@@ -1,0 +1,3 @@
+graft odpaccounts/static
+graft odpaccounts/templates
+global-exclude *.pyc

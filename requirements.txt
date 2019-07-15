@@ -1,0 +1,10 @@
+hydra-client-blueprint
+flask
+flask-sqlalchemy
+flask-admin
+flask-dance[sqla]
+flask-login
+requests
+python-dotenv
+psycopg2
+click
