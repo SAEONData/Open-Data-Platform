@@ -26,7 +26,7 @@ def register():
             user = User(email=email, password=password, active=True)
             db.session.add(user)
             db.session.commit()
-            return redirect(url_for('.login'))
+            return redirect(url_for('hydra.login'))
 
         flash(error)
 
