@@ -1,33 +1,17 @@
-from flask import Blueprint, flash, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for, request
 
-from ..models import db
-from ..models.user import User
+from ..forms.registration import RegistrationForm
+from ..lib.users import create_user_account
 
 bp = Blueprint('user', __name__)
 
 
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        error = None
-        if not email:  # todo validate email address
-            error = "Email is required."
-        elif not password:  # todo validate password
-            error = "Password is required."
-        else:
-            user = User.query.filter_by(email=email).first()
-            if user:
-                error = "User {} is already registered.".format(email)
+    form = RegistrationForm()
+    if request.method == 'POST' and form.validate():
+        create_user_account(form.email.data, form.password.data)
+        # todo confirmation email
+        return redirect(url_for('hydra.login'))
 
-        if error is None:
-            # todo generate password hash; set active=False initially, email must be confirmed
-            user = User(email=email, password=password, active=True)
-            db.session.add(user)
-            db.session.commit()
-            return redirect(url_for('hydra.login'))
-
-        flash(error)
-
-    return render_template('register.html')
+    return render_template('register.html', form=form)

@@ -4,7 +4,10 @@ flask-sqlalchemy
 flask-admin
 flask-dance[sqla]
 flask-login
+flask-wtf
 requests
 python-dotenv
 psycopg2
 click
+wtforms
+argon2_cffi
