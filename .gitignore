@@ -11,3 +11,4 @@ build/
 *.ini
 *.yml
 .env
+virtualenv/
