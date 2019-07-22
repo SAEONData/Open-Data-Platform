@@ -72,7 +72,7 @@ nav ul li a, nav ul li span, header .action {
 .flash {
   margin: 1em 0;
   padding: 1em;
-  background: #cae6f6;
+  background: #F0E2FF;
   border: 1px solid #377ba8;
 }
 
@@ -115,4 +115,8 @@ img {
 
 .odp-logo {
     max-height: 60px;
+}
+
+ul.errors {
+    color: #FF0000;
 }

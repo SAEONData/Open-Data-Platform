@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  {% block title %}Welcome{% endblock %}
+    {% block title %}Welcome{% endblock %}
+    {%- if current_user.is_authenticated -%}
+        , {{ current_user.email }}
+    {% endif %}
 {% endblock %}
