@@ -26,7 +26,7 @@ def validate_hydra_response(response):
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
     """
-    Called by Hydra as part of the login flow.
+    Redirected here from Hydra as part of the login flow.
     """
     hydra_url = current_app.config['HYDRA_ADMIN_URL']
     ignore_cert_err = get_env() == 'development'
@@ -36,7 +36,7 @@ def login():
     form = None
 
     if request.method == 'GET':
-        # we'll only ever get here by a request from Hydra; if a user tries to get
+        # we should only ever get here by a redirect from Hydra; if a user tries to get
         # this endpoint, they won't have a valid challenge and we'll end up aborting
         challenge = request.args.get('login_challenge')
 
@@ -101,7 +101,7 @@ def login():
 @bp.route('/consent')
 def consent():
     """
-    Called by Hydra as part of the consent flow.
+    Redirected here from Hydra as part of the consent flow.
     """
     hydra_url = current_app.config['HYDRA_ADMIN_URL']
     ignore_cert_err = get_env() == 'development'
@@ -138,7 +138,7 @@ def consent():
 @bp.route('/logout')
 def logout():
     """
-    Called by Hydra as part of the logout flow.
+    Redirected here from Hydra as part of the logout flow.
     """
     hydra_url = current_app.config['HYDRA_ADMIN_URL']
     ignore_cert_err = get_env() == 'development'
