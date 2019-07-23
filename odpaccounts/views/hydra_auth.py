@@ -53,8 +53,6 @@ def login():
             user_id = login_request['subject']
             try:
                 validate_auto_login(user_id)
-            # except x.ODPUserNotFound:
-            #     todo: delete user session on hydra
             except x.ODPLoginError as e:
                 user_id = None
                 error = e
