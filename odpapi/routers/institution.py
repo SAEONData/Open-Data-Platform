@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from odpapi.lib.common import PagerParams
-from odpapi.lib.adapter import ODPAPIAdapter, get_adapter
+from odpapi.lib.adapters import ODPAPIAdapter, get_adapter
 from odpapi.models.institution import Institution, InstitutionIn, InstitutionOut
 
 router = APIRouter()

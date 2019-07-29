@@ -7,7 +7,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from odpapi.routers import metadata, institution
 from odpapi.config import read_config
-from odpapi.lib.adapter import load_adapters
+from odpapi.lib import adapters
 
 
 config = read_config()
@@ -19,7 +19,7 @@ app = FastAPI(
     config=config,
 )
 
-load_adapters(app)
+adapters.load_adapters(app)
 
 app.include_router(
     institution.router,

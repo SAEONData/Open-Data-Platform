@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Body
 
 from odpapi.lib.metadata import MetadataRecordsFilter
 from odpapi.lib.common import PagerParams
-from odpapi.lib.adapter import ODPAPIAdapter, get_adapter
+from odpapi.lib.adapters import ODPAPIAdapter, get_adapter
 from odpapi.models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
