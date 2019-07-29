@@ -1,18 +1,19 @@
 import pkg_resources
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 import yaml
-from pydantic import BaseModel, IPvAnyAddress, UrlStr
+from pydantic import BaseModel, IPvAnyAddress, UrlStr, constr
 
 
 CONFIG_FILE = pkg_resources.resource_filename(__name__, '../config.yml')
+HOSTNAME_REGEX = r'^\w+(\.\w+)+$'
 
 
 class ServerConfig(BaseModel):
     """
     ASGI server config.
     """
-    host: IPvAnyAddress
+    host: Union[IPvAnyAddress, constr(regex=HOSTNAME_REGEX)]
     port: int
 
 
