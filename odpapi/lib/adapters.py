@@ -4,6 +4,7 @@ import inspect
 from typing import List, Dict, Any
 
 from starlette.requests import Request
+from starlette.status import HTTP_501_NOT_IMPLEMENTED
 from fastapi import HTTPException, FastAPI
 
 import odpapi_adapters
@@ -19,7 +20,7 @@ def get_adapter(request: Request):
         for route in adapter.routes:
             if request.url.path.startswith(route):
                 return adapter
-    raise HTTPException(status_code=501, detail="Adapter not found for {}".format(request.url.path))
+    raise HTTPException(status_code=HTTP_501_NOT_IMPLEMENTED, detail="Adapter not found for {}".format(request.url.path))
 
 
 def load_adapters(app: FastAPI):
