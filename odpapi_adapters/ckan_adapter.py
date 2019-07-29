@@ -8,7 +8,7 @@ from requests import RequestException
 from fastapi import HTTPException
 import ckanapi
 
-from odpapi.lib.adapter import ODPAPIAdapter
+from odpapi.lib.adapters import ODPAPIAdapter
 from odpapi.lib.common import PagerParams
 from odpapi.lib.metadata import MetadataRecordsFilter, DOI_REGEX
 from odpapi.models.institution import (
