@@ -7,6 +7,7 @@ from pydantic import BaseModel, UrlStr, UUID4
 from requests import RequestException
 from fastapi import HTTPException
 import ckanapi
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_503_SERVICE_UNAVAILABLE
 
 from odpapi.lib.adapters import ODPAPIAdapter
 from odpapi.lib.common import PagerParams
@@ -64,19 +65,19 @@ class CKANAdapter(ODPAPIAdapter):
                 return ckan.call_action(action, data_dict=kwargs)
 
         except RequestException as e:
-            raise HTTPException(status_code=503, detail="Error sending request to CKAN: {}".format(e))
+            raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail="Error sending request to CKAN: {}".format(e))
 
         except ckanapi.ValidationError as e:
-            raise HTTPException(status_code=400, detail=e.error_dict)
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=e.error_dict)
 
         except ckanapi.NotAuthorized as e:
-            raise HTTPException(status_code=403, detail="Not authorized to access CKAN resource: {}".format(e))
+            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not authorized to access CKAN resource: {}".format(e))
 
         except ckanapi.NotFound as e:
-            raise HTTPException(status_code=404, detail="CKAN resource not found: {}".format(e))
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="CKAN resource not found: {}".format(e))
 
         except ckanapi.CKANAPIError as e:
-            raise HTTPException(status_code=400, detail="CKAN error: {}".format(e))
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="CKAN error: {}".format(e))
 
     @staticmethod
     def _make_object_name(title: str, object_type: str):
