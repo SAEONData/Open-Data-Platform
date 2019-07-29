@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from odpapi.lib.common import PagerParams
 from odpapi.lib.adapters import ODPAPIAdapter, get_adapter
 from odpapi.models.institution import Institution, InstitutionIn, InstitutionOut
+from odpapi.lib.security import HydraAuth
 
 router = APIRouter()
 
@@ -12,8 +13,9 @@ router = APIRouter()
 async def list_institutions(
         pager: PagerParams = Depends(),
         adapter: ODPAPIAdapter = Depends(get_adapter),
+        access_token: str = Depends(HydraAuth(['odp.institutions.read'])),
 ):
-    return adapter.list_institutions(pager)
+    return adapter.list_institutions(pager, access_token)
 
 
 @router.get('/{id_or_name}', response_model=Institution)
