@@ -21,7 +21,7 @@ class SecurityConfig(BaseModel):
     """
     Security-related config.
     """
-    hydra_insecure_http: bool = False
+    hydra_insecure_server: bool = False
     hydra_admin_url: UrlStr
     required_audience: str
 
