@@ -11,3 +11,5 @@ adapters:
     routes:
       - '/metadata/'
       - '/institutions/'
+    config:
+      ckan_url: 'http://localhost:5000'
