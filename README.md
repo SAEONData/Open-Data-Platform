@@ -9,17 +9,18 @@ The package should be installed into the same virtual environment as the
 
 ## Configuration
 
-Add an entry for the `CKANAdapter` class to `config.yml`.
+Add an entry for the `CKANAdapter` class to the ODP API's `config.yml`. For example:
+
+    adapters:
+      - name: 'CKANAdapter'
+        routes:
+          - '/metadata/'
+          - '/institutions/'
+        config:
+          ckan_url: 'http://localhost:5000'
+
 See the [ODP API](https://github.com/SAEONData/ODP-API) README for more info.
-
-### config.yml
-
-Supported routes:
-- /metadata/
-- /institutions/
 
 ### Environment variables
 
-- CKAN_URL: URL of the CKAN server
-- CKAN_APIKEY: API key of a CKAN sysadmin account used for access to CKAN (temporary solution until single sign-on
-integration has been implemented)
+- CKAN_URL: If set, will override the `config.ckan_url` option set above
