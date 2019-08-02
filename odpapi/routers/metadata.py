@@ -1,9 +1,10 @@
 from typing import List
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends
 
 from odpapi.lib.metadata import MetadataRecordsFilter
 from odpapi.lib.common import PagerParams
 from odpapi.lib.adapters import ODPAPIAdapter, get_adapter
+from odpapi.lib.security import HydraAuth
 from odpapi.models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
@@ -20,24 +21,27 @@ async def list_metadata_records(
         filter: MetadataRecordsFilter = Depends(),
         pager: PagerParams = Depends(),
         adapter: ODPAPIAdapter = Depends(get_adapter),
+        access_token: str = Depends(HydraAuth(['odp.metadata.view'])),
 ):
-    return adapter.list_metadata_records(filter, pager)
+    return adapter.list_metadata_records(filter, pager, access_token)
 
 
 @router.get('/{id_or_doi:path}', response_model=MetadataRecord)
 async def get_metadata_record(
         id_or_doi: str,
         adapter: ODPAPIAdapter = Depends(get_adapter),
+        access_token: str = Depends(HydraAuth(['odp.metadata.view'])),
 ):
-    return adapter.get_metadata_record(id_or_doi)
+    return adapter.get_metadata_record(id_or_doi, access_token)
 
 
 @router.post('/', response_model=MetadataRecordOut)
 async def create_or_update_metadata_record(
         metadata_record: MetadataRecordIn,
         adapter: ODPAPIAdapter = Depends(get_adapter),
+        access_token: str = Depends(HydraAuth(['odp.metadata.add'])),
 ):
-    return adapter.create_or_update_metadata_record(metadata_record)
+    return adapter.create_or_update_metadata_record(metadata_record, access_token)
 
 
 @router.put('/{id_or_doi:path}', response_model=MetadataRecordOut)
@@ -45,24 +49,27 @@ async def update_metadata_record(
         id_or_doi: str,
         metadata_record: MetadataRecordIn,
         adapter: ODPAPIAdapter = Depends(get_adapter),
+        access_token: str = Depends(HydraAuth(['odp.metadata.manage'])),
 ):
-    return adapter.update_metadata_record(id_or_doi, metadata_record)
+    return adapter.update_metadata_record(id_or_doi, metadata_record, access_token)
 
 
 @router.delete('/{id_or_doi:path}', response_model=bool)
 async def delete_metadata_record(
         id_or_doi: str,
         adapter: ODPAPIAdapter = Depends(get_adapter),
+        access_token: str = Depends(HydraAuth(['odp.metadata.manage'])),
 ):
-    return adapter.delete_metadata_record(id_or_doi)
+    return adapter.delete_metadata_record(id_or_doi, access_token)
 
 
 @router.post('/validate/{id_or_doi:path}', response_model=MetadataValidationResult)
 async def validate_metadata_record(
         id_or_doi: str,
         adapter: ODPAPIAdapter = Depends(get_adapter),
+        access_token: str = Depends(HydraAuth(['odp.metadata.manage'])),
 ):
-    return adapter.validate_metadata_record(id_or_doi)
+    return adapter.validate_metadata_record(id_or_doi, access_token)
 
 
 @router.post('/workflow/{id_or_doi:path}', response_model=MetadataWorkflowResult)
@@ -70,5 +77,6 @@ async def set_workflow_state_of_metadata_record(
         id_or_doi: str,
         workflow_state: str,
         adapter: ODPAPIAdapter = Depends(get_adapter),
+        access_token: str = Depends(HydraAuth(['odp.metadata.manage'])),
 ):
-    return adapter.set_workflow_state_of_metadata_record(id_or_doi, workflow_state)
+    return adapter.set_workflow_state_of_metadata_record(id_or_doi, workflow_state, access_token)
