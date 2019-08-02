@@ -21,9 +21,10 @@ class SecurityConfig(BaseModel):
     """
     Security-related config.
     """
-    hydra_insecure_server: bool = False
     hydra_admin_url: UrlStr
     required_audience: str
+    hydra_insecure_server: bool = False
+    no_access_token_validation: bool = False
 
 
 class AdapterConfig(BaseModel):
