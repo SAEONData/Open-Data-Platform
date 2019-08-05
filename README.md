@@ -12,20 +12,29 @@ system looks for adapters in the `odpapi_adapters` namespace package; an adapter
 configuring an appropriate entry under the `adapters` configuration key (see below for details).
 
 ## Configuration
+
 Server and adapters are configured in `config.yml`.
 
 This file is structured as follows:
 
-    server:                      # Uvicorn server configuration
-      host: '0.0.0.0'              # IP address to listen on
-      port: 8999                   # port number to listen on
+    server:                                       # Uvicorn server configuration
+      host: '0.0.0.0'                               # IP address to listen on
+      port: 8999                                    # port number to listen on
     
-    adapters:                    # list of adapter configurations
-      - name: 'FooBarAdapter'      # adapter class name
-        routes:                    # list of routes to be handled by the adapter
+    security:                                     # security-related config
+      hydra_admin_url: 'https://localhost:9001'     # URL of the Hydra admin API
+      oauth2_audience: 'ODP-API'                    # required value for 'aud' in received access tokens
+      
+      # the following options are for development/internal use only (optional, default 'false'):
+      hydra_dev_server: 'false'                     # set to 'true' to disable TLS certificate verification
+      no_access_token_validation: 'false'           # set to 'true' to disable access token validation
+
+    adapters:                                     # list of adapter configurations
+      - name: 'FooBarAdapter'                       # adapter class name
+        routes:                                     # list of routes to be handled by the adapter
           - '/foo/'
           - '/bar/'
-        config:                    # custom adapter config (if applicable)
+        config:                                     # custom adapter config (if applicable)
           key1: 'foo'
           key2: 'bar'
 
