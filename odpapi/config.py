@@ -22,8 +22,8 @@ class SecurityConfig(BaseModel):
     Security-related config.
     """
     hydra_admin_url: UrlStr
-    required_audience: str
-    hydra_insecure_server: bool = False
+    hydra_dev_server: bool = False
+    oauth2_audience: str
     no_access_token_validation: bool = False
 
 

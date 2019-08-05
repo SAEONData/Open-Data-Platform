@@ -4,7 +4,7 @@ server:
 
 security:
   hydra_admin_url: 'https://localhost:9001'
-  required_audience: 'ODP-API'
+  oauth2_audience: 'ODP-API'
 
 adapters:
   - name: 'CKANAdapter'

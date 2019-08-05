@@ -25,12 +25,12 @@ class HydraAuth(HTTPBearer):
 
         if validate_token:
             introspect_url = config.hydra_admin_url + '/oauth2/introspect'
-            required_audience = config.required_audience
+            required_audience = config.oauth2_audience
             required_scopes = ' '.join(self.required_scopes)
-            insecure_server = config.hydra_insecure_server
+            verify_tls = not config.hydra_dev_server
             try:
                 r = requests.post(introspect_url,
-                                  verify=not insecure_server,
+                                  verify=verify_tls,
                                   headers={
                                       'Content-Type': 'application/x-www-form-urlencoded',
                                       'Accept': 'application/json',
