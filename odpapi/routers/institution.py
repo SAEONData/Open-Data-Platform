@@ -13,7 +13,7 @@ router = APIRouter()
 async def list_institutions(
         pager: PagerParams = Depends(),
         adapter: ODPAPIAdapter = Depends(get_adapter),
-        access_token: str = Depends(HydraAuth(['odp.institutions.view'])),
+        access_token: str = Depends(HydraAuth(['ODP.Institutions'])),
 ):
     return adapter.list_institutions(pager, access_token)
 
@@ -22,7 +22,7 @@ async def list_institutions(
 async def get_institution(
         id_or_name: str,
         adapter: ODPAPIAdapter = Depends(get_adapter),
-        access_token: str = Depends(HydraAuth(['odp.institutions.view'])),
+        access_token: str = Depends(HydraAuth(['ODP.Institutions'])),
 ):
     return adapter.get_institution(id_or_name, access_token)
 
@@ -31,7 +31,7 @@ async def get_institution(
 async def add_institution(
         institution: InstitutionIn,
         adapter: ODPAPIAdapter = Depends(get_adapter),
-        access_token: str = Depends(HydraAuth(['odp.institutions.add'])),
+        access_token: str = Depends(HydraAuth(['ODP.Institutions'])),
 ):
     return adapter.add_institution(institution, access_token)
 
@@ -41,7 +41,7 @@ async def update_institution(
         id_or_name: str,
         institution: InstitutionIn,
         adapter: ODPAPIAdapter = Depends(get_adapter),
-        access_token: str = Depends(HydraAuth(['odp.institutions.manage'])),
+        access_token: str = Depends(HydraAuth(['ODP.Institutions'])),
 ):
     return adapter.update_institution(id_or_name, institution, access_token)
 
@@ -50,6 +50,6 @@ async def update_institution(
 async def delete_institution(
         id_or_name: str,
         adapter: ODPAPIAdapter = Depends(get_adapter),
-        access_token: str = Depends(HydraAuth(['odp.institutions.manage'])),
+        access_token: str = Depends(HydraAuth(['ODP.Institutions'])),
 ):
     return adapter.delete_institution(id_or_name, access_token)
