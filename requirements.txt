@@ -2,7 +2,6 @@ hydra-client-blueprint
 flask
 flask-sqlalchemy
 flask-admin
-flask-dance[sqla]
 flask-login
 flask-wtf
 requests
