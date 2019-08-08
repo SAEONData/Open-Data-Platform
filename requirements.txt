@@ -1,10 +1,12 @@
 hydra-client-blueprint
+hydra-admin-client
+
 flask
 flask-sqlalchemy
 flask-admin
 flask-login
 flask-wtf
-requests
+
 python-dotenv
 psycopg2
 click
