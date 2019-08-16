@@ -1,10 +1,14 @@
 from . import db
+from .static_data_mixin import StaticDataMixin
 
 
-class Scope(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True, nullable=False)
-    description = db.Column(db.String)
+class Scope(StaticDataMixin, db.Model):
+    """
+    Model representing an OAuth2 / application scope.
+    """
 
-    def __repr__(self):
-        return '<Scope %r>' % self.name
+    # many-to-many scopes-roles relationship
+    roles = db.relationship('Role',
+                            secondary='scoped_role',
+                            back_populates='scopes',
+                            passive_deletes=True)

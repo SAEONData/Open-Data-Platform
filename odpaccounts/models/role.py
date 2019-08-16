@@ -1,10 +1,14 @@
 from . import db
+from .static_data_mixin import StaticDataMixin
 
 
-class Role(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True, nullable=False)
-    description = db.Column(db.String)
+class Role(StaticDataMixin, db.Model):
+    """
+    Model representing a generic role.
+    """
 
-    def __repr__(self):
-        return '<Role %r>' % self.name
+    # many-to-many scopes-roles relationship
+    scopes = db.relationship('Scope',
+                             secondary='scoped_role',
+                             back_populates='roles',
+                             passive_deletes=True)
