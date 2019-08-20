@@ -10,4 +10,4 @@ class InstitutionRegistry(StaticDataMixin, db.Model):
     institutions = db.relationship('Institution',
                                    back_populates='registry',
                                    passive_deletes=True,
-                                   order_by='institution.title')
+                                   order_by='Institution.title')
