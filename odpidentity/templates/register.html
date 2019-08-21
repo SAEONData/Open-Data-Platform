@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'login_base.html' %}
 {% from 'macros.html' import with_errors %}
 
-{% block header %}
-    {% block title %}Create new account{% endblock %}
+{% block page_heading %}
+    {% block title %}Create account{% endblock %}
 {% endblock %}
 
 {% block content %}
@@ -10,6 +10,6 @@
         {{ form.csrf_token }}
         {{ form.email.label }} {{ with_errors(form.email) }}
         {{ form.password.label }} {{ with_errors(form.password) }}
-        <input type="submit" value="Create account">
+        <input type="submit" value="Sign up">
     </form>
 {% endblock %}

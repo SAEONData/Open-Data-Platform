@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<title>{% block title %}{% endblock %} - Identity Service - Open Data Platform</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<body class="login">
+    <header>
+        <nav>
+            <h1><img class="nrf-icon" src="{{ url_for('static', filename='NRF-Icon.png') }}">ODP Identity Service</h1>
+        </nav>
+    </header>
+
+    <main>
+        <header><h1>{% block page_heading %}{% endblock %}</h1></header>
+        {% block content %}{% endblock %}
+    </main>
+</body>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<title>{% block title %}{% endblock %} - Identity Service - Open Data Platform</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<body>
+    <header>
+        <nav>
+            <h1><a class="nav-button" href="{{ url_for('home.index') }}">
+                <img class="nrf-icon" src="{{ url_for('static', filename='NRF-Icon.png') }}">ODP Identity Service
+            </a></h1>
+            <ul>
+                {% if current_user.is_authenticated %}
+                    <li><span>Hello, {{ current_user.email }}!</span>
+                    <li><a class="nav-button" href="{{ url_for('hydra.logout') }}">Log out</a>
+                {% else %}
+                    <li><a class="nav-button" href="{{ url_for('user.register') }}">Create account</a>
+                    <li><a class="nav-button" href="{{ url_for('hydra.login') }}">Log in</a>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="flash">
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        <header><h1>{% block page_heading %}{% endblock %}</h1></header>
+        {% block content %}{% endblock %}
+    </main>
+</body>

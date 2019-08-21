@@ -1,122 +1,139 @@
 html {
   font-family: sans-serif;
   background: #F4F7FC;
-  padding: 1rem;
 }
 
 body {
-  max-width: 420px;
-  margin: 100px auto;
   background: white;
+  border: 1px solid #13334C;
+  box-shadow: 2px 2px 5px 1px #DDDDDD;
+  margin: 1rem;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  color: #13334C;
-  margin: 1rem 0;
+body.login {
+  width: 400px;
+  margin-left: calc(50vw - 200px);
+  margin-top: 15vh;
 }
 
-a {
-  color: #13334C;
-}
-
-hr {
-  border: none;
-  border-top: 1px solid lightgray;
+ul {
+  list-style: none;
 }
 
 nav {
-  background: #FFFFFF;
+  background: linear-gradient(to right, #D3ECFF, #D8FFEF);
+  color: #13334C;
   display: flex;
-  align-items: center;
-  padding: 0 0.5rem;
-  max-height: 60px;
+  margin: 0;
+  height: 60px;
+  border-bottom: 1px solid #13334C;
+}
+
+nav a {
+  text-decoration: none;
+  color: inherit;
 }
 
 nav h1 {
   flex: auto;
-  margin: 0;
+  align-items: center;
 }
 
-nav h1 a {
-  text-decoration: none;
-  padding: 0.25rem 0.5rem;
-}
-
-nav ul  {
+nav ul, nav h1  {
   display: flex;
-  list-style: none;
+  height: 100%;
   margin: 0;
   padding: 0;
+  font-weight: bold;
 }
 
-nav ul li a, nav ul li span, header .action {
-  display: block;
-  padding: 0.5rem;
-}
-
-.content {
-  padding: 0 1rem 1rem;
-}
-
-.content > header {
-  border-bottom: 1px solid lightgray;
+nav ul li span, nav ul li a, nav h1 a {
   display: flex;
-  align-items: flex-end;
+  height: 100%;
+  align-items: center;
+  padding: 0 1em;
 }
 
-.content > header h1 {
-  flex: auto;
-  margin: 1rem 0 0.25rem 0;
+.nav-button:hover {
+  background: #5BFFB2;
+  text-decoration: underline;
 }
 
 .flash {
-  margin: 1em 0;
-  padding: 1em;
-  background: #F0E2FF;
-  border: 1px solid #377ba8;
+  display: flex;
+  flex-direction: column;
 }
 
-.content:last-child {
-  margin-bottom: 0;
+.flash ul {
+  max-width: 50vw;
+  margin: 0 auto;
 }
 
-.content form {
+.flash ul li {
+  display: flex;
+  align-items: center;
+  margin: .8em 0;
+  padding: 1.2em;
+  background: #FFF7E5;
+  border: 1px solid #FFC849;
+}
+
+.flash ul li.error {
+  background: #FFE5E5;
+  border: 1px solid #FF4C4C;
+}
+
+section, main {
+  padding: 1rem;
+}
+
+main header {
+  font-size: .95em;
+  margin-bottom: 2em;
+}
+
+input[type=submit] {
+  align-self: start;
+  min-width: 9em;
+  height: 30px;
+  background: #D3ECFF;
+  border: 1px solid #13334C;
+  cursor: pointer;
+  margin-top: 1.5em;
+}
+
+input[type=submit]:hover {
+  background: #5BFFB2;
+  text-decoration: underline;
+}
+
+img.nrf-icon {
+    object-fit: scale-down;
+    max-height: 90%;
+    margin-right: 8px;
+    margin-top: 2px;
+}
+
+ul.form-field-errors {
+    color: #FF0000;
+}
+
+main form {
   margin: 1em 0;
   display: flex;
   flex-direction: column;
 }
 
-.content label {
+main label {
   font-weight: bold;
   margin-bottom: 0.5em;
 }
 
-.content input, .content textarea {
+main input, main textarea {
   margin-bottom: 1em;
 }
 
-.content textarea {
+main textarea {
   min-height: 12em;
   resize: vertical;
-}
-
-input.danger {
-  color: #cc2f2e;
-}
-
-input[type=submit] {
-  align-self: start;
-  min-width: 10em;
-}
-
-img {
-    object-fit: scale-down;
-}
-
-.odp-logo {
-    max-height: 60px;
-}
-
-ul.errors {
-    color: #FF0000;
 }
