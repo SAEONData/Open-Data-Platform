@@ -4,6 +4,7 @@ import os
 class Config:
     SECRET_KEY = os.getenv('FLASK_SECRET_KEY')
     SERVER_NAME = os.getenv('FLASK_SERVER_NAME')
+    FLASK_ADMIN_SWATCH = os.getenv('FLASK_ADMIN_SWATCH')
 
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_ECHO = os.getenv('DATABASE_ECHO', '').lower() == 'true'

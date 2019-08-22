@@ -3,3 +3,12 @@
 {% block page_heading %}
     {% block title %}Welcome{% endblock %}
 {% endblock %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+        <ul>
+            <li><a class="link-button" href="{{ url_for('user.profile') }}">Update Profile</a>
+            <li><a class="link-button" href="{{ url_for('admin.index') }}">Administration</a>
+        </ul>
+    {% endif %}
+{% endblock %}
