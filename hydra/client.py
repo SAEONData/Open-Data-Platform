@@ -9,7 +9,7 @@ class HydraAdminClient:
 
     def __init__(self, server_url: str,
                  verify_tls: bool = True,
-                 timeout: float = 0.5,
+                 timeout: float = 5.0,
                  remember_login_for: int = 30,
                  remember_consent_for: int = 0,
                  ):
