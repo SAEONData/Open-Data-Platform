@@ -11,7 +11,7 @@ body {
 }
 
 body.login {
-  width: 400px;
+  width: 430px;
   margin-left: calc(50vw - 200px);
   margin-top: 15vh;
 }
@@ -20,13 +20,24 @@ ul {
   list-style: none;
 }
 
+img.nrf-icon {
+  object-fit: scale-down;
+  max-height: 80%;
+  margin-right: 8px;
+  margin-top: 2px;
+}
+
 nav {
-  background: linear-gradient(to right, #D3ECFF, #D8FFEF);
+  background: linear-gradient(to right, #D3ECFF, #BAFFEC);
   color: #13334C;
   display: flex;
   margin: 0;
-  height: 60px;
+  height: 75px;
   border-bottom: 1px solid #13334C;
+}
+
+body.login nav {
+  height: 100px;
 }
 
 nav a {
@@ -55,7 +66,7 @@ nav ul li span, nav ul li a, nav h1 a {
 }
 
 .nav-button:hover {
-  background: #5BFFB2;
+  background: #44FFCD;
   text-decoration: underline;
 }
 
@@ -88,34 +99,34 @@ section, main {
 }
 
 main header {
-  font-size: .95em;
-  margin-bottom: 2em;
+  font-size: .85em;
+  margin-top: 3em;
+  margin-bottom: 3em;
 }
 
 input[type=submit] {
   align-self: start;
-  min-width: 9em;
-  height: 30px;
-  background: #D3ECFF;
-  border: 1px solid #13334C;
+  min-width: 7.5em;
+  height: 3.5em;
+  background: #C4DCF2;
+  border: 1px solid gray;
   cursor: pointer;
-  margin-top: 1.5em;
+  margin-top: 1.6em;
+  font-weight: bold;
 }
 
 input[type=submit]:hover {
-  background: #5BFFB2;
   text-decoration: underline;
+  background: #44FFCD;
 }
 
-img.nrf-icon {
-    object-fit: scale-down;
-    max-height: 90%;
-    margin-right: 8px;
-    margin-top: 2px;
+ul.form-errors {
+  color: #FF0000;
+  padding: 0;
 }
 
-ul.form-field-errors {
-    color: #FF0000;
+input.has-error {
+  box-shadow: 0px 0px 1px 1px #FF0000;
 }
 
 main form {

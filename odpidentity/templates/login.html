@@ -1,5 +1,5 @@
 {% extends 'login_base.html' %}
-{% from 'macros.html' import with_errors %}
+{% from 'macros.html' import field_errors, form_errors %}
 
 {% block page_heading %}
     {% block title %}Log in{% endblock %}
@@ -7,10 +7,11 @@
 
 {% block content %}
     <form action="{{ url_for('auth.login') }}" method="POST">
+        {{ form_errors(form) }}
         {{ form.csrf_token }}
         {{ form.login_challenge }}
-        {{ form.email.label }} {{ with_errors(form.email) }}
-        {{ form.password.label }} {{ with_errors(form.password) }}
+        {{ form.email.label }} {{ field_errors(form.email) }}
+        {{ form.password.label }} {{ field_errors(form.password) }}
         <input type="submit" value="Log in">
     </form>
 {% endblock %}
