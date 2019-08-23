@@ -9,7 +9,7 @@ class Institution(StaticDataMixin, db.Model):
 
     # allow institutions to be hierarchically related
     parent_id = db.Column(db.Integer, db.ForeignKey('institution.id', ondelete='CASCADE'))
-    children = db.relationship('Institution', passive_deletes=True)
+    children = db.relationship('Institution', back_populates='parent', passive_deletes=True)
 
     registry_id = db.Column(db.Integer, db.ForeignKey('institution_registry.id', ondelete='CASCADE'))
     registry = db.relationship('InstitutionRegistry', back_populates='institutions')
@@ -24,3 +24,6 @@ class Institution(StaticDataMixin, db.Model):
                             secondary='institutional_user',
                             back_populates='institutions',
                             passive_deletes=True)
+
+
+Institution.parent = db.relationship('Institution', back_populates='children', remote_side=[Institution.id])
