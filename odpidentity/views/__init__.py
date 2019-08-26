@@ -21,13 +21,11 @@ def init_app(app):
     app.register_blueprint(hydra_client.bp, url_prefix='/user')
     app.register_blueprint(hydra_auth.bp, url_prefix='/auth')
 
-    admin_views = Admin(app,
-                        name='ODP Admin',
-                        index_view=admin.home,
-                        base_template='admin_base.html',
-                        )
-    admin_views.add_view(admin.users)
-    admin_views.add_view(admin.roles)
-    admin_views.add_view(admin.scopes)
-    admin_views.add_view(admin.institutions)
-    admin_views.add_view(admin.institution_registries)
+    admin_views = Admin(app, name='ODP Admin', index_view=admin.home, base_template='admin_base.html')
+    admin_views.add_views(
+        admin.users,
+        admin.roles,
+        admin.scopes,
+        admin.institutions,
+        admin.institution_registries,
+    )
