@@ -5,7 +5,7 @@ html {
 
 body {
   background: white;
-  border: 1px solid #13334C;
+  border: 2px solid #13334C;
   box-shadow: 2px 2px 5px 1px #DDDDDD;
   margin: 1rem;
 }
@@ -27,22 +27,22 @@ nav {
   display: flex;
   margin: 0;
   height: 75px;
-  border-bottom: 1px solid #13334C;
+  border-bottom: 2px solid #13334C;
 }
 
 body.login {
-  width: 410px;
-  margin-left: calc(50vw - 200px);
-  margin-top: 15vh;
+  width: 350px;
+  margin-left: calc(50vw - (350px / 2));
+  margin-top: calc((100vh - (350px * 1.618)) * .382);
 }
 
 body.login nav {
-  height: 135px;
-  padding: 0.5em;
+  height: 120px;
+  padding: .5em 1.3em;
 }
 
 body.login img.nrf-icon {
-  max-height: 50%;
+  max-height: 60%;
 }
 
 nav a {
@@ -71,7 +71,6 @@ nav ul li span, nav ul li a, nav h1 a {
 }
 
 .nav-button:hover {
-  background: #44FFCD;
   text-decoration: underline;
 }
 
@@ -105,17 +104,18 @@ section, main {
 
 main header {
   font-size: .85em;
-  margin: 3em .75em;
+  margin: 3em .75em 2.5em;
 }
 
 main footer {
-  margin: 1em .75em 2em;
+  margin: .5em .75em .8em;
   display: flex;
   flex-direction: column;
 }
 
 main footer span {
   align-self: center;
+  font-size: smaller;
 }
 
 main a {
@@ -129,7 +129,7 @@ main a:hover {
 }
 
 main form {
-  margin: 1em .75em;
+  margin: 1em .75em .5em;
   display: flex;
   flex-direction: column;
 }
@@ -151,19 +151,17 @@ main textarea {
 input[type=submit] {
   align-self: center;
   min-width: 7em;
-  height: 4em;
-  background: #C4DCF2;
+  height: 3em;
   background: radial-gradient(#BAFFEC, #D3ECFF);
-  border: 1px solid gray;
+  border: 1px solid lightgray;
   cursor: pointer;
-  margin-top: 1.5em;
+  margin-top: 1.6em;
   font-weight: bold;
   font-size: 1em;
 }
 
 input[type=submit]:hover {
   text-decoration: underline;
-  background: #44FFCD;
 }
 
 ul.form-errors {
