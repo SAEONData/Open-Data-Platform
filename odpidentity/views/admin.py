@@ -9,6 +9,7 @@ from ..models.scope import Scope
 from ..models.institution import Institution
 from ..models.institution_registry import InstitutionRegistry
 from ..lib.utils import make_object_name
+from ..forms.fields import DualListboxField
 
 
 class AdminHomeView(AdminIndexView):
@@ -42,9 +43,7 @@ class StaticDataModelView(AdminModelView):
     column_default_sort = 'name'
     form_excluded_columns = ['name']
     form_args = {
-        'title': {
-            'filters': [lambda s: s.strip() if s else s],
-        }
+        'title': dict(filters=[lambda s: s.strip() if s else s])
     }
 
     def on_model_change(self, form, model, is_created):
@@ -64,7 +63,18 @@ class ScopeModelView(StaticDataModelView):
     """
     Scope model view.
     """
-    form_excluded_columns = ['name', 'roles']
+    form_columns = ['title', 'description', 'roles']
+    form_overrides = {
+        'roles': DualListboxField
+    }
+    form_args = {
+        'roles': dict(
+            model_class=Role,
+            choices=lambda: [(r.id, r.title) for r in Role.query.filter_by(is_admin=False).order_by('title').all()],
+        )
+    }
+    create_template = 'scope_create.html'
+    edit_template = 'scope_edit.html'
 
 
 class InstitutionModelView(StaticDataModelView):

@@ -18,3 +18,27 @@
         </ul>
     {% endif %}
 {% endmacro %}
+
+{% macro duallistbox_css() %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/bootstrap-duallistbox/src/bootstrap-duallistbox.css') }}">
+{% endmacro %}
+
+{% macro duallistbox_js(field_id) %}
+    <script src="{{ url_for('static', filename='node_modules/bootstrap-duallistbox/dist/jquery.bootstrap-duallistbox.js') }}" type="text/javascript"></script>
+    <script type="text/javascript">
+        params = {
+            bootstrap2Compatible: true,
+            moveOnSelect: false
+        };
+        {% for key, val in kwargs.items() %}
+            {%- if val == True -%}
+                params["{{ key }}"] = true;
+            {%- elif val == False -%}
+                params["{{ key }}"] = false;
+            {%- else -%}
+                params["{{ key }}"] = "{{ val }}";
+            {%- endif %}
+        {% endfor %}
+        $("#{{ field_id }}").bootstrapDualListbox(params);
+    </script>
+{% endmacro %}
