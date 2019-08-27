@@ -3,7 +3,7 @@ from wtforms import SelectMultipleField
 
 class DualListboxField(SelectMultipleField):
     """
-    Custom field that renders a dual listbox component, useful for managing
+    Custom field that works with a dual listbox component, useful for managing
     many-to-many relations.
     """
 
