@@ -34,6 +34,9 @@ class UserModelView(AdminModelView):
     """
     can_create = False
     column_list = ['id', 'email', 'active', 'confirmed_at', 'institutions']
+    column_formatters = {
+        'institutions': lambda vw, ctx, model, prop: ', '.join(sorted([i.title for i in model.institutions]))
+    }
     form_columns = ['email', 'active', 'institutions']
     form_overrides = {
         'institutions': DualListboxField
@@ -75,6 +78,10 @@ class ScopeModelView(StaticDataModelView):
     """
     Scope model view.
     """
+    column_list = ['name', 'title', 'description', 'roles']
+    column_formatters = {
+        'roles': lambda vw, ctx, model, prop: ', '.join(sorted([r.title for r in model.roles]))
+    }
     form_columns = ['title', 'description', 'roles']
     form_overrides = {
         'roles': DualListboxField
@@ -93,7 +100,13 @@ class InstitutionModelView(StaticDataModelView):
     """
     Institution model view.
     """
-    form_excluded_columns = ['name', 'children', 'users']
+    column_list = ['name', 'title', 'description', 'parent', 'registry.title']
+    column_labels = {
+        'registry.title': 'Registry'
+    }
+    column_formatters = {
+        'parent': lambda vw, ctx, model, prop: model.parent.title if model.parent else None
+    }
 
 
 class InstitutionRegistryModelView(StaticDataModelView):
