@@ -32,8 +32,20 @@ class UserModelView(AdminModelView):
     """
     User model view.
     """
-    column_exclude_list = ['password']
-    form_excluded_columns = ['password']
+    can_create = False
+    column_list = ['id', 'email', 'active', 'confirmed_at', 'institutions']
+    form_columns = ['email', 'active', 'institutions']
+    form_overrides = {
+        'institutions': DualListboxField
+    }
+    form_args = {
+        'institutions': dict(
+            model_class=Institution,
+            choices=lambda: [(i.id, i.title) for i in Institution.query.order_by('title').all()],
+        )
+    }
+    create_template = 'user_create.html'
+    edit_template = 'user_edit.html'
 
 
 class StaticDataModelView(AdminModelView):
