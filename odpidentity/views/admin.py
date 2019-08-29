@@ -52,7 +52,6 @@ class UserModelView(AdminModelView):
             choices=lambda: [(i.id, i.title) for i in Institution.query.order_by('title').all()],
         )
     }
-    create_template = 'user_create.html'
     edit_template = 'user_edit.html'
 
 
