@@ -93,7 +93,7 @@ class ScopeModelView(StaticDataModelView):
     form_args = {
         'roles': dict(
             model_class=Role,
-            choices=lambda: [(r.id, r.title) for r in Role.query.filter_by(is_admin=False).order_by('title').all()],
+            choices=lambda: [(r.id, r.title) for r in Role.query.order_by('title').all()],
         )
     }
     create_template = 'scope_create.html'
