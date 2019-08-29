@@ -24,6 +24,11 @@ class AdminModelView(ModelView):
     """
     Base view for all data models.
     """
+    list_template = 'admin_model_list.html'
+    create_template = 'admin_model_create.html'
+    edit_template = 'admin_model_edit.html'
+    details_template = 'admin_model_details.html'
+
     def is_accessible(self):
         return current_user.is_authenticated
 
