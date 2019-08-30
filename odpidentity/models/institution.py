@@ -6,17 +6,26 @@ class Institution(StaticDataMixin, db.Model):
     """
     Model representing an institution.
     """
+    id = db.Column(db.Integer, primary_key=True)
 
-    # allow institutions to be hierarchically related
-    parent_id = db.Column(db.Integer, db.ForeignKey('institution.id', ondelete='CASCADE'))
-    children = db.relationship('Institution', back_populates='parent', passive_deletes=True)
+    # institutions can be hierarchically related
+    parent_id = db.Column(db.Integer)
+    parent = db.relationship('Institution',
+                             backref='children',
+                             remote_side=[id],
+                             primaryjoin=parent_id == id)
 
-    registry_id = db.Column(db.Integer, db.ForeignKey('institution_registry.id', ondelete='CASCADE'))
+    registry_id = db.Column(db.Integer, db.ForeignKey('institution_registry.id', ondelete='CASCADE'), nullable=False)
     registry = db.relationship('InstitutionRegistry', back_populates='institutions')
 
     __table_args__ = (
-        # a top-level institution must be linked to a registry; a sub-institution must only be linked to its parent
-        db.CheckConstraint('(parent_id is null and registry_id is not null) or (parent_id is not null and registry_id is null)'),
+        # ensure that hierarchically-related institutions are in the same registry
+        db.UniqueConstraint('id', 'registry_id'),
+        db.ForeignKeyConstraint(
+            ['parent_id', 'registry_id'],
+            ['institution.id', 'institution.registry_id'],
+            ondelete='CASCADE',
+        ),
     )
 
     # many-to-many institutions-users relationship
@@ -24,6 +33,3 @@ class Institution(StaticDataMixin, db.Model):
                             secondary='institutional_user',
                             back_populates='institutions',
                             passive_deletes=True)
-
-
-Institution.parent = db.relationship('Institution', back_populates='children', remote_side=[Institution.id])
