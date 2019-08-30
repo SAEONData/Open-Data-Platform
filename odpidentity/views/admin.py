@@ -9,7 +9,6 @@ from ..models.scope import Scope
 from ..models.institution import Institution
 from ..models.institution_registry import InstitutionRegistry
 from ..lib.utils import make_object_name
-from ..forms.fields import DualListboxField
 
 
 class AdminHomeView(AdminIndexView):
@@ -43,13 +42,10 @@ class UserModelView(AdminModelView):
         'institutions': lambda vw, ctx, model, prop: ', '.join(sorted([i.title for i in model.institutions]))
     }
     form_columns = ['email', 'active', 'institutions']
-    form_overrides = {
-        'institutions': DualListboxField
-    }
     form_args = {
         'institutions': dict(
-            model_class=Institution,
-            choices=lambda: [(i.id, i.title) for i in Institution.query.order_by('title').all()],
+            get_label='title',
+            query_factory=lambda: Institution.query.order_by('title'),
         )
     }
     edit_template = 'user_edit.html'
@@ -87,13 +83,10 @@ class ScopeModelView(StaticDataModelView):
         'roles': lambda vw, ctx, model, prop: ', '.join(sorted([r.title for r in model.roles]))
     }
     form_columns = ['title', 'description', 'roles']
-    form_overrides = {
-        'roles': DualListboxField
-    }
     form_args = {
         'roles': dict(
-            model_class=Role,
-            choices=lambda: [(r.id, r.title) for r in Role.query.order_by('title').all()],
+            get_label='title',
+            query_factory=lambda: Role.query.order_by('title'),
         )
     }
     create_template = 'scope_create.html'
@@ -110,6 +103,17 @@ class InstitutionModelView(StaticDataModelView):
     }
     column_formatters = {
         'parent': lambda vw, ctx, model, prop: model.parent.title if model.parent else None
+    }
+    form_columns = ['registry', 'parent', 'title', 'description']
+    form_args = {
+        'registry': dict(
+            get_label='title',
+            query_factory=lambda: InstitutionRegistry.query.order_by('title'),
+        ),
+        'parent': dict(
+            get_label='title',
+            query_factory=lambda: Institution.query.order_by('title'),
+        ),
     }
 
 
@@ -147,5 +151,5 @@ institution_registries = InstitutionRegistryModelView(
     InstitutionRegistry, db.session,
     name='Institution Registries',
     category='Institutions',
-    endpoint='institution_registries',
+    endpoint='institutions/registries',
 )
