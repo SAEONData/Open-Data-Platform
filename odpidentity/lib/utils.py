@@ -7,4 +7,4 @@ def make_object_name(title: str):
     a user-entered title, by lowercasing and converting any sequence of non-
     letter/digit chars to a hyphen.
     """
-    return re.sub(r'[^a-z0-9-]+', '-', title.lower()).strip('-')
+    return re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
