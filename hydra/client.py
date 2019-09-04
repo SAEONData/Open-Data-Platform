@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import requests
 
@@ -189,6 +189,32 @@ class HydraAdminClient:
                           'error': error_code,
                           'error_description': error_description,
                       })
+
+    def introspect_token(self, access_token: str, require_scope: List[str], require_audience: Optional[List[str]] = None):
+        """
+        Validate an OAuth2 access/refresh token and return additional information about the token.
+        If the token is invalid, raise a ``HydraAdminError`` with 403 (forbidden) HTTP status code.
+
+        https://www.ory.sh/docs/hydra/sdk/api#introspect-oauth2-tokens
+
+        :param access_token: opaque access token string
+        :param require_scope: list of scopes that the access token is expected to be valid for
+        :param require_audience: (optional) list of audiences that the access token is expected to be valid for
+        :return: dict
+        """
+        r = self._request('POST', '/oauth2/introspect',
+                          headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                          data={
+                              'token': access_token,
+                              'scope': ' '.join(require_scope),
+                          })
+        if not require_audience:
+            require_audience = []
+        if not r['active'] or not (set(require_audience) <= set(r.get('aud', []))):
+            raise HydraAdminError(status_code=403,
+                                  error_detail="Invalid token",
+                                  method='POST',
+                                  endpoint='/oauth2/introspect')
 
     def _request(self, method, endpoint, **kwargs):
         headers = {'Accept': 'application/json'}
