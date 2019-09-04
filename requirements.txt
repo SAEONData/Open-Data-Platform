@@ -1,4 +1,4 @@
 fastapi
 uvicorn
 pyyaml
-requests
+hydra-admin-client

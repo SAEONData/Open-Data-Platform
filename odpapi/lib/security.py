@@ -1,9 +1,9 @@
 from fastapi.security import HTTPBearer
 from fastapi.exceptions import HTTPException
 from starlette.requests import Request
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_500_INTERNAL_SERVER_ERROR
-import requests
 from typing import List
+
+from hydra import HydraAdminClient, HydraAdminError
 
 
 class HydraAuth(HTTPBearer):
@@ -24,27 +24,13 @@ class HydraAuth(HTTPBearer):
         access_token = auth_credentials.credentials
 
         if validate_token:
-            introspect_url = config.hydra_admin_url + '/oauth2/introspect'
-            required_audience = config.oauth2_audience
-            required_scopes = ' '.join(self.required_scopes)
-            verify_tls = not config.hydra_dev_server
             try:
-                r = requests.post(introspect_url,
-                                  verify=verify_tls,
-                                  headers={
-                                      'Content-Type': 'application/x-www-form-urlencoded',
-                                      'Accept': 'application/json',
-                                  },
-                                  data={
-                                      'token': access_token,
-                                      'scope': required_scopes,
-                                  })
-                r.raise_for_status()
-            except requests.RequestException:
-                raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to validate access token")
-
-            token_info = r.json()
-            if not token_info['active'] or required_audience not in token_info.get('aud', []):
-                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Invalid access token")
+                hydra_admin = HydraAdminClient(
+                    server_url=config.hydra_admin_url,
+                    verify_tls=not config.hydra_dev_server,
+                )
+                hydra_admin.introspect_token(access_token, self.required_scopes, [config.oauth2_audience])
+            except HydraAdminError as e:
+                raise HTTPException(status_code=e.status_code, detail=e.error_detail)
 
         return access_token
