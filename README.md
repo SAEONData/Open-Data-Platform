@@ -17,6 +17,8 @@ Server and adapters are configured in `config.yml`.
 
 This file is structured as follows:
 
+    environment: 'development'                    # runtime environment
+    
     server:                                       # Uvicorn server configuration
       host: '0.0.0.0'                               # IP address to listen on
       port: 8999                                    # port number to listen on

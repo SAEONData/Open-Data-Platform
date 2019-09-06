@@ -1,5 +1,6 @@
 import pkg_resources
 from typing import List, Dict, Any, Union
+from enum import Enum
 
 import yaml
 from pydantic import BaseModel, IPvAnyAddress, UrlStr, constr
@@ -7,6 +8,13 @@ from pydantic import BaseModel, IPvAnyAddress, UrlStr, constr
 
 CONFIG_FILE = pkg_resources.resource_filename(__name__, '../config.yml')
 HOSTNAME_REGEX = r'^\w+(\.\w+)+$'
+
+
+class RunEnviron(str, Enum):
+    development = 'development'
+    test = 'test'
+    staging = 'staging'
+    production = 'production'
 
 
 class ServerConfig(BaseModel):
@@ -40,6 +48,7 @@ class AppConfig(BaseModel):
     """
     Top-level config container class.
     """
+    environment: RunEnviron
     server: ServerConfig
     security: SecurityConfig
     adapters: List[AdapterConfig]
