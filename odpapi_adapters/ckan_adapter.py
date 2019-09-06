@@ -40,8 +40,8 @@ class CKANAdapterConfig(BaseModel):
 
 class CKANAdapter(ODPAPIAdapter):
 
-    def __init__(self, routes, **config):
-        super().__init__(routes, **config)
+    def __init__(self, app, routes, **config):
+        super().__init__(app, routes, **config)
         config = CKANAdapterConfig(**config)
         # the environment variable CKAN_URL will override the local config
         self.ckan_url = os.getenv('CKAN_URL') or config.ckan_url
