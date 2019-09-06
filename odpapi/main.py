@@ -5,7 +5,7 @@ import uvicorn
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from odpapi.routers import metadata, institution
+from odpapi.routers import metadata, institution, doi
 from odpapi.config import read_config
 from odpapi.lib import adapters
 
@@ -31,6 +31,12 @@ app.include_router(
     metadata.router,
     prefix='/metadata',
     tags=['Metadata'],
+)
+
+app.include_router(
+    doi.router,
+    prefix='/doi',
+    tags=['DOI'],
 )
 
 # TODO add security middlewares
