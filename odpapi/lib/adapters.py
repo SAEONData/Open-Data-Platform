@@ -11,7 +11,8 @@ import odpapi_adapters
 
 
 class ODPAPIAdapter:
-    def __init__(self, routes: List[str], **config: Dict[str, Any]):
+    def __init__(self, app: FastAPI, routes: List[str], **config: Dict[str, Any]):
+        self.app = app
         self.routes = routes
 
 
@@ -40,7 +41,7 @@ def load_adapters(app: FastAPI):
             unknowns += [entry.name]
             continue
         adapter_cls = available_adapters[entry.name]
-        adapters += [adapter_cls(entry.routes, **entry.config)]
+        adapters += [adapter_cls(app, entry.routes, **entry.config)]
 
     if unknowns:
         raise ValueError("Unknown adapter(s): {}".format(", ".join(unknowns)))
