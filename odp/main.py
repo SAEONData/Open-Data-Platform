@@ -5,9 +5,9 @@ import uvicorn
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from odpapi.routers import metadata, institution, doi
-from odpapi.config import read_config
-from odpapi.lib import adapters
+from odp.routers import metadata, institution, doi
+from odp.config import read_config
+from odp.lib import adapters
 
 
 config = read_config()

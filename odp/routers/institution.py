@@ -1,10 +1,10 @@
 from typing import List
 from fastapi import APIRouter, Depends
 
-from odpapi.lib.common import PagerParams
-from odpapi.lib.adapters import ODPAPIAdapter, get_adapter
-from odpapi.models.institution import Institution, InstitutionIn, InstitutionOut
-from odpapi.lib.security import HydraAuth
+from ..lib.common import PagerParams
+from ..lib.adapters import ODPAPIAdapter, get_adapter
+from ..models.institution import Institution, InstitutionIn, InstitutionOut
+from ..lib.security import HydraAuth
 
 router = APIRouter()
 

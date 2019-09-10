@@ -1,6 +1,6 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
-version = '0.1'
+version = '0.1.0'
 
 setup(
     name='ODP-API',
@@ -10,7 +10,8 @@ setup(
     author='Mark Jacobson',
     author_email='mark@saeon.ac.za',
     license='MIT',
-    packages=['odpapi'],
+    packages=find_packages(),
+    include_package_data=True,
     install_requires=[
         # use requirements.txt
     ],

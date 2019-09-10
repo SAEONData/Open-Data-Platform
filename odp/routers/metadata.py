@@ -1,11 +1,11 @@
 from typing import List
 from fastapi import APIRouter, Depends
 
-from odpapi.lib.metadata import MetadataRecordsFilter
-from odpapi.lib.common import PagerParams
-from odpapi.lib.adapters import ODPAPIAdapter, get_adapter
-from odpapi.lib.security import HydraAuth
-from odpapi.models.metadata import (
+from ..lib.metadata import MetadataRecordsFilter
+from ..lib.common import PagerParams
+from ..lib.adapters import ODPAPIAdapter, get_adapter
+from ..lib.security import HydraAuth
+from ..models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
     MetadataRecordOut,

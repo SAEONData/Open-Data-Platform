@@ -1,7 +1,7 @@
 from typing import Set, Dict
 from pydantic import BaseModel, Schema, UUID4
 
-from odpapi.lib.metadata import DOI_REGEX
+from ..lib.metadata import DOI_REGEX
 
 
 class MetadataRecordIn(BaseModel):
