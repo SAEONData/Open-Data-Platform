@@ -108,7 +108,7 @@ main header {
 }
 
 main footer {
-  margin: .5em .75em .8em;
+  margin: .5em .75em 1em;
   display: flex;
   flex-direction: column;
 }
@@ -151,11 +151,11 @@ main textarea {
 input[type=submit] {
   align-self: center;
   min-width: 7em;
-  height: 3em;
+  height: 2.6em;
   background: radial-gradient(#BAFFEC, #D3ECFF);
   border: 1px solid lightgray;
   cursor: pointer;
-  margin-top: 1.6em;
+  margin-top: 2em;
   font-weight: bold;
   font-size: 1em;
 }
