@@ -1,8 +1,11 @@
 import uuid
 
 from flask_login import UserMixin
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from . import db
+from .user_institution import UserInstitution
 
 
 class User(UserMixin, db.Model):
@@ -15,11 +18,14 @@ class User(UserMixin, db.Model):
     active = db.Column(db.Boolean(), nullable=False)
     confirmed_at = db.Column(db.DateTime())
 
-    # many-to-many institutions-users relationship
-    institutions = db.relationship('Institution',
-                                   secondary='institutional_user',
-                                   back_populates='users',
-                                   passive_deletes=True)
+    # many-to-many institutions-users relationship via association object
+    user_institutions = relationship('UserInstitution',
+                                     back_populates='user',
+                                     cascade='all, delete-orphan',
+                                     passive_deletes=True)
+    # enables working with the other side of the relationship transparently
+    institutions = association_proxy('user_institutions', 'institution',
+                                     creator=lambda i: UserInstitution(institution=i))
 
     def __repr__(self):
         return '<User %r>' % self.email

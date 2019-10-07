@@ -1,0 +1,13 @@
+{% from 'macros.html' import duallistbox_js %}
+
+{% macro scopes_duallistbox_js() %}
+    {{ duallistbox_js('scopes',
+                      showFilterInputs=False,
+                      infoText=False,
+                      selectorMinimalHeight=200,
+                      moveSelectedLabel='Add selected',
+                      moveAllLabel='Add all',
+                      nonSelectedListLabel='Available scopes',
+                      selectedListLabel='Scopes to which this role is applicable',
+    ) }}
+{% endmacro %}

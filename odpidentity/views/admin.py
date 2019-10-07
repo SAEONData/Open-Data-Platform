@@ -71,7 +71,19 @@ class RoleModelView(StaticDataModelView):
     """
     Role model view.
     """
-    form_excluded_columns = ['name', 'scopes']
+    column_list = ['name', 'title', 'description', 'is_admin', 'scopes']
+    column_formatters = {
+        'scopes': lambda vw, ctx, model, prop: ', '.join(sorted([s.title for s in model.scopes]))
+    }
+    form_columns = ['title', 'description', 'is_admin', 'scopes']
+    form_args = {
+        'scopes': dict(
+            get_label='title',
+            query_factory=lambda: Scope.query.order_by('title'),
+        )
+    }
+    create_template = 'role_create.html'
+    edit_template = 'role_edit.html'
 
 
 class ScopeModelView(StaticDataModelView):
@@ -104,7 +116,7 @@ class InstitutionModelView(StaticDataModelView):
     column_formatters = {
         'parent': lambda vw, ctx, model, prop: model.parent.title if model.parent else None
     }
-    form_columns = ['registry', 'parent', 'title', 'description']
+    form_columns = ['registry', 'parent', 'title', 'description', 'users']
     form_args = {
         'registry': dict(
             get_label='title',
@@ -114,7 +126,13 @@ class InstitutionModelView(StaticDataModelView):
             get_label='title',
             query_factory=lambda: Institution.query.order_by('title'),
         ),
+        'users': dict(
+            get_label='email',
+            query_factory=lambda: User.query.order_by('email'),
+        ),
     }
+    create_template = 'institution_create.html'
+    edit_template = 'institution_edit.html'
 
 
 class InstitutionRegistryModelView(StaticDataModelView):

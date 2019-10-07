@@ -1,0 +1,13 @@
+{% extends 'admin_model_create.html' %}
+{% from 'macros.html' import duallistbox_css %}
+{% from 'institution_macros.html' import users_duallistbox_js %}
+
+{% block head_css %}
+    {{ super() }}
+    {{ duallistbox_css() }}
+{% endblock %}
+
+{% block tail_js %}
+    {{ super() }}
+    {{ users_duallistbox_js() }}
+{% endblock %}

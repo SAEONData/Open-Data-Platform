@@ -1,4 +1,8 @@
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.associationproxy import association_proxy
+
 from . import db
+from .user_institution import UserInstitution
 from .static_data_mixin import StaticDataMixin
 
 
@@ -28,8 +32,11 @@ class Institution(StaticDataMixin, db.Model):
         ),
     )
 
-    # many-to-many institutions-users relationship
-    users = db.relationship('User',
-                            secondary='institutional_user',
-                            back_populates='institutions',
-                            passive_deletes=True)
+    # many-to-many institutions-users relationship via association object
+    institution_users = relationship('UserInstitution',
+                                     back_populates='institution',
+                                     cascade='all, delete-orphan',
+                                     passive_deletes=True)
+    # enables working with the other side of the relationship transparently
+    users = association_proxy('institution_users', 'user',
+                              creator=lambda u: UserInstitution(user=u))

@@ -1,5 +1,9 @@
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.associationproxy import association_proxy
+
 from . import db
 from .static_data_mixin import StaticDataMixin
+from .role_scope import RoleScope
 
 
 class Role(StaticDataMixin, db.Model):
@@ -8,8 +12,11 @@ class Role(StaticDataMixin, db.Model):
     """
     is_admin = db.Column(db.Boolean(), nullable=False)
 
-    # many-to-many scopes-roles relationship
-    scopes = db.relationship('Scope',
-                             secondary='scoped_role',
-                             back_populates='roles',
-                             passive_deletes=True)
+    # many-to-many scopes-roles relationship via association object
+    role_scopes = relationship('RoleScope',
+                               back_populates='role',
+                               cascade='all, delete-orphan',
+                               passive_deletes=True)
+    # enables working with the other side of the relationship transparently
+    scopes = association_proxy('role_scopes', 'scope',
+                               creator=lambda s: RoleScope(scope=s))
