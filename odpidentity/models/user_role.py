@@ -13,13 +13,13 @@ class UserRole(db.Model):
     __table_args__ = (
         db.ForeignKeyConstraint(
             ['user_id', 'institution_id'],
-            ['institutional_user.user_id', 'institutional_user.institution_id'],
+            ['user_institution.user_id', 'user_institution.institution_id'],
             name='user_role_user_id_institution_id_fkey',
             ondelete='CASCADE',
         ),
         db.ForeignKeyConstraint(
             ['role_id', 'scope_id'],
-            ['scoped_role.role_id', 'scoped_role.scope_id'],
+            ['role_scope.role_id', 'role_scope.scope_id'],
             name='user_role_role_id_scope_id_fkey',
             ondelete='CASCADE',
         ),
