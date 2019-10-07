@@ -21,6 +21,7 @@ tokens.
 
 * [Hydra-Admin-Client](https://github.com/SAEONData/Hydra-Admin-Client)
 * [Hydra-Client-Blueprint](https://github.com/SAEONData/Hydra-Client-Blueprint)
+* [Fork of Flask-Admin](https://github.com/SAEONData/flask-admin)
 
 ### Database setup
 
