@@ -9,5 +9,5 @@ class UserInstitution(db.Model):
     # disallow deleting of an institution if it has any users
     institution_id = db.Column(db.Integer, db.ForeignKey('institution.id', ondelete='RESTRICT'), primary_key=True)
 
-    user = db.relationship('User', back_populates='user_institutions')
-    institution = db.relationship('Institution', back_populates='institution_users')
+    user = db.relationship('User', back_populates='_institutions')
+    institution = db.relationship('Institution', back_populates='_users')

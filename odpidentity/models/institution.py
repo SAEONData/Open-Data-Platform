@@ -33,10 +33,10 @@ class Institution(StaticDataMixin, db.Model):
     )
 
     # many-to-many institutions-users relationship via association object
-    institution_users = relationship('UserInstitution',
-                                     back_populates='institution',
-                                     cascade='all, delete-orphan',
-                                     passive_deletes=True)
+    _users = relationship('UserInstitution',
+                          back_populates='institution',
+                          cascade='all, delete-orphan',
+                          passive_deletes=True)
     # enables working with the other side of the relationship transparently
-    users = association_proxy('institution_users', 'user',
+    users = association_proxy('_users', 'user',
                               creator=lambda u: UserInstitution(user=u))

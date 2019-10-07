@@ -12,10 +12,10 @@ class Scope(StaticDataMixin, db.Model):
     """
 
     # many-to-many scopes-roles relationship via association object
-    scope_roles = relationship('RoleScope',
-                               back_populates='scope',
-                               cascade='all, delete-orphan',
-                               passive_deletes=True)
+    _roles = relationship('RoleScope',
+                          back_populates='scope',
+                          cascade='all, delete-orphan',
+                          passive_deletes=True)
     # enables working with the other side of the relationship transparently
-    roles = association_proxy('scope_roles', 'role',
+    roles = association_proxy('_roles', 'role',
                               creator=lambda r: RoleScope(role=r))

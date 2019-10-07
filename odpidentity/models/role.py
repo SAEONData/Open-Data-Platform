@@ -13,10 +13,10 @@ class Role(StaticDataMixin, db.Model):
     is_admin = db.Column(db.Boolean(), nullable=False)
 
     # many-to-many scopes-roles relationship via association object
-    role_scopes = relationship('RoleScope',
-                               back_populates='role',
-                               cascade='all, delete-orphan',
-                               passive_deletes=True)
+    _scopes = relationship('RoleScope',
+                           back_populates='role',
+                           cascade='all, delete-orphan',
+                           passive_deletes=True)
     # enables working with the other side of the relationship transparently
-    scopes = association_proxy('role_scopes', 'scope',
+    scopes = association_proxy('_scopes', 'scope',
                                creator=lambda s: RoleScope(scope=s))

@@ -19,12 +19,12 @@ class User(UserMixin, db.Model):
     confirmed_at = db.Column(db.DateTime())
 
     # many-to-many institutions-users relationship via association object
-    user_institutions = relationship('UserInstitution',
-                                     back_populates='user',
-                                     cascade='all, delete-orphan',
-                                     passive_deletes=True)
+    _institutions = relationship('UserInstitution',
+                                 back_populates='user',
+                                 cascade='all, delete-orphan',
+                                 passive_deletes=True)
     # enables working with the other side of the relationship transparently
-    institutions = association_proxy('user_institutions', 'institution',
+    institutions = association_proxy('_institutions', 'institution',
                                      creator=lambda i: UserInstitution(institution=i))
 
     def __repr__(self):
