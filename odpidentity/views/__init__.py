@@ -24,6 +24,7 @@ def init_app(app):
     admin_views = Admin(app, name='ODP Admin', index_view=admin.home, base_template='admin_base.html')
     admin_views.add_views(
         admin.users,
+        admin.members,
         admin.roles,
         admin.scopes,
         admin.institutions,

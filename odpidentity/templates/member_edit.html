@@ -1,0 +1,19 @@
+{% extends 'admin_model_edit.html' %}
+{% from 'macros.html' import duallistbox_css %}
+{% from 'member_macros.html' import capabilities_duallistbox_js %}
+
+{% block head_css %}
+    {{ super() }}
+    {{ duallistbox_css() }}
+{% endblock %}
+
+{% block edit_form %}
+    <p>User: {{ model.user.email }}</p>
+    <p>Institution: {{ model.institution.name }}</p>
+    {{ super() }}
+{% endblock %}
+
+{% block tail_js %}
+    {{ super() }}
+    {{ capabilities_duallistbox_js() }}
+{% endblock %}
