@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from . import db
-from .user_institution import UserInstitution
+from .member import Member
 
 
 class User(UserMixin, db.Model):
@@ -15,17 +15,17 @@ class User(UserMixin, db.Model):
     id = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
-    active = db.Column(db.Boolean(), nullable=False)
-    confirmed_at = db.Column(db.DateTime())
+    active = db.Column(db.Boolean, nullable=False)
+    confirmed_at = db.Column(db.DateTime)
 
-    # many-to-many institutions-users relationship via association object
-    _institutions = relationship('UserInstitution',
-                                 back_populates='user',
-                                 cascade='all, delete-orphan',
-                                 passive_deletes=True)
+    # many-to-many relationship between institution and user represented by member
+    members = relationship('Member',
+                           back_populates='user',
+                           cascade='all, delete-orphan',
+                           passive_deletes=True)
     # enables working with the other side of the relationship transparently
-    institutions = association_proxy('_institutions', 'institution',
-                                     creator=lambda i: UserInstitution(institution=i))
+    institutions = association_proxy('members', 'institution',
+                                     creator=lambda i: Member(institution=i))
 
     def __repr__(self):
-        return '<User %r>' % self.email
+        return '<User %s>' % self.email

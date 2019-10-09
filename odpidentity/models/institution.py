@@ -2,15 +2,16 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from . import db
-from .user_institution import UserInstitution
-from .static_data_mixin import StaticDataMixin
+from .member import Member
 
 
-class Institution(StaticDataMixin, db.Model):
+class Institution(db.Model):
     """
     Model representing an institution.
     """
     id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String, unique=True, nullable=False)
+    name = db.Column(db.String, unique=True, nullable=False)
 
     # institutions can be hierarchically related
     parent_id = db.Column(db.Integer)
@@ -32,11 +33,14 @@ class Institution(StaticDataMixin, db.Model):
         ),
     )
 
-    # many-to-many institutions-users relationship via association object
-    _users = relationship('UserInstitution',
-                          back_populates='institution',
-                          cascade='all, delete-orphan',
-                          passive_deletes=True)
+    # many-to-many relationship between institution and user represented by member
+    members = relationship('Member',
+                           back_populates='institution',
+                           cascade='all, delete-orphan',
+                           passive_deletes=True)
     # enables working with the other side of the relationship transparently
-    users = association_proxy('_users', 'user',
-                              creator=lambda u: UserInstitution(user=u))
+    users = association_proxy('members', 'user',
+                              creator=lambda u: Member(user=u))
+
+    def __repr__(self):
+        return '<Institution %s>' % self.code

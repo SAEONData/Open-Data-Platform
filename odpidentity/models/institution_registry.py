@@ -1,13 +1,17 @@
 from . import db
-from .static_data_mixin import StaticDataMixin
 
 
-class InstitutionRegistry(StaticDataMixin, db.Model):
+class InstitutionRegistry(db.Model):
     """
     Model representing an institution registry.
     """
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String, unique=True, nullable=False)
+    name = db.Column(db.String, unique=True, nullable=False)
 
     institutions = db.relationship('Institution',
                                    back_populates='registry',
-                                   passive_deletes=True,
-                                   order_by='Institution.title')
+                                   passive_deletes=True)
+
+    def __repr__(self):
+        return '<InstitutionRegistry %s>' % self.code

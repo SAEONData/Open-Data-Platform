@@ -2,20 +2,25 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from . import db
-from .role_scope import RoleScope
-from .static_data_mixin import StaticDataMixin
+from .capability import Capability
 
 
-class Scope(StaticDataMixin, db.Model):
+class Scope(db.Model):
     """
     Model representing an OAuth2 / application scope.
     """
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String, unique=True, nullable=False)
+    description = db.Column(db.String)
 
-    # many-to-many scopes-roles relationship via association object
-    _roles = relationship('RoleScope',
-                          back_populates='scope',
-                          cascade='all, delete-orphan',
-                          passive_deletes=True)
+    # many-to-many relationship between scope and role represented by capability
+    capabilities = relationship('Capability',
+                                back_populates='scope',
+                                cascade='all, delete-orphan',
+                                passive_deletes=True)
     # enables working with the other side of the relationship transparently
-    roles = association_proxy('_roles', 'role',
-                              creator=lambda r: RoleScope(role=r))
+    roles = association_proxy('capabilities', 'role',
+                              creator=lambda r: Capability(role=r))
+
+    def __repr__(self):
+        return '<Scope %s>' % self.code

@@ -2,21 +2,26 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from . import db
-from .static_data_mixin import StaticDataMixin
-from .role_scope import RoleScope
+from .capability import Capability
 
 
-class Role(StaticDataMixin, db.Model):
+class Role(db.Model):
     """
     Model representing a generic role.
     """
-    is_admin = db.Column(db.Boolean(), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String, unique=True, nullable=False)
+    name = db.Column(db.String, unique=True, nullable=False)
+    is_admin = db.Column(db.Boolean, nullable=False)
 
-    # many-to-many scopes-roles relationship via association object
-    _scopes = relationship('RoleScope',
-                           back_populates='role',
-                           cascade='all, delete-orphan',
-                           passive_deletes=True)
+    # many-to-many relationship between scope and role represented by capability
+    capabilities = relationship('Capability',
+                                back_populates='role',
+                                cascade='all, delete-orphan',
+                                passive_deletes=True)
     # enables working with the other side of the relationship transparently
-    scopes = association_proxy('_scopes', 'scope',
-                               creator=lambda s: RoleScope(scope=s))
+    scopes = association_proxy('capabilities', 'scope',
+                               creator=lambda s: Capability(scope=s))
+
+    def __repr__(self):
+        return '<Role %s>' % self.code
