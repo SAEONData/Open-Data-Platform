@@ -10,17 +10,11 @@ class Capability(db.Model):
     Model of a scope-role many-to-many relationship, representing the capability
     to perform a particular role within a given application scope.
     """
-    id = db.Column(db.Integer, primary_key=True)
-
-    scope_id = db.Column(db.Integer, db.ForeignKey('scope.id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer, db.ForeignKey('role.id', ondelete='CASCADE'))
+    scope_id = db.Column(db.Integer, db.ForeignKey('scope.id', ondelete='CASCADE'), primary_key=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id', ondelete='CASCADE'), primary_key=True)
 
     scope = db.relationship('Scope', back_populates='capabilities')
     role = db.relationship('Role', back_populates='capabilities')
-
-    __table_args__ = (
-        db.UniqueConstraint('scope_id', 'role_id'),
-    )
 
     # many-to-many relationship between member and capability represented by actor
     actors = relationship('Actor',
