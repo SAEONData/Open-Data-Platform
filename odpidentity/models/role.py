@@ -12,7 +12,6 @@ class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String, unique=True, nullable=False)
     name = db.Column(db.String, unique=True, nullable=False)
-    is_admin = db.Column(db.Boolean, nullable=False)
 
     # many-to-many relationship between scope and role represented by capability
     capabilities = relationship('Capability',

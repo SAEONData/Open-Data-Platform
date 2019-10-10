@@ -129,6 +129,7 @@ def create_user_account(email, password):
     user = User(
         email=email,
         password=ph.hash(password),
+        superuser=False,
         active=True,
         confirmed_at = datetime.datetime.now()  # todo: remove once we've implemented email confirmation
     )

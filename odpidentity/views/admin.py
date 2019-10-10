@@ -61,12 +61,12 @@ class UserModelView(AdminModelView):
     User model view.
     """
     can_create = False
-    column_list = ['id', 'email', 'active', 'confirmed_at', 'institutions']
+    column_list = ['id', 'email', 'superuser', 'active', 'confirmed_at', 'institutions']
     column_default_sort = 'email'
     column_formatters = {
         'institutions': lambda vw, ctx, model, prop: ', '.join(sorted([i.name for i in model.institutions]))
     }
-    form_columns = ['email', 'active', 'institutions']
+    form_columns = ['email', 'superuser', 'active', 'institutions']
     form_args = {
         'institutions': dict(
             get_label='name',
@@ -128,12 +128,12 @@ class RoleModelView(AdminModelView):
     """
     Role model view.
     """
-    column_list = ['name', 'code', 'is_admin', 'scopes']
+    column_list = ['name', 'code', 'scopes']
     column_default_sort = 'name'
     column_formatters = {
         'scopes': lambda vw, ctx, model, prop: ', '.join(sorted([s.code for s in model.scopes]))
     }
-    form_columns = ['name', 'code', 'is_admin', 'scopes']
+    form_columns = ['name', 'code', 'scopes']
     form_overrides = {
         'code': CodeField
     }
