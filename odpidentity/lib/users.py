@@ -4,6 +4,7 @@ from argon2.exceptions import VerifyMismatchError
 from ..lib import exceptions as x
 from ..models import db
 from ..models.user import User
+from ..models.privilege import Privilege
 
 ph = argon2.PasswordHasher()
 
@@ -149,3 +150,35 @@ def check_password_complexity(password):
     """
     # todo...
     return len(password) >= 4
+
+
+def id_token_data(user):
+    """
+    Construct a dict of items to put in an ID token for this user.
+
+    :param user: a User instance
+    :return: dict
+    """
+    return {'email': user.email}
+
+
+def access_token_data(user):
+    """
+    Construct a dict of items to put in an access token for this user.
+
+    :param user: a User instance
+    :return: dict
+    """
+    access_info = {
+        'superuser': user.superuser,
+        'privileges': [],
+    }
+    if not user.superuser:
+        privileges = Privilege.query.filter_by(user_id=user.id).all()
+        for privilege in privileges:
+            access_info['privileges'] += [{
+                'institution': privilege.institution.code,
+                'scope': privilege.scope.code,
+                'role': privilege.role.code,
+            }]
+    return access_info

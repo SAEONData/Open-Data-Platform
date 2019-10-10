@@ -28,3 +28,8 @@ class Privilege(db.Model):
             ondelete='CASCADE',
         ),
     )
+
+    institution = db.relationship('Institution', viewonly=True, foreign_keys=institution_id, primaryjoin='Privilege.institution_id == Institution.id')
+    user = db.relationship('User', viewonly=True, foreign_keys=user_id, primaryjoin='Privilege.user_id == User.id')
+    scope = db.relationship('Scope', viewonly=True, foreign_keys=scope_id, primaryjoin='Privilege.scope_id == Scope.id')
+    role = db.relationship('Role', viewonly=True, foreign_keys=role_id, primaryjoin='Privilege.role_id == Role.id')

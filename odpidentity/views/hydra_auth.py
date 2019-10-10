@@ -4,7 +4,7 @@ from hydra import HydraAdminClient, HydraAdminError
 
 from ..models.user import User
 from ..forms.login import LoginForm
-from ..lib.users import validate_auto_login
+from ..lib.users import validate_auto_login, id_token_data, access_token_data
 from ..lib import exceptions as x
 
 bp = Blueprint('auth', __name__)
@@ -99,12 +99,8 @@ def consent():
             challenge,
             grant_scope=consent_request['requested_scope'],
             grant_audience=consent_request['requested_access_token_audience'],
-            access_token_data={
-
-            },
-            id_token_data={
-                'email': user.email,
-            },
+            access_token_data=access_token_data(user),
+            id_token_data=id_token_data(user),
         )
         return redirect(redirect_to)
 
