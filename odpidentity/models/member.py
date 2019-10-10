@@ -2,7 +2,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from . import db
-from .actor import Actor
+from .privilege import Privilege
 
 
 class Member(db.Model):
@@ -17,11 +17,11 @@ class Member(db.Model):
     institution = db.relationship('Institution', back_populates='members')
     user = db.relationship('User', back_populates='members')
 
-    # many-to-many relationship between member and capability represented by actor
-    actors = relationship('Actor',
-                          back_populates='member',
-                          cascade='all, delete-orphan',
-                          passive_deletes=True)
+    # many-to-many relationship between member and capability represented by privilege
+    privileges = relationship('Privilege',
+                              back_populates='member',
+                              cascade='all, delete-orphan',
+                              passive_deletes=True)
     # enables working with the other side of the relationship transparently
-    capabilities = association_proxy('actors', 'capability',
-                                     creator=lambda c: Actor(capability=c))
+    capabilities = association_proxy('privileges', 'capability',
+                                     creator=lambda c: Privilege(capability=c))

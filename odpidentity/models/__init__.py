@@ -7,7 +7,7 @@ def init_app(app):
     from .hydra_token import HydraToken
     from .user import User
     from .member import Member
-    from .actor import Actor
+    from .privilege import Privilege
     from .role import Role
     from .scope import Scope
     from .capability import Capability
