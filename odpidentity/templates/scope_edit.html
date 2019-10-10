@@ -1,6 +1,5 @@
 {% extends 'admin_model_edit.html' %}
-{% from 'macros.html' import duallistbox_css %}
-{% from 'scope_macros.html' import roles_duallistbox_js %}
+{% from 'macros.html' import duallistbox_css, scope_roles_duallistbox_js %}
 
 {% block head_css %}
     {{ super() }}
@@ -9,5 +8,5 @@
 
 {% block tail_js %}
     {{ super() }}
-    {{ roles_duallistbox_js() }}
+    {{ scope_roles_duallistbox_js() }}
 {% endblock %}

@@ -1,6 +1,5 @@
 {% extends 'admin_model_edit.html' %}
-{% from 'macros.html' import duallistbox_css %}
-{% from 'institution_macros.html' import users_duallistbox_js %}
+{% from 'macros.html' import duallistbox_css, institution_users_duallistbox_js %}
 
 {% block head_css %}
     {{ super() }}
@@ -9,5 +8,5 @@
 
 {% block tail_js %}
     {{ super() }}
-    {{ users_duallistbox_js() }}
+    {{ institution_users_duallistbox_js() }}
 {% endblock %}
