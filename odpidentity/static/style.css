@@ -151,11 +151,11 @@ main textarea {
 input[type=submit] {
   align-self: center;
   min-width: 7em;
-  height: 2.6em;
+  height: 2.8em;
   background: radial-gradient(#BAFFEC, #D3ECFF);
   border: 1px solid lightgray;
   cursor: pointer;
-  margin-top: 2em;
+  margin-top: 1.1em;
   font-weight: bold;
   font-size: 1em;
 }
