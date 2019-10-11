@@ -9,7 +9,6 @@ from ..models import db
 from ..models.user import User
 from ..models.role import Role
 from ..models.capability import Capability
-from ..models.member import Member
 from ..models.scope import Scope
 from ..models.institution import Institution
 from ..models.institution_registry import InstitutionRegistry
@@ -192,41 +191,3 @@ class InstitutionRegistryModelView(AdminModelView):
     form_overrides = {
         'code': CodeField
     }
-
-
-home = AdminHomeView()
-
-users = UserModelView(
-    User, db.session,
-    name='Users',
-    category='Users',
-    endpoint='users',
-)
-members = MemberModelView(
-    Member, db.session,
-    name='User Roles',
-    category='Users',
-    endpoint='users/roles',
-)
-roles = RoleModelView(
-    Role, db.session,
-    name='Roles',
-    endpoint='roles',
-)
-scopes = ScopeModelView(
-    Scope, db.session,
-    name='Scopes',
-    endpoint='scopes',
-)
-institutions = InstitutionModelView(
-    Institution, db.session,
-    name='Institutions',
-    category='Institutions',
-    endpoint='institutions',
-)
-institution_registries = InstitutionRegistryModelView(
-    InstitutionRegistry, db.session,
-    name='Institution Registries',
-    category='Institutions',
-    endpoint='institutions/registries',
-)
