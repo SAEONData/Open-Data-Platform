@@ -1,5 +1,6 @@
 import re
 
+from flask import abort, Response
 from flask_admin import AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
@@ -60,12 +61,12 @@ class UserModelView(AdminModelView):
     User model view.
     """
     can_create = False
-    column_list = ['id', 'email', 'superuser', 'active', 'confirmed_at', 'institutions']
+    column_list = ['id', 'email', 'active', 'superuser', 'confirmed_at', 'institutions']
     column_default_sort = 'email'
     column_formatters = {
         'institutions': lambda vw, ctx, model, prop: ', '.join(sorted([i.name for i in model.institutions]))
     }
-    form_columns = ['email', 'superuser', 'active', 'institutions']
+    form_columns = ['email', 'active', 'institutions']
     form_args = {
         'institutions': dict(
             get_label='name',
@@ -73,6 +74,14 @@ class UserModelView(AdminModelView):
         )
     }
     edit_template = 'user_edit.html'
+
+    def edit_form(self, obj=None):
+        """
+        Only allow superusers to edit superusers.
+        """
+        if obj and obj.superuser and not current_user.superuser:
+            abort(Response("You are not permitted to edit a superuser."))
+        return super().edit_form(obj)
 
 
 class MemberModelView(AdminModelView):
