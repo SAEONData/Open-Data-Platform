@@ -15,3 +15,7 @@ class Config:
     HYDRA_CLIENT_ID = os.getenv('HYDRA_CLIENT_ID')
     HYDRA_CLIENT_SECRET = os.getenv('HYDRA_CLIENT_SECRET')
     HYDRA_SCOPES = os.getenv('HYDRA_SCOPES', '').split()
+
+    ADMIN_INSTITUTION = os.getenv('ADMIN_INSTITUTION')
+    ADMIN_ROLE = os.getenv('ADMIN_ROLE')
+    ADMIN_SCOPE = os.getenv('ADMIN_SCOPE')

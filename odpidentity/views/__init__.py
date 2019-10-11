@@ -39,28 +39,28 @@ def init_app(app):
         name='Privileges',
         endpoint='privileges',
     )
-    roles = admin.RoleModelView(
-        Role, db.session,
-        name='Roles',
-        endpoint='roles',
-        category='System Configuration',
-    )
-    scopes = admin.ScopeModelView(
-        Scope, db.session,
-        name='Scopes',
-        endpoint='scopes',
-        category='System Configuration',
-    )
     institutions = admin.InstitutionModelView(
         Institution, db.session,
         name='Institutions',
         endpoint='institutions',
     )
+    roles = admin.RoleModelView(
+        Role, db.session,
+        name='Roles',
+        category='System Configuration',
+        endpoint='roles',
+    )
+    scopes = admin.ScopeModelView(
+        Scope, db.session,
+        name='Scopes',
+        category='System Configuration',
+        endpoint='scopes',
+    )
     institution_registries = admin.InstitutionRegistryModelView(
         InstitutionRegistry, db.session,
         name='Institution Registries',
-        endpoint='registries',
         category='System Configuration',
+        endpoint='registries',
     )
 
     admin_views = Admin(app, name='ODP Admin', index_view=home, base_template='admin_base.html')

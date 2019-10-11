@@ -78,5 +78,13 @@ with the Identity Service as a client application:
 * HYDRA_PUBLIC_URL: URL of the Hydra public API
 * HYDRA_CLIENT_ID: client ID of this service as registered with Hydra
 * HYDRA_CLIENT_SECRET: client secret of this service as registered with Hydra
-* HYDRA_SCOPES: openid
+* HYDRA_SCOPES: openid ODP.Admin
 * OAUTHLIB_INSECURE_TRANSPORT: set to `True` in development, to allow OAuth to work when running the server on HTTP
+
+#### Admin interface config
+
+Settings for controlling access to the admin interface.
+
+* ADMIN_INSTITUTION: institution code of the institution that owns this service
+* ADMIN_ROLE: role code of the administrative role
+* ADMIN_SCOPE: scope code applicable to this service (should be one of the `HYDRA_SCOPES` values)
