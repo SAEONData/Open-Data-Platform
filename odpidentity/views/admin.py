@@ -1,9 +1,10 @@
 import re
 
-from flask import current_app, abort, Response, flash, redirect
+from flask import current_app, flash, redirect, request
 from flask_admin import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.helpers import get_redirect_target
+from flask_admin.model.helpers import get_mdict_item_or_list
 from flask_login import current_user
 from wtforms import StringField
 
@@ -115,12 +116,15 @@ class UserModelView(AdminModelView):
     """
     User model view.
     """
-    can_create = False
+    can_create = False  # users may only be created via signup
+    action_disallowed_list = ['delete']  # disallow deletion of multiple users at once
+
     column_list = ['id', 'email', 'active', 'superuser', 'confirmed_at', 'institutions']
     column_default_sort = 'email'
     column_formatters = {
         'institutions': lambda vw, ctx, model, prop: ', '.join(sorted([i.name for i in model.institutions]))
     }
+
     form_columns = ['email', 'active', 'institutions']
     form_args = {
         'institutions': dict(
@@ -130,13 +134,25 @@ class UserModelView(AdminModelView):
     }
     edit_template = 'user_edit.html'
 
-    def edit_form(self, obj=None):
-        """
-        Only allow superusers to edit superusers.
-        """
-        if obj and obj.superuser and not current_user.superuser:
-            abort(Response("You are not permitted to edit a superuser."))
-        return super().edit_form(obj)
+    @expose('/edit/', methods=('GET', 'POST'))
+    def edit_view(self):
+        id = get_mdict_item_or_list(request.args, 'id')
+        if id is not None:
+            user = User.query.get(id)
+            if user and user.superuser and not current_user.superuser:
+                flash("Only superusers may perform this action.")
+                return redirect(get_redirect_target())
+        return super().edit_view()
+
+    @expose('/delete/', methods=('POST',))
+    def delete_view(self):
+        id = request.form.get('id')
+        if id is not None:
+            user = User.query.get(id)
+            if user and user.superuser and not current_user.superuser:
+                flash("Only superusers may perform this action.")
+                return redirect(get_redirect_target())
+        return super().delete_view()
 
 
 class MemberModelView(AdminModelView):
@@ -145,6 +161,7 @@ class MemberModelView(AdminModelView):
     """
     can_create = False
     can_delete = False
+
     column_list = ['user.email', 'institution.name', 'capabilities']
     column_default_sort = [('user.email', False), ('institution.name', False)]
     column_labels = {
@@ -154,6 +171,7 @@ class MemberModelView(AdminModelView):
     column_formatters = {
         'capabilities': lambda vw, ctx, model, prop: ', '.join(sorted([c.label for c in model.capabilities]))
     }
+
     form_columns = ['capabilities']
     form_args = {
         'capabilities': dict(
@@ -177,6 +195,7 @@ class InstitutionModelView(AdminModelView):
     column_formatters = {
         'parent': lambda vw, ctx, model, prop: model.parent.name if model.parent else None
     }
+
     form_columns = ['registry', 'parent', 'name', 'code', 'users']
     form_overrides = {
         'code': CodeField
@@ -208,6 +227,7 @@ class RoleModelView(SysAdminModelView):
     column_formatters = {
         'scopes': lambda vw, ctx, model, prop: ', '.join(sorted([s.code for s in model.scopes]))
     }
+
     form_columns = ['name', 'code', 'scopes']
     form_overrides = {
         'code': CodeField
@@ -231,6 +251,7 @@ class ScopeModelView(SysAdminModelView):
     column_formatters = {
         'roles': lambda vw, ctx, model, prop: ', '.join(sorted([r.name for r in model.roles]))
     }
+
     form_columns = ['code', 'description', 'roles']
     form_args = {
         'code': dict(
@@ -251,6 +272,7 @@ class InstitutionRegistryModelView(SysAdminModelView):
     """
     column_list = ['name', 'code']
     column_default_sort = 'name'
+
     form_columns = ['name', 'code']
     form_overrides = {
         'code': CodeField
