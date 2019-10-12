@@ -1,8 +1,9 @@
 import re
 
-from flask import current_app, abort, Response
-from flask_admin import AdminIndexView
+from flask import current_app, abort, Response, flash, redirect
+from flask_admin import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.helpers import get_redirect_target
 from flask_login import current_user
 from wtforms import StringField
 
@@ -79,10 +80,35 @@ class AdminModelView(ModelView):
 
 class SysAdminModelView(AdminModelView):
     """
-    Base view for system config models. Only accessible to superusers.
+    Base view for system config models. Only modifiable by superusers.
     """
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.superuser
+    @expose('/new/', methods=('GET', 'POST'))
+    def create_view(self):
+        if not current_user.superuser:
+            flash("Only superusers may perform this action.")
+            return redirect(get_redirect_target())
+        return super().create_view()
+
+    @expose('/edit/', methods=('GET', 'POST'))
+    def edit_view(self):
+        if not current_user.superuser:
+            flash("Only superusers may perform this action.")
+            return redirect(get_redirect_target())
+        return super().edit_view()
+
+    @expose('/delete/', methods=('POST',))
+    def delete_view(self):
+        if not current_user.superuser:
+            flash("Only superusers may perform this action.")
+            return redirect(get_redirect_target())
+        return super().delete_view()
+
+    @expose('/action/', methods=('POST',))
+    def action_view(self):
+        if not current_user.superuser:
+            flash("Only superusers may perform this action.")
+            return redirect(get_redirect_target())
+        return super().action_view()
 
 
 class UserModelView(AdminModelView):
