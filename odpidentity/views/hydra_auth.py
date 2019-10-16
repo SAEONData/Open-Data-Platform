@@ -95,13 +95,14 @@ def consent():
         user_id = consent_request['subject']
         user = User.query.get(user_id)
 
-        redirect_to = hydra_admin.accept_consent_request(
-            challenge,
-            grant_scope=consent_request['requested_scope'],
-            grant_audience=consent_request['requested_access_token_audience'],
-            access_token_data=access_token_data(user),
-            id_token_data=id_token_data(user),
-        )
+        consent_params = {
+            'grant_scope': consent_request['requested_scope'],
+            'grant_audience': consent_request['requested_access_token_audience'],
+            'access_token_data': access_token_data(user, consent_request['requested_scope']),
+            'id_token_data': id_token_data(user),
+        }
+        redirect_to = hydra_admin.accept_consent_request(challenge, **consent_params)
+
         return redirect(redirect_to)
 
     except HydraAdminError as e:

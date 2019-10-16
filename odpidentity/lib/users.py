@@ -5,6 +5,7 @@ from ..lib import exceptions as x
 from ..models import db
 from ..models.user import User
 from ..models.privilege import Privilege
+from ..models.scope import Scope
 
 ph = argon2.PasswordHasher()
 
@@ -162,11 +163,27 @@ def id_token_data(user):
     return {'email': user.email}
 
 
-def access_token_data(user):
+def access_token_data(user, scopes):
     """
     Construct a dict of items to put in an access token for this user.
+    This is structured as follows::
+        {
+            'superuser': True/False,
+            'privileges': [{
+                'institution': institution code,
+                'institution_name': institution name,
+                'role': role code,
+                'role_name': role name,
+                'scope': scope code,
+            }, ...]
+        }
+
+    Privileges are filtered to include only those applicable to the requested scopes.
+    If the user is a superuser, privileges will be an empty list, since a superuser
+    can do anything anyway.
 
     :param user: a User instance
+    :param scopes: list of scopes being requested for the token
     :return: dict
     """
     access_info = {
@@ -174,11 +191,15 @@ def access_token_data(user):
         'privileges': [],
     }
     if not user.superuser:
-        privileges = Privilege.query.filter_by(user_id=user.id).all()
+        privileges = Privilege.query.filter_by(user_id=user.id) \
+            .join(Scope, Privilege.scope_id == Scope.id).filter(Scope.code.in_(scopes)) \
+            .all()
         for privilege in privileges:
             access_info['privileges'] += [{
                 'institution': privilege.institution.code,
-                'scope': privilege.scope.code,
+                'institution_name': privilege.institution.name,
                 'role': privilege.role.code,
+                'role_name': privilege.role.name,
+                'scope': privilege.scope.code,
             }]
     return access_info
