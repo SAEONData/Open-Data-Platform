@@ -10,7 +10,7 @@ class HydraAdminClient:
     def __init__(self, server_url: str,
                  verify_tls: bool = True,
                  timeout: float = 5.0,
-                 remember_login_for: int = 30,
+                 remember_login_for: int = 30 * 86400,  # 30 days
                  remember_consent_for: int = 0,
                  ):
         """
@@ -19,8 +19,8 @@ class HydraAdminClient:
         :param server_url: the base URL of the Hydra admin API
         :param verify_tls: whether to verify the Hydra server TLS certificate
         :param timeout: how long to wait for data from Hydra (seconds)
-        :param remember_login_for: number of days to remember a successful login; 0 = remember indefinitely
-        :param remember_consent_for: number of days to remember a successful consent; 0 = remember indefinitely
+        :param remember_login_for: number of seconds to remember a successful login; 0 = remember indefinitely
+        :param remember_consent_for: number of seconds to remember a successful consent; 0 = remember indefinitely
         """
         self.server_url = server_url
         self.verify_tls = verify_tls
@@ -57,7 +57,7 @@ class HydraAdminClient:
                           json={
                               'subject': user_id,
                               'remember': True,
-                              'remember_for': self.remember_login_for * 24 * 3600,
+                              'remember_for': self.remember_login_for,
                           })
         return r['redirect_to']
 
@@ -117,7 +117,7 @@ class HydraAdminClient:
                               'grant_scope': grant_scope,
                               'grant_access_token_audience': grant_audience,
                               'remember': True,
-                              'remember_for': self.remember_consent_for * 24 * 3600,
+                              'remember_for': self.remember_consent_for,
                               'session': {
                                   'access_token': access_token_data,
                                   'id_token': id_token_data,
