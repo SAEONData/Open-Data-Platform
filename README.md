@@ -69,6 +69,7 @@ Settings pertaining to integration with Hydra's login, consent and logout flows,
 plays the role of identity provider:
 
 * HYDRA_ADMIN_URL: URL of the Hydra admin API
+* HYDRA_LOGIN_EXPIRY: number of seconds to remember a successful login
 
 #### Hydra client config
 

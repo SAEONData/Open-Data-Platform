@@ -10,6 +10,17 @@ from ..lib import exceptions as x
 bp = Blueprint('auth', __name__)
 
 
+def create_hydra_admin():
+    """
+    Returns a HydraAdminClient instance.
+    """
+    return HydraAdminClient(
+        server_url=current_app.config['HYDRA_ADMIN_URL'],
+        remember_login_for=current_app.config['HYDRA_LOGIN_EXPIRY'],
+        verify_tls=get_env() != 'development',
+    )
+
+
 def hydra_error(e):
     """
     Requests to the Hydra admin API are critical to the login, consent and logout flows.
@@ -29,10 +40,7 @@ def login():
     Redirected here from Hydra as part of the login flow.
     """
     try:
-        hydra_admin = HydraAdminClient(
-            server_url=current_app.config['HYDRA_ADMIN_URL'],
-            verify_tls=get_env() != 'development',
-        )
+        hydra_admin = create_hydra_admin()
         user_id = None
         error = None
         form = None
@@ -86,10 +94,7 @@ def consent():
     Redirected here from Hydra as part of the consent flow.
     """
     try:
-        hydra_admin = HydraAdminClient(
-            server_url=current_app.config['HYDRA_ADMIN_URL'],
-            verify_tls=get_env() != 'development',
-        )
+        hydra_admin = create_hydra_admin()
         challenge = request.args.get('consent_challenge')
         consent_request = hydra_admin.get_consent_request(challenge)
         user_id = consent_request['subject']
@@ -115,10 +120,7 @@ def logout():
     Redirected here from Hydra as part of the logout flow.
     """
     try:
-        hydra_admin = HydraAdminClient(
-            server_url=current_app.config['HYDRA_ADMIN_URL'],
-            verify_tls=get_env() != 'development',
-        )
+        hydra_admin = create_hydra_admin()
         challenge = request.args.get('logout_challenge')
         logout_request = hydra_admin.get_logout_request(challenge)
         redirect_to = hydra_admin.accept_logout_request(challenge)
