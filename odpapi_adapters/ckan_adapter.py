@@ -1,15 +1,14 @@
 from typing import List
 import re
 import json
-import os
 
-from pydantic import BaseModel, UrlStr
+from pydantic import UrlStr
 from requests import RequestException
 from fastapi import HTTPException
 import ckanapi
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_503_SERVICE_UNAVAILABLE
 
-from odp.lib.adapters import ODPAPIAdapter
+from odp.lib.adapters import ODPAPIAdapter, ODPAPIAdapterConfig
 from odp.lib.common import PagerParams
 from odp.lib.metadata import MetadataRecordsFilter, DOI_REGEX
 from odp.models.institution import (
@@ -33,28 +32,25 @@ OBJECT_NAME_SUFFIXES = {
 }
 
 
-class CKANAdapterConfig(BaseModel):
-    ckan_url: UrlStr = None
-    use_apikey: bool = False
+class CKANAdapterConfig(ODPAPIAdapterConfig):
+    """
+    Config for the CKAN adapter, populated from the environment.
+    """
+    CKAN_URL: UrlStr
+
+    class Config:
+        env_prefix = 'CKAN_ADAPTER.'
 
 
 class CKANAdapter(ODPAPIAdapter):
-
-    def __init__(self, app, routes, **config):
-        super().__init__(app, routes, **config)
-        config = CKANAdapterConfig(**config)
-        # the environment variable CKAN_URL will override the local config
-        self.ckan_url = os.getenv('CKAN_URL') or config.ckan_url
-        self.use_apikey = config.use_apikey
 
     def _call_ckan(self, action, access_token, **kwargs):
         """
         Call a CKAN API action function.
 
-        For certain development/internal scenarios:
-        A CKAN API key may be provided instead of an access token if the CKANAdapter's ``config.use_apikey``
-        option has been set to ``True``. Note: this will only work if the ``security.no_access_token_validation``
-        config option has also been set to ``True``.
+        For development/internal usage:
+        If the NO_AUTH environment variable has been set to ``True``, we assume that the access_token
+        parameter contains a CKAN API key instead of an access token.
 
         :param action: CKAN action function name
         :param access_token: the access token string to be forwarded to CKAN in the Authorization header
@@ -62,12 +58,12 @@ class CKANAdapter(ODPAPIAdapter):
         :returns: the response dictionary / value returned from CKAN
         :raises HTTPException
         """
-        if self.use_apikey:
-            authorization_header = access_token
+        if self.app_config.NO_AUTH:
+            authorization_header = access_token  # assume it's a CKAN API key
         else:
             authorization_header = 'Bearer ' + access_token
         try:
-            with ckanapi.RemoteCKAN(self.ckan_url) as ckan:
+            with ckanapi.RemoteCKAN(self.config.CKAN_URL) as ckan:
                 return ckan.call_action(action, data_dict=kwargs, apikey=authorization_header)
 
         except RequestException as e:
