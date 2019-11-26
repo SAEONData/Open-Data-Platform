@@ -2,8 +2,6 @@ import pkg_resources
 
 from fastapi import FastAPI
 import uvicorn
-from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
-from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from odp.routers import metadata, institution
 from odp.config import read_config
@@ -32,10 +30,6 @@ app.include_router(
     prefix='/metadata',
     tags=['Metadata'],
 )
-
-# TODO add security middlewares
-# app.add_middleware(HTTPSRedirectMiddleware)
-# app.add_middleware(TrustedHostMiddleware, allowed_hosts=['odpapi.saeon.ac.za'])
 
 
 if __name__ == '__main__':
