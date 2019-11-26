@@ -14,6 +14,9 @@ class ServerEnv(str, Enum):
 
 
 class Config(BaseSettings):
+    """
+    Application config, populated from the environment.
+    """
     SERVER_ENV: ServerEnv
     SERVER_HOST: Union[IPvAnyAddress, constr(regex=HOSTNAME_REGEX)]
     SERVER_PORT: int
