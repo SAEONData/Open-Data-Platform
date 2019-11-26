@@ -17,8 +17,8 @@ class HydraAuth(HTTPBearer):
         Validate and return the access token that was supplied in the Authorization header.
         :return: str
         """
-        config = request.app.extra['config'].security
-        validate_token = not config.no_access_token_validation
+        config = request.app.extra['config']
+        validate_token = not config.NO_AUTH
 
         auth_credentials = await super().__call__(request)
         access_token = auth_credentials.credentials
@@ -26,10 +26,10 @@ class HydraAuth(HTTPBearer):
         if validate_token:
             try:
                 hydra_admin = HydraAdminClient(
-                    server_url=config.hydra_admin_url,
-                    verify_tls=not config.hydra_dev_server,
+                    server_url=config.HYDRA_ADMIN_URL,
+                    verify_tls=config.SERVER_ENV != 'development',
                 )
-                hydra_admin.introspect_token(access_token, self.required_scopes, [config.oauth2_audience])
+                hydra_admin.introspect_token(access_token, self.required_scopes, [config.OAUTH2_AUDIENCE])
             except HydraAdminError as e:
                 raise HTTPException(status_code=e.status_code, detail=e.error_detail)
 

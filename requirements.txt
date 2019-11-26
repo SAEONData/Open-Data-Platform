@@ -1,4 +1,4 @@
 fastapi
 uvicorn
-pyyaml
 hydra-admin-client
+python-dotenv

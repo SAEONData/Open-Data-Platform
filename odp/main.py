@@ -2,19 +2,19 @@ import pkg_resources
 
 from fastapi import FastAPI
 import uvicorn
+from dotenv import load_dotenv
 
 from odp.routers import metadata, institution
-from odp.config import read_config
+from odp.config import Config
 from odp.lib import adapters
 
-
-config = read_config()
+load_dotenv()
 
 app = FastAPI(
     title="ODP API",
     description="The Open Data Platform API",
     version=pkg_resources.require('odp-api')[0].version,
-    config=config,
+    config=Config(),
 )
 
 adapters.load_adapters(app)
@@ -33,4 +33,4 @@ app.include_router(
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host=str(config.server.host), port=config.server.port)
+    uvicorn.run(app, host=app.extra['config'].SERVER_HOST, port=app.extra['config'].SERVER_PORT)

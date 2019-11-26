@@ -1,60 +1,36 @@
-import pkg_resources
-from typing import List, Dict, Any, Union
+from typing import Union, Optional
 from enum import Enum
 
-import yaml
-from pydantic import BaseModel, IPvAnyAddress, UrlStr, constr
+from pydantic import BaseSettings, IPvAnyAddress, UrlStr, constr, validator
 
-
-CONFIG_FILE = pkg_resources.resource_filename(__name__, '../config.yml')
 HOSTNAME_REGEX = r'^\w+(\.\w+)+$'
 
 
-class RunEnviron(str, Enum):
+class ServerEnv(str, Enum):
     development = 'development'
     test = 'test'
     staging = 'staging'
     production = 'production'
 
 
-class ServerConfig(BaseModel):
-    """
-    ASGI server config.
-    """
-    host: Union[IPvAnyAddress, constr(regex=HOSTNAME_REGEX)]
-    port: int
+class Config(BaseSettings):
+    SERVER_ENV: ServerEnv
+    SERVER_HOST: Union[IPvAnyAddress, constr(regex=HOSTNAME_REGEX)]
+    SERVER_PORT: int
 
+    NO_AUTH: Optional[bool]
+    HYDRA_ADMIN_URL: Optional[UrlStr]
+    OAUTH2_AUDIENCE: Optional[str]
 
-class SecurityConfig(BaseModel):
-    """
-    Security-related config.
-    """
-    hydra_admin_url: UrlStr
-    hydra_dev_server: bool = False
-    oauth2_audience: str
-    no_access_token_validation: bool = False
+    @validator('NO_AUTH', pre=True, always=True)
+    def validate_no_auth(cls, value):
+        return value
 
+    @validator('HYDRA_ADMIN_URL', 'OAUTH2_AUDIENCE', always=True)
+    def require_auth_settings(cls, value, values):
+        if not values.get('NO_AUTH', False) and not value:
+            raise ValueError("Value is required if NO_AUTH is False")
+        return value
 
-class AdapterConfig(BaseModel):
-    """
-    Config for an individual adapter.
-    """
-    name: str
-    routes: List[str]
-    config: Dict[str, Any] = {}
-
-
-class AppConfig(BaseModel):
-    """
-    Top-level config container class.
-    """
-    environment: RunEnviron
-    server: ServerConfig
-    security: SecurityConfig
-    adapters: List[AdapterConfig]
-
-
-def read_config():
-    with open(CONFIG_FILE, 'r') as f:
-        config = AppConfig(**yaml.safe_load(f))
-    return config
+    class Config:
+        env_prefix = ''
