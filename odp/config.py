@@ -1,9 +1,7 @@
-from typing import Union, Optional
+from typing import Optional
 from enum import Enum
 
-from pydantic import BaseSettings, IPvAnyAddress, UrlStr, constr, validator
-
-HOSTNAME_REGEX = r'^\w+(\.\w+)+$'
+from pydantic import BaseSettings, UrlStr, validator
 
 
 class ServerEnv(str, Enum):
@@ -18,7 +16,7 @@ class Config(BaseSettings):
     Application config, populated from the environment.
     """
     SERVER_ENV: ServerEnv
-    SERVER_HOST: Union[IPvAnyAddress, constr(regex=HOSTNAME_REGEX)]
+    SERVER_HOST: str
     SERVER_PORT: int
 
     NO_AUTH: Optional[bool]
