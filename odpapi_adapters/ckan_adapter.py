@@ -64,7 +64,8 @@ class CKANAdapter(ODPAPIAdapter):
             authorization_header = 'Bearer ' + access_token
         try:
             with ckanapi.RemoteCKAN(self.config.CKAN_URL) as ckan:
-                return ckan.call_action(action, data_dict=kwargs, apikey=authorization_header)
+                return ckan.call_action(action, data_dict=kwargs, apikey=authorization_header,
+                                        requests_kwargs={'verify': self.app_config.SERVER_ENV != 'development'})
 
         except RequestException as e:
             raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail="Error sending request to CKAN: {}".format(e))
