@@ -10,7 +10,7 @@ setup(
     author='Mark Jacobson',
     author_email='mark@saeon.ac.za',
     license='MIT',
-    packages=[],
+    packages=['odpapi_adapters'],
     install_requires=[
         # use requirements.txt
     ],
