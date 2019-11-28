@@ -19,11 +19,11 @@ app = FastAPI(
 
 adapters.load_adapters(app)
 
-app.include_router(
-    institution.router,
-    prefix='/institutions',
-    tags=['Institutions'],
-)
+# app.include_router(
+#     institution.router,
+#     prefix='/institutions',
+#     tags=['Institutions'],
+# )
 
 app.include_router(
     metadata.router,
