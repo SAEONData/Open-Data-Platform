@@ -10,7 +10,7 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_
 
 from odp.lib.adapters import ODPAPIAdapter, ODPAPIAdapterConfig
 from odp.lib.common import PagerParams
-from odp.lib.metadata import MetadataRecordsFilter, DOI_REGEX
+from odp.lib.metadata import MetadataRecordsFilter
 from odp.models.institution import (
     Institution,
     InstitutionIn,
@@ -19,7 +19,6 @@ from odp.models.institution import (
 from odp.models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
-    MetadataRecordOut,
     MetadataValidationResult,
     MetadataWorkflowResult,
 )
@@ -162,11 +161,12 @@ class CKANAdapter(ODPAPIAdapter):
         """
         return MetadataRecord(
             institution=ckan_record['owner_org'],
+            collection=ckan_record['metadata_collection_id'],
             metadata_standard=ckan_record['metadata_standard_id'],
             metadata=ckan_record['metadata_json'],
             infrastructures=[inf_dict['id'] for inf_dict in ckan_record['infrastructures']],
             id=ckan_record['id'],
-            doi=ckan_record['name'] if re.match(DOI_REGEX, ckan_record['name']) else None,
+            doi=ckan_record['doi'],
             state=ckan_record['state'],
             errors=ckan_record['errors'],
             validated=ckan_record['validated'],
@@ -187,6 +187,8 @@ class CKANAdapter(ODPAPIAdapter):
             'infrastructures': [{'id': inf_id} for inf_id in metadata_record.infrastructures],
             'metadata_standard_id': metadata_record.metadata_standard,
             'metadata_json': json.dumps(metadata_record.metadata),
+            'doi': metadata_record.doi,
+            'auto_assign_doi': metadata_record.auto_assign_doi,
         }
 
     def list_metadata_records(self, filter: MetadataRecordsFilter, pager: PagerParams, access_token: str) -> List[MetadataRecord]:
@@ -202,16 +204,16 @@ class CKANAdapter(ODPAPIAdapter):
         )
         return [self._translate_from_ckan_record(record) for record in ckan_record_list]
 
-    def get_metadata_record(self, id_or_doi: str, access_token: str) -> MetadataRecord:
+    def get_metadata_record(self, id: str, access_token: str) -> MetadataRecord:
         ckan_record = self._call_ckan(
             'metadata_record_show',
             access_token,
-            id=id_or_doi,
+            id=id,
             deserialize_json=True,
         )
         return self._translate_from_ckan_record(ckan_record)
 
-    def create_or_update_metadata_record(self, metadata_record: MetadataRecordIn, access_token: str) -> MetadataRecordOut:
+    def create_or_update_metadata_record(self, metadata_record: MetadataRecordIn, access_token: str) -> MetadataRecord:
         input_dict = self._translate_to_ckan_record(metadata_record, access_token)
         ckan_record = self._call_ckan(
             'metadata_record_create',
@@ -233,12 +235,12 @@ class CKANAdapter(ODPAPIAdapter):
 
         return self._translate_from_ckan_record(ckan_record)
 
-    def update_metadata_record(self, id_or_doi: str, metadata_record: MetadataRecordIn, access_token: str) -> MetadataRecordOut:
+    def update_metadata_record(self, id: str, metadata_record: MetadataRecordIn, access_token: str) -> MetadataRecord:
         input_dict = self._translate_to_ckan_record(metadata_record, access_token)
         ckan_record = self._call_ckan(
             'metadata_record_update',
             access_token,
-            id=id_or_doi,
+            id=id,
             deserialize_json=True,
             **input_dict,
         )
@@ -256,19 +258,19 @@ class CKANAdapter(ODPAPIAdapter):
 
         return self._translate_from_ckan_record(ckan_record)
 
-    def delete_metadata_record(self, id_or_doi: str, access_token: str) -> bool:
+    def delete_metadata_record(self, id: str, access_token: str) -> bool:
         self._call_ckan(
             'metadata_record_delete',
             access_token,
-            id=id_or_doi,
+            id=id,
         )
         return True
 
-    def validate_metadata_record(self, id_or_doi: str, access_token: str) -> MetadataValidationResult:
+    def validate_metadata_record(self, id: str, access_token: str) -> MetadataValidationResult:
         validation_activity_record = self._call_ckan(
             'metadata_record_validate',
             access_token,
-            id=id_or_doi,
+            id=id,
         )
         validation_results = validation_activity_record['data']['results']
         validation_errors = {}
@@ -280,11 +282,11 @@ class CKANAdapter(ODPAPIAdapter):
             errors=validation_errors,
         )
 
-    def set_workflow_state_of_metadata_record(self, id_or_doi: str, workflow_state: str, access_token: str) -> MetadataWorkflowResult:
+    def set_workflow_state_of_metadata_record(self, id: str, workflow_state: str, access_token: str) -> MetadataWorkflowResult:
         workflow_activity_record = self._call_ckan(
             'metadata_record_workflow_state_transition',
             access_token,
-            id=id_or_doi,
+            id=id,
             workflow_state_id=workflow_state,
         )
         workflow_errors = workflow_activity_record['data']['errors']
