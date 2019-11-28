@@ -6,7 +6,7 @@ from ..lib.metadata import DOI_REGEX
 
 class MetadataRecordIn(BaseModel):
     institution: str
-    collection: str = Schema(None, description="If not specified, the institution's default metadata collection will be used.")
+    collection: str
     metadata_standard: str
     metadata: Dict
     infrastructures: Set[str]
