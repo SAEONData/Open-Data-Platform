@@ -177,13 +177,9 @@ class CKANAdapter(ODPAPIAdapter):
         """
         Convert a MetadataRecordIn object into a CKAN metadata record dict.
         """
-        collection_name = metadata_record.collection
-        if collection_name is None:
-            institution_dict = self.get_institution(metadata_record.institution, access_token)
-            collection_name = institution_dict['name'] + OBJECT_NAME_SUFFIXES['metadata_collection']
         return {
             'owner_org': metadata_record.institution,
-            'metadata_collection_id': collection_name,
+            'metadata_collection_id': metadata_record.collection,
             'infrastructures': [{'id': inf_id} for inf_id in metadata_record.infrastructures],
             'metadata_standard_id': metadata_record.metadata_standard,
             'metadata_json': json.dumps(metadata_record.metadata),
