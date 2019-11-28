@@ -1,4 +1,4 @@
-from typing import Set, Dict
+from typing import Set, Dict, Optional
 from pydantic import BaseModel, Schema, UUID4
 
 from ..lib.metadata import DOI_REGEX
@@ -10,19 +10,22 @@ class MetadataRecordIn(BaseModel):
     metadata_standard: str
     metadata: Dict
     infrastructures: Set[str]
+    doi: str = Schema('', regex=DOI_REGEX)
+    auto_assign_doi: bool = False
 
 
-class MetadataRecordOut(BaseModel):
+class MetadataRecord(BaseModel):
     id: UUID4
-    doi: str = Schema(None, regex=DOI_REGEX)
+    doi: str
+    institution: str
+    collection: str
+    metadata_standard: str
+    metadata: Dict
+    infrastructures: Set[str]
     state: str
     errors: Dict
     validated: bool
-    workflow_state: str = None
-
-
-class MetadataRecord(MetadataRecordIn, MetadataRecordOut):
-    pass
+    workflow_state: Optional[str]
 
 
 class MetadataValidationResult(BaseModel):
