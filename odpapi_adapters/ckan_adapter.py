@@ -166,6 +166,7 @@ class CKANAdapter(ODPAPIAdapter):
             metadata=ckan_record['metadata_json'],
             infrastructures=[inf_dict['id'] for inf_dict in ckan_record['infrastructures']],
             id=ckan_record['id'],
+            pid=ckan_record['name'] if ckan_record['name'] != ckan_record['id'] else None,
             doi=ckan_record['doi'],
             state=ckan_record['state'],
             errors=ckan_record['errors'],
