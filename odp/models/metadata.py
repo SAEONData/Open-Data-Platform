@@ -16,6 +16,7 @@ class MetadataRecordIn(BaseModel):
 
 class MetadataRecord(BaseModel):
     id: UUID4
+    pid: Optional[str]
     doi: str
     institution: str
     collection: str
