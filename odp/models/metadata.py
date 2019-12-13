@@ -9,7 +9,6 @@ class MetadataRecordIn(BaseModel):
     collection: str
     metadata_standard: str
     metadata: Dict
-    infrastructures: Set[str]
     doi: str = Schema('', regex=DOI_REGEX)
     auto_assign_doi: bool = False
 
@@ -22,7 +21,6 @@ class MetadataRecord(BaseModel):
     collection: str
     metadata_standard: str
     metadata: Dict
-    infrastructures: Set[str]
     state: str
     errors: Dict
     validated: bool
