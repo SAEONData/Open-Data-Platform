@@ -164,7 +164,6 @@ class CKANAdapter(ODPAPIAdapter):
             collection=ckan_record['metadata_collection_id'],
             metadata_standard=ckan_record['metadata_standard_id'],
             metadata=ckan_record['metadata_json'],
-            infrastructures=[inf_dict['id'] for inf_dict in ckan_record['infrastructures']],
             id=ckan_record['id'],
             pid=ckan_record['name'] if ckan_record['name'] != ckan_record['id'] else None,
             doi=ckan_record['doi'],
@@ -181,7 +180,6 @@ class CKANAdapter(ODPAPIAdapter):
         return {
             'owner_org': metadata_record.institution,
             'metadata_collection_id': metadata_record.collection,
-            'infrastructures': [{'id': inf_id} for inf_id in metadata_record.infrastructures],
             'metadata_standard_id': metadata_record.metadata_standard,
             'metadata_json': json.dumps(metadata_record.metadata),
             'doi': metadata_record.doi,
