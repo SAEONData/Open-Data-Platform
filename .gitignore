@@ -6,8 +6,5 @@ htmlcov/
 build/
 *.egg-info/
 .idea/
-*.log
-*.ini
-*.yml
 .env
 virtualenv/
