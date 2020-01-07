@@ -1,13 +1,13 @@
 from flask_login import LoginManager
 from flask_admin import Admin
 
-from ..models import db_session
-from ..models.user import User
-from ..models.role import Role
-from ..models.member import Member
-from ..models.scope import Scope
-from ..models.institution import Institution
-from ..models.institution_registry import InstitutionRegistry
+from odpaccounts.db import session as db_session
+from odpaccounts.models.user import User
+from odpaccounts.models.role import Role
+from odpaccounts.models.member import Member
+from odpaccounts.models.scope import Scope
+from odpaccounts.models.institution import Institution
+from odpaccounts.models.institution_registry import InstitutionRegistry
 
 login_manager = LoginManager()
 login_manager.login_view = 'hydra.login'

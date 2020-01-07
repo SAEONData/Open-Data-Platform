@@ -1,13 +1,13 @@
-hydra-client-blueprint
-hydra-admin-client
-
 flask
 flask-admin
 flask-login
 flask-wtf
 
 python-dotenv
-psycopg2
 click
 wtforms
 argon2_cffi
+
+odp-accountslib
+hydra-client-blueprint
+hydra-admin-client

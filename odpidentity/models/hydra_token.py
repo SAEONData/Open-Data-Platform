@@ -1,6 +1,6 @@
 from hydra_client import HydraTokenMixin
 
-from . import Base
+from odpaccounts.models import Base
 
 
 class HydraToken(HydraTokenMixin, Base):

@@ -2,8 +2,9 @@ from flask import Blueprint, request, render_template, redirect, abort, current_
 from flask.helpers import get_env
 from hydra import HydraAdminClient, HydraAdminError
 
-from ..models import db_session
-from ..models.user import User
+from odpaccounts.db import session as db_session
+from odpaccounts.models.user import User
+
 from ..forms.login import LoginForm
 from ..lib.users import validate_auto_login, id_token_data, access_token_data
 from ..lib import exceptions as x

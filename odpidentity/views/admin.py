@@ -8,14 +8,14 @@ from flask_admin.model.helpers import get_mdict_item_or_list
 from flask_login import current_user
 from wtforms import StringField
 
-from ..models import db_session
-from ..models.user import User
-from ..models.role import Role
-from ..models.capability import Capability
-from ..models.scope import Scope
-from ..models.institution import Institution
-from ..models.institution_registry import InstitutionRegistry
-from ..models.privilege import Privilege
+from odpaccounts.db import session as db_session
+from odpaccounts.models.user import User
+from odpaccounts.models.role import Role
+from odpaccounts.models.capability import Capability
+from odpaccounts.models.scope import Scope
+from odpaccounts.models.institution import Institution
+from odpaccounts.models.institution_registry import InstitutionRegistry
+from odpaccounts.models.privilege import Privilege
 
 
 def _can_access_admin_views():
