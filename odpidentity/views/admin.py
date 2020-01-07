@@ -8,7 +8,7 @@ from flask_admin.model.helpers import get_mdict_item_or_list
 from flask_login import current_user
 from wtforms import StringField
 
-from ..models import db
+from ..models import db_session
 from ..models.user import User
 from ..models.role import Role
 from ..models.capability import Capability
@@ -30,7 +30,7 @@ def _can_access_admin_views():
         return True
 
     # TODO: cache the result of this query; it's called repeatedly
-    admin_privilege = Privilege.query.filter_by(user_id=current_user.id) \
+    admin_privilege = db_session.query(Privilege).filter_by(user_id=current_user.id) \
         .join(Institution, Privilege.institution_id == Institution.id).filter_by(code=current_app.config['ADMIN_INSTITUTION']) \
         .join(Role, Privilege.role_id == Role.id).filter_by(code=current_app.config['ADMIN_ROLE']) \
         .join(Scope, Privilege.scope_id == Scope.id).filter_by(code=current_app.config['ADMIN_SCOPE']) \
@@ -129,7 +129,7 @@ class UserModelView(AdminModelView):
     form_args = {
         'institutions': dict(
             get_label='name',
-            query_factory=lambda: Institution.query.order_by('name'),
+            query_factory=lambda: db_session.query(Institution).order_by('name'),
         )
     }
     edit_template = 'user_edit.html'
@@ -138,7 +138,7 @@ class UserModelView(AdminModelView):
     def edit_view(self):
         id = get_mdict_item_or_list(request.args, 'id')
         if id is not None:
-            user = User.query.get(id)
+            user = db_session.query(User).get(id)
             if user and user.superuser and not current_user.superuser:
                 flash("Only superusers may perform this action.")
                 return redirect(get_redirect_target())
@@ -148,7 +148,7 @@ class UserModelView(AdminModelView):
     def delete_view(self):
         id = request.form.get('id')
         if id is not None:
-            user = User.query.get(id)
+            user = db_session.query(User).get(id)
             if user and user.superuser and not current_user.superuser:
                 flash("Only superusers may perform this action.")
                 return redirect(get_redirect_target())
@@ -176,7 +176,7 @@ class MemberModelView(AdminModelView):
     form_args = {
         'capabilities': dict(
             get_label='label',
-            query_factory=lambda: db.session.query(Capability).join(Scope).join(Role).order_by(Scope.code, Role.name),
+            query_factory=lambda: db_session.query(Capability).join(Scope).join(Role).order_by(Scope.code, Role.name),
         )
     }
     edit_template = 'member_edit.html'
@@ -203,15 +203,15 @@ class InstitutionModelView(AdminModelView):
     form_args = {
         'registry': dict(
             get_label='name',
-            query_factory=lambda: InstitutionRegistry.query.order_by('name'),
+            query_factory=lambda: db_session.query(InstitutionRegistry).order_by('name'),
         ),
         'parent': dict(
             get_label='name',
-            query_factory=lambda: Institution.query.order_by('name'),
+            query_factory=lambda: db_session.query(Institution).order_by('name'),
         ),
         'users': dict(
             get_label='email',
-            query_factory=lambda: User.query.order_by('email'),
+            query_factory=lambda: db_session.query(User).order_by('email'),
         ),
     }
     create_template = 'institution_create.html'
@@ -235,7 +235,7 @@ class RoleModelView(SysAdminModelView):
     form_args = {
         'scopes': dict(
             get_label='code',
-            query_factory=lambda: Scope.query.order_by('code'),
+            query_factory=lambda: db_session.query(Scope).order_by('code'),
         )
     }
     create_template = 'role_create.html'
@@ -259,7 +259,7 @@ class ScopeModelView(SysAdminModelView):
         ),
         'roles': dict(
             get_label='name',
-            query_factory=lambda: Role.query.order_by('name'),
+            query_factory=lambda: db_session.query(Role).order_by('name'),
         )
     }
     create_template = 'scope_create.html'

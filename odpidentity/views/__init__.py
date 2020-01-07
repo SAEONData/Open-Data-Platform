@@ -1,7 +1,7 @@
 from flask_login import LoginManager
 from flask_admin import Admin
 
-from ..models import db
+from ..models import db_session
 from ..models.user import User
 from ..models.role import Role
 from ..models.member import Member
@@ -15,7 +15,7 @@ login_manager.login_view = 'hydra.login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(user_id)
+    return db_session.query(User).get(user_id)
 
 
 def init_app(app):
@@ -30,34 +30,34 @@ def init_app(app):
     # set up admin views
     home = admin.AdminHomeView()
     users = admin.UserModelView(
-        User, db.session,
+        User, db_session,
         name='Users',
         endpoint='users',
     )
     privileges = admin.MemberModelView(
-        Member, db.session,
+        Member, db_session,
         name='Privileges',
         endpoint='privileges',
     )
     institutions = admin.InstitutionModelView(
-        Institution, db.session,
+        Institution, db_session,
         name='Institutions',
         endpoint='institutions',
     )
     roles = admin.RoleModelView(
-        Role, db.session,
+        Role, db_session,
         name='Roles',
         category='System Configuration',
         endpoint='roles',
     )
     scopes = admin.ScopeModelView(
-        Scope, db.session,
+        Scope, db_session,
         name='Scopes',
         category='System Configuration',
         endpoint='scopes',
     )
     institution_registries = admin.InstitutionRegistryModelView(
-        InstitutionRegistry, db.session,
+        InstitutionRegistry, db_session,
         name='Institution Registries',
         category='System Configuration',
         endpoint='registries',

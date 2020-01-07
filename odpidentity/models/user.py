@@ -1,23 +1,26 @@
 import uuid
 
 from flask_login import UserMixin
+from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from . import db
+from . import Base
 from .member import Member
 
 
-class User(UserMixin, db.Model):
+class User(UserMixin, Base):
     """
     Model representing a user account.
     """
-    id = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    email = db.Column(db.String, unique=True, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    superuser = db.Column(db.Boolean, nullable=False)
-    active = db.Column(db.Boolean, nullable=False)
-    confirmed_at = db.Column(db.DateTime)
+    __tablename__ = 'user'
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    email = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+    superuser = Column(Boolean, nullable=False)
+    active = Column(Boolean, nullable=False)
+    confirmed_at = Column(DateTime)
 
     # many-to-many relationship between institution and user represented by member
     members = relationship('Member',

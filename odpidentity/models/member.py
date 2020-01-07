@@ -1,21 +1,24 @@
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from . import db
+from . import Base
 from .privilege import Privilege
 
 
-class Member(db.Model):
+class Member(Base):
     """
     Model of an institution-user many-to-many relationship, representing
     a user's membership of an institution.
     """
-    # disallow deleting of an institution if it has any members
-    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id', ondelete='RESTRICT'), primary_key=True)
-    user_id = db.Column(db.String, db.ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
+    __tablename__ = 'member'
 
-    institution = db.relationship('Institution', back_populates='members')
-    user = db.relationship('User', back_populates='members')
+    # disallow deleting of an institution if it has any members
+    institution_id = Column(Integer, ForeignKey('institution.id', ondelete='RESTRICT'), primary_key=True)
+    user_id = Column(String, ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
+
+    institution = relationship('Institution', back_populates='members')
+    user = relationship('User', back_populates='members')
 
     # many-to-many relationship between member and capability represented by privilege
     privileges = relationship('Privilege',

@@ -2,6 +2,7 @@ from flask import Blueprint, request, render_template, redirect, abort, current_
 from flask.helpers import get_env
 from hydra import HydraAdminClient, HydraAdminError
 
+from ..models import db_session
 from ..models.user import User
 from ..forms.login import LoginForm
 from ..lib.users import validate_auto_login, id_token_data, access_token_data
@@ -98,7 +99,7 @@ def consent():
         challenge = request.args.get('consent_challenge')
         consent_request = hydra_admin.get_consent_request(challenge)
         user_id = consent_request['subject']
-        user = User.query.get(user_id)
+        user = db_session.query(User).get(user_id)
 
         consent_params = {
             'grant_scope': consent_request['requested_scope'],

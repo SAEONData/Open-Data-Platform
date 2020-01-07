@@ -1,17 +1,20 @@
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from . import db
+from . import Base
 from .capability import Capability
 
 
-class Role(db.Model):
+class Role(Base):
     """
     Model representing a generic role.
     """
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String, unique=True, nullable=False)
-    name = db.Column(db.String, unique=True, nullable=False)
+    __tablename__ = 'role'
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String, unique=True, nullable=False)
+    name = Column(String, unique=True, nullable=False)
 
     # many-to-many relationship between scope and role represented by capability
     capabilities = relationship('Capability',

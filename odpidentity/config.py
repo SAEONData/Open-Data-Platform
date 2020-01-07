@@ -10,10 +10,6 @@ class Config:
     SERVER_NAME = os.getenv('FLASK_SERVER_NAME')
     FLASK_ADMIN_SWATCH = os.getenv('FLASK_ADMIN_SWATCH')
 
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-    SQLALCHEMY_ECHO = os.getenv('DATABASE_ECHO', '').lower() == 'true'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-
     HYDRA_ADMIN_URL = os.getenv('HYDRA_ADMIN_URL')
     HYDRA_PUBLIC_URL = os.getenv('HYDRA_PUBLIC_URL')
     HYDRA_CLIENT_ID = os.getenv('HYDRA_CLIENT_ID')

@@ -1,9 +1,9 @@
 from hydra_client import HydraTokenMixin
 
-from . import db
+from . import Base
 
 
-class HydraToken(HydraTokenMixin, db.Model):
+class HydraToken(HydraTokenMixin, Base):
     """
     Represents the OAuth token for a user logged in locally to the identity service.
     """
