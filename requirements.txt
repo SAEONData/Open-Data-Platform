@@ -3,6 +3,7 @@ flask-admin
 flask-login
 python-dotenv
 click
+wtforms
 
 odp-accountslib
 hydra-admin-client

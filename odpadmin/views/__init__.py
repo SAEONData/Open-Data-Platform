@@ -1,5 +1,5 @@
 from flask_login import LoginManager
-from flask_admin import Admin
+from flask_admin import Admin, AdminIndexView
 
 from odpaccounts.db import session as db_session
 from odpaccounts.models.user import User
@@ -24,8 +24,7 @@ def init_app(app):
     from . import hydra_client, admin
     app.register_blueprint(hydra_client.bp, url_prefix='/user')
 
-    # set up admin views
-    home = admin.AdminHomeView(
+    home = AdminIndexView(
         url='/',
     )
     users = admin.UserModelView(

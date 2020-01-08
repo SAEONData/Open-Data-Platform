@@ -1,7 +1,7 @@
 import re
 
 from flask import current_app, flash, redirect, request
-from flask_admin import AdminIndexView, expose
+from flask_admin import expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.helpers import get_mdict_item_or_list
@@ -16,26 +16,6 @@ from odpaccounts.models.scope import Scope
 from odpaccounts.models.institution import Institution
 from odpaccounts.models.institution_registry import InstitutionRegistry
 from odpaccounts.models.privilege import Privilege
-
-
-def _can_access_admin_views():
-    """
-    Determine whether the current user can access the admin views.
-    :return: bool
-    """
-    if not current_user.is_authenticated:
-        return False
-
-    if current_user.superuser:
-        return True
-
-    # TODO: cache the result of this query; it's called repeatedly
-    admin_privilege = db_session.query(Privilege).filter_by(user_id=current_user.id) \
-        .join(Institution, Privilege.institution_id == Institution.id).filter_by(code=current_app.config['ADMIN_INSTITUTION']) \
-        .join(Role, Privilege.role_id == Role.id).filter_by(code=current_app.config['ADMIN_ROLE']) \
-        .join(Scope, Privilege.scope_id == Scope.id).filter_by(code=current_app.config['ADMIN_SCOPE']) \
-        .one_or_none()
-    return admin_privilege is not None
 
 
 class CodeField(StringField):
@@ -58,14 +38,6 @@ class CodeField(StringField):
             self.raw_data = [code]
 
 
-class AdminHomeView(AdminIndexView):
-    """
-    Admin UI home page view.
-    """
-    def is_accessible(self):
-        return True
-
-
 class AdminModelView(ModelView):
     """
     Base view for all data models.
@@ -76,7 +48,19 @@ class AdminModelView(ModelView):
     details_template = 'admin_model_details.html'
 
     def is_accessible(self):
-        return _can_access_admin_views()
+        if not current_user.is_authenticated:
+            return False
+
+        if current_user.superuser:
+            return True
+
+        # TODO: cache the result of this query; it's called repeatedly
+        admin_privilege = db_session.query(Privilege).filter_by(user_id=current_user.id) \
+            .join(Institution, Privilege.institution_id == Institution.id).filter_by(code=current_app.config['ADMIN_INSTITUTION']) \
+            .join(Role, Privilege.role_id == Role.id).filter_by(code=current_app.config['ADMIN_ROLE']) \
+            .join(Scope, Privilege.scope_id == Scope.id).filter_by(code=current_app.config['ADMIN_SCOPE']) \
+            .one_or_none()
+        return admin_privilege is not None
 
 
 class SysAdminModelView(AdminModelView):
