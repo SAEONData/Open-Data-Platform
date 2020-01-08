@@ -1,8 +1,0 @@
-{% extends 'admin/base.html' %}
-
-{% block access_control %}
-    <ul class="nav pull-right">
-        <li><a href="{{ url_for('home.index') }}">ODP Identity</a>
-        <li><a href="{{ url_for('hydra.logout') }}">Log out</a>
-    </ul>
-{% endblock %}

@@ -11,12 +11,9 @@ class Config:
     FLASK_ADMIN_SWATCH = os.getenv('FLASK_ADMIN_SWATCH')
 
     HYDRA_ADMIN_URL = os.getenv('HYDRA_ADMIN_URL')
+    HYDRA_LOGIN_EXPIRY = int(os.getenv('HYDRA_LOGIN_EXPIRY', '86400'))
+
     HYDRA_PUBLIC_URL = os.getenv('HYDRA_PUBLIC_URL')
     HYDRA_CLIENT_ID = os.getenv('HYDRA_CLIENT_ID')
     HYDRA_CLIENT_SECRET = os.getenv('HYDRA_CLIENT_SECRET')
     HYDRA_SCOPES = os.getenv('HYDRA_SCOPES', '').split()
-    HYDRA_LOGIN_EXPIRY = int(os.getenv('HYDRA_LOGIN_EXPIRY', '86400'))
-
-    ADMIN_INSTITUTION = os.getenv('ADMIN_INSTITUTION')
-    ADMIN_ROLE = os.getenv('ADMIN_ROLE')
-    ADMIN_SCOPE = os.getenv('ADMIN_SCOPE')

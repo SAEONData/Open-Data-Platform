@@ -1,10 +1,8 @@
 flask
-flask-admin
 flask-login
 flask-wtf
 
 python-dotenv
-click
 wtforms
 argon2_cffi
 
