@@ -1,0 +1,9 @@
+flask
+flask-admin
+flask-login
+python-dotenv
+click
+
+odp-accountslib
+hydra-admin-client
+hydra-client-blueprint

@@ -1,0 +1,3 @@
+graft odpadmin/static
+graft odpadmin/templates
+global-exclude *.pyc
