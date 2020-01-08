@@ -8,7 +8,8 @@ from .base import AdminModelView
 
 class MemberModelView(AdminModelView):
     """
-    Member model view. Used for assigning capabilities to members.
+    Member model view. Used for assigning capabilities to members -
+    effectively creating/deleting privilege records.
     """
     can_create = False
     can_delete = False
