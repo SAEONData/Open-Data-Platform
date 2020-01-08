@@ -21,40 +21,40 @@ def load_user(user_id):
 def init_app(app):
     login_manager.init_app(app)
 
-    from . import hydra_client, admin
+    from . import hydra_client, user, member, institution, institution_registry, role, scope
     app.register_blueprint(hydra_client.bp, url_prefix='/user')
 
     home = AdminIndexView(
         url='/',
     )
-    users = admin.UserModelView(
+    users = user.UserModelView(
         User, db_session,
         name='Users',
         endpoint='users',
     )
-    privileges = admin.MemberModelView(
+    privileges = member.MemberModelView(
         Member, db_session,
         name='Privileges',
         endpoint='privileges',
     )
-    institutions = admin.InstitutionModelView(
+    institutions = institution.InstitutionModelView(
         Institution, db_session,
         name='Institutions',
         endpoint='institutions',
     )
-    roles = admin.RoleModelView(
+    roles = role.RoleModelView(
         Role, db_session,
         name='Roles',
         category='System Configuration',
         endpoint='roles',
     )
-    scopes = admin.ScopeModelView(
+    scopes = scope.ScopeModelView(
         Scope, db_session,
         name='Scopes',
         category='System Configuration',
         endpoint='scopes',
     )
-    institution_registries = admin.InstitutionRegistryModelView(
+    institution_registries = institution_registry.InstitutionRegistryModelView(
         InstitutionRegistry, db_session,
         name='Institution Registries',
         category='System Configuration',
