@@ -2,7 +2,11 @@
 
 {% block access_control %}
     <ul class="nav pull-right">
-        <li><a href="{{ url_for('home.index') }}">ODP Identity</a>
-        <li><a href="{{ url_for('hydra.logout') }}">Log out</a>
+        {% if current_user.is_authenticated %}
+            <li><a>Logged in as {{ current_user.email }}</a>
+            <li><a href="{{ url_for('hydra.logout') }}">Log out</a>
+        {% else %}
+            <li><a href="{{ url_for('hydra.login') }}">Log in</a>
+        {% endif %}
     </ul>
 {% endblock %}

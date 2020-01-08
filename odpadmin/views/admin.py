@@ -63,7 +63,7 @@ class AdminHomeView(AdminIndexView):
     Admin UI home page view.
     """
     def is_accessible(self):
-        return _can_access_admin_views()
+        return True
 
 
 class AdminModelView(ModelView):
