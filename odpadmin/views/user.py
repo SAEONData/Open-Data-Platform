@@ -8,7 +8,7 @@ from odpaccounts.db import session as db_session
 from odpaccounts.models.institution import Institution
 from odpaccounts.models.user import User
 
-from .admin import AdminModelView
+from .base import AdminModelView
 
 
 class UserModelView(AdminModelView):

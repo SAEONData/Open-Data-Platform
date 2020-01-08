@@ -1,7 +1,7 @@
 from odpaccounts.db import session as db_session
 from odpaccounts.models.scope import Scope
 
-from .admin import SysAdminModelView, CodeField
+from .base import SysAdminModelView, CodeField
 
 
 class RoleModelView(SysAdminModelView):

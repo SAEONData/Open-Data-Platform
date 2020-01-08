@@ -1,4 +1,4 @@
-from .admin import SysAdminModelView, CodeField
+from .base import SysAdminModelView, CodeField
 
 
 class InstitutionRegistryModelView(SysAdminModelView):

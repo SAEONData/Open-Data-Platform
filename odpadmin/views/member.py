@@ -3,7 +3,7 @@ from odpaccounts.models.capability import Capability
 from odpaccounts.models.role import Role
 from odpaccounts.models.scope import Scope
 
-from .admin import AdminModelView
+from .base import AdminModelView
 
 
 class MemberModelView(AdminModelView):

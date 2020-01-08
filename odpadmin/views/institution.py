@@ -3,7 +3,7 @@ from odpaccounts.models.institution import Institution
 from odpaccounts.models.institution_registry import InstitutionRegistry
 from odpaccounts.models.user import User
 
-from .admin import AdminModelView, CodeField
+from .base import AdminModelView, CodeField
 
 
 class InstitutionModelView(AdminModelView):
