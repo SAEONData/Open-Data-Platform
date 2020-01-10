@@ -14,7 +14,7 @@ ph = argon2.PasswordHasher()
 def validate_user_login(email, password):
     """
     Validate the credentials supplied by a user via the login form, returning the user object
-    on success. An ``ODPLoginError`` is raised if the login cannot be permitted for any reason.
+    on success. An ``ODPIdentityError`` is raised if the login cannot be permitted for any reason.
 
     :param email: the input email address
     :param password: the input plain-text password
@@ -62,7 +62,7 @@ def validate_user_login(email, password):
 def validate_auto_login(user_id):
     """
     Validate a login request for which Hydra has indicated that the user is already authenticated,
-    returning the user object on success. An ``ODPLoginError`` is raised if the login cannot be
+    returning the user object on success. An ``ODPIdentityError`` is raised if the login cannot be
     permitted for any reason.
 
     :param user_id: the user id
@@ -100,10 +100,10 @@ def lock_account(user):
     return False
 
 
-def validate_user_registration(email, password):
+def validate_user_signup(email, password):
     """
-    Validate the credentials supplied by a new user. An ``ODPUserRegistrationError``
-    is raised if the registration cannot be permitted for any reason.
+    Validate the credentials supplied by a new user. An ``ODPIdentityError``
+    is raised if the signup cannot be permitted for any reason.
 
     :param email: the input email address
     :param password: the input plain-text password

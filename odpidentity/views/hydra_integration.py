@@ -39,7 +39,7 @@ def login():
         if login_mode == LoginMode.LOGIN:
             return redirect(url_for('user.login', challenge=challenge))
         elif login_mode == LoginMode.SIGNUP:
-            return redirect(url_for('user.signup'))
+            return redirect(url_for('user.signup', challenge=challenge))
         else:
             abort(501)
 

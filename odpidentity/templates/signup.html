@@ -6,9 +6,10 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('user.register') }}" method="POST">
+    <form action="{{ url_for('user.signup') }}" method="POST">
         {{ form_errors(form) }}
         {{ form.csrf_token }}
+        {{ form.challenge }}
         {{ form.email.label }} {{ field_errors(form.email) }}
         {{ form.password.label }} {{ field_errors(form.password) }}
         <input type="submit" value="Sign up">

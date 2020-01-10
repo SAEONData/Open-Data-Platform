@@ -3,7 +3,7 @@ from flask_login import login_required
 from hydra import HydraAdminError
 
 from ..forms.login import LoginForm
-from ..forms.registration import RegistrationForm
+from ..forms.signup import SignupForm
 from ..lib.users import create_user_account, validate_auto_login
 from ..lib.hydra import hydra_error_abort
 from ..lib import exceptions as x
@@ -29,7 +29,7 @@ def login():
                 user_id = login_request['subject']
                 try:
                     validate_auto_login(user_id)
-                except x.ODPLoginError as e:
+                except x.ODPIdentityError as e:
                     user_id = None
                     error = e
 
@@ -44,7 +44,7 @@ def login():
             try:
                 if form.validate():  # calls validate_user_login
                     user_id = form.user_id
-            except x.ODPLoginError as e:
+            except x.ODPIdentityError as e:
                 error = e
 
         if user_id:
@@ -60,15 +60,42 @@ def login():
         hydra_error_abort(e)
 
 
-@bp.route('/register', methods=('GET', 'POST'))
-def register():
-    form = RegistrationForm()
-    if request.method == 'POST' and form.validate():
-        create_user_account(form.email.data, form.password.data)
-        # todo confirmation email
-        return redirect(url_for('oauth2.login'))
+@bp.route('/signup', methods=('GET', 'POST'))
+def signup():
+    try:
+        user = None
+        error = None
+        form = None
 
-    return render_template('register.html', form=form)
+        if request.method == 'GET':
+            challenge = request.args.get('challenge')
+            login_request = hydra_admin.get_login_request(challenge)
+            authenticated = login_request['skip']
+            # TODO what do we do if already authenticated?
+            form = SignupForm(challenge=challenge)
+
+        else:
+            # it's a post from the user
+            form = SignupForm()
+            challenge = form.challenge.data
+            try:
+                if form.validate():  # calls validate_user_signup
+                    user = create_user_account(form.email.data, form.password.data)
+            except x.ODPIdentityError as e:
+                error = e
+
+        if user:
+            redirect_to = hydra_admin.accept_login_request(challenge, user.id)
+        elif error:
+            redirect_to = hydra_admin.reject_login_request(challenge, error.error_code, error.error_description)
+        else:
+            return render_template('signup.html', form=form)
+
+        return redirect(redirect_to)
+
+    except HydraAdminError as e:
+        # TODO we have to rollback the user creation, or keep it in an inactive state, if we arrive here
+        hydra_error_abort(e)
 
 
 @bp.route('/profile')
