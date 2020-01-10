@@ -4,9 +4,9 @@
     <ul class="nav pull-right">
         {% if current_user.is_authenticated %}
             <li><a>Logged in as {{ current_user.email }}</a>
-            <li><a href="{{ url_for('hydra.logout') }}">Log out</a>
+            <li><a href="{{ url_for('oauth2.logout') }}">Log out</a>
         {% else %}
-            <li><a href="{{ url_for('hydra.login') }}">Log in</a>
+            <li><a href="{{ url_for('oauth2.login') }}">Log in</a>
         {% endif %}
     </ul>
 {% endblock %}

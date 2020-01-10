@@ -10,7 +10,7 @@ from odpaccounts.models.institution import Institution
 from odpaccounts.models.institution_registry import InstitutionRegistry
 
 login_manager = LoginManager()
-login_manager.login_view = 'hydra.login'
+login_manager.login_view = 'oauth2.login'
 
 
 @login_manager.user_loader
@@ -21,8 +21,8 @@ def load_user(user_id):
 def init_app(app):
     login_manager.init_app(app)
 
-    from . import hydra_client, user, member, institution, institution_registry, role, scope
-    app.register_blueprint(hydra_client.bp, url_prefix='/user')
+    from . import hydra_oauth2, user, member, institution, institution_registry, role, scope
+    app.register_blueprint(hydra_oauth2.bp, url_prefix='/oauth2')
 
     home = AdminIndexView(
         url='/',

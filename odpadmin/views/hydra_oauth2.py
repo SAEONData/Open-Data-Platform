@@ -4,4 +4,4 @@ from hydra_client import HydraClientBlueprint
 
 from ..models.hydra_token import HydraToken
 
-bp = HydraClientBlueprint('hydra', __name__, db_session, User, HydraToken)
+bp = HydraClientBlueprint('oauth2', __name__, db_session, User, HydraToken)
