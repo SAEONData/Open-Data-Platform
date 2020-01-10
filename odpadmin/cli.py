@@ -10,8 +10,14 @@ def init_app(app):
 @click.option('--drop-all', is_flag=True)
 @with_appcontext
 def init_db(drop_all):
-    import odpaccounts.models
+    """
+    Create all the tables defined in ODP-AccountsLib, as well as the token table
+    defined in this service.
+    :param drop_all: if this flag is set, drop all tables first, before issuing create table commands
+    """
+    from odpaccounts.models import Base
+    from odpaccounts.db import engine
     if drop_all:
-        odpaccounts.models.drop_all()
-    odpaccounts.models.create_all()
+        Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
     click.echo("Initialized the database.")
