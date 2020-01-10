@@ -5,7 +5,7 @@ from hydra import HydraAdminError
 from ..forms.login import LoginForm
 from ..forms.registration import RegistrationForm
 from ..lib.users import create_user_account, validate_auto_login
-from ..lib.hydra import create_hydra_admin, hydra_error
+from ..lib.hydra import create_hydra_admin, hydra_error_abort
 from ..lib import exceptions as x
 
 bp = Blueprint('user', __name__)
@@ -57,7 +57,7 @@ def login():
         return redirect(redirect_to)
 
     except HydraAdminError as e:
-        hydra_error(e)
+        hydra_error_abort(e)
 
 
 @bp.route('/register', methods=('GET', 'POST'))
