@@ -5,8 +5,9 @@ from hydra import HydraAdminError
 from ..forms.login import LoginForm
 from ..forms.registration import RegistrationForm
 from ..lib.users import create_user_account, validate_auto_login
-from ..lib.hydra import create_hydra_admin, hydra_error_abort
+from ..lib.hydra import hydra_error_abort
 from ..lib import exceptions as x
+from . import hydra_admin
 
 bp = Blueprint('user', __name__)
 
@@ -14,7 +15,6 @@ bp = Blueprint('user', __name__)
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
     try:
-        hydra_admin = create_hydra_admin()
         user_id = None
         error = None
         form = None

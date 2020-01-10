@@ -8,7 +8,8 @@ from odpaccounts.db import session as db_session
 from odpaccounts.models.user import User
 
 from ..lib.users import id_token_data, access_token_data
-from ..lib.hydra import create_hydra_admin, hydra_error_abort
+from ..lib.hydra import hydra_error_abort
+from . import hydra_admin
 
 bp = Blueprint('hydra', __name__)
 
@@ -31,7 +32,6 @@ def login():
     Redirected here from Hydra as part of the login flow.
     """
     try:
-        hydra_admin = create_hydra_admin()
         challenge = request.args.get('login_challenge')
         login_request = hydra_admin.get_login_request(challenge)
         login_mode = LoginMode.from_request_url(login_request['request_url'])
@@ -53,7 +53,6 @@ def consent():
     Redirected here from Hydra as part of the consent flow.
     """
     try:
-        hydra_admin = create_hydra_admin()
         challenge = request.args.get('consent_challenge')
         consent_request = hydra_admin.get_consent_request(challenge)
         user_id = consent_request['subject']
@@ -79,7 +78,6 @@ def logout():
     Redirected here from Hydra as part of the logout flow.
     """
     try:
-        hydra_admin = create_hydra_admin()
         challenge = request.args.get('logout_challenge')
         logout_request = hydra_admin.get_logout_request(challenge)
         redirect_to = hydra_admin.accept_logout_request(challenge)

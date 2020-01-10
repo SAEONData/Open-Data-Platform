@@ -1,18 +1,4 @@
 from flask import current_app, abort
-from flask.helpers import get_env
-
-from hydra import HydraAdminClient
-
-
-def create_hydra_admin():
-    """
-    Returns a HydraAdminClient instance.
-    """
-    return HydraAdminClient(
-        server_url=current_app.config['HYDRA_ADMIN_URL'],
-        remember_login_for=current_app.config['HYDRA_LOGIN_EXPIRY'],
-        verify_tls=get_env() != 'development',
-    )
 
 
 def hydra_error_abort(e):
