@@ -23,7 +23,14 @@ provider that performs authentication, session management and issuance of ID, ac
 
 ### Database setup
 
-The ODP Admin service should be used to initialize the accounts database.
+First, the Accounts Database should be initialized using the [ODP Admin Service](https://github.com/SAEONData/ODP-Admin).
+
+Then, use the `initdb` CLI command to create the table for storing OAuth2 tokens for users logged in
+to the Identity Service:
+
+`cd` to the project root directory, activate the virtual environment, and run:
+
+    flask initdb
 
 ### Quick start
 
@@ -75,4 +82,4 @@ with the Identity Service as a client application:
 * HYDRA_CLIENT_ID: client ID of this service as registered with Hydra
 * HYDRA_CLIENT_SECRET: client secret of this service as registered with Hydra
 * HYDRA_SCOPES: openid
-* OAUTHLIB_INSECURE_TRANSPORT: set to `True` in development, to allow OAuth to work when running the server on HTTP
+* OAUTHLIB_INSECURE_TRANSPORT: set to `True` in development, to allow OAuth2 to work when running the server on HTTP
