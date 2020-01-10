@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('auth.login') }}" method="POST">
+    <form action="{{ url_for('user.login') }}" method="POST">
         {{ form_errors(form) }}
         {{ form.csrf_token }}
         {{ form.login_challenge }}
@@ -17,5 +17,5 @@
 {% endblock %}
 
 {% block swap_login_signup_message %}
-    Don't have an account yet? <a href="{{ url_for('user.register') }}">Sign up</a>
+    Don't have an account yet? <a href="{{ url_for('oauth2.signup') }}">Sign up</a>
 {% endblock %}
