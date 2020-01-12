@@ -67,22 +67,24 @@ def signup():
         error = None
         form = None
 
-        if request.method == 'GET':
-            challenge = request.args.get('challenge')
-            login_request = hydra_admin.get_login_request(challenge)
-            authenticated = login_request['skip']
-            # TODO what do we do if already authenticated?
-            form = SignupForm(challenge=challenge)
+        try:
+            if request.method == 'GET':
+                challenge = request.args.get('challenge')
+                login_request = hydra_admin.get_login_request(challenge)
+                authenticated = login_request['skip']
+                if authenticated:
+                    raise x.ODPSignupLoggedInUser
+                form = SignupForm(challenge=challenge)
 
-        else:
-            # it's a post from the user
-            form = SignupForm()
-            challenge = form.challenge.data
-            try:
+            else:
+                # it's a post from the user
+                form = SignupForm()
+                challenge = form.challenge.data
                 if form.validate():  # calls validate_user_signup
                     user = create_user_account(form.email.data, form.password.data)
-            except x.ODPIdentityError as e:
-                error = e
+
+        except x.ODPIdentityError as e:
+            error = e
 
         if user:
             redirect_to = hydra_admin.accept_login_request(challenge, user.id)

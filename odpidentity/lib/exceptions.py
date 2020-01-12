@@ -46,3 +46,9 @@ class ODPPasswordComplexityError(ODPIdentityError):
 
     error_code = 'password_complexity'
     error_description = "The password does not meet the minimum complexity requirements."
+
+
+class ODPSignupLoggedInUser(ODPIdentityError):
+
+    error_code = 'signup_logged_in_user'
+    error_description = "A logged in user cannot sign up."
