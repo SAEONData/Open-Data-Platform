@@ -36,9 +36,9 @@ class ODPAccountLocked(ODPIdentityError):
     error_description = "The user's account is temporarily locked."
 
 
-class ODPUserAlreadyExists(ODPIdentityError):
+class ODPEmailInUse(ODPIdentityError):
 
-    error_code = 'user_already_exists'
+    error_code = 'email_in_use'
     error_description = "The email address is already associated with a user account."
 
 

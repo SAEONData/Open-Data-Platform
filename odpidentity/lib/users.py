@@ -113,7 +113,7 @@ def validate_user_signup(email, password):
     """
     user = db_session.query(User).filter_by(email=email).first()
     if user:
-        raise x.ODPUserAlreadyExists
+        raise x.ODPEmailInUse
 
     if not check_password_complexity(password):
         raise x.ODPPasswordComplexityError

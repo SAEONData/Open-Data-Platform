@@ -16,7 +16,7 @@ class SignupForm(CredentialsForm):
         try:
             validate_user_signup(self.email.data, self.password.data)
 
-        except x.ODPUserAlreadyExists:
+        except x.ODPEmailInUse:
             self.email.errors.append("The email address is already associated with a user account.")
             return False
 
