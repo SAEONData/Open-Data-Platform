@@ -23,14 +23,7 @@ provider that performs authentication, session management and issuance of ID, ac
 
 ### Database setup
 
-First, the Accounts Database should be initialized using the [ODP Admin Service](https://github.com/SAEONData/ODP-Admin).
-
-Then, use the `initdb` CLI command to create the table for storing OAuth2 tokens for users logged in
-to the Identity Service:
-
-`cd` to the project root directory, activate the virtual environment, and run:
-
-    flask initdb
+The ODP Admin service should be used to initialize the accounts database.
 
 ### Quick start
 

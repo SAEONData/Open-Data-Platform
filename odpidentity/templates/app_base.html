@@ -11,10 +11,10 @@
             <ul>
                 {% if current_user.is_authenticated %}
                     <li><span>Hello, {{ current_user.email }}!</span>
-                    <li><a class="nav-button" href="{{ url_for('oauth2.logout') }}">Log out</a>
+                    <li><a class="nav-button" href="{{ url_for('odpidentity.logout') }}">Log out</a>
                 {% else %}
-                    <li><a class="nav-button" href="{{ url_for('oauth2.signup') }}">Create account</a>
-                    <li><a class="nav-button" href="{{ url_for('oauth2.login') }}">Log in</a>
+                    <li><a class="nav-button" href="{{ url_for('odpidentity.signup') }}">Create account</a>
+                    <li><a class="nav-button" href="{{ url_for('odpidentity.login') }}">Log in</a>
                 {% endif %}
             </ul>
         </nav>

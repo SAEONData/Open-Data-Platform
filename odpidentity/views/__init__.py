@@ -7,7 +7,7 @@ from odpaccounts.db import session as db_session
 from odpaccounts.models.user import User
 
 login_manager = LoginManager()
-login_manager.login_view = 'oauth2.login'
+login_manager.login_view = 'odpidentity.login'
 
 mail = Mail()
 
