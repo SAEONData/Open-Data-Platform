@@ -1,7 +1,7 @@
 import uuid
 
 from flask_login import UserMixin
-from sqlalchemy import Column, String, Boolean, DateTime
+from sqlalchemy import Column, String, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -20,7 +20,7 @@ class User(UserMixin, Base):
     password = Column(String, nullable=False)
     superuser = Column(Boolean, nullable=False)
     active = Column(Boolean, nullable=False)
-    confirmed_at = Column(DateTime)
+    verified = Column(Boolean, nullable=False)
 
     # many-to-many relationship between institution and user represented by member
     members = relationship('Member',
