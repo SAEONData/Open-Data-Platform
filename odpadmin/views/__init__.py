@@ -10,7 +10,7 @@ from odpaccounts.models.institution import Institution
 from odpaccounts.models.institution_registry import InstitutionRegistry
 
 login_manager = LoginManager()
-login_manager.login_view = 'oauth2.login'
+login_manager.login_view = 'odpadmin.login'
 
 
 @login_manager.user_loader
