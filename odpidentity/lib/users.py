@@ -6,7 +6,7 @@ from odpaccounts.models.privilege import Privilege
 from odpaccounts.models.scope import Scope
 from odpaccounts.models.user import User
 
-from ..lib import exceptions as x
+from . import exceptions as x
 
 ph = argon2.PasswordHasher()
 
@@ -53,8 +53,8 @@ def validate_user_login(email, password):
     if not user.active:
         raise x.ODPAccountDisabled
 
-    if not user.confirmed_at:
-        raise x.ODPEmailNotConfirmed
+    if not user.verified:
+        raise x.ODPEmailNotVerified
 
     return user
 
@@ -84,8 +84,8 @@ def validate_auto_login(user_id):
     if not user.active:
         raise x.ODPAccountDisabled
 
-    if not user.confirmed_at:
-        raise x.ODPEmailNotConfirmed
+    if not user.verified:
+        raise x.ODPEmailNotVerified
 
     return user
 
@@ -128,13 +128,12 @@ def create_user_account(email, password):
     :param password: the input plain-text password
     :return: a User object
     """
-    import datetime
     user = User(
         email=email,
         password=ph.hash(password),
         superuser=False,
         active=True,
-        confirmed_at = datetime.datetime.now()  # todo: remove once we've implemented email confirmation
+        verified=False,
     )
     db_session.add(user)
     db_session.commit()

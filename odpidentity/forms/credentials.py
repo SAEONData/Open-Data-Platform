@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField
+from wtforms import StringField, PasswordField, HiddenField
 from wtforms.validators import input_required, email
 
 
 class CredentialsForm(FlaskForm):
 
-    # TODO recaptcha
+    challenge = HiddenField()
 
     email = StringField(
         label='Email address',

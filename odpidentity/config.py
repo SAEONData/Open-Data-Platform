@@ -10,6 +10,9 @@ class Config:
     SERVER_NAME = os.getenv('FLASK_SERVER_NAME')
     FLASK_ADMIN_SWATCH = os.getenv('FLASK_ADMIN_SWATCH')
 
+    MAIL_SERVER = os.getenv('MAIL_SERVER')
+    MAIL_PORT = int(os.getenv('MAIL_PORT', '25'))
+
     HYDRA_ADMIN_URL = os.getenv('HYDRA_ADMIN_URL')
     HYDRA_LOGIN_EXPIRY = int(os.getenv('HYDRA_LOGIN_EXPIRY', '86400'))
 

@@ -1,4 +1,5 @@
 from flask_login import LoginManager
+from flask_mail import Mail
 from flask.helpers import get_env
 
 from hydra import HydraAdminClient
@@ -7,6 +8,8 @@ from odpaccounts.models.user import User
 
 login_manager = LoginManager()
 login_manager.login_view = 'oauth2.login'
+
+mail = Mail()
 
 hydra_admin = None
 
@@ -18,6 +21,7 @@ def load_user(user_id):
 
 def init_app(app):
     login_manager.init_app(app)
+    mail.init_app(app)
 
     global hydra_admin
     hydra_admin = HydraAdminClient(

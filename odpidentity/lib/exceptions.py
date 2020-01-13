@@ -12,9 +12,9 @@ class ODPUserNotFound(ODPIdentityError):
     error_description = "The user id or email address is not associated with any user account."
 
 
-class ODPEmailNotConfirmed(ODPIdentityError):
+class ODPEmailNotVerified(ODPIdentityError):
 
-    error_code = 'email_not_confirmed'
+    error_code = 'email_not_verified'
     error_description = "The user's email address has not yet been verified."
 
 
@@ -52,3 +52,9 @@ class ODPSignupLoggedInUser(ODPIdentityError):
 
     error_code = 'signup_logged_in_user'
     error_description = "A logged in user cannot sign up."
+
+
+class ODPEmailVerificationError(ODPIdentityError):
+
+    error_code = 'email_verification_error'
+    error_description = "The email address could not be verified."

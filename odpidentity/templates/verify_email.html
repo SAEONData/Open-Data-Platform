@@ -1,0 +1,14 @@
+{% extends 'login_base.html' %}
+
+{% block page_heading %}
+    {% block title %}Verify email{% endblock %}
+{% endblock %}
+
+{% block content %}
+    <form action="{{ url_for('user.verify_email') }}" method="POST">
+        {{ form.csrf_token }}
+        {{ form.challenge }}
+        {{ form.email }}
+        <input type="submit" value="Re-send verification email">
+    </form>
+{% endblock %}

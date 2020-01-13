@@ -9,6 +9,18 @@
         </nav>
     </header>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="flash">
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+    {% endwith %}
+
     <main>
         <header><h1>{% block page_heading %}{% endblock %}</h1></header>
         {% block content %}{% endblock %}

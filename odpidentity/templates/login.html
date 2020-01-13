@@ -9,7 +9,7 @@
     <form action="{{ url_for('user.login') }}" method="POST">
         {{ form_errors(form) }}
         {{ form.csrf_token }}
-        {{ form.login_challenge }}
+        {{ form.challenge }}
         {{ form.email.label }} {{ field_errors(form.email) }}
         {{ form.password.label }} {{ field_errors(form.password) }}
         <input type="submit" value="Log in">

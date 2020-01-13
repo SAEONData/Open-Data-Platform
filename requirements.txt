@@ -1,7 +1,8 @@
 flask
 flask-login
 flask-wtf
-
+flask-mail
+itsdangerous
 python-dotenv
 wtforms
 argon2_cffi
