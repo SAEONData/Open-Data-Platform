@@ -15,7 +15,7 @@ from ..lib.users import (
     validate_user_signup,
     validate_user_login,
 )
-from ..lib.hydra import hydra_error_abort
+from ..lib.hydra import hydra_error_page
 from ..lib import exceptions as x
 from . import hydra_admin, mail
 
@@ -82,48 +82,49 @@ def login():
         return redirect(redirect_to)
 
     except HydraAdminError as e:
-        hydra_error_abort(e)
+        return hydra_error_page(e)
 
 
 @bp.route('/signup', methods=('GET', 'POST'))
 def signup():
     try:
-        if request.method == 'GET':
-            challenge = request.args.get('challenge')
-            login_request = hydra_admin.get_login_request(challenge)
-            authenticated = login_request['skip']
-            if authenticated:
-                raise x.ODPSignupLoggedInUser
-            form = CredentialsForm(challenge=challenge)
+        try:
+            if request.method == 'GET':
+                challenge = request.args.get('challenge')
+                login_request = hydra_admin.get_login_request(challenge)
+                authenticated = login_request['skip']
+                if authenticated:
+                    raise x.ODPSignupLoggedInUser
+                form = CredentialsForm(challenge=challenge)
 
-        else:
-            # it's a post from the user
-            form = CredentialsForm()
-            challenge = form.challenge.data
-            if form.validate():
-                email = form.email.data
-                password = form.password.data
-                user = db_session.query(User).filter_by(email=email).one_or_none()
-                if user:
-                    # user exists: switch to a login
-                    return login()
-                try:
-                    validate_user_signup(email, password)
-                    user = create_user_account(email, password)
-                    send_verification_email(email, challenge)
-                    return redirect(url_for('.verify_email', email=email, challenge=challenge))
+            else:
+                # it's a post from the user
+                form = CredentialsForm()
+                challenge = form.challenge.data
+                if form.validate():
+                    email = form.email.data
+                    password = form.password.data
+                    user = db_session.query(User).filter_by(email=email).one_or_none()
+                    if user:
+                        # user exists: switch to a login
+                        return login()
+                    try:
+                        validate_user_signup(email, password)
+                        user = create_user_account(email, password)
+                        send_verification_email(email, challenge)
+                        return redirect(url_for('.verify_email', email=email, challenge=challenge))
 
-                except x.ODPPasswordComplexityError:
-                    form.password.errors.append("The password does not meet the minimum complexity requirements.")
+                    except x.ODPPasswordComplexityError:
+                        form.password.errors.append("The password does not meet the minimum complexity requirements.")
 
-        return render_template('signup.html', form=form)
+            return render_template('signup.html', form=form)
 
-    except x.ODPIdentityError as e:
-        redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
-        return redirect(redirect_to)
+        except x.ODPIdentityError as e:
+            redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
+            return redirect(redirect_to)
 
     except HydraAdminError as e:
-        hydra_error_abort(e)
+        return hydra_error_page(e)
 
 
 @bp.route('/verify-email', methods=('GET', 'POST'))
@@ -160,8 +161,9 @@ def verified_email():
 
     except x.ODPIdentityError:
         abort(403)  # HTTP 403 Forbidden
+
     except HydraAdminError as e:
-        hydra_error_abort(e)
+        return hydra_error_page(e)
 
 
 @bp.route('/profile')

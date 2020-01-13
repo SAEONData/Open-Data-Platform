@@ -8,7 +8,7 @@ from odpaccounts.db import session as db_session
 from odpaccounts.models.user import User
 
 from ..lib.users import id_token_data, access_token_data
-from ..lib.hydra import hydra_error_abort
+from ..lib.hydra import hydra_error_page
 from . import hydra_admin
 
 bp = Blueprint('hydra', __name__)
@@ -44,7 +44,7 @@ def login():
             abort(501)
 
     except HydraAdminError as e:
-        hydra_error_abort(e)
+        return hydra_error_page(e)
 
 
 @bp.route('/consent')
@@ -69,7 +69,7 @@ def consent():
         return redirect(redirect_to)
 
     except HydraAdminError as e:
-        hydra_error_abort(e)
+        return hydra_error_page(e)
 
 
 @bp.route('/logout')
@@ -84,4 +84,4 @@ def logout():
         return redirect(redirect_to)
 
     except HydraAdminError as e:
-        hydra_error_abort(e)
+        return hydra_error_page(e)
