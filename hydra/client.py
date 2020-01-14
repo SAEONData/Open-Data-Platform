@@ -241,8 +241,8 @@ class HydraAdminClient:
                 e_kwargs['error_detail'] = e.response.json()
             except ValueError:
                 pass
-            raise HydraAdminError(*e.args, **e_kwargs)
+            raise HydraAdminError(*e.args, **e_kwargs) from e
 
         except requests.RequestException as e:
             e_kwargs['status_code'] = 503
-            raise HydraAdminError(*e.args, **e_kwargs)
+            raise HydraAdminError(*e.args, **e_kwargs) from e
