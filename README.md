@@ -46,8 +46,8 @@ Applicable environment variables are listed below with example / allowed values:
 
 #### Standard Flask config
 
-* FLASK_APP: odpidentity
-* FLASK_ENV: development|testing|staging|production; note: setting `FLASK_ENV=development` disables TLS
+* FLASK_APP: `odpidentity`
+* FLASK_ENV: `development`|`testing`|`staging`|`production`; note: setting `FLASK_ENV=development` disables TLS
     certificate verification when making requests to the Hydra server
 * FLASK_DEBUG: enabled by default if `FLASK_ENV=development`; you may want to disable this (`FLASK_DEBUG=False`)
     if debugging in an IDE
@@ -79,5 +79,5 @@ with the Identity Service as a client application:
 * HYDRA_PUBLIC_URL: URL of the Hydra public API
 * HYDRA_CLIENT_ID: client ID of this service as registered with Hydra
 * HYDRA_CLIENT_SECRET: client secret of this service as registered with Hydra
-* HYDRA_SCOPES: openid
+* HYDRA_SCOPES: `openid`
 * OAUTHLIB_INSECURE_TRANSPORT: set to `True` in development, to allow OAuth2 to work when running the server on HTTP (default `False`)
