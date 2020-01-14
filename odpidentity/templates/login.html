@@ -17,5 +17,5 @@
 {% endblock %}
 
 {% block swap_login_signup_message %}
-    Don't have an account yet? <a href="{{ url_for('odpidentity.signup') }}">Sign up</a>
+    Don't have an account yet? <a href="{{ url_for('signup.signup', challenge=form.challenge.data) }}">Sign up</a>
 {% endblock %}
