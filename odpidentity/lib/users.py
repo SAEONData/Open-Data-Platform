@@ -1,3 +1,5 @@
+import re
+
 import argon2
 from argon2.exceptions import VerifyMismatchError
 
@@ -24,7 +26,7 @@ def validate_user_login(email, password):
     :raises ODPAccountLocked: if the user account has been temporarily locked
     :raises ODPIncorrectPassword: if the password is incorrect
     :raises ODPAccountDisabled: if the user account has been deactivated
-    :raises ODPEmailNotConfirmed: if the email address has not yet been verified
+    :raises ODPEmailNotVerified: if the email address has not yet been verified
     """
     user = db_session.query(User).filter_by(email=email).first()
     if not user:
@@ -71,7 +73,7 @@ def validate_auto_login(user_id):
     :raises ODPUserNotFound: if the user account associated with this id has been deleted
     :raises ODPAccountLocked: if the user account has been temporarily locked
     :raises ODPAccountDisabled: if the user account has been deactivated
-    :raises ODPEmailNotConfirmed: if the user changed their email address since their last login,
+    :raises ODPEmailNotVerified: if the user changed their email address since their last login,
         but have not yet verified it
     """
     user = db_session.query(User).get(user_id)
@@ -108,7 +110,7 @@ def validate_user_signup(email, password):
     :param email: the input email address
     :param password: the input plain-text password
 
-    :raises ODPUserAlreadyExists: if the email address is already associated with a user account
+    :raises ODPEmailInUse: if the email address is already associated with a user account
     :raises ODPPasswordComplexityError: if the password does not meet the minimum complexity requirements
     """
     user = db_session.query(User).filter_by(email=email).first()
@@ -117,6 +119,51 @@ def validate_user_signup(email, password):
 
     if not check_password_complexity(password):
         raise x.ODPPasswordComplexityError
+
+
+def validate_forgot_password(email):
+    """
+    Validate that a forgotten password request is for a valid email address.
+
+    :param email: the input email address
+    :return: a User object
+
+    :raises ODPUserNotFound: if there is no user account for the given email address
+    :raises ODPAccountLocked: if the user account has been temporarily locked
+    :raises ODPAccountDisabled: if the user account has been deactivated
+    """
+    user = db_session.query(User).filter_by(email=email).first()
+    if not user:
+        raise x.ODPUserNotFound
+
+    if is_account_locked(user):
+        raise x.ODPAccountLocked
+
+    if not user.active:
+        raise x.ODPAccountDisabled
+
+    return user
+
+
+def validate_password_reset(email, password):
+    """
+    Validate a new password set by the user.
+
+    :param email: the user's email address
+    :param password: the new password
+    :return: a User object
+
+    :raises ODPUserNotFound: if the email address is not associated with any user account
+    :raises ODPPasswordComplexityError: if the password does not meet the minimum complexity requirements
+    """
+    user = db_session.query(User).filter_by(email=email).first()
+    if not user:
+        raise x.ODPUserNotFound
+
+    if not check_password_complexity(password):
+        raise x.ODPPasswordComplexityError
+
+    return user
 
 
 def create_user_account(email, password):
@@ -141,6 +188,30 @@ def create_user_account(email, password):
     return user
 
 
+def update_user_verified(user, verified):
+    """
+    Update the verified status of a user.
+
+    :param user: a User instance
+    :param verified: True/False
+    """
+    user.verified = verified
+    db_session.add(user)
+    db_session.commit()
+
+
+def update_user_password(user, password):
+    """
+    Update a user's password.
+
+    :param user: a User instance
+    :param password: the input plain-text password
+    """
+    user.password = ph.hash(password)
+    db_session.add(user)
+    db_session.commit()
+
+
 def check_password_complexity(password):
     """
     Check that a password meets the minimum complexity requirements, returning True if the
@@ -150,7 +221,10 @@ def check_password_complexity(password):
     :return: boolean
     """
     # todo...
-    return len(password) >= 4
+    valid = len(password) >= 8
+    valid = valid and re.search(r'[a-zA-Z]', password) is not None
+    valid = valid and re.search(r'[0-9]', password) is not None
+    return valid
 
 
 def id_token_data(user):

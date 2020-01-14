@@ -2,8 +2,8 @@ class ODPIdentityError(Exception):
     """ Base exception class """
 
     # code and description are sent to Hydra when rejecting a login request
-    error_code = 'login_error'
-    error_description = "An unknown login error occurred."
+    error_code = 'unknown_error'
+    error_description = "An unknown error occurred."
 
 
 class ODPUserNotFound(ODPIdentityError):

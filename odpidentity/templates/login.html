@@ -16,6 +16,7 @@
     </form>
 {% endblock %}
 
-{% block swap_login_signup_message %}
+{% block login_footer %}
     Don't have an account yet? <a href="{{ url_for('signup.signup', challenge=form.challenge.data) }}">Sign up</a>
+    <a href="{{ url_for('login.forgot_password', challenge=form.challenge.data) }}">Forgot your password?</a>
 {% endblock %}

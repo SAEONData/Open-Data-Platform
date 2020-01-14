@@ -4,11 +4,12 @@ from hydra import HydraAdminError
 
 from .. import hydra_admin
 from ..forms.credentials import CredentialsForm
+from ..forms.forgot_password import ForgotPasswordForm
 from ..forms.verify_email import VerifyEmailForm
 from ..lib import exceptions as x
 from ..lib.hydra import hydra_error_page
-from ..lib.users import validate_auto_login, validate_user_login
-from .account import send_verification_email
+from ..lib.users import validate_auto_login, validate_user_login, validate_forgot_password
+from .account import send_verification_email, send_password_reset_email
 
 bp = Blueprint('login', __name__)
 
@@ -89,3 +90,31 @@ def verify():
             send_verification_email(form.email.data, form.challenge.data)
 
     return render_template('login_verify.html', form=form)
+
+
+@bp.route('/forgot-password', methods=('GET', 'POST'))
+def forgot_password():
+    sent = False
+    if request.method == 'GET':
+        challenge = request.args.get('challenge')
+        form = ForgotPasswordForm(challenge=challenge)
+
+    else:
+        # POST: send the password reset email
+        form = ForgotPasswordForm()
+        challenge = form.challenge.data
+        if form.validate():
+            email = form.email.data
+            try:
+                user = validate_forgot_password(email)
+                send_password_reset_email(email, challenge)
+                sent = True
+
+            except x.ODPUserNotFound:
+                form.email.errors.append("The email address is not associated with any user account.")
+
+            except x.ODPIdentityError as e:
+                redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
+                return redirect(redirect_to)
+
+    return render_template('forgot_password.html', form=form, sent=sent)
