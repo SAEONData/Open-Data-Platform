@@ -56,7 +56,12 @@ Applicable environment variables are listed below with example / allowed values:
 #### Database config
 
 * DATABASE_URL: URL of the ODP Accounts database, e.g. `postgresql://dbuser:pwd@host/dbname`
-* DATABASE_ECHO: set to `True` to emit SQLAlchemy database calls to stderr
+* DATABASE_ECHO: set to `True` to emit SQLAlchemy database calls to stderr (default `False`)
+
+#### Mail server config
+
+* MAIL_SERVER: mail server hostname / IP address
+* MAIL_PORT: mail server port (default `25`)
 
 #### Hydra admin config
 
@@ -64,7 +69,7 @@ Settings pertaining to integration with Hydra's login, consent and logout flows,
 plays the role of identity provider:
 
 * HYDRA_ADMIN_URL: URL of the Hydra admin API
-* HYDRA_LOGIN_EXPIRY: number of seconds to remember a successful login
+* HYDRA_LOGIN_EXPIRY: number of seconds to remember a successful login (default `86400` - 24 hours)
 
 #### Hydra client config
 
@@ -75,4 +80,4 @@ with the Identity Service as a client application:
 * HYDRA_CLIENT_ID: client ID of this service as registered with Hydra
 * HYDRA_CLIENT_SECRET: client secret of this service as registered with Hydra
 * HYDRA_SCOPES: openid
-* OAUTHLIB_INSECURE_TRANSPORT: set to `True` in development, to allow OAuth2 to work when running the server on HTTP
+* OAUTHLIB_INSECURE_TRANSPORT: set to `True` in development, to allow OAuth2 to work when running the server on HTTP (default `False`)
