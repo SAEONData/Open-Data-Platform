@@ -23,7 +23,7 @@ class LoginMode(Enum):
         try:
             return LoginMode(parse_qs(urlparse(url).query).get('mode', [])[0])
         except (IndexError, ValueError):
-            abort(422)
+            abort(422)  # HTTP 422 Unprocessable Entity
 
 
 @bp.route('/login')
@@ -41,7 +41,7 @@ def login():
         elif login_mode == LoginMode.SIGNUP:
             return redirect(url_for('user.signup', challenge=challenge))
         else:
-            abort(501)
+            abort(501)  # HTTP 501 Not Implemented
 
     except HydraAdminError as e:
         return hydra_error_page(e)

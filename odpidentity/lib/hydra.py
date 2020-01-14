@@ -8,15 +8,16 @@ def hydra_error_page(e):
     home.
 
     :param e: the HydraAdminError exception
+    :return: a redirect response
     """
-    if 500 <= e.status_code < 600:
-        current_app.logger.critical("Hydra server %d error for %s %s: %s",
-                                    e.status_code, e.method, e.endpoint, e.error_detail)
-    elif 400 <= e.status_code < 500:
+    if 400 <= e.status_code < 500:
         current_app.logger.error("Hydra client %d error for %s %s: %s",
                                  e.status_code, e.method, e.endpoint, e.error_detail)
+    elif 500 <= e.status_code < 600:
+        current_app.logger.critical("Hydra server %d error for %s %s: %s",
+                                    e.status_code, e.method, e.endpoint, e.error_detail)
     else:
-        raise ValueError
+        raise ValueError  # HydraAdminError should only ever be raised for HTTP 4xx/5xx errors
 
     flash("There was a problem with your request. Our technicians have been notified.", category='error')
     return redirect(url_for('home.index'))

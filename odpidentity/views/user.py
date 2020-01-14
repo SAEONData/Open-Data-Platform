@@ -196,7 +196,8 @@ def send_verification_email(email, challenge):
         mail.send(msg)
         flash("An email verification link has been sent to your email address.")
     except Exception as e:
-        flash("There was a problem sending the verification email: {}".format(e), category='error')
+        current_app.logger.error("Error sending verification email to {}: {}".format(email, e))
+        flash("There was a problem sending the verification email.", category='error')
 
 
 def read_verification_token(token):
