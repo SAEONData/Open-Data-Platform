@@ -1,9 +1,30 @@
 from flask import Flask
+from flask_login import LoginManager
+from flask_mail import Mail
+from flask.helpers import get_env
+
+from hydra import HydraAdminClient
+from odpaccounts.db import session as db_session
+from odpaccounts.models.user import User
+
+
+login_manager = LoginManager()
+login_manager.login_view = 'odpidentity.login'
+
+mail = Mail()
+
+hydra_admin = HydraAdminClient('')
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db_session.query(User).get(user_id)
 
 
 def create_app(config=None):
     """
     Flask application factory.
+
     :param config: config dict or filename
     :return: Flask app instance
     """
@@ -21,5 +42,12 @@ def create_app(config=None):
 
     models.init_app(app)
     views.init_app(app)
+
+    login_manager.init_app(app)
+    mail.init_app(app)
+
+    hydra_admin.server_url = app.config['HYDRA_ADMIN_URL']
+    hydra_admin.remember_login_for = app.config['HYDRA_LOGIN_EXPIRY']
+    hydra_admin.verify_tls = get_env() != 'development'
 
     return app

@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('user.signup') }}" method="POST">
+    <form action="{{ url_for('signup.signup') }}" method="POST">
         {{ form_errors(form) }}
         {{ form.csrf_token }}
         {{ form.challenge }}

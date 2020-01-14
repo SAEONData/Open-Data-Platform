@@ -1,0 +1,15 @@
+{% extends 'login_base.html' %}
+
+{% block page_heading %}
+    {% block title %}Create account{% endblock %}
+{% endblock %}
+
+{% block content %}
+    <span>To complete the signup, please click the link in the verification email.</span>
+    <form action="{{ url_for('signup.verify') }}" method="POST">
+        {{ form.csrf_token }}
+        {{ form.challenge }}
+        {{ form.email }}
+        <input type="submit" value="Re-send verification email">
+    </form>
+{% endblock %}
