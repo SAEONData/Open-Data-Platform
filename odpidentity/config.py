@@ -8,7 +8,6 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.getenv('FLASK_SECRET_KEY')
     SERVER_NAME = os.getenv('FLASK_SERVER_NAME')
-    FLASK_ADMIN_SWATCH = os.getenv('FLASK_ADMIN_SWATCH')
 
     MAIL_SERVER = os.getenv('MAIL_SERVER')
     MAIL_PORT = int(os.getenv('MAIL_PORT', '25'))
