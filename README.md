@@ -19,7 +19,7 @@ provider that performs authentication, session management and issuance of ID, ac
 
 * [ODP-AccountsLib](https://github.com/SAEONData/ODP-AccountsLib)
 * [Hydra-Admin-Client](https://github.com/SAEONData/Hydra-Admin-Client)
-* [Hydra-Client-Blueprint](https://github.com/SAEONData/Hydra-Client-Blueprint)
+* [Hydra-OAuth2-Blueprint](https://github.com/SAEONData/Hydra-OAuth2-Blueprint)
 
 ### Database setup
 

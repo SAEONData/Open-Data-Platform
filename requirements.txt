@@ -8,5 +8,5 @@ wtforms
 argon2_cffi
 
 odp-accountslib
-hydra-client-blueprint
+hydra-oauth2-blueprint
 hydra-admin-client
