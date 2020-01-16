@@ -77,9 +77,9 @@ Settings pertaining to the usage of Hydra as OAuth2 / OpenID Connect provider, f
 with the Identity Service as a client application:
 
 * HYDRA_PUBLIC_URL: URL of the Hydra public API
-* HYDRA_CLIENT_ID: client ID of this service as registered with Hydra
-* HYDRA_CLIENT_SECRET: client secret of this service as registered with Hydra
-* HYDRA_SCOPES: `openid`
+* OAUTH2_CLIENT_ID: client ID of this service as registered with Hydra
+* OAUTH2_CLIENT_SECRET: client secret of this service as registered with Hydra
+* OAUTH2_SCOPES: `openid`
 * OAUTHLIB_INSECURE_TRANSPORT: set to `True` in development, to allow OAuth2 to work when running the server on HTTP (default `False`)
 
 #### Miscellaneous settings
