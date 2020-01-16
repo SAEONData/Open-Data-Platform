@@ -16,6 +16,6 @@
 {% endblock %}
 
 {% block login_footer %}
-    Don't have an account yet? <a href="{{ url_for('signup.signup', token=token) }}">Sign up</a>
-    <a href="{{ url_for('login.forgot_password', token=token) }}">Forgot your password?</a>
+    <p>Don't have an account yet? <a href="{{ url_for('signup.signup', token=token) }}">Sign up</a></p>
+    <p><a href="{{ url_for('login.forgot_password', token=token) }}">Forgot your password?</a></p>
 {% endblock %}
