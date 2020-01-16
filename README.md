@@ -15,7 +15,7 @@ The ODP Admin Service is a [Flask](https://palletsprojects.com/p/flask/) +
 
 * [ODP-AccountsLib](https://github.com/SAEONData/ODP-AccountsLib)
 * [Hydra-Admin-Client](https://github.com/SAEONData/Hydra-Admin-Client)
-* [Hydra-Client-Blueprint](https://github.com/SAEONData/Hydra-Client-Blueprint)
+* [Hydra-OAuth2-Blueprint](https://github.com/SAEONData/Hydra-OAuth2-Blueprint)
 * [Fork of Flask-Admin](https://github.com/SAEONData/flask-admin)
 
 ### Database setup
