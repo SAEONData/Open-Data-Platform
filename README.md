@@ -70,9 +70,9 @@ Settings pertaining to the usage of Hydra as OAuth2 / OpenID Connect provider, f
 with the Admin Service as a client application:
 
 * HYDRA_PUBLIC_URL: URL of the Hydra public API
-* HYDRA_CLIENT_ID: client ID of this service as registered with Hydra
-* HYDRA_CLIENT_SECRET: client secret of this service as registered with Hydra
-* HYDRA_SCOPES: `openid ODP.Admin`
+* OAUTH2_CLIENT_ID: client ID of this service as registered with Hydra
+* OAUTH2_CLIENT_SECRET: client secret of this service as registered with Hydra
+* OAUTH2_SCOPES: `openid ODP.Admin`
 * OAUTHLIB_INSECURE_TRANSPORT: set to `True` in development, to allow OAuth to work when running the server on HTTP (default `False`)
 
 #### Admin interface config
@@ -81,4 +81,4 @@ Settings for controlling access to the admin interface.
 
 * ADMIN_INSTITUTION: institution code of the institution that owns this service
 * ADMIN_ROLE: role code of the administrative role
-* ADMIN_SCOPE: scope code applicable to this service (should be one of the `HYDRA_SCOPES` values)
+* ADMIN_SCOPE: scope code applicable to this service (should be one of the `OAUTH2_SCOPES` values)
