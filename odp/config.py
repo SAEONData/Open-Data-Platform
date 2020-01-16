@@ -6,7 +6,7 @@ from pydantic import BaseSettings, UrlStr, validator
 
 class ServerEnv(str, Enum):
     development = 'development'
-    test = 'test'
+    testing = 'testing'
     staging = 'staging'
     production = 'production'
 
