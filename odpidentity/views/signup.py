@@ -20,6 +20,7 @@ def signup():
     """
     token = request.args.get('token')
     try:
+        # the token scope 'login' here is correct - it enables us to easily switch between login and signup using the same token
         login_request, challenge, params = decode_token(token, 'login')
 
         form = SignupForm()
