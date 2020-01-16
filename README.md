@@ -46,39 +46,39 @@ Applicable environment variables are listed below with example / allowed values:
 
 #### Standard Flask config
 
-* FLASK_APP: `odpadmin`
-* FLASK_ENV: `development`|`testing`|`staging`|`production`; note: setting `FLASK_ENV=development` disables TLS
+- **`FLASK_APP`**: `odpadmin`
+- **`FLASK_ENV`**: `development`|`testing`|`staging`|`production`; note: setting `FLASK_ENV=development` disables TLS
     certificate verification when making requests to the Hydra server
-* FLASK_DEBUG: enabled by default if `FLASK_ENV=development`; you may want to disable this (`FLASK_DEBUG=False`)
+- **`FLASK_DEBUG`**: enabled by default if `FLASK_ENV=development`; you may want to disable this (`FLASK_DEBUG=False`)
     if debugging in an IDE
-* FLASK_SECRET_KEY: sets the Flask [SECRET_KEY](https://flask.palletsprojects.com/en/1.1.x/config/#SECRET_KEY)
+- **`FLASK_SECRET_KEY`**: sets the Flask [SECRET_KEY](https://flask.palletsprojects.com/en/1.1.x/config/#SECRET_KEY)
 
 #### Database config
 
-* DATABASE_URL: URL of the ODP Accounts database, e.g. `postgresql://dbuser:pwd@host/dbname`
-* DATABASE_ECHO: set to `True` to emit SQLAlchemy database calls to stderr (default `False`)
+- **`DATABASE_URL`**: URL of the ODP Accounts database, e.g. `postgresql://dbuser:pwd@host/dbname`
+- **`DATABASE_ECHO`**: set to `True` to emit SQLAlchemy database calls to stderr (default `False`)
 
 #### Hydra admin config
 
 Settings pertaining to Hydra administrative functions:
 
-* HYDRA_ADMIN_URL: URL of the Hydra admin API
+- **`HYDRA_ADMIN_URL`**: URL of the Hydra admin API
 
 #### Hydra client config
 
 Settings pertaining to the usage of Hydra as OAuth2 / OpenID Connect provider, for users logging into and working
 with the Admin Service as a client application:
 
-* HYDRA_PUBLIC_URL: URL of the Hydra public API
-* OAUTH2_CLIENT_ID: client ID of this service as registered with Hydra
-* OAUTH2_CLIENT_SECRET: client secret of this service as registered with Hydra
-* OAUTH2_SCOPES: `openid ODP.Admin`
-* OAUTHLIB_INSECURE_TRANSPORT: set to `True` in development, to allow OAuth to work when running the server on HTTP (default `False`)
+- **`HYDRA_PUBLIC_URL`**: URL of the Hydra public API
+- **`OAUTH2_CLIENT_ID`**: client ID of this service as registered with Hydra
+- **`OAUTH2_CLIENT_SECRET`**: client secret of this service as registered with Hydra
+- **`OAUTH2_SCOPES`**: `openid ODP.Admin`
+- **`OAUTHLIB_INSECURE_TRANSPORT`**: set to `True` in development, to allow OAuth to work when running the server on HTTP (default `False`)
 
 #### Admin interface config
 
 Settings for controlling access to the admin interface.
 
-* ADMIN_INSTITUTION: institution code of the institution that owns this service
-* ADMIN_ROLE: role code of the administrative role
-* ADMIN_SCOPE: scope code applicable to this service (should be one of the `OAUTH2_SCOPES` values)
+- **`ADMIN_INSTITUTION`**: institution code of the institution that owns this service
+- **`ADMIN_ROLE`**: role code of the administrative role
+- **`ADMIN_SCOPE`**: scope code applicable to this service (should be one of the `OAUTH2_SCOPES` values)
