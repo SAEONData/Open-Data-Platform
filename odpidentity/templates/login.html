@@ -6,10 +6,9 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('login.login') }}" method="POST">
+    <form action="{{ url_for('login.login', token=token) }}" method="POST">
         {{ form_errors(form) }}
         {{ form.csrf_token }}
-        {{ form.challenge }}
         {{ form.email.label }} {{ field_errors(form.email) }}
         {{ form.password.label }} {{ field_errors(form.password) }}
         <input type="submit" value="Log in">
@@ -17,6 +16,6 @@
 {% endblock %}
 
 {% block login_footer %}
-    Don't have an account yet? <a href="{{ url_for('signup.signup', challenge=form.challenge.data) }}">Sign up</a>
-    <a href="{{ url_for('login.forgot_password', challenge=form.challenge.data) }}">Forgot your password?</a>
+    Don't have an account yet? <a href="{{ url_for('signup.signup', token=token) }}">Sign up</a>
+    <a href="{{ url_for('login.forgot_password', token=token) }}">Forgot your password?</a>
 {% endblock %}

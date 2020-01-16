@@ -166,6 +166,22 @@ def validate_password_reset(email, password):
     return user
 
 
+def validate_email_confirmation(email):
+    """
+    Validate an email confirmation.
+
+    :param email: the user's email address
+    :return: a User object
+
+    :raises ODPUserNotFound: if the email address is not associated with any user account
+    """
+    user = db_session.query(User).filter_by(email=email).first()
+    if not user:
+        raise x.ODPUserNotFound
+
+    return user
+
+
 def create_user_account(email, password):
     """
     Create a new user account with the specified credentials. The password is hashed

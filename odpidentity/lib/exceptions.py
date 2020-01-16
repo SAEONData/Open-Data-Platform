@@ -48,13 +48,7 @@ class ODPPasswordComplexityError(ODPIdentityError):
     error_description = "The password does not meet the minimum complexity requirements."
 
 
-class ODPSignupLoggedInUser(ODPIdentityError):
+class ODPSignupAuthenticatedUser(ODPIdentityError):
 
-    error_code = 'signup_logged_in_user'
-    error_description = "A logged in user cannot sign up."
-
-
-class ODPEmailVerificationError(ODPIdentityError):
-
-    error_code = 'email_verification_error'
-    error_description = "The email address could not be verified."
+    error_code = 'signup_authenticated_user'
+    error_description = "An authenticated user cannot sign up."

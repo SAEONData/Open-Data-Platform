@@ -1,15 +1,12 @@
-from flask import Blueprint, redirect, request, abort, url_for, current_app, flash, render_template
+from flask import Blueprint, redirect, request, url_for, current_app, flash, render_template
 from flask_mail import Message
-from itsdangerous import BadData, JSONWebSignatureSerializer
 
 from hydra import HydraAdminError
-from odpaccounts.db import session as db_session
-from odpaccounts.models.user import User
 
+from . import hydra_error_page, encode_token, decode_token
 from .. import hydra_admin, mail
 from ..lib import exceptions as x
-from ..lib.hydra import hydra_error_page
-from ..lib.users import validate_password_reset, update_user_password, update_user_verified
+from ..lib.users import validate_password_reset, update_user_password, update_user_verified, validate_auto_login, validate_email_confirmation
 from ..forms.reset_password import ResetPasswordForm
 
 bp = Blueprint('account', __name__)
@@ -18,20 +15,28 @@ bp = Blueprint('account', __name__)
 @bp.route('/confirm-email')
 def confirm_email():
     """
-    This route is the target for email verification links. If the data received in the token
-    is valid, then we conclude the login with Hydra.
+    This route is the target for email verification links. The token ensures that it is only accessible
+    from a verification email. If the token is valid, then we conclude the login with Hydra.
     """
-    verification_token = request.args.get('token', '')
+    token = request.args.get('token')
     try:
-        user, challenge = read_verification_token(verification_token)
-        # call Hydra before updating the user; this will throw an error if the challenge is not valid for this user
-        redirect_to = hydra_admin.accept_login_request(challenge, user.id)
-        update_user_verified(user, True)
-        flash("Your email address has been verified.")
-        return redirect(redirect_to)
+        login_request, challenge, params = decode_token(token, 'account.confirm_email')
 
-    except x.ODPIdentityError:
-        abort(403)  # HTTP 403 Forbidden
+        email = params.get('email')
+        try:
+            user = validate_email_confirmation(email)
+            update_user_verified(user, True)
+            # todo send account verified email
+
+            # we must still check that the user may log in
+            validate_auto_login(user.id)
+            redirect_to = hydra_admin.accept_login_request(challenge, user.id)
+
+        except x.ODPIdentityError as e:
+            # any validation error => reject login
+            redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
+
+        return redirect(redirect_to)
 
     except HydraAdminError as e:
         return hydra_error_page(e)
@@ -40,38 +45,42 @@ def confirm_email():
 @bp.route('/reset-password', methods=('GET', 'POST'))
 def reset_password():
     """
-    This route is the target for password reset links. If the data received in the token is
-    valid, then we display a password reset form; if the subsequent post is valid, then we
-    conclude the login with Hydra.
+    This route is the target for password reset links. The token ensures that it is only accessible from a
+    password reset email. If the token is valid, then we display a password reset form, and if the subsequent
+    post is valid, then we conclude the login with Hydra.
     """
+    token = request.args.get('token')
     try:
-        if request.method == 'GET':
-            reset_token = request.args.get('token', '')
-            user, challenge = read_password_reset_token(reset_token)
-            form = ResetPasswordForm(challenge=challenge, email=user.email)
-        else:
-            # POST
-            form = ResetPasswordForm()
+        login_request, challenge, params = decode_token(token, 'account.reset_password')
+
+        form = ResetPasswordForm()
+        email = params.get('email')
+
+        if request.method == 'POST':
             if form.validate():
-                challenge = form.challenge.data
-                email = form.email.data
                 password = form.password.data
+                redirect_to = None
                 try:
                     user = validate_password_reset(email, password)
-                    # call Hydra before updating the password; this will throw an error if the challenge is not valid for this user
-                    redirect_to = hydra_admin.accept_login_request(challenge, user.id)
                     update_user_password(user, password)
-                    flash("Your password has been changed.")
-                    return redirect(redirect_to)
+                    # todo send password updated email
+
+                    # we must still check that the user may log in
+                    validate_auto_login(user.id)
+                    redirect_to = hydra_admin.accept_login_request(challenge, user.id)
 
                 except x.ODPPasswordComplexityError:
                     form.password.errors.append("The password does not meet the minimum complexity requirements.")
 
-        return render_template('reset_password.html', form=form,
-                               password_complexity_description=current_app.config['PASSWORD_COMPLEXITY_DESCRIPTION'])
+                except x.ODPIdentityError as e:
+                    # any other validation error => reject login
+                    redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
 
-    except x.ODPIdentityError:
-        abort(403)  # HTTP 403 Forbidden
+                if redirect_to:
+                    return redirect(redirect_to)
+
+        return render_template('reset_password.html', form=form, token=token,
+                               password_complexity_description=current_app.config['PASSWORD_COMPLEXITY_DESCRIPTION'])
 
     except HydraAdminError as e:
         return hydra_error_page(e)
@@ -85,13 +94,8 @@ def send_verification_email(email, challenge):
     :param challenge: the Hydra login challenge
     """
     try:
-        serializer = JSONWebSignatureSerializer(current_app.secret_key)
-        verification_data = {
-            'email': email,
-            'challenge': challenge,
-        }
-        verification_token = serializer.dumps(verification_data)
-        verification_url = url_for('account.confirm_email', token=verification_token, _external=True)
+        token = encode_token(challenge, 'account.confirm_email', email=email)
+        verification_url = url_for('account.confirm_email', token=token, _external=True)
         msg = Message(
             subject="SAEON Open Data Platform: Please verify your email address",
             body="Click the following link to verify your email address: " + verification_url,
@@ -105,26 +109,6 @@ def send_verification_email(email, challenge):
         flash("There was a problem sending the verification email.", category='error')
 
 
-def read_verification_token(token):
-    """
-    Decode the token received in a verification link.
-
-    :param token: email verification token
-    :return: tuple(user, challenge)
-    """
-    try:
-        serializer = JSONWebSignatureSerializer(current_app.secret_key)
-        verification_data = serializer.loads(token)
-        email = verification_data['email']
-        challenge = verification_data['challenge']
-        user = db_session.query(User).filter_by(email=email).one_or_none()
-        if not user:
-            raise x.ODPUserNotFound
-        return user, challenge
-    except BadData as e:
-        raise x.ODPEmailVerificationError from e
-
-
 def send_password_reset_email(email, challenge):
     """
     Send a password reset email.
@@ -133,13 +117,8 @@ def send_password_reset_email(email, challenge):
     :param challenge: the Hydra login challenge
     """
     try:
-        serializer = JSONWebSignatureSerializer(current_app.secret_key)
-        reset_data = {
-            'email': email,
-            'challenge': challenge,
-        }
-        reset_token = serializer.dumps(reset_data)
-        reset_url = url_for('account.reset_password', token=reset_token, _external=True)
+        token = encode_token(challenge, 'account.reset_password', email=email)
+        reset_url = url_for('account.reset_password', token=token, _external=True)
         msg = Message(
             subject="SAEON Open Data Platform: Request to reset your password",
             body="Click the following link to reset your password: " + reset_url,
@@ -151,23 +130,3 @@ def send_password_reset_email(email, challenge):
     except Exception as e:
         current_app.logger.error("Error sending password reset email to {}: {}".format(email, e))
         flash("There was a problem sending the password reset email.", category='error')
-
-
-def read_password_reset_token(token):
-    """
-    Decode the token received in a password reset link.
-
-    :param token: password reset token
-    :return: tuple(user, challenge)
-    """
-    try:
-        serializer = JSONWebSignatureSerializer(current_app.secret_key)
-        reset_data = serializer.loads(token)
-        email = reset_data['email']
-        challenge = reset_data['challenge']
-        user = db_session.query(User).filter_by(email=email).one_or_none()
-        if not user:
-            raise x.ODPUserNotFound
-        return user, challenge
-    except BadData as e:
-        raise x.ODPEmailVerificationError from e

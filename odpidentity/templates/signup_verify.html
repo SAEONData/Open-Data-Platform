@@ -6,10 +6,8 @@
 
 {% block content %}
     <span>To complete the signup, please click the link in the verification email.</span>
-    <form action="{{ url_for('signup.verify') }}" method="POST">
+    <form action="{{ url_for('signup.verify', token=token) }}" method="POST">
         {{ form.csrf_token }}
-        {{ form.challenge }}
-        {{ form.email }}
         <input type="submit" value="Re-send verification email">
     </form>
 {% endblock %}

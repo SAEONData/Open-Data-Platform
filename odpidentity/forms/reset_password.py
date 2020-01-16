@@ -1,12 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, HiddenField
+from wtforms import PasswordField
 from wtforms.validators import input_required, equal_to
 
 
 class ResetPasswordForm(FlaskForm):
-
-    challenge = HiddenField()
-    email = HiddenField()
 
     password = PasswordField(
         label='New password',

@@ -8,7 +8,7 @@ from odpaccounts.db import session as db_session
 from odpaccounts.models.user import User
 
 from ..lib.users import id_token_data, access_token_data
-from ..lib.hydra import hydra_error_page
+from . import hydra_error_page, encode_token
 from .. import hydra_admin
 
 bp = Blueprint('hydra', __name__)
@@ -37,11 +37,15 @@ def login():
         login_mode = LoginMode.from_request_url(login_request['request_url'])
 
         if login_mode == LoginMode.LOGIN:
-            return redirect(url_for('login.login', challenge=challenge))
+            target_endpoint = 'login.login'
         elif login_mode == LoginMode.SIGNUP:
-            return redirect(url_for('signup.signup', challenge=challenge))
+            target_endpoint = 'signup.signup'
         else:
-            abort(501)  # HTTP 501 Not Implemented
+            raise ValueError
+
+        token = encode_token(challenge, 'login')
+        redirect_to = url_for(target_endpoint, token=token)
+        return redirect(redirect_to)
 
     except HydraAdminError as e:
         return hydra_error_page(e)

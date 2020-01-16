@@ -1,13 +1,13 @@
 from flask import Blueprint, render_template, redirect, url_for, request
+from flask_wtf import FlaskForm
 
 from hydra import HydraAdminError
 
+from . import encode_token, decode_token, hydra_error_page
 from .. import hydra_admin
-from ..forms.credentials import CredentialsForm
+from ..forms.login import LoginForm
 from ..forms.forgot_password import ForgotPasswordForm
-from ..forms.verify_email import VerifyEmailForm
 from ..lib import exceptions as x
-from ..lib.hydra import hydra_error_page
 from ..lib.users import validate_auto_login, validate_user_login, validate_forgot_password
 from .account import send_verification_email, send_password_reset_email
 
@@ -16,15 +16,19 @@ bp = Blueprint('login', __name__)
 
 @bp.route('/', methods=('GET', 'POST'))
 def login():
+    """
+    User login view. The token ensures that we can only access this view in the context of the Hydra login workflow.
+    """
+    token = request.args.get('token')
     try:
+        login_request, challenge, params = decode_token(token, 'login')
+
         user_id = None
         error = None
-        form = None
+        form = LoginForm()
 
         if request.method == 'GET':
-            challenge = request.args.get('challenge')
-            login_request = hydra_admin.get_login_request(challenge)
-            authenticated = login_request['skip']
+            authenticated = login_request['skip']  # indicates whether the user is already authenticated with Hydra
 
             # if already authenticated, we'll wind up with either a user_id or an error
             if authenticated:
@@ -32,44 +36,42 @@ def login():
                 try:
                     validate_auto_login(user_id)
                 except x.ODPIdentityError as e:
+                    # any validation error => reject login
                     user_id = None
                     error = e
 
-            # otherwise, we prepare a login form
-            else:
-                form = CredentialsForm(challenge=challenge)
+            # if not authenticated, we'll display the login form
 
-        else:
-            # it's a post from the user
-            form = CredentialsForm()
-            challenge = form.challenge.data
-            try:
-                if form.validate():
-                    email = form.email.data
-                    password = form.password.data
-                    try:
-                        user = validate_user_login(email, password)
-                        user_id = user.id
+        else:  # POST
+            if form.validate():
+                email = form.email.data
+                password = form.password.data
+                try:
+                    user = validate_user_login(email, password)
+                    user_id = user.id
 
-                    except x.ODPUserNotFound:
-                        form.email.errors.append("The email address is not associated with any user account.")
+                except x.ODPUserNotFound:
+                    form.email.errors.append("The email address is not associated with any user account.")
 
-                    except x.ODPIncorrectPassword:
-                        form.email.errors.append("The email address and password do not match.")
+                except x.ODPIncorrectPassword:
+                    form.email.errors.append("The email address and password do not match.")
 
-                    except x.ODPEmailNotVerified:
-                        send_verification_email(email, challenge)
-                        return redirect(url_for('.verify', email=email, challenge=challenge))
+                except x.ODPEmailNotVerified:
+                    # the login is completed via email verification
+                    send_verification_email(email, challenge)
+                    verify_token = encode_token(challenge, 'login.verify', email=email)
+                    return redirect(url_for('.verify', token=verify_token))
 
-            except x.ODPIdentityError as e:
-                error = e
+                except x.ODPIdentityError as e:
+                    # any other validation error (e.g. account locked/disabled) => reject login
+                    error = e
 
         if user_id:
             redirect_to = hydra_admin.accept_login_request(challenge, user_id)
         elif error:
             redirect_to = hydra_admin.reject_login_request(challenge, error.error_code, error.error_description)
         else:
-            return render_template('login.html', form=form)
+            return render_template('login.html', form=form, token=token)
 
         return redirect(redirect_to)
 
@@ -79,42 +81,55 @@ def login():
 
 @bp.route('/verify', methods=('GET', 'POST'))
 def verify():
-    if request.method == 'GET':
-        challenge = request.args.get('challenge')
-        email = request.args.get('email')
-        form = VerifyEmailForm(challenge=challenge, email=email)
-    else:
-        # POST: send the verification email
-        form = VerifyEmailForm()
-        if form.validate():
-            send_verification_email(form.email.data, form.challenge.data)
+    """
+    View for sending a verification email. The token ensures that we can only get here from the user login view.
+    """
+    token = request.args.get('token')
+    try:
+        login_request, challenge, params = decode_token(token, 'login.verify')
 
-    return render_template('login_verify.html', form=form)
+        form = FlaskForm()
+        email = params.get('email')
+
+        if request.method == 'POST':
+            send_verification_email(email, challenge)
+
+        return render_template('login_verify.html', form=form, token=token)
+
+    except HydraAdminError as e:
+        return hydra_error_page(e)
 
 
 @bp.route('/forgot-password', methods=('GET', 'POST'))
 def forgot_password():
-    sent = False
-    if request.method == 'GET':
-        challenge = request.args.get('challenge')
-        form = ForgotPasswordForm(challenge=challenge)
+    """
+    View for sending a password reset email. The token ensures that we can only access this view in the
+    context of the Hydra login workflow.
+    """
+    token = request.args.get('token')
+    try:
+        login_request, challenge, params = decode_token(token, 'login')
 
-    else:
-        # POST: send the password reset email
         form = ForgotPasswordForm()
-        challenge = form.challenge.data
-        if form.validate():
-            email = form.email.data
-            try:
-                user = validate_forgot_password(email)
-                send_password_reset_email(email, challenge)
-                sent = True
+        sent = False
 
-            except x.ODPUserNotFound:
-                form.email.errors.append("The email address is not associated with any user account.")
+        if request.method == 'POST':
+            if form.validate():
+                email = form.email.data
+                try:
+                    user = validate_forgot_password(email)
+                    send_password_reset_email(email, challenge)
+                    sent = True
 
-            except x.ODPIdentityError as e:
-                redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
-                return redirect(redirect_to)
+                except x.ODPUserNotFound:
+                    form.email.errors.append("The email address is not associated with any user account.")
 
-    return render_template('forgot_password.html', form=form, sent=sent)
+                except x.ODPIdentityError as e:
+                    # any other validation error => reject login
+                    redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
+                    return redirect(redirect_to)
+
+        return render_template('forgot_password.html', form=form, token=token, sent=sent)
+
+    except HydraAdminError as e:
+        return hydra_error_page(e)

@@ -6,16 +6,16 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('signup.signup') }}" method="POST">
+    <form action="{{ url_for('signup.signup', token=token) }}" method="POST">
         {{ form_errors(form) }}
         {{ form.csrf_token }}
-        {{ form.challenge }}
         {{ form.email.label }} {{ field_errors(form.email) }}
         {{ form.password.label }} {{ field_errors(form.password) }}
+        {{ form.confirm_password.label }} {{ field_errors(form.confirm_password) }}
         <input type="submit" value="Sign up">
     </form>
 {% endblock %}
 
 {% block login_footer %}
-    Already have an account? <a href="{{ url_for('login.login', challenge=form.challenge.data) }}">Log in</a>
+    Already have an account? <a href="{{ url_for('login.login', token=token) }}">Log in</a>
 {% endblock %}
