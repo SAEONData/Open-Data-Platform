@@ -21,13 +21,13 @@ for an example configuration.
 
 ### Environment variables
 
-* SERVER_ENV: deployment environment; `development` | `test` | `staging` | `production`
-* SERVER_HOST: IP address / hostname to listen on
-* SERVER_PORT: port number to listen on
+- **`SERVER_ENV`**: deployment environment; `development` | `testing` | `staging` | `production`
+- **`SERVER_HOST`**: IP address / hostname to listen on
+- **`SERVER_PORT`**: port number to listen on
 
-* HYDRA_ADMIN_URL: URL of the Hydra admin API, for access token validation and introspection
-* OAUTH2_AUDIENCE: the required value for `'aud'` in received access tokens; `ODP-API`
-* NO_AUTH: optional, default `False`; set to `True` to disable access token validation
+- **`HYDRA_ADMIN_URL`**: URL of the Hydra admin API, for access token validation and introspection
+- **`OAUTH2_AUDIENCE`**: `ODP-API` (expected value for 'aud' in received access tokens)
+- **`NO_AUTH`**: optional, default `False`; set to `True` to disable access token validation
 
 ## Adapters
 
