@@ -29,7 +29,9 @@ class LoginMode(Enum):
 @bp.route('/login')
 def login():
     """
-    Redirected here from Hydra as part of the login flow.
+    Implements the login provider component of the Hydra login workflow.
+    Hydra redirects to this endpoint based on the ``URLS_LOGIN`` environment
+    variable configured on the Hydra server.
     """
     try:
         challenge = request.args.get('login_challenge')
@@ -54,7 +56,9 @@ def login():
 @bp.route('/consent')
 def consent():
     """
-    Redirected here from Hydra as part of the consent flow.
+    Implements the consent provider component of the Hydra consent workflow.
+    Hydra redirects to this endpoint based on the ``URLS_CONSENT`` environment
+    variable configured on the Hydra server.
     """
     try:
         challenge = request.args.get('consent_challenge')
@@ -79,7 +83,9 @@ def consent():
 @bp.route('/logout')
 def logout():
     """
-    Redirected here from Hydra as part of the logout flow.
+    Implements the logout provider component of the Hydra logout workflow.
+    Hydra redirects to this endpoint based on the ``URLS_LOGOUT`` environment
+    variable configured on the Hydra server.
     """
     try:
         challenge = request.args.get('logout_challenge')
