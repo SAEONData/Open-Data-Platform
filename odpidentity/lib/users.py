@@ -166,9 +166,9 @@ def validate_password_reset(email, password):
     return user
 
 
-def validate_email_confirmation(email):
+def validate_email_verification(email):
     """
-    Validate an email confirmation.
+    Validate an email verification.
 
     :param email: the user's email address
     :return: a User object
