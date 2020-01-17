@@ -81,7 +81,3 @@ with the Identity Service as a client application:
 - **`OAUTH2_CLIENT_SECRET`**: client secret of this service as registered with Hydra
 - **`OAUTH2_SCOPES`**: `openid`
 - **`OAUTHLIB_INSECURE_TRANSPORT`**: set to `True` in development, to allow OAuth2 to work when running the server on HTTP (default `False`)
-
-#### Miscellaneous settings
-
-- **`PASSWORD_COMPLEXITY_DESCRIPTION`**: A description of the password complexity rules for the password reset form

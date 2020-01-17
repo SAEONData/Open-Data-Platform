@@ -107,8 +107,7 @@ def reset_password():
                 if redirect_to:
                     return redirect(redirect_to)
 
-        return render_template('reset_password.html', form=form, token=token,
-                               password_complexity_description=current_app.config['PASSWORD_COMPLEXITY_DESCRIPTION'])
+        return render_template('reset_password.html', form=form, token=token)
 
     except HydraAdminError as e:
         return hydra_error_page(e)
