@@ -8,15 +8,15 @@ class ScopeModelView(SysAdminModelView):
     """
     Scope model view.
     """
-    column_list = ['code', 'description', 'roles']
-    column_default_sort = 'code'
+    column_list = ['key', 'description', 'roles']
+    column_default_sort = 'key'
     column_formatters = {
         'roles': lambda vw, ctx, model, prop: ', '.join(sorted([r.name for r in model.roles]))
     }
 
-    form_columns = ['code', 'description', 'roles']
+    form_columns = ['key', 'description', 'roles']
     form_args = {
-        'code': dict(
+        'key': dict(
             filters=[lambda s: s.strip() if s else s]
         ),
         'roles': dict(

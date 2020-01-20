@@ -1,27 +1,27 @@
 from odpaccounts.db import session as db_session
 from odpaccounts.models.scope import Scope
 
-from .base import SysAdminModelView, CodeField
+from .base import SysAdminModelView, KeyField
 
 
 class RoleModelView(SysAdminModelView):
     """
     Role model view.
     """
-    column_list = ['name', 'code', 'scopes']
+    column_list = ['name', 'key', 'scopes']
     column_default_sort = 'name'
     column_formatters = {
-        'scopes': lambda vw, ctx, model, prop: ', '.join(sorted([s.code for s in model.scopes]))
+        'scopes': lambda vw, ctx, model, prop: ', '.join(sorted([s.key for s in model.scopes]))
     }
 
-    form_columns = ['name', 'code', 'scopes']
+    form_columns = ['name', 'key', 'scopes']
     form_overrides = {
-        'code': CodeField
+        'key': KeyField
     }
     form_args = {
         'scopes': dict(
-            get_label='code',
-            query_factory=lambda: db_session.query(Scope).order_by('code'),
+            get_label='key',
+            query_factory=lambda: db_session.query(Scope).order_by('key'),
         )
     }
     create_template = 'role_create.html'

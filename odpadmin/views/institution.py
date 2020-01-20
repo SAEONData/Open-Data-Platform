@@ -3,14 +3,14 @@ from odpaccounts.models.institution import Institution
 from odpaccounts.models.institution_registry import InstitutionRegistry
 from odpaccounts.models.user import User
 
-from .base import AdminModelView, CodeField
+from .base import AdminModelView, KeyField
 
 
 class InstitutionModelView(AdminModelView):
     """
     Institution model view.
     """
-    column_list = ['name', 'code', 'parent', 'registry.name']
+    column_list = ['name', 'key', 'parent', 'registry.name']
     column_default_sort = 'name'
     column_labels = {
         'registry.name': 'Registry',
@@ -20,9 +20,9 @@ class InstitutionModelView(AdminModelView):
         'parent': lambda vw, ctx, model, prop: model.parent.name if model.parent else None
     }
 
-    form_columns = ['registry', 'parent', 'name', 'code', 'users']
+    form_columns = ['registry', 'parent', 'name', 'key', 'users']
     form_overrides = {
-        'code': CodeField
+        'key': KeyField
     }
     form_args = {
         'registry': dict(

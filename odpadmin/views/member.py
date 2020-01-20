@@ -28,7 +28,7 @@ class MemberModelView(AdminModelView):
     form_args = {
         'capabilities': dict(
             get_label='label',
-            query_factory=lambda: db_session.query(Capability).join(Scope).join(Role).order_by(Scope.code, Role.name),
+            query_factory=lambda: db_session.query(Capability).join(Scope).join(Role).order_by(Scope.key, Role.name),
         )
     }
     edit_template = 'member_edit.html'

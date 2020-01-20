@@ -79,6 +79,6 @@ with the Admin Service as a client application:
 
 Settings for controlling access to the admin interface.
 
-- **`ADMIN_INSTITUTION`**: institution code of the institution that owns this service
-- **`ADMIN_ROLE`**: role code of the administrative role
-- **`ADMIN_SCOPE`**: scope code applicable to this service (should be one of the `OAUTH2_SCOPES` values)
+- **`ADMIN_INSTITUTION`**: institution key of the institution that owns this service
+- **`ADMIN_ROLE`**: role key of the administrative role
+- **`ADMIN_SCOPE`**: scope key of the scope applicable to this service (should be one of the `OAUTH2_SCOPES` values)
