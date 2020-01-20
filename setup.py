@@ -12,8 +12,12 @@ setup(
     license='MIT',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=[
-        # use requirements.txt
-    ],
     python_requires='~=3.6',
+    install_requires=[
+        'sqlalchemy',
+        'psycopg2',
+    ],
+    extras_require={
+        'test': ['pytest', 'coverage']
+    },
 )
