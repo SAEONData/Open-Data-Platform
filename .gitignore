@@ -7,5 +7,3 @@ dist/
 build/
 *.egg-info/
 .idea/
-.env
-virtualenv/
