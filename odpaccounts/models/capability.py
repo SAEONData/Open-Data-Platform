@@ -30,4 +30,4 @@ class Capability(Base):
 
     @property
     def label(self):
-        return '[{}] {}'.format(self.scope.code, self.role.name)
+        return '[{}] {}'.format(self.scope.key, self.role.name)

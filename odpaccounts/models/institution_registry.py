@@ -11,7 +11,7 @@ class InstitutionRegistry(Base):
     __tablename__ = 'institution_registry'
 
     id = Column(Integer, primary_key=True)
-    code = Column(String, unique=True, nullable=False)
+    key = Column(String, unique=True, nullable=False)
     name = Column(String, unique=True, nullable=False)
 
     institutions = relationship('Institution',
@@ -19,4 +19,4 @@ class InstitutionRegistry(Base):
                                 passive_deletes=True)
 
     def __repr__(self):
-        return '<InstitutionRegistry %s>' % self.code
+        return '<InstitutionRegistry %s>' % self.key

@@ -13,7 +13,7 @@ class Institution(Base):
     __tablename__ = 'institution'
 
     id = Column(Integer, primary_key=True)
-    code = Column(String, unique=True, nullable=False)
+    key = Column(String, unique=True, nullable=False)
     name = Column(String, unique=True, nullable=False)
 
     # institutions can be hierarchically related
@@ -46,4 +46,4 @@ class Institution(Base):
                               creator=lambda u: Member(user=u))
 
     def __repr__(self):
-        return '<Institution %s>' % self.code
+        return '<Institution %s>' % self.key

@@ -13,7 +13,7 @@ class Role(Base):
     __tablename__ = 'role'
 
     id = Column(Integer, primary_key=True)
-    code = Column(String, unique=True, nullable=False)
+    key = Column(String, unique=True, nullable=False)
     name = Column(String, unique=True, nullable=False)
 
     # many-to-many relationship between scope and role represented by capability
@@ -26,4 +26,4 @@ class Role(Base):
                                creator=lambda s: Capability(scope=s))
 
     def __repr__(self):
-        return '<Role %s>' % self.code
+        return '<Role %s>' % self.key
