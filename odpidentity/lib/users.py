@@ -260,11 +260,11 @@ def access_token_data(user, scopes):
         {
             'superuser': True/False,
             'privileges': [{
-                'institution': institution code,
+                'institution': institution key,
                 'institution_name': institution name,
-                'role': role code,
+                'role': role key,
                 'role_name': role name,
-                'scope': scope code,
+                'scope': scope key,
             }, ...]
         }
 
@@ -282,14 +282,14 @@ def access_token_data(user, scopes):
     }
     if not user.superuser:
         privileges = db_session.query(Privilege).filter_by(user_id=user.id) \
-            .join(Scope, Privilege.scope_id == Scope.id).filter(Scope.code.in_(scopes)) \
+            .join(Scope, Privilege.scope_id == Scope.id).filter(Scope.key.in_(scopes)) \
             .all()
         for privilege in privileges:
             access_info['privileges'] += [{
-                'institution': privilege.institution.code,
+                'institution': privilege.institution.key,
                 'institution_name': privilege.institution.name,
-                'role': privilege.role.code,
+                'role': privilege.role.key,
                 'role_name': privilege.role.name,
-                'scope': privilege.scope.code,
+                'scope': privilege.scope.key,
             }]
     return access_info
