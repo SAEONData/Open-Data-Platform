@@ -11,8 +11,11 @@ setup(
     author_email='mark@saeon.ac.za',
     license='MIT',
     packages=find_namespace_packages(),
-    install_requires=[
-        # use requirements.txt
-    ],
     python_requires='~=3.6',
+    install_requires=[
+        'ckanapi',
+    ],
+    extras_require={
+        'test': ['pytest', 'coverage']
+    },
 )
