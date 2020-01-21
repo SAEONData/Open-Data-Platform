@@ -12,8 +12,16 @@ setup(
     license='MIT',
     packages=find_namespace_packages(),
     include_package_data=True,
-    install_requires=[
-        # use requirements.txt
-    ],
     python_requires='~=3.6',
+    install_requires=[
+        'fastapi==0.43.0',  # TODO we shouldn't pin versions here; but this is needed until we're compatible with 0.44 and above
+        'uvicorn',
+        'python-dotenv',
+    ],
+    extras_require={
+        'test': ['pytest', 'coverage']
+    },
+    dependency_links=[
+        'git+https://github.com/SAEONData/Hydra-Admin-Client.git#egg=Hydra_Admin_Client',
+    ],
 )
