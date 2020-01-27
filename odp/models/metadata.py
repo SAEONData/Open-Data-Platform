@@ -1,5 +1,5 @@
-from typing import Set, Dict, Optional
-from pydantic import BaseModel, Schema, UUID4
+from typing import Dict, Optional
+from pydantic import BaseModel, Field, UUID4
 
 from ..lib.metadata import DOI_REGEX
 
@@ -9,7 +9,7 @@ class MetadataRecordIn(BaseModel):
     collection: str
     metadata_standard: str
     metadata: Dict
-    doi: str = Schema('', regex=DOI_REGEX)
+    doi: str = Field('', regex=DOI_REGEX)
     auto_assign_doi: bool = False
 
 

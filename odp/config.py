@@ -1,7 +1,7 @@
 from typing import Optional
 from enum import Enum
 
-from pydantic import BaseSettings, UrlStr, validator
+from pydantic import BaseSettings, AnyHttpUrl, validator
 
 
 class ServerEnv(str, Enum):
@@ -20,7 +20,7 @@ class Config(BaseSettings):
     SERVER_PORT: int
 
     NO_AUTH: Optional[bool]
-    HYDRA_ADMIN_URL: Optional[UrlStr]
+    HYDRA_ADMIN_URL: Optional[AnyHttpUrl]
     OAUTH2_AUDIENCE: Optional[str]
 
     @validator('NO_AUTH', pre=True, always=True)

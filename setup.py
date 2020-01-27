@@ -14,7 +14,7 @@ setup(
     include_package_data=True,
     python_requires='~=3.6',
     install_requires=[
-        'fastapi==0.43.0',  # TODO we shouldn't pin versions here; but this is needed until we're compatible with 0.44 and above
+        'fastapi',
         'uvicorn',
         'python-dotenv',
     ],
