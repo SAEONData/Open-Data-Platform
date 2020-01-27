@@ -190,7 +190,7 @@ class HydraAdminClient:
                           'error_description': error_description,
                       })
 
-    def introspect_token(self, access_token: str, require_scope: List[str],
+    def introspect_token(self, token: str, require_scope: List[str],
                          require_audience: Optional[List[str]] = None) -> dict:
         """
         Validate an OAuth2 access/refresh token and return additional information about the token.
@@ -198,15 +198,15 @@ class HydraAdminClient:
 
         https://www.ory.sh/docs/hydra/sdk/api#introspect-oauth2-tokens
 
-        :param access_token: opaque access token string
-        :param require_scope: list of scopes that the access token is expected to be valid for
-        :param require_audience: (optional) list of audiences that the access token is expected to be valid for
+        :param token: opaque access/refresh token string
+        :param require_scope: list of scopes that the token is expected to be valid for
+        :param require_audience: (optional) list of audiences that the token is expected to be valid for
         :return: dict
         """
         token_info = self._request('POST', '/oauth2/introspect',
                                    headers={'Content-Type': 'application/x-www-form-urlencoded'},
                                    data={
-                                       'token': access_token,
+                                       'token': token,
                                        'scope': ' '.join(require_scope),
                                    })
         if not require_audience:
