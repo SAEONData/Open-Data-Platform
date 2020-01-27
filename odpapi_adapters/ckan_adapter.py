@@ -2,7 +2,7 @@ from typing import List
 import re
 import json
 
-from pydantic import UrlStr
+from pydantic import AnyHttpUrl
 from requests import RequestException
 from fastapi import HTTPException
 import ckanapi
@@ -35,7 +35,7 @@ class CKANAdapterConfig(ODPAPIAdapterConfig):
     """
     Config for the CKAN adapter, populated from the environment.
     """
-    CKAN_URL: UrlStr
+    CKAN_URL: AnyHttpUrl
 
     class Config:
         env_prefix = 'CKAN_ADAPTER.'
