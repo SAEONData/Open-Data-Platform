@@ -16,6 +16,7 @@ setup(
     install_requires=[
         'sqlalchemy',
         'psycopg2',
+        'pydantic',
     ],
     extras_require={
         'test': ['pytest', 'coverage']
