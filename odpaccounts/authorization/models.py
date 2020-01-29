@@ -9,7 +9,7 @@ class TokenType(Enum):
     refresh = 'refresh_token'
 
 
-class Capacity(BaseModel):
+class AccessRight(BaseModel):
     institution_key: str
     institution_name: str
     role_key: str
@@ -17,10 +17,10 @@ class Capacity(BaseModel):
     scope_key: str
 
 
-class AuthorizedUser(BaseModel):
+class AccessRights(BaseModel):
     user_id: str
     superuser: bool
-    capacities: List[Capacity]
+    rights: List[AccessRight]
 
 
 class AccessToken(BaseModel):
@@ -33,9 +33,9 @@ class AccessToken(BaseModel):
     iss: str
     iat: int
     exp: int
-    ext: AuthorizedUser
+    ext: AccessRights
 
 
-class IDToken(BaseModel):
-    sub: str
+class UserProfile(BaseModel):
+    user_id: str
     email: EmailStr
