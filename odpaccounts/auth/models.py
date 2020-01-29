@@ -1,7 +1,7 @@
 from typing import List
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 
 
 class TokenType(Enum):
@@ -24,8 +24,8 @@ class AccessRights(BaseModel):
 
 
 class AccessToken(BaseModel):
-    active: bool = Field(..., const=True)
     token_type: TokenType
+    active: bool
     client_id: str
     scope: str
     aud: List[str]
