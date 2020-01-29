@@ -1,14 +1,13 @@
 from typing import List
 
-from sqlalchemy.orm import Session
-
+from ..db import session as db_session
 from ..models.privilege import Privilege
 from ..models.user import User
 from ..models.scope import Scope
 from ..authorization.models import AuthorizedUser, Capacity
 
 
-def create_authorized_user(db_session: Session, user: User, scopes: List[str]) -> AuthorizedUser:
+def create_authorized_user(user: User, scopes: List[str]) -> AuthorizedUser:
     """
     Create an :class:`AuthorizedUser` instance, which is suitable for attachment to the
     access token for this user. This data will be recoverable from the 'ext' attribute
@@ -18,7 +17,6 @@ def create_authorized_user(db_session: Session, user: User, scopes: List[str]) -
     If the user is a superuser, privileges will be an empty list, since a superuser
     can do anything anyway.
 
-    :param db_session: SQLAlchemy session
     :param user: a User instance
     :param scopes: list of scopes being requested for the token
     :return: AuthorizedUser
