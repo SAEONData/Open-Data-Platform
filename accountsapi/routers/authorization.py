@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.post('/', response_model=AccessRights)
-async def authorize(
+async def validate_and_introspect_token(
         token_in: TokenIn,
         request: Request,
 ):
@@ -21,14 +21,11 @@ async def authorize(
             server_url=config.HYDRA_ADMIN_URL,
             verify_tls=config.SERVER_ENV != 'development',
         )
-        access_token = AccessToken(**hydra_admin.introspect_token(
-            token_in.token,
-            token_in.require_scope,
-            token_in.require_audience,
-        ))
+        token_data = hydra_admin.introspect_token(**token_in.dict())
+        access_token = AccessToken(**token_data)
         access_rights = AccessRights(**access_token.ext.dict())
         assert access_rights.user_id == access_token.sub
         return access_rights
 
     except HydraAdminError as e:
-        raise HTTPException(status_code=e.status_code, detail=e.error_detail)
+        raise HTTPException(status_code=e.status_code, detail=e.error_detail) from e
