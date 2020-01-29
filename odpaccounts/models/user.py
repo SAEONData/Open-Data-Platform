@@ -1,6 +1,5 @@
 import uuid
 
-from flask_login import UserMixin
 from sqlalchemy import Column, String, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -9,7 +8,7 @@ from . import Base
 from .member import Member
 
 
-class User(UserMixin, Base):
+class User(Base):
     """
     Model representing a user account.
     """
@@ -33,3 +32,22 @@ class User(UserMixin, Base):
 
     def __repr__(self):
         return '<User %s>' % self.email
+
+    # region Flask-Login
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    @property
+    def is_active(self):
+        return self.active and self.verified
+
+    def get_id(self):
+        return str(self.id)
+
+    # endregion
