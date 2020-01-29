@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright &copy; 2019 The South African Environmental Observation Network (SAEON)
+Copyright &copy; 2020 The South African Environmental Observation Network (SAEON)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
