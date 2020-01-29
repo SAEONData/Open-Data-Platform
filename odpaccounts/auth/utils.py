@@ -4,7 +4,7 @@ from ..db import session as db_session
 from ..models.privilege import Privilege
 from ..models.user import User
 from ..models.scope import Scope
-from ..authorization.models import AccessRights, AccessRight, UserProfile
+from ..auth.models import AccessRights, AccessRight, UserProfile
 
 
 def get_access_rights(user: User, scopes: List[str]) -> AccessRights:
