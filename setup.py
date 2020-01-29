@@ -17,7 +17,6 @@ setup(
         'fastapi',
         'uvicorn',
         'python-dotenv',
-        'pydantic[email]',
     ],
     extras_require={
         'test': ['pytest', 'coverage']
