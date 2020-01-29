@@ -6,7 +6,7 @@ from hydra import HydraAdminError
 
 from odpaccounts.db import session as db_session
 from odpaccounts.models.user import User
-from odpaccounts.authorization.utils import get_access_rights, get_user_profile
+from odpaccounts.auth.utils import get_access_rights, get_user_profile
 
 from . import hydra_error_page, encode_token
 from .. import hydra_admin
