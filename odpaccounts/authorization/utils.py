@@ -43,3 +43,17 @@ def get_access_rights(user: User, scopes: List[str]) -> AccessRights:
             scope_key=privilege.scope.key,
         ) for privilege in privileges],
     )
+
+
+def get_user_profile(user: User) -> UserProfile:
+    """
+    Create a :class:`UserProfile` instance, which is suitable for generating the ID token
+    for this user.
+
+    :param user: a User instance
+    :return: UserProfile
+    """
+    return UserProfile(
+        user_id=user.id,
+        email=user.email,
+    )
