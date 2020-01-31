@@ -7,11 +7,11 @@ OpenAPI standard. API requests are fulfilled by _adapters_ configured to handle 
 
 ### System dependencies
 
-* Python 3.6 (NB: does not currently work with Python &ge; 3.7)
+* Python 3.6
 
 ### Project dependencies
 
-* [Hydra-Admin-Client](https://github.com/SAEONData/Hydra-Admin-Client)
+* [ODP-AccountsLib](https://github.com/SAEONData/ODP-AccountsLib)
 
 ## Configuration
 
@@ -21,13 +21,20 @@ for an example configuration.
 
 ### Environment variables
 
+#### Global
+
 - **`SERVER_ENV`**: deployment environment; `development` | `testing` | `staging` | `production`
 - **`SERVER_HOST`**: IP address / hostname to listen on
 - **`SERVER_PORT`**: port number to listen on
 
-- **`HYDRA_ADMIN_URL`**: URL of the Hydra admin API, for access token validation and introspection
+- **`ACCOUNTS_API_URL`**: URL of the ODP Accounts API, for access token validation and introspection
 - **`OAUTH2_AUDIENCE`**: `ODP-API` (expected value for 'aud' in received access tokens)
 - **`NO_AUTH`**: optional, default `False`; set to `True` to disable access token validation
+
+#### Metadata router
+
+- **`METADATA.ADAPTER`**: class name of the adapter that will handle `/metadata/` requests
+- **`METADATA.OAUTH2_SCOPE`**: OAuth2 scope required for `/metadata/` requests
 
 ## Adapters
 
@@ -35,12 +42,11 @@ An adapter (e.g. [ODP-API-CKANAdapter](https://github.com/SAEONData/ODP-API-CKAN
 of a class that inherits from `odp.lib.adapters.ODPAPIAdapter`, along with a corresponding `-Config`
 class that inherits from `odp.lib.adapters.ODPAPIAdapterConfig`. These classes should be defined in
 a module (or modules) located under an `odpapi_adapters` namespace package in the adapter project
-directory. The adapter is then enabled by simply installing it into the same Python environment
-as the ODP API.
+directory. The adapter is enabled by installing it into the same Python environment as the ODP API,
+and setting the applicable `ROUTER.ADAPTER` environment variable(s) for router(s) that should use
+the adapter.
 
 The adapter class contains methods that fulfil adapter calls as defined in one or more `odp.routers.*`
 modules. The adapter's config class should define an environment variable prefix (e.g. `'FOOBAR_ADAPTER.'`),
 and may define additional settings as needed, which will also be automatically loaded from the
-environment at startup.The environment supplied to the system at startup must at a minimum include
-a `ROUTES` variable (e.g. `FOOBAR_ADAPTER.ROUTES`) whose value is a JSON-encoded list of routes that
-the adapter will handle.
+environment at startup.

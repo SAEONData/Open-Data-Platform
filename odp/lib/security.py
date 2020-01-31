@@ -1,36 +1,63 @@
-from fastapi.security import HTTPBearer
+from typing import NamedTuple
+
 from fastapi.exceptions import HTTPException
+from fastapi.security import HTTPBearer
 from starlette.requests import Request
-from typing import List
+from starlette.status import HTTP_503_SERVICE_UNAVAILABLE
+import requests
 
-from hydra import HydraAdminClient, HydraAdminError
+from odpaccounts.auth.models import AccessRights
 
 
-class HydraAuth(HTTPBearer):
+class AuthData(NamedTuple):
+    access_token: str
+    access_rights: AccessRights
 
-    def __init__(self, required_scopes: List[str]):
-        super().__init__(auto_error=True)
-        self.required_scopes = required_scopes
 
-    async def __call__(self, request: Request) -> str:
+class Authorizer(HTTPBearer):
+    """
+    Dependency class which authorizes the current request.
+    """
+    async def __call__(self, request: Request) -> AuthData:
         """
-        Validate and return the access token that was supplied in the Authorization header.
-        :return: str
+        Validate the access token that was supplied in the Authorization header,
+        and return the token and associated access rights.
+        :return: tuple(access_token, access_rights)
         """
         config = request.app.extra['config']
         validate_token = not config.NO_AUTH
 
         auth_credentials = await super().__call__(request)
+
         access_token = auth_credentials.credentials
+        access_rights = None
 
         if validate_token:
             try:
-                hydra_admin = HydraAdminClient(
-                    server_url=config.HYDRA_ADMIN_URL,
-                    verify_tls=config.SERVER_ENV != 'development',
-                )
-                hydra_admin.introspect_token(access_token, self.required_scopes, [config.OAUTH2_AUDIENCE])
-            except HydraAdminError as e:
-                raise HTTPException(status_code=e.status_code, detail=e.error_detail)
+                r = requests.post(config.ACCOUNTS_API_URL + '/authorization',
+                                  json={
+                                      'token': access_token,
+                                      'require_scope': [request.state.config.OAUTH2_SCOPE],
+                                      'require_audience': [config.OAUTH2_AUDIENCE],
+                                  },
+                                  headers={
+                                      'Content-Type': 'application/json',
+                                      'Accept': 'application/json',
+                                  },
+                                  verify=config.SERVER_ENV != 'development',
+                                  timeout=5.0 if config.SERVER_ENV != 'development' else 300,
+                                  )
+                r.raise_for_status()
+                access_rights = AccessRights(**r.json())
 
-        return access_token
+            except requests.HTTPError as e:
+                try:
+                    detail = e.response.json()
+                except ValueError:
+                    detail = e.response.reason
+                raise HTTPException(status_code=e.response.status_code, detail=detail) from e
+
+            except requests.RequestException as e:
+                raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail=str(e)) from e
+
+        return AuthData(access_token, access_rights)

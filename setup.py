@@ -1,6 +1,6 @@
 from setuptools import setup, find_namespace_packages
 
-version = '0.1.0'
+version = '0.2.0'
 
 setup(
     name='ODP-API',
@@ -17,11 +17,12 @@ setup(
         'fastapi',
         'uvicorn',
         'python-dotenv',
+        'requests',
     ],
     extras_require={
         'test': ['pytest', 'coverage']
     },
     dependency_links=[
-        'git+https://github.com/SAEONData/Hydra-Admin-Client.git#egg=Hydra_Admin_Client',
+        'git+https://github.com/SAEONData/ODP-AccountsLib.git#egg=ODP_AccountsLib',
     ],
 )
