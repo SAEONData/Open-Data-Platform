@@ -39,14 +39,14 @@ for an example configuration.
 ## Adapters
 
 An adapter (e.g. [ODP-API-CKANAdapter](https://github.com/SAEONData/ODP-API-CKANAdapter)) consists
-of a class that inherits from `odp.lib.adapters.ODPAPIAdapter`, along with a corresponding `-Config`
-class that inherits from `odp.lib.adapters.ODPAPIAdapterConfig`. These classes should be defined in
+of a class that inherits from `odpapi.adapters.ODPAPIAdapter`, along with a corresponding `-Config`
+class that inherits from `odpapi.adapters.ODPAPIAdapterConfig`. These classes should be defined in
 a module (or modules) located under an `odpapi_adapters` namespace package in the adapter project
 directory. The adapter is enabled by installing it into the same Python environment as the ODP API,
 and setting the applicable `ROUTER.ADAPTER` environment variable(s) for router(s) that should use
 the adapter.
 
-The adapter class contains methods that fulfil adapter calls as defined in one or more `odp.routers.*`
+The adapter class contains methods that fulfil adapter calls as defined in one or more `odpapi.routers.*`
 modules. The adapter's config class should define an environment variable prefix (e.g. `'FOOBAR_ADAPTER.'`),
 and may define additional settings as needed, which will also be automatically loaded from the
 environment at startup.

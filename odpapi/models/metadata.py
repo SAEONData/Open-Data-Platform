@@ -1,7 +1,14 @@
 from typing import Dict, Optional
 from pydantic import BaseModel, Field, UUID4
 
-from ..lib.metadata import DOI_REGEX
+# adapted from https://www.crossref.org/blog/dois-and-matching-regular-expressions
+DOI_REGEX = r'^10\.\d{4,}(\.\d+)*/[-._;()/:a-zA-Z0-9]+$'
+
+
+class MetadataRecordsFilter:
+    def __init__(self, institution: str = None, infrastructure: str = None):
+        self.institution = institution
+        self.infrastructure = infrastructure
 
 
 class MetadataRecordIn(BaseModel):

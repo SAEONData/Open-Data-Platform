@@ -3,7 +3,7 @@ from starlette.requests import Request
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
 
 from ..config import router_config_factory
-from ..lib.security import Authorizer, AuthData
+from ..security import Authorizer, AuthData
 
 
 def load_configs(app: FastAPI, *router_modules: str):

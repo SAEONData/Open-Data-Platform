@@ -3,13 +3,13 @@ from typing import List
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
-from ..lib.metadata import MetadataRecordsFilter
-from ..lib.common import PagerParams
+from ..models import PagerParams
 from ..models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
     MetadataValidationResult,
     MetadataWorkflowResult,
+    MetadataRecordsFilter,
 )
 
 router = APIRouter()
