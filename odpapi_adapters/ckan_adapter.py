@@ -8,19 +8,19 @@ from fastapi import HTTPException
 import ckanapi
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_503_SERVICE_UNAVAILABLE
 
-from odp.lib.adapters import ODPAPIAdapter, ODPAPIAdapterConfig
-from odp.lib.common import PagerParams
-from odp.lib.metadata import MetadataRecordsFilter
-from odp.models.institution import (
+from odpapi.adapters import ODPAPIAdapter, ODPAPIAdapterConfig
+from odpapi.models import PagerParams
+from odpapi.models.institution import (
     Institution,
     InstitutionIn,
     InstitutionOut,
 )
-from odp.models.metadata import (
+from odpapi.models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
     MetadataValidationResult,
     MetadataWorkflowResult,
+    MetadataRecordsFilter,
 )
 
 
