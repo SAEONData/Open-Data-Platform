@@ -1,9 +1,8 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from starlette.requests import Request
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
 
 from ..config import router_config_factory
-from ..security import Authorizer, AuthData
 
 
 def load_configs(app: FastAPI, *router_modules: str):
@@ -39,16 +38,3 @@ async def set_adapter(request: Request):
     except KeyError:
         raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR,
                             f"Unknown adapter {request.state.config.ADAPTER} specified for {router_module}.")
-
-
-async def authorize(request: Request, auth_data: AuthData = Depends(Authorizer())):
-    """
-    Dependency function which authorizes the current request and sets
-    authorization data on the request state::
-        request.state.access_token
-        request.state.access_info
-
-    Note: the set_config dependency must come before this one
-    """
-    request.state.access_token = auth_data.access_token
-    request.state.access_info = auth_data.access_info

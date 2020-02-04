@@ -21,12 +21,11 @@ routers.load_configs(app, metadata.__name__)
 
 app.include_router(
     metadata.router,
-    prefix='/metadata',
+    prefix='/{institution_key}/metadata',
     tags=['Metadata'],
     dependencies=[
         Depends(routers.set_config),
         Depends(routers.set_adapter),
-        Depends(routers.authorize),
     ],
 )
 

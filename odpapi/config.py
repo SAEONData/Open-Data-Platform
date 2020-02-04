@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
 
 from pydantic import BaseSettings, AnyHttpUrl, validator
@@ -39,8 +39,16 @@ class RouterConfig(BaseSettings):
     Router config base class. Router-specific descendants are created dynamically
     using the factory method below.
     """
+    # class name of the adapter that will fulfil requests to this router
     ADAPTER: str
+    # scope applicable to this router
     OAUTH2_SCOPE: str
+    # roles that may read resources (belonging to the same institution, if the router is institution-aware)
+    READONLY_ROLES: List[str]
+    # roles that may read or write resources (belonging to the same institution, if the router is institution-aware)
+    READWRITE_ROLES: List[str]
+    # roles that may read or write resources belonging to any institution, and that may access admin-only functions
+    ADMIN_ROLES: List[str]
 
 
 def router_config_factory(router_module: str):

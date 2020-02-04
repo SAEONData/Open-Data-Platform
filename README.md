@@ -31,10 +31,19 @@ for an example configuration.
 - **`OAUTH2_AUDIENCE`**: `ODP-API` (expected value for 'aud' in received access tokens)
 - **`NO_AUTH`**: optional, default `False`; set to `True` to disable access token validation
 
-#### Metadata router
+#### Routers
 
-- **`METADATA.ADAPTER`**: class name of the adapter that will handle `/metadata/` requests
-- **`METADATA.OAUTH2_SCOPE`**: OAuth2 scope required for `/metadata/` requests
+Router-specific environment variables are prefixed with the uppercased name of the router module,
+e.g. `METADATA.ADAPTER`, etc. Following are the options that are applicable per router:
+
+- **`<ROUTER>.ADAPTER`**: class name of the adapter that will fulfil requests to the router
+- **`<ROUTER>.OAUTH2_SCOPE`**: OAuth2 scope applicable to the router
+- **`<ROUTER>.READONLY_ROLES`**: JSON-encoded list of roles that may read resources via this router;
+if the router is institution-aware, the resources must belong to the same institution as the user
+- **`<ROUTER>.READWRITE_ROLES`**: JSON-encoded list of roles that may read or write resources via this router;
+if the router is institution-aware, the resources must belong to the same institution as the user
+- **`<ROUTER>.ADMIN_ROLES`**: JSON-encoded list of roles that may read or write resources belonging
+to _any_ institution, and that may access administrative functions, via this router
 
 ## Adapters
 
@@ -43,7 +52,7 @@ of a class that inherits from `odpapi.adapters.ODPAPIAdapter`, along with a corr
 class that inherits from `odpapi.adapters.ODPAPIAdapterConfig`. These classes should be defined in
 a module (or modules) located under an `odpapi_adapters` namespace package in the adapter project
 directory. The adapter is enabled by installing it into the same Python environment as the ODP API,
-and setting the applicable `ROUTER.ADAPTER` environment variable(s) for router(s) that should use
+and setting the applicable `<ROUTER>.ADAPTER` environment variable(s) for router(s) that should use
 the adapter.
 
 The adapter class contains methods that fulfil adapter calls as defined in one or more `odpapi.routers.*`
