@@ -1,18 +1,19 @@
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 from starlette.requests import Request
+from starlette.status import HTTP_403_FORBIDDEN
 
 from hydra import HydraAdminClient, HydraAdminError
-from odpaccounts.auth.models import AccessToken, AccessRights
+from odpaccounts.auth.models import AccessToken, AccessInfo
 
-from ..models.authorization import TokenIn
+from ..models.authorization import AuthorizationRequest
 
 router = APIRouter()
 
 
-@router.post('/', response_model=AccessRights)
+@router.post('/', response_model=AccessInfo)
 async def validate_and_introspect_token(
-        token_in: TokenIn,
+        auth_request: AuthorizationRequest,
         request: Request,
 ):
     config = request.app.extra['config']
@@ -21,11 +22,31 @@ async def validate_and_introspect_token(
             server_url=config.HYDRA_ADMIN_URL,
             verify_tls=config.SERVER_ENV != 'development',
         )
-        token_data = hydra_admin.introspect_token(**token_in.dict())
-        access_token = AccessToken(**token_data)
-        access_rights = AccessRights(**access_token.ext.dict())
-        assert access_rights.user_id == access_token.sub
-        return access_rights
-
+        # this verifies token validity, including scope and audience
+        token_data = hydra_admin.introspect_token(
+            token=auth_request.token,
+            require_scope=[auth_request.scope],
+            require_audience=[auth_request.audience],
+        )
     except HydraAdminError as e:
         raise HTTPException(status_code=e.status_code, detail=e.error_detail) from e
+
+    access_token = AccessToken(**token_data)
+    access_info = AccessInfo(**access_token.ext.dict())
+    assert access_info.user_id == access_token.sub
+
+    allow = access_info.superuser
+    if not allow:
+        # the token might be valid for multiple scopes, but we must only consider privileges
+        # related to the requested scope
+        access_info.access_rights = [r for r in access_info.access_rights if r.scope_key == auth_request.scope]
+        # filter privileges to include only those indicating that the user has a "super" role
+        # (within any institution), or that the user has an applicable role within the given institution
+        access_info.access_rights = [r for r in access_info.access_rights if r.role_key in auth_request.super_roles
+                                     or (r.role_key in auth_request.institutional_roles and r.institution_key == auth_request.institution)]
+        allow = len(access_info.access_rights) > 0
+
+    if not allow:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Insufficient privileges")
+
+    return access_info
