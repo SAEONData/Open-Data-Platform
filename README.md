@@ -14,5 +14,4 @@ See the [ODP API](https://github.com/SAEONData/ODP-API) README for more info.
 
 ### Environment variables
 
-- **`CKAN_ADAPTER.ROUTES`**: JSON-encoded list of routes that the adapter will handle
 - **`CKAN_ADAPTER.CKAN_URL`**: URL of the CKAN server
