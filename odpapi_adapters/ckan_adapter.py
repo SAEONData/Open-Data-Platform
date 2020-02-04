@@ -20,7 +20,6 @@ from odpapi.models.metadata import (
     MetadataRecordIn,
     MetadataValidationResult,
     MetadataWorkflowResult,
-    MetadataRecordsFilter,
 )
 
 
@@ -186,12 +185,11 @@ class CKANAdapter(ODPAPIAdapter):
             'auto_assign_doi': metadata_record.auto_assign_doi,
         }
 
-    def list_metadata_records(self, filter: MetadataRecordsFilter, pager: PagerParams, access_token: str) -> List[MetadataRecord]:
+    def list_metadata_records(self, institution_key: str, pager: PagerParams, access_token: str) -> List[MetadataRecord]:
         ckan_record_list = self._call_ckan(
             'metadata_record_list',
             access_token,
-            owner_org=filter.institution,
-            infrastructure_id=filter.infrastructure,
+            owner_org=institution_key,
             offset=pager.skip,
             limit=pager.limit,
             all_fields=True,
