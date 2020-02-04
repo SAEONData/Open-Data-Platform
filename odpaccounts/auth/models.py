@@ -17,10 +17,10 @@ class AccessRight(BaseModel):
     scope_key: str
 
 
-class AccessRights(BaseModel):
+class AccessInfo(BaseModel):
     user_id: str
     superuser: bool
-    rights: List[AccessRight]
+    access_rights: List[AccessRight]
 
 
 class AccessToken(BaseModel):
@@ -33,7 +33,7 @@ class AccessToken(BaseModel):
     iss: str
     iat: int
     exp: int
-    ext: AccessRights
+    ext: AccessInfo
 
 
 class UserProfile(BaseModel):
