@@ -6,7 +6,7 @@ from hydra import HydraAdminError
 
 from odpaccounts.db import session as db_session
 from odpaccounts.models.user import User
-from odpaccounts.auth.utils import get_access_rights, get_user_profile
+from odpaccounts.auth.utils import get_access_info, get_user_profile
 
 from . import hydra_error_page, encode_token
 from .. import hydra_admin
@@ -66,13 +66,13 @@ def consent():
         user_id = consent_request['subject']
         user = db_session.query(User).get(user_id)
 
-        access_rights = get_access_rights(user, consent_request['requested_scope'])
+        access_info = get_access_info(user, consent_request['requested_scope'])
         user_profile = get_user_profile(user)
 
         consent_params = {
             'grant_scope': consent_request['requested_scope'],
             'grant_audience': consent_request['requested_access_token_audience'],
-            'access_token_data': access_rights.dict(),
+            'access_token_data': access_info.dict(),
             'id_token_data': user_profile.dict(),
         }
         redirect_to = hydra_admin.accept_consent_request(challenge, **consent_params)
