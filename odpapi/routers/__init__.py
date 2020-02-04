@@ -46,9 +46,9 @@ async def authorize(request: Request, auth_data: AuthData = Depends(Authorizer()
     Dependency function which authorizes the current request and sets
     authorization data on the request state::
         request.state.access_token
-        request.state.access_rights
+        request.state.access_info
 
     Note: the set_config dependency must come before this one
     """
     request.state.access_token = auth_data.access_token
-    request.state.access_rights = auth_data.access_rights
+    request.state.access_info = auth_data.access_info

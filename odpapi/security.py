@@ -6,12 +6,12 @@ from starlette.requests import Request
 from starlette.status import HTTP_503_SERVICE_UNAVAILABLE
 import requests
 
-from odpaccounts.auth.models import AccessRights
+from odpaccounts.auth.models import AccessInfo
 
 
 class AuthData(NamedTuple):
     access_token: str
-    access_rights: AccessRights
+    access_info: AccessInfo
 
 
 class Authorizer(HTTPBearer):
@@ -22,17 +22,20 @@ class Authorizer(HTTPBearer):
         """
         Validate the access token that was supplied in the Authorization header,
         and return the token and associated access rights.
-        :return: tuple(access_token, access_rights)
+        :return: tuple(access_token, access_info)
         """
         config = request.app.extra['config']
-        validate_token = not config.NO_AUTH
 
-        auth_credentials = await super().__call__(request)
+        http_auth = await super().__call__(request)
+        access_token = http_auth.credentials
 
-        access_token = auth_credentials.credentials
-        access_rights = None
-
-        if validate_token:
+        if config.NO_AUTH:
+            access_info = AccessInfo(
+                superuser=True,
+                user_id='',
+                rights=[],
+            )
+        else:
             try:
                 r = requests.post(config.ACCOUNTS_API_URL + '/authorization/',
                                   json={
@@ -48,7 +51,7 @@ class Authorizer(HTTPBearer):
                                   timeout=5.0 if config.SERVER_ENV != 'development' else 300,
                                   )
                 r.raise_for_status()
-                access_rights = AccessRights(**r.json())
+                access_info = AccessInfo(**r.json())
 
             except requests.HTTPError as e:
                 try:
@@ -60,4 +63,4 @@ class Authorizer(HTTPBearer):
             except requests.RequestException as e:
                 raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail=str(e)) from e
 
-        return AuthData(access_token, access_rights)
+        return AuthData(access_token, access_info)
