@@ -34,7 +34,7 @@ class Authorizer(HTTPBearer):
 
         if validate_token:
             try:
-                r = requests.post(config.ACCOUNTS_API_URL + '/authorization',
+                r = requests.post(config.ACCOUNTS_API_URL + '/authorization/',
                                   json={
                                       'token': access_token,
                                       'require_scope': [request.state.config.OAUTH2_SCOPE],
