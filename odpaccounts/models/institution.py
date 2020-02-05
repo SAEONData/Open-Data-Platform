@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, ForeignKeyConstraint, UniqueConstraint
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -17,24 +17,11 @@ class Institution(Base):
     name = Column(String, unique=True, nullable=False)
 
     # institutions can be hierarchically related
-    parent_id = Column(Integer)
+    parent_id = Column(Integer, ForeignKey('institution.id', ondelete='CASCADE'))
     parent = relationship('Institution',
                           backref='children',
                           remote_side=[id],
                           primaryjoin=parent_id == id)
-
-    registry_id = Column(Integer, ForeignKey('institution_registry.id', ondelete='CASCADE'), nullable=False)
-    registry = relationship('InstitutionRegistry', back_populates='institutions')
-
-    __table_args__ = (
-        # ensure that hierarchically-related institutions are in the same registry
-        UniqueConstraint('id', 'registry_id'),
-        ForeignKeyConstraint(
-            ('parent_id', 'registry_id'),
-            ('institution.id', 'institution.registry_id'),
-            ondelete='CASCADE',
-        ),
-    )
 
     # many-to-many relationship between institution and user represented by member
     members = relationship('Member',
