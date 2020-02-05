@@ -1,5 +1,4 @@
 from typing import List
-import re
 import json
 
 from pydantic import AnyHttpUrl
@@ -10,24 +9,12 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_
 
 from odpapi.adapters import ODPAPIAdapter, ODPAPIAdapterConfig
 from odpapi.models import PagerParams
-from odpapi.models.institution import (
-    Institution,
-    InstitutionIn,
-    InstitutionOut,
-)
 from odpapi.models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
     MetadataValidationResult,
     MetadataWorkflowResult,
 )
-
-
-OBJECT_NAME_SUFFIXES = {
-    'organization': '',
-    'metadata_collection': '-metadata',
-    'infrastructure': '-infrastructure',
-}
 
 
 class CKANAdapterConfig(ODPAPIAdapterConfig):
@@ -79,79 +66,6 @@ class CKANAdapter(ODPAPIAdapter):
 
         except ckanapi.CKANAPIError as e:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="CKAN error: {}".format(e))
-
-    @staticmethod
-    def _make_object_name(title: str, object_type: str):
-        """
-        Generate a name for a CKAN object. This may be suffixed according to the object
-        type, to prevent name collisions between different types of CKAN group object.
-        """
-        suffix = OBJECT_NAME_SUFFIXES.get(object_type, '')
-        name = title.lower() + suffix
-        return re.sub(r'[^a-z0-9_-]+', '-', name)
-
-    # region Institutions
-
-    def list_institutions(self, pager: PagerParams, access_token: str) -> List[Institution]:
-        return self._call_ckan(
-            'organization_list',
-            access_token,
-            offset=pager.skip,
-            limit=pager.limit,
-            all_fields=True,
-            include_datasets=False,
-            include_dataset_count=False,
-            include_extras=False,
-            include_tags=False,
-            include_groups=False,
-            include_users=False,
-            include_followers=False,
-        )
-
-    def get_institution(self, id_or_name: str, access_token: str) -> Institution:
-        return self._call_ckan(
-            'organization_show',
-            access_token,
-            id=id_or_name,
-            include_datasets=False,
-            include_dataset_count=False,
-            include_extras=False,
-            include_tags=False,
-            include_groups=False,
-            include_users=False,
-            include_followers=False,
-        )
-
-    def add_institution(self, institution: InstitutionIn, access_token: str) -> InstitutionOut:
-        return self._call_ckan(
-            'organization_create',
-            access_token,
-            title=institution.title,
-            description=institution.description,
-            name=self._make_object_name(institution.title, 'organization'),
-        )
-
-    def update_institution(self, id_or_name: str, institution: InstitutionIn, access_token: str) -> InstitutionOut:
-        # don't update the institution name as this may have unforeseen consequences
-        return self._call_ckan(
-            'organization_update',
-            access_token,
-            id=id_or_name,
-            title=institution.title,
-            description=institution.description,
-        )
-
-    def delete_institution(self, id_or_name: str, access_token: str) -> bool:
-        self._call_ckan(
-            'organization_delete',
-            access_token,
-            id=id_or_name,
-        )
-        return True
-
-    # endregion Institutions
-
-    # region Metadata
 
     @staticmethod
     def _translate_from_ckan_record(ckan_record):
@@ -288,5 +202,3 @@ class CKANAdapter(ODPAPIAdapter):
             success=not workflow_errors,
             errors=workflow_errors,
         )
-
-    # endregion Metadata
