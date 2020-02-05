@@ -1,6 +1,5 @@
 from odpaccounts.db import session as db_session
 from odpaccounts.models.institution import Institution
-from odpaccounts.models.institution_registry import InstitutionRegistry
 from odpaccounts.models.user import User
 
 from .base import AdminModelView, KeyField
@@ -10,25 +9,20 @@ class InstitutionModelView(AdminModelView):
     """
     Institution model view.
     """
-    column_list = ['name', 'key', 'parent', 'registry.name']
+    column_list = ['name', 'key', 'parent']
     column_default_sort = 'name'
     column_labels = {
-        'registry.name': 'Registry',
         'users': 'Members',
     }
     column_formatters = {
         'parent': lambda vw, ctx, model, prop: model.parent.name if model.parent else None
     }
 
-    form_columns = ['registry', 'parent', 'name', 'key', 'users']
+    form_columns = ['parent', 'name', 'key', 'users']
     form_overrides = {
         'key': KeyField
     }
     form_args = {
-        'registry': dict(
-            get_label='name',
-            query_factory=lambda: db_session.query(InstitutionRegistry).order_by('name'),
-        ),
         'parent': dict(
             get_label='name',
             query_factory=lambda: db_session.query(Institution).order_by('name'),

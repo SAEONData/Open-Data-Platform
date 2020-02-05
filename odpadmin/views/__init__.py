@@ -7,7 +7,6 @@ from odpaccounts.models.role import Role
 from odpaccounts.models.member import Member
 from odpaccounts.models.scope import Scope
 from odpaccounts.models.institution import Institution
-from odpaccounts.models.institution_registry import InstitutionRegistry
 
 login_manager = LoginManager()
 login_manager.login_view = 'odpadmin.login'
@@ -21,7 +20,7 @@ def load_user(user_id):
 def init_app(app):
     login_manager.init_app(app)
 
-    from . import hydra_oauth2, user, member, institution, institution_registry, role, scope
+    from . import hydra_oauth2, user, member, institution, role, scope
     app.register_blueprint(hydra_oauth2.bp, url_prefix='/oauth2')
 
     home = AdminIndexView(
@@ -54,12 +53,6 @@ def init_app(app):
         category='System Configuration',
         endpoint='scopes',
     )
-    institution_registries = institution_registry.InstitutionRegistryModelView(
-        InstitutionRegistry, db_session,
-        name='Institution Registries',
-        category='System Configuration',
-        endpoint='registries',
-    )
 
     admin_views = Admin(app, name='ODP Admin', index_view=home, base_template='admin_base.html')
     admin_views.add_views(
@@ -68,5 +61,4 @@ def init_app(app):
         privileges,
         roles,
         scopes,
-        institution_registries,
     )
