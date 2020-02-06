@@ -53,19 +53,19 @@ class CKANAdapter(ODPAPIAdapter):
                                         requests_kwargs={'verify': self.app_config.SERVER_ENV != 'development'})
 
         except RequestException as e:
-            raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail="Error sending request to CKAN: {}".format(e))
+            raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail="Error sending request to CKAN: {}".format(e)) from e
 
         except ckanapi.ValidationError as e:
-            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=e.error_dict)
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=e.error_dict) from e
 
         except ckanapi.NotAuthorized as e:
-            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not authorized to access CKAN resource: {}".format(e))
+            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not authorized to access CKAN resource: {}".format(e)) from e
 
         except ckanapi.NotFound as e:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="CKAN resource not found: {}".format(e))
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="CKAN resource not found: {}".format(e)) from e
 
         except ckanapi.CKANAPIError as e:
-            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="CKAN error: {}".format(e))
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="CKAN error: {}".format(e)) from e
 
     @staticmethod
     def _translate_from_ckan_record(ckan_record):
@@ -73,33 +73,37 @@ class CKANAdapter(ODPAPIAdapter):
         Convert a CKAN metadata record dict into a MetadataRecord object.
         """
         return MetadataRecord(
-            institution=ckan_record['owner_org'],
-            collection=ckan_record['metadata_collection_id'],
-            metadata_standard=ckan_record['metadata_standard_id'],
+            institution_key=ckan_record['owner_org'],
+            collection_key=ckan_record['metadata_collection_id'],
+            schema_key=ckan_record['metadata_standard_id'],
             metadata=ckan_record['metadata_json'],
             id=ckan_record['id'],
             pid=ckan_record['name'] if ckan_record['name'] != ckan_record['id'] else None,
             doi=ckan_record['doi'],
-            state=ckan_record['state'],
-            errors=ckan_record['errors'],
             validated=ckan_record['validated'],
-            workflow_state=ckan_record['workflow_state_id'],
+            errors=ckan_record['errors'],
+            state=ckan_record['workflow_state_id'],
         )
 
-    def _translate_to_ckan_record(self, metadata_record: MetadataRecordIn, access_token: str):
+    @staticmethod
+    def _translate_to_ckan_record(institution_key: str, metadata_record: MetadataRecordIn):
         """
         Convert a MetadataRecordIn object into a CKAN metadata record dict.
         """
         return {
-            'owner_org': metadata_record.institution,
-            'metadata_collection_id': metadata_record.collection,
-            'metadata_standard_id': metadata_record.metadata_standard,
+            'owner_org': institution_key,
+            'metadata_collection_id': metadata_record.collection_key,
+            'metadata_standard_id': metadata_record.schema_key,
             'metadata_json': json.dumps(metadata_record.metadata),
             'doi': metadata_record.doi,
             'auto_assign_doi': metadata_record.auto_assign_doi,
         }
 
-    def list_metadata_records(self, institution_key: str, pager: PagerParams, access_token: str) -> List[MetadataRecord]:
+    def list_metadata_records(self,
+                              institution_key: str,
+                              pager: PagerParams,
+                              access_token: str,
+                              ) -> List[MetadataRecord]:
         ckan_record_list = self._call_ckan(
             'metadata_record_list',
             access_token,
@@ -111,17 +115,29 @@ class CKANAdapter(ODPAPIAdapter):
         )
         return [self._translate_from_ckan_record(record) for record in ckan_record_list]
 
-    def get_metadata_record(self, id: str, access_token: str) -> MetadataRecord:
+    def get_metadata_record(self,
+                            institution_key: str,
+                            record_id: str,
+                            access_token: str,
+                            ) -> MetadataRecord:
         ckan_record = self._call_ckan(
             'metadata_record_show',
             access_token,
-            id=id,
+            id=record_id,
             deserialize_json=True,
         )
+        # check that the record actually belongs to the institution we've specified
+        if ckan_record['owner_org'] != institution_key:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="CKAN resource not found")
+
         return self._translate_from_ckan_record(ckan_record)
 
-    def create_or_update_metadata_record(self, metadata_record: MetadataRecordIn, access_token: str) -> MetadataRecord:
-        input_dict = self._translate_to_ckan_record(metadata_record, access_token)
+    def create_or_update_metadata_record(self,
+                                         institution_key: str,
+                                         metadata_record: MetadataRecordIn,
+                                         access_token: str,
+                                         ) -> MetadataRecord:
+        input_dict = self._translate_to_ckan_record(institution_key, metadata_record)
         ckan_record = self._call_ckan(
             'metadata_record_create',
             access_token,
@@ -132,7 +148,7 @@ class CKANAdapter(ODPAPIAdapter):
         if not ckan_record['validated']:
             # try to validate the record, for convenience
             try:
-                validaton_result = self.validate_metadata_record(ckan_record['id'], access_token)
+                validaton_result = self.validate_metadata_record(institution_key, ckan_record['id'], access_token)
                 ckan_record.update({
                     'validated': True,
                     'errors': validaton_result.errors,
@@ -142,12 +158,20 @@ class CKANAdapter(ODPAPIAdapter):
 
         return self._translate_from_ckan_record(ckan_record)
 
-    def update_metadata_record(self, id: str, metadata_record: MetadataRecordIn, access_token: str) -> MetadataRecord:
-        input_dict = self._translate_to_ckan_record(metadata_record, access_token)
+    def update_metadata_record(self,
+                               institution_key: str,
+                               record_id: str,
+                               metadata_record: MetadataRecordIn,
+                               access_token: str,
+                               ) -> MetadataRecord:
+        # make sure that the record we're updating belongs to the specified institution
+        self.get_metadata_record(institution_key, record_id, access_token)
+
+        input_dict = self._translate_to_ckan_record(institution_key, metadata_record)
         ckan_record = self._call_ckan(
             'metadata_record_update',
             access_token,
-            id=id,
+            id=record_id,
             deserialize_json=True,
             **input_dict,
         )
@@ -155,7 +179,7 @@ class CKANAdapter(ODPAPIAdapter):
         if not ckan_record['validated']:
             # try to validate the record, for convenience
             try:
-                validaton_result = self.validate_metadata_record(ckan_record['id'], access_token)
+                validaton_result = self.validate_metadata_record(institution_key, ckan_record['id'], access_token)
                 ckan_record.update({
                     'validated': True,
                     'errors': validaton_result.errors,
@@ -165,19 +189,33 @@ class CKANAdapter(ODPAPIAdapter):
 
         return self._translate_from_ckan_record(ckan_record)
 
-    def delete_metadata_record(self, id: str, access_token: str) -> bool:
+    def delete_metadata_record(self,
+                               institution_key: str,
+                               record_id: str,
+                               access_token: str,
+                               ) -> bool:
+        # make sure that the record we're deleting belongs to the specified institution
+        self.get_metadata_record(institution_key, record_id, access_token)
+
         self._call_ckan(
             'metadata_record_delete',
             access_token,
-            id=id,
+            id=record_id,
         )
         return True
 
-    def validate_metadata_record(self, id: str, access_token: str) -> MetadataValidationResult:
+    def validate_metadata_record(self,
+                                 institution_key: str,
+                                 record_id: str,
+                                 access_token: str,
+                                 ) -> MetadataValidationResult:
+        # make sure that the record we're validating belongs to the specified institution
+        self.get_metadata_record(institution_key, record_id, access_token)
+
         validation_activity_record = self._call_ckan(
             'metadata_record_validate',
             access_token,
-            id=id,
+            id=record_id,
         )
         validation_results = validation_activity_record['data']['results']
         validation_errors = {}
@@ -189,12 +227,20 @@ class CKANAdapter(ODPAPIAdapter):
             errors=validation_errors,
         )
 
-    def set_workflow_state_of_metadata_record(self, id: str, workflow_state: str, access_token: str) -> MetadataWorkflowResult:
+    def change_state_of_metadata_record(self,
+                                        institution_key: str,
+                                        record_id: str,
+                                        state: str,
+                                        access_token: str,
+                                        ) -> MetadataWorkflowResult:
+        # make sure that the record we're updating belongs to the specified institution
+        self.get_metadata_record(institution_key, record_id, access_token)
+
         workflow_activity_record = self._call_ckan(
             'metadata_record_workflow_state_transition',
             access_token,
-            id=id,
-            workflow_state_id=workflow_state,
+            id=record_id,
+            workflow_state_id=state,
         )
         workflow_errors = workflow_activity_record['data']['errors']
 
