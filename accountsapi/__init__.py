@@ -11,7 +11,6 @@ def db_session():
     from odpaccounts.models.scope import Scope
     from odpaccounts.models.capability import Capability
     from odpaccounts.models.institution import Institution
-    from odpaccounts.models.institution_registry import InstitutionRegistry
     try:
         yield session
     finally:

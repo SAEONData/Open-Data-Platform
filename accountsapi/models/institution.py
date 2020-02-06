@@ -7,4 +7,3 @@ class Institution(BaseModel):
     key: str
     name: str
     parent_key: Optional[str]
-    registry_key: str
