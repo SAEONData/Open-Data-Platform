@@ -1,14 +1,15 @@
 from typing import Dict, Optional
+
 from pydantic import BaseModel, Field, UUID4
 
 # adapted from https://www.crossref.org/blog/dois-and-matching-regular-expressions
-DOI_REGEX = r'^10\.\d{4,}(\.\d+)*/[-._;()/:a-zA-Z0-9]+$'
+# Note: this allows either a DOI string or an empty string
+DOI_REGEX = r'^(|10\.\d{4,}(\.\d+)*/[-._;()/:a-zA-Z0-9]+)$'
 
 
 class MetadataRecordIn(BaseModel):
-    institution: str
-    collection: str
-    metadata_standard: str
+    collection_key: str
+    schema_key: str
     metadata: Dict
     doi: str = Field('', regex=DOI_REGEX)
     auto_assign_doi: bool = False
@@ -18,14 +19,13 @@ class MetadataRecord(BaseModel):
     id: UUID4
     pid: Optional[str]
     doi: str
-    institution: str
-    collection: str
-    metadata_standard: str
+    institution_key: str
+    collection_key: str
+    schema_key: str
     metadata: Dict
-    state: str
-    errors: Dict
     validated: bool
-    workflow_state: Optional[str]
+    errors: Dict
+    state: Optional[str]
 
 
 class MetadataValidationResult(BaseModel):
