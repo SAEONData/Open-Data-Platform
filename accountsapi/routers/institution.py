@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
@@ -31,3 +33,16 @@ async def create_or_update_institution(
     session.commit()
 
     return institution
+
+
+@router.get('/', response_model=List[Institution])
+async def list_institutions(
+        session: Session = Depends(db_session),
+):
+    return [
+        Institution(
+            key=institution_orm.key,
+            name=institution_orm.name,
+            parent_key=institution_orm.parent.key if institution_orm.parent else None,
+        ) for institution_orm in session.query(InstitutionORM).all()
+    ]
