@@ -126,8 +126,9 @@ class CKANAdapter(ODPAPIAdapter):
             id=record_id,
             deserialize_json=True,
         )
-        # check that the record actually belongs to the institution we've specified
-        if ckan_record['owner_org'] != institution_key:
+        # check that the record has not been marked as deleted in CKAN, and
+        # that it belongs to the given institution
+        if ckan_record['state'] != 'active' or ckan_record['owner_org'] != institution_key:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="CKAN resource not found")
 
         return self._translate_from_ckan_record(ckan_record)
