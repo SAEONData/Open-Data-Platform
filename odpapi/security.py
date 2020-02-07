@@ -47,7 +47,7 @@ class Authorizer(HTTPBearer):
             access_info = AccessInfo(
                 superuser=True,
                 user_id='',
-                rights=[],
+                access_rights=[],
             )
         else:
             try:
