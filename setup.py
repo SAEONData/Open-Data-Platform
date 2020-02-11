@@ -16,6 +16,7 @@ setup(
     install_requires=[
         'flask',
         'flask-login',
+        'flask-admin',
         'python-dotenv',
         'click',
         'wtforms',
@@ -27,6 +28,5 @@ setup(
         'git+https://github.com/SAEONData/ODP-AccountsLib.git#egg=ODP_AccountsLib',
         'git+https://github.com/SAEONData/Hydra-Admin-Client.git#egg=Hydra_Admin_Client',
         'git+https://github.com/SAEONData/Hydra-OAuth2-Blueprint.git#egg=Hydra_OAuth2_Blueprint',
-        'git+https://github.com/SAEONData/flask-admin.git#egg=Flask_Admin',
     ],
 )
