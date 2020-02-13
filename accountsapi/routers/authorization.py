@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 from starlette.requests import Request
@@ -32,6 +34,9 @@ async def validate_and_introspect_token(
         raise HTTPException(status_code=e.status_code, detail=e.error_detail) from e
 
     access_token = AccessToken(**token_data)
+    issue_time = datetime.fromtimestamp(access_token.iat, timezone.utc)
+    expiry_time = datetime.fromtimestamp(access_token.exp, timezone.utc)
+
     access_info = AccessInfo(**access_token.ext.dict())
     assert access_info.user_id == access_token.sub
 
