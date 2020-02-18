@@ -5,7 +5,7 @@ import uvicorn
 from dotenv import load_dotenv
 
 from odpapi import config, routers, adapters
-from odpapi.routers import metadata
+from odpapi.routers import metadata, search
 
 load_dotenv()
 
@@ -17,12 +17,22 @@ app = FastAPI(
 )
 
 adapters.load_adapters(app)
-routers.load_configs(app, metadata.__name__)
+routers.load_configs(app, metadata.__name__, search.__name__)
 
 app.include_router(
     metadata.router,
     prefix='/{institution_key}/metadata',
-    tags=['Metadata'],
+    tags=['Manage Metadata'],
+    dependencies=[
+        Depends(routers.set_config),
+        Depends(routers.set_adapter),
+    ],
+)
+
+app.include_router(
+    search.router,
+    prefix='/metadata/search',
+    tags=['Search Metadata'],
     dependencies=[
         Depends(routers.set_config),
         Depends(routers.set_adapter),
