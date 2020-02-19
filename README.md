@@ -38,12 +38,19 @@ e.g. `METADATA.ADAPTER`, etc. Following are the options that are applicable per 
 
 - **`<ROUTER>.ADAPTER`**: class name of the adapter that will fulfil requests to the router
 - **`<ROUTER>.OAUTH2_SCOPE`**: OAuth2 scope applicable to the router
-- **`<ROUTER>.READONLY_ROLES`**: JSON-encoded list of roles that may read resources via this router;
+- **`<ROUTER>.READONLY_ROLES`**: list of roles that may read resources via this router;
 if the router is institution-aware, the resources must belong to the same institution as the user
-- **`<ROUTER>.READWRITE_ROLES`**: JSON-encoded list of roles that may read or write resources via this router;
+- **`<ROUTER>.READWRITE_ROLES`**: list of roles that may read and write resources via this router;
 if the router is institution-aware, the resources must belong to the same institution as the user
-- **`<ROUTER>.ADMIN_ROLES`**: JSON-encoded list of roles that may read or write resources belonging
+- **`<ROUTER>.ADMIN_ROLES`**: list of roles that may read and write resources belonging
 to _any_ institution, and that may access administrative functions, via this router
+
+Note: the `*_ROLES` options should be entered as JSON-encoded lists, e.g.
+
+    METADATA.READWRITE_ROLES=["contributor", "curator"]
+
+The `*_ROLES` options are optional, defaulting to the empty list `[]`, i.e. no roles allowed
+access of the specified type.
 
 ## Adapters
 
