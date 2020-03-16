@@ -6,7 +6,7 @@ from starlette.status import HTTP_503_SERVICE_UNAVAILABLE, HTTP_422_UNPROCESSABL
 from pydantic import AnyHttpUrl, BaseModel
 
 from odpapi.adapters import ODPAPIAdapter, ODPAPIAdapterConfig
-from odpapi.models import PagerParams
+from odpapi.models import Pagination
 from odpapi.models.search import SearchParams
 
 
@@ -30,7 +30,7 @@ class ElasticAdapter(ODPAPIAdapter):
         result_length: int = 0
         results: List[Dict] = []
 
-    async def search_metadata(self, search_params: SearchParams, pager_params: PagerParams, **search_terms) -> List[Dict]:
+    async def search_metadata(self, search_params: SearchParams, pagination: Pagination, **search_terms) -> List[Dict]:
         results = []
         params = search_terms
         params.update({
@@ -40,8 +40,8 @@ class ElasticAdapter(ODPAPIAdapter):
             'to': search_params.to_date.strftime('%Y-%m-%d') if search_params.to_date else None,
             'sort': search_params.sort_field,
             'sortorder': search_params.sort_order.value,
-            'start': pager_params.skip + 1,  # search agent 'start' is a 1-based record position
-            'size': pager_params.limit,
+            'start': pagination.offset + 1,  # search agent 'start' is a 1-based record position
+            'size': pagination.limit,
         })
         try:
             for index in self.config.SEARCH_INDEXES:
