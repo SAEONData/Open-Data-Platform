@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
-from ..models import PagerParams
+from ..models import Pagination
 from ..models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
@@ -20,10 +20,10 @@ async def list_metadata_records(
         request: Request,
         institution_key: str,
         auth_data: AuthData = Depends(Authorizer(read_only=True)),
-        pager: PagerParams = Depends(),
+        pagination: Pagination = Depends(),
 ):
     return request.state.adapter.list_metadata_records(
-        institution_key, pager, auth_data.access_token)
+        institution_key, pagination, auth_data.access_token)
 
 
 @router.get('/{record_id:path}', response_model=MetadataRecord)
