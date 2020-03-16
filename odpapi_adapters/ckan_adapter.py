@@ -8,7 +8,7 @@ import ckanapi
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_503_SERVICE_UNAVAILABLE
 
 from odpapi.adapters import ODPAPIAdapter, ODPAPIAdapterConfig
-from odpapi.models import PagerParams
+from odpapi.models import Pagination
 from odpapi.models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
@@ -101,15 +101,15 @@ class CKANAdapter(ODPAPIAdapter):
 
     def list_metadata_records(self,
                               institution_key: str,
-                              pager: PagerParams,
+                              pagination: Pagination,
                               access_token: str,
                               ) -> List[MetadataRecord]:
         ckan_record_list = self._call_ckan(
             'metadata_record_list',
             access_token,
             owner_org=institution_key,
-            offset=pager.skip,
-            limit=pager.limit,
+            offset=pagination.offset,
+            limit=pagination.limit,
             all_fields=True,
             deserialize_json=True,
         )
