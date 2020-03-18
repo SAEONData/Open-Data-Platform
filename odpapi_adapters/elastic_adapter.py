@@ -1,21 +1,27 @@
-from typing import List, Dict
+from typing import List
 
-import requests
+from pydantic import AnyHttpUrl, validator
 from fastapi.exceptions import HTTPException
-from starlette.status import HTTP_503_SERVICE_UNAVAILABLE, HTTP_422_UNPROCESSABLE_ENTITY
-from pydantic import AnyHttpUrl, BaseModel
+from starlette.status import HTTP_503_SERVICE_UNAVAILABLE, HTTP_400_BAD_REQUEST
+from elasticsearch import Elasticsearch, ElasticsearchException, TransportError
 
 from odpapi.adapters import ODPAPIAdapter, ODPAPIAdapterConfig
 from odpapi.models import Pagination
-from odpapi.models.search import SearchParams
+from odpapi.models.search import QueryDSL, SearchHit
 
 
 class ElasticAdapterConfig(ODPAPIAdapterConfig):
     """
     Config for the Elastic adapter, populated from the environment.
     """
-    ES_AGENT_URL: AnyHttpUrl
-    SEARCH_INDEXES: List[str]
+    ES_URL: AnyHttpUrl
+    INDICES: List[str]
+
+    @validator('ES_URL')
+    def check_port(cls, v):
+        if not v.port:
+            raise ValueError("Port must be specified in the Elasticsearch URL")
+        return v
 
     class Config:
         env_prefix = 'ELASTIC_ADAPTER.'
@@ -23,48 +29,35 @@ class ElasticAdapterConfig(ODPAPIAdapterConfig):
 
 class ElasticAdapter(ODPAPIAdapter):
 
-    class SearchResult(BaseModel):
-        success: bool
-        msg: str = ''
-        error: str = ''
-        result_length: int = 0
-        results: List[Dict] = []
+    def __init__(self, app, config: ElasticAdapterConfig):
+        super().__init__(app, config)
+        self.es_client = Elasticsearch([config.ES_URL])
 
-    async def search_metadata(self, search_params: SearchParams, pagination: Pagination, **search_terms) -> List[Dict]:
+    @staticmethod
+    def _parse_elastic_response(r) -> List[SearchHit]:
         results = []
-        params = search_terms
-        params.update({
-            'match': search_params.match_type.value,
-            'fields': search_params.output_fields,
-            'from': search_params.from_date.strftime('%Y-%m-%d') if search_params.from_date else None,
-            'to': search_params.to_date.strftime('%Y-%m-%d') if search_params.to_date else None,
-            'sort': search_params.sort_field,
-            'sortorder': search_params.sort_order.value,
-            'start': pagination.offset + 1,  # search agent 'start' is a 1-based record position
-            'size': pagination.limit,
-        })
+        for hit in r.get('hits', {}).get('hits', []):
+            results += [SearchHit(
+                metadata=hit['_source']['metadata_json'],
+                institution=hit['_source']['organization'],
+                collection=hit['_source']['collection'],
+                id=hit['_source']['record_id'],
+            )]
+        return results
+
+    async def search(self, query_dsl: QueryDSL, pagination: Pagination) -> List[SearchHit]:
         try:
-            for index in self.config.SEARCH_INDEXES:
-                params['index'] = index
-                r = requests.get(self.config.ES_AGENT_URL + '/search',
-                                 params=params,
-                                 timeout=None if self.app_config.SERVER_ENV == 'development' else 30,
-                                 headers={'Accept': 'application/json'})
-                r.raise_for_status()
-                result = self.SearchResult(**r.json())
-                if result.success:
-                    results += result.results
-                else:
-                    raise HTTPException(status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail=result.msg or result.error)
+            response = self.es_client.search(
+                index=','.join(self.config.INDICES),
+                body={'query': query_dsl.query},
+                from_=pagination.offset,
+                size=pagination.limit,
+            )
+            return self._parse_elastic_response(response)
 
-            return results
+        except TransportError as e:
+            status_code = e.status_code if type(e.status_code) is int else HTTP_503_SERVICE_UNAVAILABLE
+            raise HTTPException(status_code=status_code, detail=str(e))
 
-        except requests.HTTPError as e:
-            try:
-                error_detail = e.response.json()
-            except ValueError:
-                error_detail = e.response.reason
-            raise HTTPException(status_code=e.response.status_code, detail=error_detail)
-
-        except requests.RequestException as e:
-            raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
+        except ElasticsearchException as e:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(e))

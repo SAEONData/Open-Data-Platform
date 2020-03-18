@@ -16,4 +16,5 @@ See the [ODP API](https://github.com/SAEONData/ODP-API) README for more info.
 
 ### Environment variables
 
-- **`ELASTIC_ADAPTER.ES_AGENT_URL`**: URL of the Elastic search agent
+- **`ELASTIC_ADAPTER.ES_URL`**: URL of the Elasticsearch instance; must include port
+- **`ELASTIC_ADAPTER.INDICES`**: JSON-encoded list of Elasticsearch indexes
