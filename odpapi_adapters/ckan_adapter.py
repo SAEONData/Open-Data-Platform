@@ -56,7 +56,7 @@ class CKANAdapter(ODPAPIAdapter):
             raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail="Error sending request to CKAN: {}".format(e)) from e
 
         except ckanapi.ValidationError as e:
-            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=e.error_dict) from e
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="CKAN validation error: {}".format(e)) from e
 
         except ckanapi.NotAuthorized as e:
             raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not authorized to access CKAN resource: {}".format(e)) from e
