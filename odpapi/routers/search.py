@@ -1,21 +1,19 @@
-from typing import List, Dict
+from typing import List
 
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
 from ..models import Pagination
-from ..models.search import SearchParams
+from ..models.search import QueryDSL, SearchHit
 
 router = APIRouter()
 
 
-@router.get('/', response_model=List[Dict])
-async def search_metadata(
+@router.post('/', response_model=List[SearchHit])
+async def search(
         request: Request,
-        search_params: SearchParams = Depends(),
+        query_dsl: QueryDSL,
         pagination: Pagination = Depends(),
 ):
-    search_terms = {k: v for k, v in request.query_params.items() if
-                    k not in search_params.__dict__.keys() | pagination.__dict__.keys()}
-    results = await request.state.adapter.search_metadata(search_params, pagination, **search_terms)
-    return results
+    result = await request.state.adapter.search(query_dsl, pagination)
+    return result
