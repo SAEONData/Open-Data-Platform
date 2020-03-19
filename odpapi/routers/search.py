@@ -10,10 +10,10 @@ router = APIRouter()
 
 
 @router.post('/', response_model=List[SearchHit])
-async def search(
+async def search_metadata(
         request: Request,
         query_dsl: QueryDSL,
         pagination: Pagination = Depends(),
 ):
-    result = await request.state.adapter.search(query_dsl, pagination)
+    result = await request.state.adapter.search_metadata(query_dsl, pagination)
     return result
