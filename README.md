@@ -1,6 +1,7 @@
 # ODP API - Elasticsearch adapter
 
-Provides access to the search function of the [Elastic search agent](https://github.com/SAEONData/elastic-search-agent).
+Search metadata via the Elasticsearch search API, using the
+[Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/6.2/query-dsl.html).
 
 ## Installation
 
@@ -17,4 +18,4 @@ See the [ODP API](https://github.com/SAEONData/ODP-API) README for more info.
 ### Environment variables
 
 - **`ELASTIC_ADAPTER.ES_URL`**: URL of the Elasticsearch instance; must include port
-- **`ELASTIC_ADAPTER.INDICES`**: JSON-encoded list of Elasticsearch indexes
+- **`ELASTIC_ADAPTER.INDICES`**: JSON-encoded list of Elasticsearch indexes to search
