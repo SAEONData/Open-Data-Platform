@@ -45,7 +45,7 @@ class ElasticAdapter(ODPAPIAdapter):
             )]
         return results
 
-    async def search(self, query_dsl: QueryDSL, pagination: Pagination) -> List[SearchHit]:
+    async def search_metadata(self, query_dsl: QueryDSL, pagination: Pagination) -> List[SearchHit]:
         try:
             response = self.es_client.search(
                 index=','.join(self.config.INDICES),
