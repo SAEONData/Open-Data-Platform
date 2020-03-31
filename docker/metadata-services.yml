@@ -1,0 +1,167 @@
+version: '3.5'
+
+networks:
+  ckan-net:
+    name: ckan-net
+  elastic-net:
+    name: elastic-net
+
+volumes:
+  elastic-data:
+
+services:
+  odp-metadata-api:
+    container_name: odp-metadata-api
+    build:
+      context: odp-api
+    networks:
+      - ckan-net
+      - elastic-net
+    ports:
+      - "8888:8888"
+    environment:
+      - SERVER_ENV
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8888
+      - ACCOUNTS_API_URL
+      - OAUTH2_AUDIENCE=ODP-API
+      - METADATA.ADAPTER=CKANAdapter
+      - METADATA.OAUTH2_SCOPE=ODP.Metadata
+      - METADATA.READONLY_ROLES=${METADATA_READONLY_ROLES}
+      - METADATA.READWRITE_ROLES=${METADATA_READWRITE_ROLES}
+      - METADATA.ADMIN_ROLES=${METADATA_ADMIN_ROLES}
+      - CKAN_ADAPTER.CKAN_URL=https://ckan:5000
+      - SEARCH.ADAPTER=ElasticAdapter
+      - SEARCH.OAUTH2_SCOPE=ODP.Metadata
+      - ELASTIC_ADAPTER.ES_URL=https://elasticsearch:9200
+      - ELASTIC_ADAPTER.INDICES=${ELASTICSEARCH_INDICES}
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    depends_on:
+      - ckan
+      - elasticsearch
+    restart: always
+
+  odp-migration-api:
+    container_name: odp-migration-api
+    build:
+      context: odp-api
+    networks:
+      - ckan-net
+    ports:
+      - "7777:8888"
+    environment:
+      - SERVER_ENV
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8888
+      - NO_AUTH=True
+      - METADATA.ADAPTER=CKANAdapter
+      - METADATA.OAUTH2_SCOPE=ODP.Metadata
+      - CKAN_ADAPTER.CKAN_URL=https://ckan:5000
+      - SEARCH.ADAPTER=ElasticAdapter
+      - SEARCH.OAUTH2_SCOPE=ODP.Metadata
+      - ELASTIC_ADAPTER.ES_URL=https://elasticsearch:9200
+      - ELASTIC_ADAPTER.INDICES=${ELASTICSEARCH_INDICES}
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    depends_on:
+      - ckan
+    restart: always
+
+  ckan:
+    container_name: ckan
+    build:
+      context: ckan-metadata
+      args:
+        - SERVER_ENV
+        - CKAN_URL
+        - CKAN_DB_URL=postgresql://ckan_default:${CKAN_DB_PASSWORD}@${CKAN_DB_HOST}/ckan_default
+        - DOI_PREFIX
+        - HYDRA_PUBLIC_URL
+        - HYDRA_ADMIN_URL
+        - OAUTH2_CLIENT_SECRET=${CKAN_OAUTH2_SECRET}
+        - IDENTITY_SERVICE_URL
+        - ELASTIC_AGENT_URL=http://es-agent:9210
+        - SOLR_URL=http://solr:8983/solr
+        - REDIS_URL=http://redis:6379/0
+        - RABBITMQ_HOST=rabbitmq
+    networks:
+      - ckan-net
+      - elastic-net
+    ports:
+      - "5000:5000"
+    environment:
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    depends_on:
+      - solr
+      - redis
+      - rabbitmq
+      - es-agent
+    restart: always
+
+  pycsw:
+    container_name: pycsw
+    build:
+      context: pycsw
+      args:
+        - ELASTIC_AGENT_SEARCH_URL=http://es-agent:9210/search
+    networks:
+      - elastic-net
+    ports:
+      - "8000:8000"
+    depends_on:
+      - es-agent
+    restart: always
+
+  es-agent:
+    container_name: es-agent
+    build:
+      context: es-agent
+    networks:
+      - elastic-net
+    environment:
+      - ELASTIC_AGENT_HOST=localhost
+      - ELASTIC_AGENT_PORT=9210
+      - ELASTIC_SEARCH_HOST=elasticsearch
+      - ELASTIC_SEARCH_PORT=9200
+    depends_on:
+      - elasticsearch
+    restart: always
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.2
+    networks:
+      - elastic-net
+    ports:
+      - "9200:9200"
+    environment:
+      - cluster.name=docker-cluster
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data/
+    restart: always
+
+  solr:
+    container_name: solr
+    build:
+      context: solr
+    networks:
+      - ckan-net
+    restart: always
+
+  redis:
+    container_name: redis
+    image: redis:5
+    networks:
+      - ckan-net
+    restart: always
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3
+    networks:
+      - ckan-net
+    restart: always
