@@ -67,7 +67,7 @@ services:
       - "9999:9999"
     environment:
       - SERVER_ENV
-      - SERVER_HOST=127.0.0.1
+      - SERVER_HOST=0.0.0.0
       - SERVER_PORT=9999
       - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
       - HYDRA_ADMIN_URL=https://hydra:4445
