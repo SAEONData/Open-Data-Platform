@@ -35,10 +35,10 @@ containing the following environment variables as applicable:
 - **`ADMIN_FLASK_KEY`**: Flask secret key for the admin service
 - **`ADMIN_OAUTH2_SECRET`**: OAuth2 client secret for the admin service UI
 - **`HYDRA_IMAGE`**: the Hydra Docker image, e.g. `oryd/hydra:v1.2.3`
-- **`HYDRA_LOGIN_EXPIRY`**: number of seconds to remember a successful login
-- **`HYDRA_SYSTEM_SECRET`**: secret for encrypting the Hydra database; note that key rotation is not supported
 - **`HYDRA_DB_HOST`**: Hydra database hostname / IP address
 - **`HYDRA_DB_PASSWORD`**: Hydra database password
+- **`HYDRA_SYSTEM_SECRET`**: secret for encrypting the Hydra database; note that key rotation is not supported
+- **`HYDRA_LOGIN_EXPIRY`**: number of seconds to remember a successful login
 
 ### Metadata services options
 - **`CKAN_URL`**: URL of the CKAN server
