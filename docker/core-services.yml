@@ -8,8 +8,7 @@ services:
   odp-identity:
     container_name: odp-identity
     build:
-      context: .
-      dockerfile: odp-identity/Dockerfile
+      context: odp-identity
       args:
         - PROXY_IP
     networks:
@@ -36,8 +35,7 @@ services:
   odp-admin:
     container_name: odp-admin
     build:
-      context: .
-      dockerfile: odp-admin/Dockerfile
+      context: odp-admin
     networks:
       - odp-core-net
     ports:
@@ -62,8 +60,7 @@ services:
   odp-admin-api:
     container_name: odp-admin-api
     build:
-      context: .
-      dockerfile: odp-accountsapi/Dockerfile
+      context: odp-accountsapi
     networks:
       - odp-core-net
     ports:
