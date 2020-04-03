@@ -19,4 +19,4 @@ ARG CA_CERT_URL
 RUN curl ${CA_CERT_URL} -f -o /usr/local/share/ca-certificates/saeon-internal-ca.crt; exit 0
 RUN update-ca-certificates
 
-CMD ["gunicorn", "-b 127.0.0.1:9025", "odpadmin:create_app()"]
+CMD ["gunicorn", "-b 0.0.0.0:9025", "odpadmin:create_app()"]
