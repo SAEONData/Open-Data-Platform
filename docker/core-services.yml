@@ -36,6 +36,8 @@ services:
     container_name: odp-admin
     build:
       context: odp-admin
+      args:
+        - CA_CERT_URL
     networks:
       - odp-core-net
     ports:
