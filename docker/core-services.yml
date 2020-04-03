@@ -11,6 +11,7 @@ services:
       context: odp-identity
       args:
         - PROXY_IP
+        - CA_CERT_URL
     networks:
       - odp-core-net
     ports:
@@ -63,6 +64,8 @@ services:
     container_name: odp-admin-api
     build:
       context: odp-accountsapi
+      args:
+        - CA_CERT_URL
     networks:
       - odp-core-net
     ports:

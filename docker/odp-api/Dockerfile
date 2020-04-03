@@ -15,7 +15,8 @@ RUN cd ODP-API-CKANAdapter && pip install .
 RUN cd ODP-API-ElasticAdapter && pip install .
 RUN cd ODP-AccountsLib && pip install .
 
-COPY ../staging-ca.crt /usr/local/share/ca-certificates/
+ARG CA_CERT_URL
+RUN curl ${CA_CERT_URL} -f -o /usr/local/share/ca-certificates/saeon-internal-ca.crt; exit 0
 RUN update-ca-certificates
 
 CMD ["python", "ODP-API/odpapi/main.py"]

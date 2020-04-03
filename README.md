@@ -22,7 +22,8 @@ containing the following environment variables as applicable:
 
 ### Common options
 - **`SERVER_ENV`**: deployment environment: `development`|`testing`|`staging`|`production`
-- **`PROXY_IP`**: (optional) IP address of front-end reverse proxy server
+- **`PROXY_IP`**: IP address of front-end reverse proxy server (optional, typically used in staging/production)
+- **`CA_CERT_URL`**: download URL for an internal CA certificate (optional, typically used in staging/production)
 - **`HYDRA_PUBLIC_URL`**: URL of the Hydra public API
 - **`HYDRA_ADMIN_URL`**: URL of the Hydra admin API
 

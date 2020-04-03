@@ -15,7 +15,8 @@ RUN cd ODP-AccountsLib && pip install .
 RUN cd Hydra-Admin-Client && pip install .
 RUN cd Hydra-OAuth2-Blueprint && pip install .
 
-COPY ../staging-ca.crt /usr/local/share/ca-certificates/
+ARG CA_CERT_URL
+RUN curl ${CA_CERT_URL} -f -o /usr/local/share/ca-certificates/saeon-internal-ca.crt; exit 0
 RUN update-ca-certificates
 
 ARG PROXY_IP

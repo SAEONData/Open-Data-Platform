@@ -62,7 +62,8 @@ RUN paster db init -c ckan.ini
 RUN cd /srv/ckanext-metadata && paster metadata_framework initdb -c /srv/ckan/ckan.ini
 RUN cd /srv/ckanext-jsonpatch && paster jsonpatch initdb -c /srv/ckan/ckan.ini
 
-COPY ../staging-ca.crt /usr/local/share/ca-certificates/
+ARG CA_CERT_URL
+RUN curl ${CA_CERT_URL} -f -o /usr/local/share/ca-certificates/saeon-internal-ca.crt; exit 0
 RUN update-ca-certificates
 
 COPY supervisord.conf /etc/supervisor/conf.d/
