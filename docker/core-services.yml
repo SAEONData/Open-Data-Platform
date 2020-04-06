@@ -9,6 +9,7 @@ services:
     container_name: odp-identity
     build:
       context: odp-identity
+      dockerfile: Dockerfile-${SERVER_ENV}
       args:
         - PROXY_IP
         - CA_CERT_URL
