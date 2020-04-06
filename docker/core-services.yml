@@ -95,9 +95,9 @@ services:
       - URLS_SELF_ISSUER=${HYDRA_PUBLIC_URL}
       - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
       - DSN=postgres://hydra_user:${HYDRA_DB_PASSWORD}@${HYDRA_DB_HOST}:5432/hydra_db?sslmode=disable
-      - URLS_LOGIN=https://odp-identity:9024/hydra/login
-      - URLS_CONSENT=https://odp-identity:9024/hydra/consent
-      - URLS_LOGOUT=https://odp-identity:9024/hydra/logout
+      - URLS_LOGIN=${IDENTITY_SERVICE_URL}/hydra/login
+      - URLS_CONSENT=${IDENTITY_SERVICE_URL}/hydra/consent
+      - URLS_LOGOUT=${IDENTITY_SERVICE_URL}/hydra/logout
       # TODO remove; the following makes access token lifetime 1 week (the default is 1 hour),
       # as a workaround until such time as we've implemented token refresh on the client side
       - TTL_ACCESS_TOKEN=168h
