@@ -38,9 +38,6 @@ services:
       - ELASTIC_ADAPTER.ES_URL=https://elasticsearch:9200
       - ELASTIC_ADAPTER.INDICES=${ELASTICSEARCH_INDICES}
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-    depends_on:
-      - ckan
-      - elasticsearch
     restart: always
 
   odp-migration-api:
@@ -66,8 +63,6 @@ services:
       - ELASTIC_ADAPTER.ES_URL=https://elasticsearch:9200
       - ELASTIC_ADAPTER.INDICES=${ELASTICSEARCH_INDICES}
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-    depends_on:
-      - ckan
     restart: always
 
   ckan:
@@ -99,7 +94,6 @@ services:
       - solr
       - redis
       - rabbitmq
-      - es-agent
     restart: always
 
   pycsw:

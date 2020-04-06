@@ -29,8 +29,6 @@ services:
       - HYDRA_ADMIN_URL=https://hydra:4445
       - HYDRA_LOGIN_EXPIRY
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-    depends_on:
-      - hydra
     restart: always
 
   odp-admin:
@@ -77,8 +75,6 @@ services:
       - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
       - HYDRA_ADMIN_URL=https://hydra:4445
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-    depends_on:
-      - hydra
     restart: always
 
   hydra:
