@@ -8,6 +8,7 @@ networks:
 
 volumes:
   elastic-data:
+    name: elastic-data
 
 services:
   odp-metadata-api:
