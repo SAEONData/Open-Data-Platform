@@ -36,7 +36,9 @@ services:
     container_name: odp-admin
     build:
       context: odp-admin
+      dockerfile: Dockerfile-${SERVER_ENV}
       args:
+        - PROXY_IP
         - CA_CERT_URL
     networks:
       - odp-core-net
