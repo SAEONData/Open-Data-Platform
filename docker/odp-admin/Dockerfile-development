@@ -15,7 +15,6 @@ RUN cd ODP-AccountsLib && pip install -e .
 RUN cd Hydra-Admin-Client && pip install -e .
 RUN cd Hydra-OAuth2-Blueprint && pip install -e .
 
-ENV GUNICORN_CMD_ARGS --forwarded-allow-ips=*
 ENV PYTHONWARNINGS ignore:Unverified HTTPS request
 
 CMD ["gunicorn", "-b 0.0.0.0:9025", "odpadmin:create_app()"]

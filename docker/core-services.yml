@@ -11,7 +11,6 @@ services:
       context: odp-identity
       dockerfile: Dockerfile-${SERVER_ENV}
       args:
-        - PROXY_IP
         - CA_CERT_URL
     networks:
       - odp-core-net
@@ -30,6 +29,7 @@ services:
       - HYDRA_ADMIN_URL=https://hydra:4445
       - HYDRA_LOGIN_EXPIRY
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
     restart: always
 
   odp-admin:
@@ -38,7 +38,6 @@ services:
       context: odp-admin
       dockerfile: Dockerfile-${SERVER_ENV}
       args:
-        - PROXY_IP
         - CA_CERT_URL
     networks:
       - odp-core-net
@@ -59,6 +58,7 @@ services:
       - ADMIN_ROLE=administrator
       - ADMIN_SCOPE=ODP.Admin
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
     restart: always
 
   odp-admin-api:
