@@ -26,7 +26,7 @@ services:
       - OAUTH2_CLIENT_SECRET=${IDENTITY_OAUTH2_SECRET}
       - OAUTH2_SCOPES=openid
       - HYDRA_PUBLIC_URL
-      - HYDRA_ADMIN_URL=https://hydra:4445
+      - HYDRA_ADMIN_URL
       - HYDRA_LOGIN_EXPIRY
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
@@ -50,7 +50,7 @@ services:
       - FLASK_ADMIN_SWATCH=flatly
       - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
       - HYDRA_PUBLIC_URL
-      - HYDRA_ADMIN_URL=https://hydra:4445
+      - HYDRA_ADMIN_URL
       - OAUTH2_CLIENT_ID=odp-admin
       - OAUTH2_CLIENT_SECRET=${ADMIN_OAUTH2_SECRET}
       - OAUTH2_SCOPES=openid ODP.Admin
@@ -76,7 +76,7 @@ services:
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=9999
       - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
-      - HYDRA_ADMIN_URL=https://hydra:4445
+      - HYDRA_ADMIN_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
 
@@ -87,8 +87,6 @@ services:
       - odp-core-net
     ports:
       - "9000:4444"
-      # TODO don't expose admin port
-      # requires modifying ckanext-accesscontrol to use accountsapi rather than hydra directly for token validation
       - "9001:4445"
     environment:
       - URLS_SELF_ISSUER=${HYDRA_PUBLIC_URL}
