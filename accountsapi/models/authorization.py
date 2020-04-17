@@ -13,7 +13,6 @@ class AuthorizationRequest(BaseModel):
     true about the info associated with the token in order for the request to be allowed.
     """
     token: str = Field(..., description="The token received by the calling API from a client application.")
-    audience: str = Field(..., description="The intended audience for the token (typically, the calling API).")
     scope: str = Field(..., description="The scope applicable to the request.")
     institution: str = Field(None, description="The institution applicable to the request (if the request relates "
                                                "to an institutional resource).")

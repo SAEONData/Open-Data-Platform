@@ -24,11 +24,10 @@ async def validate_and_introspect_token(
             server_url=config.HYDRA_ADMIN_URL,
             verify_tls=config.SERVER_ENV != 'development',
         )
-        # this verifies token validity, including scope and audience
+        # this verifies token validity
         token_data = hydra_admin.introspect_token(
             token=auth_request.token,
             require_scope=[auth_request.scope],
-            require_audience=[auth_request.audience],
         )
     except HydraAdminError as e:
         raise HTTPException(status_code=e.status_code, detail=e.error_detail) from e
