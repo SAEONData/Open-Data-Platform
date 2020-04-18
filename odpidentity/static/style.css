@@ -22,7 +22,7 @@ img.nrf-icon {
 }
 
 nav {
-  background: linear-gradient(to right, #D3ECFF, #BAFFEC);
+  background: #11B6FC;
   color: #13334C;
   display: flex;
   margin: 0;
@@ -31,18 +31,19 @@ nav {
 }
 
 body.login {
-  width: 350px;
+  width: 400px;
   margin-left: calc(50vw - (350px / 2));
   margin-top: calc((100vh - (350px * 1.618)) * .382);
 }
 
 body.login nav {
-  height: 120px;
-  padding: .5em 1.3em;
+  height: 140px;
+  padding: .5em 1em;
 }
 
-body.login img.nrf-icon {
-  max-height: 60%;
+body.login img.odp-header-image {
+  max-height: 65%;
+  margin-top: 1.8em;
 }
 
 nav a {
@@ -104,11 +105,11 @@ section, main {
 
 main header {
   font-size: .85em;
-  margin: 3em .75em 2.5em;
+  margin: 3em 1.5em 2.5em;
 }
 
 main footer {
-  margin: .5em .75em 1em;
+  margin: .5em 1.5em 1em;
   display: flex;
   flex-direction: column;
 }
@@ -129,7 +130,7 @@ main a:hover {
 }
 
 main form {
-  margin: 1em .75em .5em;
+  margin: 1em 1.5em .5em;
   display: flex;
   flex-direction: column;
 }
@@ -152,8 +153,8 @@ input[type=submit] {
   align-self: center;
   min-width: 7em;
   height: 2.8em;
-  background: radial-gradient(#BAFFEC, #D3ECFF);
-  border: 1px solid lightgray;
+  background: #11B6FC;
+  border: 1.5px solid #13334C;
   cursor: pointer;
   margin-top: 1.1em;
   font-weight: bold;
