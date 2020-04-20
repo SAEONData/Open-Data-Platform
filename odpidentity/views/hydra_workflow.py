@@ -23,7 +23,7 @@ class LoginMode(Enum):
         try:
             return LoginMode(parse_qs(urlparse(url).query).get('mode', [])[0])
         except (IndexError, ValueError):
-            abort(422)  # HTTP 422 Unprocessable Entity
+            return LoginMode.LOGIN
 
 
 @bp.route('/login')
