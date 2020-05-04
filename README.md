@@ -17,7 +17,7 @@ ODP metadata services include:
 
 ## Configuration
 
-Create a `.env` file in the `docker` subdirectory on the target machine,
+Create a `.env` file in the `deploy` subdirectory on the target machine,
 containing the following environment variables as applicable:
 
 ### Common options
@@ -35,7 +35,7 @@ containing the following environment variables as applicable:
 - **`IDENTITY_OAUTH2_SECRET`**: OAuth2 client secret for the identity service UI
 - **`ADMIN_FLASK_KEY`**: Flask secret key for the admin service
 - **`ADMIN_OAUTH2_SECRET`**: OAuth2 client secret for the admin service UI
-- **`HYDRA_IMAGE`**: the Hydra Docker image, e.g. `oryd/hydra:v1.2.3`
+- **`HYDRA_IMAGE`**: the Hydra Docker image, e.g. `oryd/hydra:v1.4.10`
 - **`HYDRA_DB_HOST`**: Hydra database hostname / IP address
 - **`HYDRA_DB_PASSWORD`**: Hydra database password
 - **`HYDRA_SYSTEM_SECRET`**: secret for encrypting the Hydra database; note that key rotation is not supported
@@ -93,12 +93,28 @@ To make the change permanent, edit the file `/etc/sysctl.conf` and add the follo
     docker-compose -f metadata-services build --no-cache
     docker-compose -f metadata-services up -d
 
-## Notes
+## Local development
+
+A Docker Compose configuration for setting up a local development environment is provided in the `develop` subdirectory.
+
+To use this, copy `.env.example` to `.env` and update values if necessary (the defaults should work fine for a standard setup).
+
+Next, initialise the Hydra DB:
+
+    ./setup-hydra-db.sh
+
+Then start the Docker containers:
+
+    docker-compose up -d
+
+Finally, create the requisite OAuth2 clients in Hydra:
+
+    ./setup-hydra-clients.sh
 
 ### Upgrading dependencies
 
-To upgrade dependencies and re-generate the `requirements.txt` file for the identity service /
-admin service / accounts API, carry out the following steps:
+To upgrade dependencies and re-generate the `requirements.txt` file for an ODP service or API,
+carry out the following steps:
 
 1. Activate the virtual environment of the service / API.
 1. Upgrade Python libraries as necessary.

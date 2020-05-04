@@ -1,0 +1,113 @@
+version: "3.5"
+
+networks:
+  hydra-net:
+    name: hydra-net
+    external: true
+  elastic-net:
+    name: elastic-net
+  ckan-net:
+    name: ckan-net
+
+volumes:
+  hydra-data:
+    name: hydra-data
+    external: true
+  elastic-data:
+    name: elastic-data
+
+services:
+  hydra:
+    container_name: hydra
+    image: ${HYDRA_IMAGE}
+    networks:
+      - hydra-net
+    ports:
+      - "9000:4444"
+      - "9001:4445"
+    environment:
+      - URLS_SELF_ISSUER=https://localhost:9000
+      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
+      - DSN=postgres://hydra_user:${HYDRA_DB_PASSWORD}@hydra-db:5432/hydra_db?sslmode=disable
+      - URLS_LOGIN=${IDENTITY_URL}/hydra/login
+      - URLS_CONSENT=${IDENTITY_URL}/hydra/consent
+      - URLS_LOGOUT=${IDENTITY_URL}/hydra/logout
+      - TTL_ACCESS_TOKEN=10000h
+    depends_on:
+      - hydra-db
+    restart: always
+
+  hydra-db:
+    container_name: hydra-db
+    image: postgres:9.6
+    networks:
+      - hydra-net
+    volumes:
+      - hydra-data:/var/lib/postgresql/data
+    environment:
+      - PGDATA=/var/lib/postgresql/data
+      - POSTGRES_DB=hydra_db
+      - POSTGRES_USER=hydra_user
+      - POSTGRES_PASSWORD=${HYDRA_DB_PASSWORD}
+    restart: always
+
+  es-agent:
+    container_name: es-agent
+    build:
+      context: ../deploy/es-agent
+    networks:
+      - elastic-net
+    environment:
+      - ELASTIC_AGENT_HOST=localhost
+      - ELASTIC_AGENT_PORT=9210
+      - ELASTIC_SEARCH_HOST=elasticsearch
+      - ELASTIC_SEARCH_PORT=9200
+    depends_on:
+      - elasticsearch
+    restart: always
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.2
+    networks:
+      - elastic-net
+    ports:
+      - "9200:9200"
+    environment:
+      - cluster.name=docker-cluster
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data/
+    restart: always
+
+  solr:
+    container_name: solr
+    build:
+      context: ../deploy/solr
+    networks:
+      - ckan-net
+    ports:
+      - "8983:8983"
+    restart: always
+
+  redis:
+    container_name: redis
+    image: redis:5
+    networks:
+      - ckan-net
+    ports:
+      - "6379:6379"
+    restart: always
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3
+    networks:
+      - ckan-net
+    ports:
+      - "5672:5672"
+    restart: always
