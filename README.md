@@ -28,7 +28,6 @@ for an example configuration.
 - **`SERVER_PORT`**: port number to listen on
 
 - **`ACCOUNTS_API_URL`**: URL of the ODP Accounts API, for access token validation and introspection
-- **`OAUTH2_AUDIENCE`**: `ODP-API` (expected value for 'aud' in received access tokens)
 - **`NO_AUTH`**: optional, default `False`; set to `True` to disable access token validation
 
 #### Routers
