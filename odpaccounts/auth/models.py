@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from enum import Enum
 
 from pydantic import BaseModel, EmailStr
@@ -28,7 +28,7 @@ class AccessToken(BaseModel):
     active: bool
     client_id: str
     scope: str
-    aud: List[str]
+    aud: Optional[List[str]]
     sub: str
     iss: str
     iat: int
