@@ -84,6 +84,10 @@ services:
         - SOLR_URL=http://solr:8983/solr
         - REDIS_URL=http://redis:6379/0
         - RABBITMQ_HOST=rabbitmq
+        - CKAN_ADMIN_ORG
+        - CKAN_ADMIN_ROLE
+        - CKAN_CURATOR_ROLE
+        - CKAN_CONTRIBUTOR_ROLE
     networks:
       - ckan-net
       - elastic-net
