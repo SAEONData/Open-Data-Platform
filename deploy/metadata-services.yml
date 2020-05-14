@@ -40,32 +40,6 @@ services:
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
 
-  odp-migration-api:
-    container_name: odp-migration-api
-    build:
-      context: odp-api
-      args:
-        - CA_CERT_URL
-    networks:
-      - ckan-net
-      - elastic-net
-    ports:
-      - "7777:8888"
-    environment:
-      - SERVER_ENV
-      - SERVER_HOST=0.0.0.0
-      - SERVER_PORT=8888
-      - NO_AUTH=True
-      - METADATA.ADAPTER=CKANAdapter
-      - METADATA.OAUTH2_SCOPE=ODP.Metadata
-      - CKAN_ADAPTER.CKAN_URL=http://ckan:5000
-      - SEARCH.ADAPTER=ElasticAdapter
-      - SEARCH.OAUTH2_SCOPE=ODP.Metadata
-      - ELASTIC_ADAPTER.ES_URL=http://elasticsearch:9200
-      - ELASTIC_ADAPTER.INDICES=${ELASTICSEARCH_INDICES}
-      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-    restart: always
-
   ckan:
     container_name: ckan
     build:
