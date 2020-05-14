@@ -95,6 +95,8 @@ services:
       context: es-agent
     networks:
       - elastic-net
+    ports:
+      - "9210:9210"
     environment:
       - ELASTIC_AGENT_HOST=localhost
       - ELASTIC_AGENT_PORT=9210
