@@ -68,6 +68,9 @@ RUN sed -i "/\[app:main\]/a ckan.openidconnect.api_id = not used" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.api_secret = not used" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.edit_url = ${IDENTITY_SERVICE_URL}/user/profile" ckan.ini
 RUN /bin/bash -c 'if [[ ${SERVER_ENV} == development ]]; then sed -i "/\[app:main\]/a ckan.openidconnect.no_verify_ssl_cert = true" ckan.ini; fi'
+RUN sed -i "s/ckan.site_title =.*/ckan.site_title = ODP Metadata/" ckan.ini
+RUN sed -i "s%ckan.site_logo =.*%ckan.site_logo = /images/SAEON-NRF-LOGO.png%" ckan.ini
+RUN sed -i "s%ckan.favicon =.*%ckan.favicon = /images/NRF-Icon.png%" ckan.ini
 RUN cat ckan.ini
 
 RUN paster db init -c ckan.ini
