@@ -1,15 +1,13 @@
-from typing import List
-
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
 from ..models import Pagination
-from ..models.search import QueryDSL, SearchHit
+from ..models.search import QueryDSL, SearchResult
 
 router = APIRouter()
 
 
-@router.post('/', response_model=List[SearchHit])
+@router.post('/', response_model=SearchResult)
 async def search_metadata(
         request: Request,
         query_dsl: QueryDSL,
