@@ -18,7 +18,7 @@ class UserModelView(AdminModelView):
     can_create = False  # users may only be created via signup
     action_disallowed_list = ['delete']  # disallow deletion of multiple users at once
 
-    column_list = ['id', 'email', 'active', 'superuser', 'confirmed_at', 'institutions']
+    column_list = ['id', 'email', 'verified', 'active', 'superuser', 'institutions']
     column_default_sort = 'email'
     column_formatters = {
         'institutions': lambda vw, ctx, model, prop: ', '.join(sorted([i.name for i in model.institutions]))
