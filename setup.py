@@ -11,7 +11,7 @@ setup(
     author_email='mark@saeon.ac.za',
     license='MIT',
     packages=find_namespace_packages(),
-    python_requires='~=3.6',
+    python_requires='~=3.8',
     install_requires=[
         'elasticsearch>=6.0.0,<7.0.0',
     ],

@@ -7,7 +7,7 @@ from elasticsearch import Elasticsearch, ElasticsearchException, TransportError
 
 from odpapi.adapters import ODPAPIAdapter, ODPAPIAdapterConfig
 from odpapi.models import Pagination
-from odpapi.models.search import QueryDSL, SearchHit
+from odpapi.models.search import QueryDSL, SearchHit, SearchResult
 
 
 class ElasticAdapterConfig(ODPAPIAdapterConfig):
@@ -34,18 +34,19 @@ class ElasticAdapter(ODPAPIAdapter):
         self.es_client = Elasticsearch([config.ES_URL])
 
     @staticmethod
-    def _parse_elastic_response(r) -> List[SearchHit]:
-        results = []
-        for hit in r.get('hits', {}).get('hits', []):
-            results += [SearchHit(
+    def _parse_elastic_response(r) -> SearchResult:
+        return SearchResult(
+            total_hits=(es_hits_dict := r.get('hits', {})).get('total', 0),
+            max_score=es_hits_dict.get('max_score', 0.0),
+            query_time=r.get('took', 0),
+            hits=[SearchHit(
                 metadata=hit['_source']['metadata_json'],
-                institution=hit['_source']['organization'],
-                collection=hit['_source']['collection'],
-                id=hit['_source']['record_id'],
-            )]
-        return results
+                metadata_id=hit['_source']['record_id'],
+                score=hit['_score'],
+            ) for hit in es_hits_dict.get('hits', [])],
+        )
 
-    async def search_metadata(self, query_dsl: QueryDSL, pagination: Pagination) -> List[SearchHit]:
+    async def search_metadata(self, query_dsl: QueryDSL, pagination: Pagination) -> SearchResult:
         try:
             response = self.es_client.search(
                 index=','.join(self.config.INDICES),
