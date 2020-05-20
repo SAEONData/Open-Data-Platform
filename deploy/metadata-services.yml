@@ -15,6 +15,7 @@ services:
     container_name: odp-metadata-api
     build:
       context: odp-api
+      dockerfile: Dockerfile-${SERVER_ENV}
       args:
         - CA_CERT_URL
     networks:
