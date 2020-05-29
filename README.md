@@ -22,7 +22,7 @@ containing the following environment variables as applicable:
 
 ### Common options
 - **`SERVER_ENV`**: deployment environment: `development`|`testing`|`staging`|`production`
-- **`CA_CERT_URL`**: download URL for an internal CA certificate (staging/production)
+- **`CA_CERT_URL`**: download URL for an internal CA certificate
 - **`IDENTITY_SERVICE_URL`**: URL of the ODP Identity service
 - **`HYDRA_PUBLIC_URL`**: URL of the Hydra public API
 - **`HYDRA_ADMIN_URL`**: URL of the Hydra admin API
