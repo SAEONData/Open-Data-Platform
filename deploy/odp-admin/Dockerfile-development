@@ -2,7 +2,7 @@ FROM python:3.6
 
 WORKDIR /srv
 
-RUN git clone https://github.com/SAEONData/ODP-Admin.git
+RUN git clone -b development https://github.com/SAEONData/ODP-Admin.git
 RUN git clone https://github.com/SAEONData/ODP-AccountsLib.git
 RUN git clone https://github.com/SAEONData/Hydra-Admin-Client.git
 RUN git clone https://github.com/SAEONData/Hydra-OAuth2-Blueprint.git
