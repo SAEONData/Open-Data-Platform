@@ -8,7 +8,7 @@ services:
   odp-identity:
     container_name: odp-identity
     build:
-      context: odp-identity
+      context: core-services/odp-identity
       dockerfile: Dockerfile-${SERVER_ENV}
       args:
         - CA_CERT_URL
@@ -35,7 +35,7 @@ services:
   odp-admin:
     container_name: odp-admin
     build:
-      context: odp-admin
+      context: core-services/odp-admin
       dockerfile: Dockerfile-${SERVER_ENV}
       args:
         - CA_CERT_URL
@@ -64,7 +64,7 @@ services:
   odp-admin-api:
     container_name: odp-admin-api
     build:
-      context: odp-accountsapi
+      context: core-services/odp-admin-api
       args:
         - CA_CERT_URL
     networks:

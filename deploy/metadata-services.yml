@@ -14,7 +14,7 @@ services:
   odp-metadata-api:
     container_name: odp-metadata-api
     build:
-      context: odp-api
+      context: metadata-services/odp-api
       dockerfile: Dockerfile-${SERVER_ENV}
       args:
         - CA_CERT_URL
@@ -44,7 +44,7 @@ services:
   ckan:
     container_name: ckan
     build:
-      context: ckan-metadata
+      context: metadata-services/ckan-metadata
       args:
         - SERVER_ENV
         - CA_CERT_URL
@@ -79,7 +79,7 @@ services:
   pycsw:
     container_name: pycsw
     build:
-      context: pycsw
+      context: metadata-services/pycsw
       args:
         - ELASTIC_AGENT_SEARCH_URL=http://es-agent:9210/search
     networks:
@@ -93,7 +93,7 @@ services:
   es-agent:
     container_name: es-agent
     build:
-      context: es-agent
+      context: metadata-services/es-agent
     networks:
       - elastic-net
     ports:
@@ -128,7 +128,7 @@ services:
   solr:
     container_name: solr
     build:
-      context: solr
+      context: metadata-services/solr
     networks:
       - ckan-net
     restart: always
