@@ -11,7 +11,7 @@ services:
       context: core-services/odp-identity
       dockerfile: Dockerfile-${SERVER_ENV}
       args:
-        - CA_CERT_URL
+        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
       - odp-core-net
     ports:
@@ -25,8 +25,8 @@ services:
       - OAUTH2_CLIENT_ID=odp-identity
       - OAUTH2_CLIENT_SECRET=${IDENTITY_OAUTH2_SECRET}
       - OAUTH2_SCOPES=openid
-      - HYDRA_PUBLIC_URL
-      - HYDRA_ADMIN_URL
+      - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
+      - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - HYDRA_LOGIN_EXPIRY
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
@@ -38,7 +38,7 @@ services:
       context: core-services/odp-admin
       dockerfile: Dockerfile-${SERVER_ENV}
       args:
-        - CA_CERT_URL
+        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
       - odp-core-net
     ports:
@@ -49,8 +49,8 @@ services:
       - FLASK_SECRET_KEY=${ADMIN_FLASK_KEY}
       - FLASK_ADMIN_SWATCH=flatly
       - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
-      - HYDRA_PUBLIC_URL
-      - HYDRA_ADMIN_URL
+      - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
+      - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - OAUTH2_CLIENT_ID=odp-admin
       - OAUTH2_CLIENT_SECRET=${ADMIN_OAUTH2_SECRET}
       - OAUTH2_SCOPES=openid ODP.Admin
@@ -66,7 +66,7 @@ services:
     build:
       context: core-services/odp-admin-api
       args:
-        - CA_CERT_URL
+        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
       - odp-core-net
     ports:
@@ -76,7 +76,7 @@ services:
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=9999
       - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
-      - HYDRA_ADMIN_URL
+      - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
 
@@ -89,12 +89,12 @@ services:
       - "9000:4444"
       - "9001:4445"
     environment:
-      - URLS_SELF_ISSUER=${HYDRA_PUBLIC_URL}
+      - URLS_SELF_ISSUER=${ODP_PUBLIC_URL}/auth
       - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
       - DSN=postgres://hydra_user:${HYDRA_DB_PASSWORD}@${HYDRA_DB_HOST}:5432/hydra_db?sslmode=disable
-      - URLS_LOGIN=${IDENTITY_SERVICE_URL}/hydra/login
-      - URLS_CONSENT=${IDENTITY_SERVICE_URL}/hydra/consent
-      - URLS_LOGOUT=${IDENTITY_SERVICE_URL}/hydra/logout
+      - URLS_LOGIN=${ODP_PUBLIC_URL}/id/hydra/login
+      - URLS_CONSENT=${ODP_PUBLIC_URL}/id/hydra/consent
+      - URLS_LOGOUT=${ODP_PUBLIC_URL}/id/hydra/logout
       # TODO remove; the following makes access token lifetime 1 week (the default is 1 hour),
       # as a workaround until such time as we've implemented token refresh on the client side
       - TTL_ACCESS_TOKEN=168h

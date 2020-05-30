@@ -17,7 +17,7 @@ services:
       context: metadata-services/odp-api
       dockerfile: Dockerfile-${SERVER_ENV}
       args:
-        - CA_CERT_URL
+        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
       - ckan-net
       - elastic-net
@@ -27,7 +27,7 @@ services:
       - SERVER_ENV
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=8888
-      - ACCOUNTS_API_URL
+      - ACCOUNTS_API_URL=${ODP_ADMIN_URL}/api
       - METADATA.ADAPTER=CKANAdapter
       - METADATA.OAUTH2_SCOPE=ODP.Metadata
       - METADATA.READONLY_ROLES=${METADATA_READONLY_ROLES}
@@ -47,14 +47,14 @@ services:
       context: metadata-services/ckan-metadata
       args:
         - SERVER_ENV
-        - CA_CERT_URL
+        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
         - CKAN_URL
         - CKAN_DB_URL=postgresql://ckan_default:${CKAN_DB_PASSWORD}@${CKAN_DB_HOST}/ckan_default
         - DOI_PREFIX
-        - HYDRA_PUBLIC_URL
-        - HYDRA_ADMIN_URL
+        - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
+        - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
         - OAUTH2_CLIENT_SECRET=${CKAN_OAUTH2_SECRET}
-        - IDENTITY_SERVICE_URL
+        - IDENTITY_SERVICE_URL=${ODP_PUBLIC_URL}/id
         - ELASTIC_AGENT_URL=http://es-agent:9210
         - SOLR_URL=http://solr:8983/solr
         - REDIS_URL=http://redis:6379/0

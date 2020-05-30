@@ -1,0 +1,51 @@
+server {
+    listen 80;
+    server_name odp-admin.saeon.*;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name odp-admin.saeon.*;
+
+    ssl_certificate /etc/ssl/certs/odp-admin.crt;
+    ssl_certificate_key /etc/ssl/private/odp-admin.key;
+
+    access_log /var/log/nginx/odp-admin-access.log;
+    error_log /var/log/nginx/odp-admin-error.log;
+
+    # Admin UI
+    location / {
+        proxy_pass         http://127.0.0.1:9025;
+        proxy_redirect     off;
+        proxy_set_header   Host                 $host;
+        proxy_set_header   X-Real-IP            $remote_addr;
+        proxy_set_header   X-Forwarded-For      $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto    $scheme;
+    }
+
+    # Admin API
+    location /api/ {
+        proxy_pass         http://127.0.0.1:9999/;
+        proxy_redirect     / /api/;
+        proxy_set_header   Host                 $host;
+        proxy_set_header   X-Real-IP            $remote_addr;
+        proxy_set_header   X-Forwarded-For      $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto    $scheme;
+    }
+
+    # Hydra Admin API
+    location /hydra/ {
+        proxy_pass         https://127.0.0.1:9001/;
+        proxy_redirect     / /hydra/;
+        proxy_set_header   Host                 $host;
+        proxy_set_header   X-Real-IP            $remote_addr;
+        proxy_set_header   X-Forwarded-For      $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto    $scheme;
+    }
+
+    # CA certificate
+    location = /ca.crt {
+        alias /srv/ca-cert/saeon-ca.crt;
+    }
+}

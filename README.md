@@ -22,10 +22,8 @@ containing the following environment variables as applicable:
 
 ### Common options
 - **`SERVER_ENV`**: deployment environment: `development`|`testing`|`staging`|`production`
-- **`CA_CERT_URL`**: download URL for an internal CA certificate
-- **`IDENTITY_SERVICE_URL`**: URL of the ODP Identity service
-- **`HYDRA_PUBLIC_URL`**: URL of the Hydra public API
-- **`HYDRA_ADMIN_URL`**: URL of the Hydra admin API
+- **`ODP_PUBLIC_URL`**: URL of the ODP web-facing server
+- **`ODP_ADMIN_URL`**: URL of the ODP admin server
 
 ### Core services options
 - **`ACCOUNTS_DB_HOST`**: ODP accounts database hostname / IP address
@@ -46,7 +44,6 @@ containing the following environment variables as applicable:
 - **`CKAN_DB_HOST`**: CKAN database hostname / IP address
 - **`CKAN_DB_PASSWORD`**: CKAN database password
 - **`CKAN_OAUTH2_SECRET`**: OAuth2 client secret for the CKAN UI
-- **`ACCOUNTS_API_URL`**: URL of the ODP Accounts API
 - **`DOI_PREFIX`**: SAEON DOI prefix
 - **`METADATA_READONLY_ROLES`**: JSON-encoded list of roles that may read metadata within the same institution
 - **`METADATA_READWRITE_ROLES`**: JSON-encoded list of roles that may read and write metadata within the same institution
