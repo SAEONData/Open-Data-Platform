@@ -6,12 +6,12 @@ services of the SAEON Open Data Platform.
 ODP core services include:
 - [ODP Identity](https://github.com/SAEONData/ODP-Identity)
 - [ODP Admin](https://github.com/SAEONData/ODP-Admin)
-- [ODP Accounts API](https://github.com/SAEONData/ODP-AccountsAPI)
+- [ODP Admin API](https://github.com/SAEONData/ODP-AccountsAPI)
 - [ORY Hydra](https://www.ory.sh/docs/hydra/)
 
 ODP metadata services include:
 - [ODP API](https://github.com/SAEONData/ODP-API)
-- CKAN metadata management server
+- CKAN-based metadata management server
 - PyCSW metadata harvest endpoint
 - Elasticsearch metadata discovery catalogue
 
@@ -20,12 +20,12 @@ ODP metadata services include:
 Create a `.env` file in the `deploy` subdirectory on the target machine,
 containing the following environment variables as applicable:
 
-### Common options
+### General configuration
 - **`SERVER_ENV`**: deployment environment: `development`|`testing`|`staging`|`production`
 - **`ODP_PUBLIC_URL`**: URL of the ODP web-facing server
 - **`ODP_ADMIN_URL`**: URL of the ODP admin server
 
-### Core services options
+### Core services configuration
 - **`ACCOUNTS_DB_HOST`**: ODP accounts database hostname / IP address
 - **`ACCOUNTS_DB_PASSWORD`**: ODP accounts database password
 - **`MAIL_SERVER`**: IP / hostname of mail server used for sending email verifications / password resets
@@ -37,19 +37,12 @@ containing the following environment variables as applicable:
 - **`HYDRA_DB_HOST`**: Hydra database hostname / IP address
 - **`HYDRA_DB_PASSWORD`**: Hydra database password
 - **`HYDRA_SYSTEM_SECRET`**: secret for encrypting the Hydra database; note that key rotation is not supported
-- **`HYDRA_LOGIN_EXPIRY`**: number of seconds to remember a successful login
 
-### Metadata services options
+### Metadata services configuration
 - **`CKAN_URL`**: URL of the CKAN server
 - **`CKAN_DB_HOST`**: CKAN database hostname / IP address
 - **`CKAN_DB_PASSWORD`**: CKAN database password
 - **`CKAN_OAUTH2_SECRET`**: OAuth2 client secret for the CKAN UI
-- **`DOI_PREFIX`**: SAEON DOI prefix
-- **`METADATA_READONLY_ROLES`**: JSON-encoded list of roles that may read metadata within the same institution
-- **`METADATA_READWRITE_ROLES`**: JSON-encoded list of roles that may read and write metadata within the same institution
-- **`METADATA_ADMIN_ROLES`**: JSON-encoded list of roles that may read and write metadata belonging to _any_ institution,
-and that may access metadata admin functions
-- **`ELASTICSEARCH_INDICES`**: JSON-encoded list of Elasticsearch indexes to query for metadata searches
 
 ## Core services installation / upgrade
 

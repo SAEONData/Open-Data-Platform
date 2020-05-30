@@ -30,14 +30,14 @@ services:
       - ACCOUNTS_API_URL=${ODP_ADMIN_URL}/api
       - METADATA.ADAPTER=CKANAdapter
       - METADATA.OAUTH2_SCOPE=ODP.Metadata
-      - METADATA.READONLY_ROLES=${METADATA_READONLY_ROLES}
-      - METADATA.READWRITE_ROLES=${METADATA_READWRITE_ROLES}
-      - METADATA.ADMIN_ROLES=${METADATA_ADMIN_ROLES}
+      - METADATA.READONLY_ROLES=["member"]
+      - METADATA.READWRITE_ROLES=["contributor"]
+      - METADATA.ADMIN_ROLES=["curator"]
       - CKAN_ADAPTER.CKAN_URL=http://ckan:5000
       - SEARCH.ADAPTER=ElasticAdapter
       - SEARCH.OAUTH2_SCOPE=ODP.Metadata
       - ELASTIC_ADAPTER.ES_URL=http://elasticsearch:9200
-      - ELASTIC_ADAPTER.INDICES=${ELASTICSEARCH_INDICES}
+      - ELASTIC_ADAPTER.INDICES=["saeon-odp-4-2","sans-1878-mims-1","sans-1878-mims-historical-1","sans-1878-sadco-historical-1"]
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
 
@@ -50,7 +50,7 @@ services:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
         - CKAN_URL
         - CKAN_DB_URL=postgresql://ckan_default:${CKAN_DB_PASSWORD}@${CKAN_DB_HOST}/ckan_default
-        - DOI_PREFIX
+        - DOI_PREFIX=10.15493
         - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
         - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
         - OAUTH2_CLIENT_SECRET=${CKAN_OAUTH2_SECRET}
@@ -59,10 +59,10 @@ services:
         - SOLR_URL=http://solr:8983/solr
         - REDIS_URL=http://redis:6379/0
         - RABBITMQ_HOST=rabbitmq
-        - CKAN_ADMIN_ORG
-        - CKAN_ADMIN_ROLE
-        - CKAN_CURATOR_ROLE
-        - CKAN_CONTRIBUTOR_ROLE
+        - CKAN_ADMIN_ORG=saeon
+        - CKAN_ADMIN_ROLE=administrator
+        - CKAN_CURATOR_ROLE=curator
+        - CKAN_CONTRIBUTOR_ROLE=contributor
     networks:
       - ckan-net
       - elastic-net

@@ -27,7 +27,7 @@ services:
       - OAUTH2_SCOPES=openid
       - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
-      - HYDRA_LOGIN_EXPIRY
+      - HYDRA_LOGIN_EXPIRY=2592000
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
     restart: always
