@@ -1,10 +1,16 @@
 from typing import Dict, Optional
+from enum import Enum
 
-from pydantic import BaseModel, Field, UUID4
+from pydantic import BaseModel, Field, UUID4, AnyHttpUrl
 
 # adapted from https://www.crossref.org/blog/dois-and-matching-regular-expressions
 # Note: this allows either a DOI string or an empty string
 DOI_REGEX = r'^(|10\.\d{4,}(\.\d+)*/[-._;()/:a-zA-Z0-9]+)$'
+
+
+class CaptureMethod(str, Enum):
+    wizard = 'wizard'
+    harvester = 'harvester'
 
 
 class MetadataRecordIn(BaseModel):
@@ -13,6 +19,10 @@ class MetadataRecordIn(BaseModel):
     metadata: Dict
     doi: str = Field('', regex=DOI_REGEX)
     auto_assign_doi: bool = False
+    terms_conditions_accepted: bool
+    data_agreement_accepted: bool
+    data_agreement_url: AnyHttpUrl
+    capture_method: CaptureMethod
 
 
 class MetadataRecord(BaseModel):
