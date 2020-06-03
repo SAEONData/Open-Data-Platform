@@ -1,5 +1,6 @@
-from typing import List
+from typing import List, Dict, Any
 import json
+import logging
 
 from pydantic import AnyHttpUrl
 from requests import RequestException
@@ -15,6 +16,8 @@ from odpapi.models.metadata import (
     MetadataValidationResult,
     MetadataWorkflowResult,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class CKANAdapterConfig(ODPAPIAdapterConfig):
@@ -53,19 +56,24 @@ class CKANAdapter(ODPAPIAdapter):
                                         requests_kwargs={'verify': self.app_config.SERVER_ENV != 'development'})
 
         except RequestException as e:
-            raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail="Error sending request to CKAN: {}".format(e)) from e
+            raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE,
+                                detail="Error sending request to CKAN: {}".format(e)) from e
 
         except ckanapi.ValidationError as e:
-            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="CKAN validation error: {}".format(e)) from e
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST,
+                                detail="CKAN validation error: {}".format(e)) from e
 
         except ckanapi.NotAuthorized as e:
-            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not authorized to access CKAN resource: {}".format(e)) from e
+            raise HTTPException(status_code=HTTP_403_FORBIDDEN,
+                                detail="Not authorized to access CKAN resource: {}".format(e)) from e
 
         except ckanapi.NotFound as e:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="CKAN resource not found: {}".format(e)) from e
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                                detail="CKAN resource not found: {}".format(e)) from e
 
         except ckanapi.CKANAPIError as e:
-            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="CKAN error: {}".format(e)) from e
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST,
+                                detail="CKAN error: {}".format(e)) from e
 
     @staticmethod
     def _translate_from_ckan_record(ckan_record):
@@ -145,17 +153,20 @@ class CKANAdapter(ODPAPIAdapter):
             deserialize_json=True,
             **input_dict,
         )
+        record_id = ckan_record['id']
+        self._annotate_metadata_record(record_id, metadata_record, access_token)
 
         if not ckan_record['validated']:
             # try to validate the record, for convenience
             try:
-                validaton_result = self.validate_metadata_record(institution_key, ckan_record['id'], access_token)
+                validaton_result = self.validate_metadata_record(institution_key, record_id, access_token)
                 ckan_record.update({
                     'validated': True,
                     'errors': validaton_result.errors,
                 })
-            except:
-                pass
+            except HTTPException as e:
+                # note: this is a system error, not a validation error
+                logger.warning(f"An error occurred while validating metadata record {record_id}: {e.detail}")
 
         return self._translate_from_ckan_record(ckan_record)
 
@@ -176,17 +187,19 @@ class CKANAdapter(ODPAPIAdapter):
             deserialize_json=True,
             **input_dict,
         )
+        self._annotate_metadata_record(record_id, metadata_record, access_token)
 
         if not ckan_record['validated']:
             # try to validate the record, for convenience
             try:
-                validaton_result = self.validate_metadata_record(institution_key, ckan_record['id'], access_token)
+                validaton_result = self.validate_metadata_record(institution_key, record_id, access_token)
                 ckan_record.update({
                     'validated': True,
                     'errors': validaton_result.errors,
                 })
-            except:
-                pass
+            except HTTPException as e:
+                # note: this is a system error, not a validation error
+                logger.warning(f"An error occurred while validating metadata record {record_id}: {e.detail}")
 
         return self._translate_from_ckan_record(ckan_record)
 
@@ -248,4 +261,43 @@ class CKANAdapter(ODPAPIAdapter):
         return MetadataWorkflowResult(
             success=not workflow_errors,
             errors=workflow_errors,
+        )
+
+    def _annotate_metadata_record(self,
+                                  record_id: str,
+                                  metadata_record: MetadataRecordIn,
+                                  access_token: str,
+                                  ) -> None:
+
+        def annotate(key: str, value: Dict[str, Any]):
+            try:
+                self._call_ckan('metadata_record_workflow_annotation_create', access_token,
+                                id=record_id, key=key, value=json.dumps(value))
+            except HTTPException as e:
+                err = None
+                if e.status_code == 400:
+                    # if we are doing a metadata record update, create annotation may fail with a 400 (duplicate),
+                    # so we try updating the annotation
+                    try:
+                        self._call_ckan('metadata_record_workflow_annotation_update', access_token,
+                                        id=record_id, key=key, value=json.dumps(value))
+                    except HTTPException as e:
+                        err = e.detail
+                else:
+                    err = e.detail
+
+                if err:
+                    logger.error(f'Error setting "{key}" annotation on metadata record {record_id}: {err}')
+
+        annotate(
+            key='terms_and_conditions',
+            value={'accepted': metadata_record.terms_conditions_accepted},
+        )
+        annotate(
+            key='data_agreement',
+            value={'accepted': metadata_record.data_agreement_accepted, 'href': metadata_record.data_agreement_url},
+        )
+        annotate(
+            key='capture_info',
+            value={'capture_method': metadata_record.capture_method},
         )
