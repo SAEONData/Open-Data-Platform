@@ -51,7 +51,7 @@ def create_app(config=None):
     hydra_admin.remember_login_for = app.config['HYDRA_LOGIN_EXPIRY']
     hydra_admin.verify_tls = get_env() != 'development'
 
-    # trust the X-Forwarded-For and X-Forwarded-Proto headers set by the proxy server
-    app.wsgi_app = ProxyFix(app.wsgi_app)
+    # trust the X-Forwarded-* headers set by the proxy server
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_prefix=1)
 
     return app
