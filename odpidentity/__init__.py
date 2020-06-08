@@ -2,6 +2,7 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask.helpers import get_env
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from hydra import HydraAdminClient
 from odpaccounts.db import session as db_session
@@ -49,5 +50,8 @@ def create_app(config=None):
     hydra_admin.server_url = app.config['HYDRA_ADMIN_URL']
     hydra_admin.remember_login_for = app.config['HYDRA_LOGIN_EXPIRY']
     hydra_admin.verify_tls = get_env() != 'development'
+
+    # trust the X-Forwarded-For and X-Forwarded-Proto headers set by the proxy server
+    app.wsgi_app = ProxyFix(app.wsgi_app)
 
     return app
