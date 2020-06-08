@@ -16,7 +16,7 @@ RUN cd Hydra-Admin-Client && pip install -e .
 RUN cd Hydra-OAuth2-Blueprint && pip install -e .
 
 ARG CA_CERT_URL
-RUN curl ${CA_CERT_URL} -f -o /usr/local/share/ca-certificates/saeon-internal-ca.crt; exit 0
+RUN curl ${CA_CERT_URL} -k -f -o /usr/local/share/ca-certificates/saeon-internal-ca.crt; exit 0
 RUN update-ca-certificates
 
 CMD ["gunicorn", "-b 0.0.0.0:9024", "odpidentity:create_app()"]
