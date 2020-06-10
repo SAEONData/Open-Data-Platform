@@ -16,9 +16,6 @@ class AppConfig(BaseSettings):
     Application config, populated from the environment.
     """
     SERVER_ENV: ServerEnv
-    SERVER_HOST: str
-    SERVER_PORT: int
-
     NO_AUTH: Optional[bool]
     ACCOUNTS_API_URL: Optional[AnyHttpUrl]
 

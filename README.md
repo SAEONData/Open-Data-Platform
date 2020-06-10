@@ -24,9 +24,7 @@ for an example configuration.
 #### Global
 
 - **`SERVER_ENV`**: deployment environment; `development` | `testing` | `staging` | `production`
-- **`SERVER_HOST`**: IP address / hostname to listen on
-- **`SERVER_PORT`**: port number to listen on
-
+- **`PATH_PREFIX`**: (optional) URL path prefix at which the API is mounted, e.g. `/api`
 - **`ACCOUNTS_API_URL`**: URL of the ODP Accounts API, for access token validation and introspection
 - **`NO_AUTH`**: optional, default `False`; set to `True` to disable access token validation
 
@@ -65,3 +63,13 @@ The adapter class contains methods that fulfil adapter calls as defined in one o
 modules. The adapter's config class should define an environment variable prefix (e.g. `'FOOBAR_ADAPTER.'`),
 and may define additional settings as needed, which will also be automatically loaded from the
 environment at startup.
+
+## Development quick start
+
+Install the Uvicorn ASGI server into the project's virtual environment:
+
+    pip install uvicorn
+
+Run the server:
+
+    uvicorn odpapi:app --reload

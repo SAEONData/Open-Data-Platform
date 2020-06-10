@@ -1,6 +1,6 @@
 from setuptools import setup, find_namespace_packages
 
-version = '0.2.0'
+version = '0.3.0'
 
 setup(
     name='ODP-API',
@@ -15,9 +15,8 @@ setup(
     python_requires='~=3.8',
     install_requires=[
         'fastapi',
-        'uvicorn',
-        'python-dotenv',
         'requests',
+        'python-dotenv',
     ],
     extras_require={
         'test': ['pytest', 'coverage']
