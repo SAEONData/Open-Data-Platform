@@ -68,7 +68,6 @@ services:
       dockerfile: Dockerfile-${SERVER_ENV}
       args:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
-        - PORT=9999
     networks:
       - odp-core-net
     ports:

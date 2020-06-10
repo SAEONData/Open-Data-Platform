@@ -17,5 +17,4 @@ ARG CA_CERT_URL
 RUN curl ${CA_CERT_URL} -k -f -o /usr/local/share/ca-certificates/saeon-internal-ca.crt; exit 0
 RUN update-ca-certificates
 
-ARG PORT
-CMD ["uvicorn", "accountsapi:app", "--host", "0.0.0.0", "--port", "${PORT}"]
+CMD ["uvicorn", "accountsapi:app", "--host", "0.0.0.0", "--port", "9999"]
