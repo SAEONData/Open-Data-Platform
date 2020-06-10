@@ -65,16 +65,17 @@ services:
     container_name: odp-admin-api
     build:
       context: core-services/odp-admin-api
+      dockerfile: Dockerfile-${SERVER_ENV}
       args:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
+        - PORT=9999
     networks:
       - odp-core-net
     ports:
       - "9999:9999"
     environment:
       - SERVER_ENV
-      - SERVER_HOST=0.0.0.0
-      - SERVER_PORT=9999
+      - PATH_PREFIX=/api
       - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
