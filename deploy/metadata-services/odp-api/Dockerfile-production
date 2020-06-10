@@ -19,4 +19,4 @@ ARG CA_CERT_URL
 RUN curl ${CA_CERT_URL} -k -f -o /usr/local/share/ca-certificates/saeon-internal-ca.crt; exit 0
 RUN update-ca-certificates
 
-CMD ["python", "ODP-API/odpapi/main.py"]
+CMD ["uvicorn", "odpapi:app", "--host", "0.0.0.0", "--port", "8888"]

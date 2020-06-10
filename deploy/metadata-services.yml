@@ -25,8 +25,7 @@ services:
       - "8888:8888"
     environment:
       - SERVER_ENV
-      - SERVER_HOST=0.0.0.0
-      - SERVER_PORT=8888
+      - PATH_PREFIX=/api
       - ACCOUNTS_API_URL=${ODP_ADMIN_URL}/api
       - METADATA.ADAPTER=CKANAdapter
       - METADATA.OAUTH2_SCOPE=ODP.Metadata
