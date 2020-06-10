@@ -9,7 +9,7 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from odpaccounts.models.institution import Institution as InstitutionORM
 
-from .. import db_session
+from ..db import db_session
 from ..models.institution import Institution
 
 router = APIRouter()

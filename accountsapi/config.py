@@ -15,6 +15,4 @@ class Config(BaseSettings):
     Application config, populated from the environment.
     """
     SERVER_ENV: ServerEnv
-    SERVER_HOST: str
-    SERVER_PORT: int
     HYDRA_ADMIN_URL: AnyHttpUrl

@@ -22,8 +22,17 @@ for an example configuration.
 ### Environment variables
 
 - **`SERVER_ENV`**: deployment environment; `development` | `testing` | `staging` | `production`
-- **`SERVER_HOST`**: IP address / hostname to listen on
-- **`SERVER_PORT`**: port number to listen on
+- **`PATH_PREFIX`**: (optional) URL path prefix at which the API is mounted, e.g. `/api`
 - **`DATABASE_URL`**: URL of the ODP Accounts database, e.g. `postgresql://odp_user:pwd@host/odp_accounts`
 - **`DATABASE_ECHO`**: set to `True` to emit SQLAlchemy database calls to stderr (default `False`)
 - **`HYDRA_ADMIN_URL`**: URL of the Hydra admin API
+
+## Development quick start
+
+Install the Uvicorn ASGI server into the project's virtual environment:
+
+    pip install uvicorn
+
+Run the server:
+
+    uvicorn accountsapi:app --reload

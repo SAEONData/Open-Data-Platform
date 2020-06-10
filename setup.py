@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.1.0'
+version = '0.2.0'
 
 setup(
     name='ODP-AccountsAPI',
@@ -12,10 +12,10 @@ setup(
     license='MIT',
     packages=find_packages(),
     include_package_data=True,
-    python_requires='~=3.6',
+    python_requires='~=3.7',
     install_requires=[
         'fastapi',
-        'uvicorn',
+        'sqlalchemy',
         'python-dotenv',
     ],
     extras_require={
