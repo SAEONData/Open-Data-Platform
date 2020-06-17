@@ -14,7 +14,7 @@ RUN cd ODP-AccountsLib && pip install -e .
 RUN cd Hydra-Admin-Client && pip install -e .
 
 ARG CA_CERT_URL
-RUN curl ${CA_CERT_URL} -k -f -o /usr/local/share/ca-certificates/saeon-internal-ca.crt; exit 0
+RUN curl ${CA_CERT_URL} -k -o /usr/local/share/ca-certificates/saeon-internal-ca.crt
 RUN update-ca-certificates
 
 CMD ["uvicorn", "accountsapi:app", "--host", "0.0.0.0", "--port", "9999"]
