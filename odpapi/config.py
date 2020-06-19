@@ -1,7 +1,7 @@
 from typing import Optional, List
 from enum import Enum
 
-from pydantic import BaseSettings, AnyHttpUrl, validator
+from pydantic import BaseSettings, AnyHttpUrl, validator, constr
 
 
 class ServerEnv(str, Enum):
@@ -16,8 +16,10 @@ class AppConfig(BaseSettings):
     Application config, populated from the environment.
     """
     SERVER_ENV: ServerEnv
-    NO_AUTH: Optional[bool]
+    PATH_PREFIX: constr(regex=r'^(/\w+)*$') = ''
+    ALLOW_ORIGINS: List[AnyHttpUrl] = []
     ACCOUNTS_API_URL: Optional[AnyHttpUrl]
+    NO_AUTH: Optional[bool]
 
     @validator('NO_AUTH', pre=True, always=True)
     def validate_no_auth(cls, value):
