@@ -24,6 +24,7 @@ containing the following environment variables as applicable:
 - **`SERVER_ENV`**: deployment environment: `development`|`testing`|`staging`|`production`
 - **`ODP_PUBLIC_URL`**: URL of the ODP web-facing server
 - **`ODP_ADMIN_URL`**: URL of the ODP admin server
+- **`CORS_ORIGINS`**: JSON-encoded list of allowed CORS origins
 
 ### Core services configuration
 - **`ACCOUNTS_DB_HOST`**: ODP accounts database hostname / IP address

@@ -26,6 +26,7 @@ services:
     environment:
       - SERVER_ENV
       - PATH_PREFIX=/api
+      - ALLOW_ORIGINS=${CORS_ORIGINS}
       - ACCOUNTS_API_URL=${ODP_ADMIN_URL}/api
       - METADATA.ADAPTER=CKANAdapter
       - METADATA.OAUTH2_SCOPE=ODP.Metadata
