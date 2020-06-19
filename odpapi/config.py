@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Union, Literal
 from enum import Enum
 
 from pydantic import BaseSettings, AnyHttpUrl, validator, constr
@@ -17,7 +17,7 @@ class AppConfig(BaseSettings):
     """
     SERVER_ENV: ServerEnv
     PATH_PREFIX: constr(regex=r'^(/\w+)*$') = ''
-    ALLOW_ORIGINS: List[AnyHttpUrl] = []
+    ALLOW_ORIGINS: List[Union[Literal['*'], AnyHttpUrl]] = []
     ACCOUNTS_API_URL: Optional[AnyHttpUrl]
     NO_AUTH: Optional[bool]
 

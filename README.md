@@ -25,6 +25,7 @@ for an example configuration.
 
 - **`SERVER_ENV`**: deployment environment; `development` | `testing` | `staging` | `production`
 - **`PATH_PREFIX`**: (optional) URL path prefix at which the API is mounted, e.g. `/api`
+- **`ALLOW_ORIGINS`**: (optional) list of allowed CORS origins; `["*"]` to allow any origin
 - **`ACCOUNTS_API_URL`**: URL of the ODP Accounts API, for access token validation and introspection
 - **`NO_AUTH`**: optional, default `False`; set to `True` to disable access token validation
 
@@ -42,9 +43,9 @@ if the router is institution-aware, the resources must belong to the same instit
 - **`<ROUTER>.ADMIN_ROLES`**: list of roles that may read and write resources belonging
 to _any_ institution, and that may access administrative functions, via this router
 
-Note: the `*_ROLES` options should be entered as JSON-encoded lists, e.g.
+Note: list-type options should be entered as JSON-encoded lists without spaces between items, e.g.
 
-    METADATA.READWRITE_ROLES=["contributor", "curator"]
+    METADATA.READWRITE_ROLES=["contributor","curator"]
 
 The `*_ROLES` options are optional, defaulting to the empty list `[]`, i.e. no roles allowed
 access of the specified type.
