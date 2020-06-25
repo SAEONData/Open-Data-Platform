@@ -7,10 +7,9 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from odpaccounts.models.institution import Institution as InstitutionORM
-
-from ..db import db_session
-from ..models.institution import Institution
+from odp.api import db_session
+from odp.api.models.institution import Institution
+from odp.db.models.institution import Institution as InstitutionORM
 
 router = APIRouter()
 

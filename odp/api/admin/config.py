@@ -1,13 +1,6 @@
-from enum import Enum
-
 from pydantic import BaseSettings, AnyHttpUrl
 
-
-class ServerEnv(str, Enum):
-    development = 'development'
-    testing = 'testing'
-    staging = 'staging'
-    production = 'production'
+from odp.api.models.env import ServerEnv
 
 
 class Config(BaseSettings):

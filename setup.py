@@ -18,11 +18,19 @@ setup(
         'sqlalchemy-utils',
         'psycopg2',
         'pydantic[email]',
+        'python-dotenv',
     ],
     extras_require={
+        'api': [
+            'fastapi',
+            'uvicorn',
+        ],
         'test': [
             'pytest',
             'pytest-cov',
         ],
     },
+    dependency_links=[
+        'git+https://github.com/SAEONData/Hydra-Admin-Client.git#egg=Hydra_Admin_Client',
+    ],
 )

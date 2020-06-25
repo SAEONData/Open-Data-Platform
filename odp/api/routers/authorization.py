@@ -6,9 +6,8 @@ from starlette.requests import Request
 from starlette.status import HTTP_403_FORBIDDEN
 
 from hydra import HydraAdminClient, HydraAdminError
-from odpaccounts.auth.models import AccessToken, AccessInfo
 
-from ..models.authorization import AuthorizationRequest
+from odp.api.models.auth import AuthorizationRequest, AccessToken, AccessInfo
 
 router = APIRouter()
 

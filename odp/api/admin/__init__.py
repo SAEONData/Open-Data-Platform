@@ -1,17 +1,15 @@
 import os
 import pkg_resources
-from dotenv import load_dotenv
+
 from fastapi import FastAPI
 
-from accountsapi.config import Config
-from accountsapi.routers import authorization, institution
-
-load_dotenv()
+from odp.api.routers import authorization, institution
+from .config import Config
 
 app = FastAPI(
-    title="ODP Accounts API",
-    description="The ODP Accounts API",
-    version=pkg_resources.require('odp-accountsapi')[0].version,
+    title="ODP Admin API",
+    description="The SAEON Open Data Platform Administrative API",
+    version=pkg_resources.require('Open-Data-Platform')[0].version,
     openapi_prefix=os.getenv('PATH_PREFIX'),
     config=Config(),
 )
