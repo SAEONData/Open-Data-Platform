@@ -33,7 +33,7 @@ class AccessToken(BaseModel):
     iss: str
     iat: int
     exp: int
-    ext: AccessInfo
+    ext: Optional[AccessInfo]
 
 
 class UserProfile(BaseModel):
