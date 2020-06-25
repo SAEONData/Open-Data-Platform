@@ -1,10 +1,10 @@
 from typing import List
 
-from ..db import session as db_session
-from ..models.privilege import Privilege
-from ..models.user import User
-from ..models.scope import Scope
-from ..auth.models import AccessInfo, AccessRight, UserProfile
+from odp.api.models.auth import AccessInfo, AccessRight, UserProfile
+from odp.db import session as db_session
+from odp.db.models.privilege import Privilege
+from odp.db.models.scope import Scope
+from odp.db.models.user import User
 
 
 def get_access_info(user: User, scopes: List[str]) -> AccessInfo:

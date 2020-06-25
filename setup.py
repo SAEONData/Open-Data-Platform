@@ -1,24 +1,28 @@
 from setuptools import setup, find_packages
 
-version = '1.0.0'
+version = '1.1.0'
 
 setup(
-    name='ODP-AccountsLib',
+    name='Open-Data-Platform',
     version=version,
-    description='Data access layer for the SAEON Open Data Platform accounts database',
-    url='https://github.com/SAEONData/ODP-AccountsLib',
+    description='The SAEON Open Data Platform - Core Framework Components',
+    url='https://github.com/SAEONData/Open-Data-Platform',
     author='Mark Jacobson',
     author_email='mark@saeon.ac.za',
     license='MIT',
     packages=find_packages(),
     include_package_data=True,
-    python_requires='~=3.6',
+    python_requires='~=3.8',
     install_requires=[
         'sqlalchemy',
+        'sqlalchemy-utils',
         'psycopg2',
         'pydantic[email]',
     ],
     extras_require={
-        'test': ['pytest', 'coverage']
+        'test': [
+            'pytest',
+            'pytest-cov',
+        ],
     },
 )
