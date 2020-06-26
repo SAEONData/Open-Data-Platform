@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<title>{% block title %}{% endblock %} - Identity Service - Open Data Platform</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<body class="login">
+    <header>
+        <nav>
+            <img class="odp-header-image" src="{{ url_for('static', filename='ODP-header.png') }}">
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="flash">
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        <header><h1>{% block page_heading %}{% endblock %}</h1></header>
+        {% block content %}{% endblock %}
+        <footer><span>{% block login_footer %}{% endblock %}</span></footer>
+    </main>
+</body>

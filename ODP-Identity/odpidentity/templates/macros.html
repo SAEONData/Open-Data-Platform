@@ -1,0 +1,20 @@
+{% macro field_errors(field) %}
+    {% if field.errors %}
+        {% set css_class = 'has-error ' + kwargs.pop('class', '') %}
+        {{ field(class=css_class, **kwargs) }}
+    {% else %}
+        {{ field(**kwargs) }}
+    {% endif %}
+{% endmacro %}
+
+{% macro form_errors(form) %}
+    {% if form.errors %}
+        <ul class="form-errors">
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+                {% for error in field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}

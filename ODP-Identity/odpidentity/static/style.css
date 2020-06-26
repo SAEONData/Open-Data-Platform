@@ -1,0 +1,175 @@
+html {
+  font-family: sans-serif;
+  background: #F4F7FC;
+}
+
+body {
+  background: white;
+  border: 2px solid #13334C;
+  box-shadow: 2px 2px 5px 1px #DDDDDD;
+  margin: 1rem;
+}
+
+ul {
+  list-style: none;
+}
+
+img.nrf-icon {
+  object-fit: scale-down;
+  max-height: 75%;
+  margin-right: 8px;
+  margin-top: 2px;
+}
+
+nav {
+  background: #11B6FC;
+  color: #13334C;
+  display: flex;
+  margin: 0;
+  height: 75px;
+  border-bottom: 2px solid #13334C;
+}
+
+body.login {
+  width: 400px;
+  margin-left: calc(50vw - (350px / 2));
+  margin-top: calc((100vh - (350px * 1.618)) * .382);
+}
+
+body.login nav {
+  height: 140px;
+  padding: .5em 1em;
+}
+
+body.login img.odp-header-image {
+  max-height: 65%;
+  margin-top: 1.8em;
+}
+
+nav a {
+  text-decoration: none;
+  color: inherit;
+}
+
+nav h1 {
+  flex: auto;
+  align-items: center;
+}
+
+nav ul, nav h1  {
+  display: flex;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-weight: bold;
+}
+
+nav ul li span, nav ul li a, nav h1 a {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  padding: 0 1em;
+}
+
+.nav-button:hover {
+  text-decoration: underline;
+}
+
+.flash {
+  display: flex;
+  flex-direction: column;
+}
+
+.flash ul {
+  max-width: 50vw;
+  margin: 0 auto;
+}
+
+.flash ul li {
+  display: flex;
+  align-items: center;
+  margin: .8em 0;
+  padding: 1.2em;
+  background: #FFF7E5;
+  border: 1px solid #FFC849;
+}
+
+.flash ul li.error {
+  background: #FFE5E5;
+  border: 1px solid #FF4C4C;
+}
+
+section, main {
+  padding: 1rem;
+}
+
+main header {
+  font-size: .85em;
+  margin: 3em 1.5em 2.5em;
+}
+
+main footer {
+  margin: .5em 1.5em 1em;
+  display: flex;
+  flex-direction: column;
+}
+
+main footer span {
+  align-self: center;
+  font-size: smaller;
+}
+
+main a {
+  text-decoration: none;
+  font-weight: bold;
+  color: #13334C;
+}
+
+main a:hover {
+  text-decoration: underline;
+}
+
+main form {
+  margin: 1em 1.5em .5em;
+  display: flex;
+  flex-direction: column;
+}
+
+main label {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+main input, main textarea {
+  margin-bottom: 1.5em;
+}
+
+main textarea {
+  min-height: 12em;
+  resize: vertical;
+}
+
+input[type=submit] {
+  align-self: center;
+  min-width: 7em;
+  height: 2.8em;
+  background: #11B6FC;
+  border: 1.5px solid #13334C;
+  cursor: pointer;
+  margin-top: 1.1em;
+  font-weight: bold;
+  font-size: 1em;
+}
+
+input[type=submit]:hover {
+  text-decoration: underline;
+}
+
+ul.form-errors {
+  color: #FF0000;
+  padding: 0;
+}
+
+input.has-error {
+  box-shadow: 0px 0px 1px 1px #FF0000;
+}
