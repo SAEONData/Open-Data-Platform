@@ -17,7 +17,6 @@ services:
     ports:
       - "9024:9024"
     environment:
-      - FLASK_APP=odpidentity
       - FLASK_ENV=${SERVER_ENV}
       - FLASK_SECRET_KEY=${IDENTITY_FLASK_KEY}
       - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
@@ -44,7 +43,6 @@ services:
     ports:
       - "9025:9025"
     environment:
-      - FLASK_APP=odpadmin
       - FLASK_ENV=${SERVER_ENV}
       - FLASK_SECRET_KEY=${ADMIN_FLASK_KEY}
       - FLASK_ADMIN_SWATCH=flatly
