@@ -1,0 +1,13 @@
+{% extends 'admin/base.html' %}
+
+{% block access_control %}
+    <ul class="nav pull-right">
+        {% if current_user.is_authenticated %}
+            <li><a>Logged in as {{ current_user.email }}</a>
+            <li><a href="{{ url_for('odpadmin.logout') }}">Log out</a>
+        {% else %}
+            <li><a href="{{ url_for('odpadmin.signup') }}">Create account</a>
+            <li><a href="{{ url_for('odpadmin.login') }}">Log in</a>
+        {% endif %}
+    </ul>
+{% endblock %}
