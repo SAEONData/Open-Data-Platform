@@ -1,6 +1,7 @@
 # ODP Admin API
 
-Back-office API providing administrative and security-related functions.
+Back-office API providing administrative and security-related functions,
+built on [FastAPI](https://fastapi.tiangolo.com/).
 
 ## Environment variables
 

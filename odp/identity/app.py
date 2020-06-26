@@ -1,25 +1,8 @@
 from flask import Flask
-from flask_login import LoginManager
-from flask_mail import Mail
 from flask.helpers import get_env
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from hydra import HydraAdminClient
-from odpaccounts.db import session as db_session
-from odpaccounts.models.user import User
-
-
-login_manager = LoginManager()
-login_manager.login_view = 'odpidentity.login'
-
-mail = Mail()
-
-hydra_admin = HydraAdminClient('')
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return db_session.query(User).get(user_id)
+from odp.identity import login_manager, mail, hydra_admin
 
 
 def create_app(config=None):
@@ -29,7 +12,7 @@ def create_app(config=None):
     :param config: config dict or filename
     :return: Flask app instance
     """
-    from . import models, views
+    from . import db, views
     from .config import Config
 
     app = Flask(__name__)
@@ -41,7 +24,7 @@ def create_app(config=None):
         else:
             app.config.from_pyfile(config, silent=True)
 
-    models.init_app(app)
+    db.init_app(app)
     views.init_app(app)
 
     login_manager.init_app(app)

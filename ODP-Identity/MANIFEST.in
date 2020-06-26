@@ -1,3 +1,0 @@
-graft odpidentity/static
-graft odpidentity/templates
-global-exclude *.pyc

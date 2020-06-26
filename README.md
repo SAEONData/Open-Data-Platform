@@ -6,10 +6,10 @@ This project provides a unified environment for the deployment of core framework
 services and metadata services of the SAEON Open Data Platform.
 
 ODP core services include:
-- [ODP Identity](https://github.com/SAEONData/ODP-Identity)
-- [ODP Admin](https://github.com/SAEONData/ODP-Admin)
-- [ODP Admin API](https://github.com/SAEONData/ODP-AccountsAPI)
-- [ORY Hydra](https://www.ory.sh/docs/hydra/)
+- [ODP Identity Service](odp/identity/README.md)
+- [ODP Admin Interface](odp/admin/README.md)
+- [ODP Admin API](odp/api/admin/README.md)
+- ORY Hydra OAuth2 & OpenID Connect provider
 
 ODP metadata services include:
 - [ODP API](https://github.com/SAEONData/ODP-API)

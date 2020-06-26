@@ -3,11 +3,11 @@ from flask_mail import Message
 from flask_wtf import FlaskForm
 
 from hydra import HydraAdminError
+from odp.lib import exceptions as x
+from odp.lib.users import validate_password_reset, update_user_password, update_user_verified, validate_auto_login, validate_email_verification
 
 from . import hydra_error_page, encode_token, decode_token
 from .. import hydra_admin, mail
-from ..lib import exceptions as x
-from ..lib.users import validate_password_reset, update_user_password, update_user_verified, validate_auto_login, validate_email_verification
 from ..forms.reset_password import ResetPasswordForm
 
 bp = Blueprint('account', __name__)

@@ -2,13 +2,13 @@ from flask import Blueprint, render_template, redirect, url_for, request
 from flask_wtf import FlaskForm
 
 from hydra import HydraAdminError
+from odp.lib import exceptions as x
+from odp.lib.users import validate_auto_login, validate_user_login, validate_forgot_password
 
 from . import encode_token, decode_token, hydra_error_page
 from .. import hydra_admin
 from ..forms.login import LoginForm
 from ..forms.forgot_password import ForgotPasswordForm
-from ..lib import exceptions as x
-from ..lib.users import validate_auto_login, validate_user_login, validate_forgot_password
 from .account import send_verification_email, send_password_reset_email
 
 bp = Blueprint('login', __name__)

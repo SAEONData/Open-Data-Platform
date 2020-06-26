@@ -1,12 +1,12 @@
 from enum import Enum
 from urllib.parse import urlparse, parse_qs
 
-from flask import Blueprint, request, redirect, abort, url_for
-from hydra import HydraAdminError
+from flask import Blueprint, request, redirect, url_for
 
-from odpaccounts.db import session as db_session
-from odpaccounts.models.user import User
-from odpaccounts.auth.utils import get_access_info, get_user_profile
+from hydra import HydraAdminError
+from odp.db import session as db_session
+from odp.db.models.user import User
+from odp.lib.auth import get_access_info, get_user_profile
 
 from . import hydra_error_page, encode_token
 from .. import hydra_admin

@@ -1,15 +1,16 @@
-# ODP Admin UI
+# ODP Admin Interface
 
-Administrative interface for the SAEON Open Data Platform.
+Administrative interface for the SAEON Open Data Platform, built on
+[Flask](https://flask.palletsprojects.com/) and
+[Flask-Admin](https://flask-admin.readthedocs.io/en/latest/).
 
 ## Environment variables
 
 ### Flask app
 
-- `FLASK_ENV`: `development`|`testing`|`staging`|`production`; setting `FLASK_ENV=development` disables TLS
-    certificate verification when making requests to the Hydra server
-- `FLASK_DEBUG`: enabled by default if `FLASK_ENV=development`; you may want to disable this (`FLASK_DEBUG=False`)
-    if debugging in an IDE
+- `FLASK_ENV`: `development`|`testing`|`staging`|`production`
+- `FLASK_DEBUG`: enabled by default if `FLASK_ENV=development`;
+    you may want to disable this (`FLASK_DEBUG=False`) if debugging in an IDE
 - `FLASK_SECRET_KEY`: sets the Flask [SECRET_KEY](https://flask.palletsprojects.com/en/1.1.x/config/#SECRET_KEY)
 - `FLASK_ADMIN_SWATCH`: the Flask-Admin theme, e.g. `flatly`|`cerulean`|`...`; [samples here](https://bootswatch.com/2)
 

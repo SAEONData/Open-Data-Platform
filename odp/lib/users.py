@@ -3,12 +3,9 @@ import re
 import argon2
 from argon2.exceptions import VerifyMismatchError
 
-from odpaccounts.db import session as db_session
-from odpaccounts.models.privilege import Privilege
-from odpaccounts.models.scope import Scope
-from odpaccounts.models.user import User
-
-from . import exceptions as x
+from odp.db import session as db_session
+from odp.db.models.user import User
+from odp.lib import exceptions as x
 
 ph = argon2.PasswordHasher()
 

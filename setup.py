@@ -19,6 +19,8 @@ setup(
         'psycopg2',
         'pydantic[email]',
         'python-dotenv',
+        'itsdangerous',
+        'argon2-cffi',
     ],
     extras_require={
         'api': [
@@ -29,6 +31,8 @@ setup(
             'flask',
             'flask-login',
             'flask-admin',
+            'flask-wtf',
+            'flask-mail',
             'click',
             'wtforms',
         ],

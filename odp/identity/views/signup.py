@@ -2,12 +2,12 @@ from flask import Blueprint, render_template, redirect, url_for, request
 from flask_wtf import FlaskForm
 
 from hydra import HydraAdminError
+from odp.lib import exceptions as x
+from odp.lib.users import create_user_account, validate_user_signup
 
 from . import hydra_error_page, encode_token, decode_token
 from .. import hydra_admin
 from ..forms.signup import SignupForm
-from ..lib import exceptions as x
-from ..lib.users import create_user_account, validate_user_signup
 from .account import send_verification_email
 
 bp = Blueprint('signup', __name__)
