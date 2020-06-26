@@ -1,5 +1,5 @@
-from odpaccounts.db import session as db_session
-from odpaccounts.models.scope import Scope
+from odp.db import session as db_session
+from odp.db.models.scope import Scope
 
 from .base import SysAdminModelView, KeyField
 

@@ -1,6 +1,6 @@
-from odpaccounts.db import session as db_session
-from odpaccounts.models.institution import Institution
-from odpaccounts.models.user import User
+from odp.db import session as db_session
+from odp.db.models.institution import Institution
+from odp.db.models.user import User
 
 from .base import AdminModelView, KeyField
 

@@ -1,12 +1,12 @@
 from flask_login import LoginManager
 from flask_admin import Admin, AdminIndexView
 
-from odpaccounts.db import session as db_session
-from odpaccounts.models.user import User
-from odpaccounts.models.role import Role
-from odpaccounts.models.member import Member
-from odpaccounts.models.scope import Scope
-from odpaccounts.models.institution import Institution
+from odp.db import session as db_session
+from odp.db.models.user import User
+from odp.db.models.role import Role
+from odp.db.models.member import Member
+from odp.db.models.scope import Scope
+from odp.db.models.institution import Institution
 
 login_manager = LoginManager()
 login_manager.login_view = 'odpadmin.login'

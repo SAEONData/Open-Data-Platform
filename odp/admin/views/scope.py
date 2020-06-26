@@ -1,5 +1,5 @@
-from odpaccounts.db import session as db_session
-from odpaccounts.models.role import Role
+from odp.db import session as db_session
+from odp.db.models.role import Role
 
 from .base import SysAdminModelView
 

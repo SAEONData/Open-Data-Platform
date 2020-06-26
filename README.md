@@ -1,7 +1,9 @@
-# Open Data Platform
+# SAEON Open Data Platform
 
-This project provides a unified environment for the deployment of core and metadata
-services of the SAEON Open Data Platform.
+## Deployment
+
+This project provides a unified environment for the deployment of core framework
+services and metadata services of the SAEON Open Data Platform.
 
 ODP core services include:
 - [ODP Identity](https://github.com/SAEONData/ODP-Identity)
@@ -15,18 +17,18 @@ ODP metadata services include:
 - PyCSW metadata harvest endpoint
 - Elasticsearch metadata discovery catalogue
 
-## Configuration
+### Configuration
 
 Create a `.env` file in the `deploy` subdirectory on the target machine,
 containing the following environment variables as applicable:
 
-### General configuration
+#### General configuration
 - **`SERVER_ENV`**: deployment environment: `development`|`testing`|`staging`|`production`
 - **`ODP_PUBLIC_URL`**: URL of the ODP web-facing server
 - **`ODP_ADMIN_URL`**: URL of the ODP admin server
 - **`CORS_ORIGINS`**: JSON-encoded list of allowed CORS origins
 
-### Core services configuration
+#### Core services configuration
 - **`ACCOUNTS_DB_HOST`**: ODP accounts database hostname / IP address
 - **`ACCOUNTS_DB_PASSWORD`**: ODP accounts database password
 - **`MAIL_SERVER`**: IP / hostname of mail server used for sending email verifications / password resets
@@ -39,36 +41,35 @@ containing the following environment variables as applicable:
 - **`HYDRA_DB_PASSWORD`**: Hydra database password
 - **`HYDRA_SYSTEM_SECRET`**: secret for encrypting the Hydra database; note that key rotation is not supported
 
-### Metadata services configuration
+#### Metadata services configuration
 - **`CKAN_URL`**: URL of the CKAN server
 - **`CKAN_DB_HOST`**: CKAN database hostname / IP address
 - **`CKAN_DB_PASSWORD`**: CKAN database password
 - **`CKAN_OAUTH2_SECRET`**: OAuth2 client secret for the CKAN UI
 
-## Core services installation / upgrade
+### Core services installation / upgrade
 
-### Hydra database migrations
+#### Hydra database migrations
 
 _Note: Do this before starting the Hydra container._
 
     source .env
     docker run -it --rm "${HYDRA_IMAGE}" migrate sql --yes "postgres://hydra_user:${HYDRA_DB_PASSWORD}@${HYDRA_DB_HOST}:5432/hydra_db?sslmode=disable"
 
-### Docker containers
+#### Docker containers
 
-    docker-compose -f core-services down
     docker-compose -f core-services build --no-cache
     docker-compose -f core-services up -d
 
-### Accounts database migrations
+#### Accounts database migrations
 
 _Note: Do this after starting the ODP Admin container._
 
     docker exec odp-admin flask initdb
 
-## Metadata services installation / upgrade
+### Metadata services installation / upgrade
 
-### System configuration
+#### System configuration
 
 The following command must be run on the host in order for the elasticsearch container to work:
 
@@ -78,17 +79,20 @@ To make the change permanent, edit the file `/etc/sysctl.conf` and add the follo
 
     vm.max_map_count=262144
 
-### Docker containers
+#### Docker containers
 
-    docker-compose -f metadata-services down
     docker-compose -f metadata-services build --no-cache
     docker-compose -f metadata-services up -d
 
-## Local development
+## Development
 
-A Docker Compose configuration for setting up a local development environment is provided in the `develop` subdirectory.
+### Local development environment setup
 
-To use this, copy `.env.example` to `.env` and update values if necessary (the defaults should work fine for a standard setup).
+A Docker Compose configuration is provided in the `develop` subdirectory, to assist with
+setting up a local development environment. _This is still a work in progress!_
+
+To use this, copy `.env.example` to `.env` and update the environment variable values as
+necessary.
 
 Next, initialise the Hydra DB:
 
@@ -101,6 +105,25 @@ Then start the Docker containers:
 Finally, create the requisite OAuth2 clients in Hydra:
 
     ./setup-hydra-clients.sh
+
+### Python virtual environment setup
+
+Change to the project root directory and run the following commands:
+
+    python3.8 -m venv .venv
+    source .venv/bin/activate
+    pip install -U pip setuptools
+    pip install -e .[api,ui,test]
+    cd ../Hydra-Admin-Client/
+    pip install -e .
+    cd ../Hydra-OAuth2-Blueprint/
+    pip install -e .
+
+### ODP accounts database setup
+
+Activate the virtual environment, switch to the `odp/admin/` directory and run:
+
+    flask initdb
 
 ### Upgrading dependencies
 

@@ -4,9 +4,9 @@ from flask_admin.helpers import get_redirect_target
 from flask_admin.model.helpers import get_mdict_item_or_list
 from flask_login import current_user
 
-from odpaccounts.db import session as db_session
-from odpaccounts.models.institution import Institution
-from odpaccounts.models.user import User
+from odp.db import session as db_session
+from odp.db.models.institution import Institution
+from odp.db.models.user import User
 
 from .base import AdminModelView
 

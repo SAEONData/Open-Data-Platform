@@ -25,6 +25,13 @@ setup(
             'fastapi',
             'uvicorn',
         ],
+        'ui': [
+            'flask',
+            'flask-login',
+            'flask-admin',
+            'click',
+            'wtforms',
+        ],
         'test': [
             'pytest',
             'pytest-cov',
@@ -32,5 +39,6 @@ setup(
     },
     dependency_links=[
         'git+https://github.com/SAEONData/Hydra-Admin-Client.git#egg=Hydra_Admin_Client',
+        'git+https://github.com/SAEONData/Hydra-OAuth2-Blueprint.git#egg=Hydra_OAuth2_Blueprint',
     ],
 )

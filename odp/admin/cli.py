@@ -15,8 +15,8 @@ def init_db(drop_all):
     defined in this service.
     :param drop_all: if this flag is set, drop all tables first, before issuing create table commands
     """
-    from odpaccounts.models import Base
-    from odpaccounts.db import engine
+    from odp.db.models import Base
+    from odp.db import engine
     if drop_all:
         Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)

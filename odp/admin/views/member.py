@@ -1,7 +1,7 @@
-from odpaccounts.db import session as db_session
-from odpaccounts.models.capability import Capability
-from odpaccounts.models.role import Role
-from odpaccounts.models.scope import Scope
+from odp.db import session as db_session
+from odp.db.models.capability import Capability
+from odp.db.models.role import Role
+from odp.db.models.scope import Scope
 
 from .base import AdminModelView
 

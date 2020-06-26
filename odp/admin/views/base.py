@@ -7,11 +7,11 @@ from flask_admin.helpers import get_redirect_target
 from flask_login import current_user
 from wtforms import StringField
 
-from odpaccounts.db import session as db_session
-from odpaccounts.models.role import Role
-from odpaccounts.models.scope import Scope
-from odpaccounts.models.institution import Institution
-from odpaccounts.models.privilege import Privilege
+from odp.db import session as db_session
+from odp.db.models.role import Role
+from odp.db.models.scope import Scope
+from odp.db.models.institution import Institution
+from odp.db.models.privilege import Privilege
 
 
 class KeyField(StringField):

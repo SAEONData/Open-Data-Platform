@@ -7,8 +7,9 @@ def create_app(config=None):
     :param config: config dict or filename
     :return: Flask app instance
     """
-    from . import models, views, cli
+    from . import views, cli
     from .config import Config
+    from odp.db import session
 
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -19,8 +20,12 @@ def create_app(config=None):
         else:
             app.config.from_pyfile(config, silent=True)
 
-    models.init_app(app)
     views.init_app(app)
     cli.init_app(app)
+
+    # ensure that the db session is closed and disposed after each request
+    @app.teardown_appcontext
+    def discard_session(exc):
+        session.remove()
 
     return app
