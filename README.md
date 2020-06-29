@@ -149,12 +149,10 @@ Switch to the `develop` subdirectory and run the following commands:
 To upgrade dependencies and re-generate the `requirements.txt` file,
 carry out the following steps:
 
-1. Activate the Python virtual environment.
-1. Upgrade Python libraries as necessary.
-1. Start up all ODP applications and services as described in the respective README's,
+- Activate the Python virtual environment.
+- Upgrade Python libraries as necessary.
+- Start up all ODP applications and services as described in the respective README's,
 and check that everything works as expected.
-1. Ensure that unit tests all pass. (still to be implemented)
-1. Switch to the project root directory and run the following command:
-
-
-    pip freeze | sed -E '/^(-e\s|pkg-resources==)/d' > requirements.txt
+- Ensure that unit tests all pass. (still to be implemented)
+- Switch to the project root directory and run the following command:
+`pip freeze | sed -E '/^(-e\s|pkg-resources==)/d' > requirements.txt`
