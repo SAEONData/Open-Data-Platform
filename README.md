@@ -5,11 +5,11 @@
 This project provides a unified environment for the deployment of core framework
 services and metadata services of the SAEON Open Data Platform.
 
-ODP core services include:
-- [ODP Identity Service](odp/identity/README.md)
-- [ODP Admin Interface](odp/admin/README.md)
-- [ODP Admin API](odp/api/admin/README.md)
-- ORY Hydra OAuth2 & OpenID Connect provider
+ODP core framework services include:
+- [ODP Identity Service](odp/identity)
+- [ODP Admin Interface](odp/admin)
+- [ODP Admin API](odp/api/admin)
+- ORY Hydra OAuth2 & OpenID Connect server
 
 ODP metadata services include:
 - [ODP API](https://github.com/SAEONData/ODP-API)
@@ -86,52 +86,75 @@ To make the change permanent, edit the file `/etc/sysctl.conf` and add the follo
 
 ## Development
 
-### Local development environment setup
+### Project installation
 
-A Docker Compose configuration is provided in the `develop` subdirectory, to assist with
-setting up a local development environment. _This is still a work in progress!_
+Clone the relevant projects from GitHub:
 
-To use this, copy `.env.example` to `.env` and update the environment variable values as
-necessary.
+    git clone -b development https://github.com/SAEONData/Open-Data-Platform.git
+    git clone https://github.com/SAEONData/Hydra-Admin-Client.git
+    git clone https://github.com/SAEONData/Hydra-OAuth2-Blueprint.git
 
-Next, initialise the Hydra DB:
+Create and activate the Python virtual environment:
 
-    ./setup-hydra-db.sh
-
-Then start the Docker containers:
-
-    docker-compose up -d
-
-Finally, create the requisite OAuth2 clients in Hydra:
-
-    ./setup-hydra-clients.sh
-
-### Python virtual environment setup
-
-Change to the project root directory and run the following commands:
-
-    python3.8 -m venv .venv
-    source .venv/bin/activate
+    python3.8 -m venv Open-Data-Platform/.venv
+    source Open-Data-Platform/.venv/bin/activate
     pip install -U pip setuptools
-    pip install -e .[api,ui,test]
-    cd ../Hydra-Admin-Client/
-    pip install -e .
-    cd ../Hydra-OAuth2-Blueprint/
-    pip install -e .
+
+Install the projects:
+
+    pip install -e Open-Data-Platform/[api,ui,test]
+    pip install -e Hydra-Admin-Client/
+    pip install -e Hydra-OAuth2-Blueprint/
+
+### Service configurations
+
+Create `.env` files in the following locations by copying the adjacent `.env.example` and updating
+any settings as needed. See the corresponding README files for further info.
+- [odp/identity](odp/identity)
+- [odp/admin](odp/admin)
+- [odp/api/admin](odp/api/admin)
 
 ### ODP accounts database setup
 
-Activate the virtual environment, switch to the `odp/admin/` directory and run:
+Run the following commands to create the accounts DB and a DB user, entering `pass` (or a
+password of your choice, which must be set in the various local `.env` files) when prompted
+for a password:
+
+    sudo -u postgres createuser -P odp_user
+    sudo -u postgres createdb -O odp_user odp_accounts
+
+Activate the Python virtual environment, switch to the `odp/admin/` subdirectory, and run:
 
     flask initdb
 
-### Upgrading dependencies
+### ORY Hydra setup
 
-To upgrade dependencies and re-generate the `requirements.txt` file for an ODP service or API,
+Switch to the `develop` subdirectory and run the following commands:
+
+    cp .env.example .env
+    ./setup-hydra-db.sh
+    docker-compose -f hydra.yml up -d
+    ./setup-hydra-clients.sh
+
+### Metadata services setup
+
+_Note: this is still a work in progress!_
+
+Switch to the `develop` subdirectory and run the following commands:
+
+    docker-compose -f metadata.yml up -d
+
+### Upgrading Python dependencies
+
+To upgrade dependencies and re-generate the `requirements.txt` file,
 carry out the following steps:
 
-1. Activate the virtual environment of the service / API.
+1. Activate the Python virtual environment.
 1. Upgrade Python libraries as necessary.
-1. Ensure that unit tests for the service / API and its dependencies all pass.
-1. Run the following command:
-`pip freeze | sed -E '/^(-e\s|pkg-resources==)/d' > requirements.txt`
+1. Start up all ODP applications and services as described in the respective README's,
+and check that everything works as expected.
+1. Ensure that unit tests all pass. (still to be implemented)
+1. Switch to the project root directory and run the following command:
+
+
+    pip freeze | sed -E '/^(-e\s|pkg-resources==)/d' > requirements.txt

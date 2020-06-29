@@ -35,6 +35,7 @@ setup(
             'flask-mail',
             'click',
             'wtforms',
+            'gunicorn',
         ],
         'test': [
             'pytest',

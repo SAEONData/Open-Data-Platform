@@ -1,0 +1,46 @@
+version: "3.5"
+
+networks:
+  hydra-net:
+    name: hydra-net
+    external: true
+
+volumes:
+  hydra-data:
+    name: hydra-data
+    external: true
+
+services:
+  hydra:
+    container_name: hydra
+    image: ${HYDRA_IMAGE}
+    networks:
+      - hydra-net
+    ports:
+      - "9000:4444"
+      - "9001:4445"
+    environment:
+      - URLS_SELF_ISSUER=https://localhost:9000
+      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
+      - DSN=postgres://hydra_user:${HYDRA_DB_PASSWORD}@hydra-db:5432/hydra_db?sslmode=disable
+      - URLS_LOGIN=${IDENTITY_URL}/hydra/login
+      - URLS_CONSENT=${IDENTITY_URL}/hydra/consent
+      - URLS_LOGOUT=${IDENTITY_URL}/hydra/logout
+      - TTL_ACCESS_TOKEN=10000h
+    depends_on:
+      - hydra-db
+    restart: always
+
+  hydra-db:
+    container_name: hydra-db
+    image: postgres:9.6
+    networks:
+      - hydra-net
+    volumes:
+      - hydra-data:/var/lib/postgresql/data
+    environment:
+      - PGDATA=/var/lib/postgresql/data
+      - POSTGRES_DB=hydra_db
+      - POSTGRES_USER=hydra_user
+      - POSTGRES_PASSWORD=${HYDRA_DB_PASSWORD}
+    restart: always
