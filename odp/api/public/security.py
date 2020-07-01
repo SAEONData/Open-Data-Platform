@@ -1,12 +1,12 @@
 from typing import NamedTuple
 
+import requests
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from starlette.requests import Request
 from starlette.status import HTTP_503_SERVICE_UNAVAILABLE
-import requests
 
-from odpaccounts.auth.models import AccessInfo
+from odp.api.models.auth import AccessInfo
 
 
 class AuthData(NamedTuple):
@@ -18,6 +18,7 @@ class Authorizer(HTTPBearer):
     """
     Dependency class which authorizes the current request.
     """
+
     def __init__(self, read_only: bool = False, admin_only: bool = False):
         """
         Constructor.
@@ -65,7 +66,7 @@ class Authorizer(HTTPBearer):
                     institutional_roles = []
                     super_roles = request.state.config.ADMIN_ROLES + roles
 
-                r = requests.post(config.ACCOUNTS_API_URL + '/authorization/',
+                r = requests.post(config.ADMIN_API_URL + '/authorization/',
                                   json={
                                       'token': access_token,
                                       'scope': request.state.config.OAUTH2_SCOPE,

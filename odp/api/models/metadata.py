@@ -1,5 +1,5 @@
-from typing import Dict, Optional
 from enum import Enum
+from typing import Dict, Optional
 
 from pydantic import BaseModel, Field, UUID4, AnyHttpUrl
 

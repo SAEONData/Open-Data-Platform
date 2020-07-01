@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
-from ..models import Pagination
-from ..models.search import QueryDSL, SearchResult
+from odp.api.models import Pagination
+from odp.api.models.search import QueryDSL, SearchResult
 
 router = APIRouter()
 

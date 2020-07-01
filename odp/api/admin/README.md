@@ -14,4 +14,4 @@ built on [FastAPI](https://fastapi.tiangolo.com/).
 
 Create a `.env` file in `odp/api/admin`, activate the Python virtual environment, and run:
 
-    uvicorn odp.api.admin:app --reload --env-file .env
+    uvicorn odp.api.admin.app:app --port 9999 --reload --env-file .env

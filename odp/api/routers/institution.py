@@ -2,9 +2,9 @@ from typing import List
 
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.exc import IntegrityError
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp.api import db_session
@@ -24,7 +24,8 @@ async def create_institution(
         name=institution.name,
     )
     try:
-        institution_orm.parent = session.query(InstitutionORM).filter_by(key=institution.parent_key).one() if institution.parent_key else None
+        institution_orm.parent = session.query(InstitutionORM).filter_by(
+            key=institution.parent_key).one() if institution.parent_key else None
     except NoResultFound:
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, "Parent institution not found.")
 

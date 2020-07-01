@@ -1,8 +1,39 @@
+import importlib
+import inspect
+import pkgutil
+
 from fastapi import FastAPI, HTTPException
 from starlette.requests import Request
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
 
-from ..config import router_config_factory
+import odp.api.public.adapters
+from odp.api.public.adapter import ODPAPIAdapter, ODPAPIAdapterConfig
+from odp.api.public.config import router_config_factory
+
+
+def load_adapters(app: FastAPI):
+    adapter_classes = {}
+    config_classes = {}
+    for module_info in pkgutil.iter_modules(odp.api.public.adapters.__path__, odp.api.public.adapters.__name__ + '.'):
+        module = importlib.import_module(module_info.name)
+        adapter_classes.update({
+            name: cls for (name, cls) in inspect.getmembers(module, lambda x: inspect.isclass(x) and
+                                                                              x is not ODPAPIAdapter and
+                                                                              issubclass(x, ODPAPIAdapter))
+        })
+        config_classes.update({
+            name: cls for (name, cls) in inspect.getmembers(module, lambda x: inspect.isclass(x) and
+                                                                              x is not ODPAPIAdapterConfig and
+                                                                              issubclass(x, ODPAPIAdapterConfig))
+        })
+
+    adapters = {}
+    for adapter_name, adapter_cls in adapter_classes.items():
+        config_name = adapter_name + 'Config'
+        config_cls = config_classes[config_name]
+        adapters[adapter_name] = adapter_cls(app, config_cls())
+
+    app.extra['adapters'] = adapters
 
 
 def load_configs(app: FastAPI, *router_modules: str):

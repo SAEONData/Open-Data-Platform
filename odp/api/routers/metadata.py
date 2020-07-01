@@ -3,14 +3,14 @@ from typing import List
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
-from ..models import Pagination
-from ..models.metadata import (
+from odp.api.models import Pagination
+from odp.api.models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
     MetadataValidationResult,
     MetadataWorkflowResult,
 )
-from ..security import Authorizer, AuthData
+from odp.api.public.security import Authorizer, AuthData
 
 router = APIRouter()
 

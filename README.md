@@ -9,10 +9,10 @@ ODP core framework services include:
 - [ODP Identity Service](odp/identity)
 - [ODP Admin Interface](odp/admin)
 - [ODP Admin API](odp/api/admin)
+- [ODP Public API](odp/api/public)
 - ORY Hydra OAuth2 & OpenID Connect server
 
 ODP metadata services include:
-- [ODP API](https://github.com/SAEONData/ODP-API)
 - CKAN-based metadata management server
 - PyCSW metadata harvest endpoint
 - Elasticsearch metadata discovery catalogue
@@ -93,6 +93,8 @@ Clone the relevant projects from GitHub:
     git clone -b development https://github.com/SAEONData/Open-Data-Platform.git
     git clone https://github.com/SAEONData/Hydra-Admin-Client.git
     git clone https://github.com/SAEONData/Hydra-OAuth2-Blueprint.git
+    git clone -b development https://github.com/SAEONData/ODP-API-CKANAdapter.git
+    git clone -b development https://github.com/SAEONData/ODP-API-ElasticAdapter.git
 
 Create and activate the Python virtual environment:
 
@@ -105,6 +107,8 @@ Install the projects:
     pip install -e Open-Data-Platform/[api,ui,test]
     pip install -e Hydra-Admin-Client/
     pip install -e Hydra-OAuth2-Blueprint/
+    pip install -e ODP-API-CKANAdapter/
+    pip install -e ODP-API-ElasticAdapter/
 
 ### Service configurations
 
@@ -113,6 +117,7 @@ any settings as needed. See the corresponding README files for further info.
 - [odp/identity](odp/identity)
 - [odp/admin](odp/admin)
 - [odp/api/admin](odp/api/admin)
+- [odp/api/public](odp/api/public)
 
 ### ODP accounts database setup
 
