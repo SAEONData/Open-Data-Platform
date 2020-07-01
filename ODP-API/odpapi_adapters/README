@@ -1,4 +1,0 @@
-This directory is a namespace package. ODP API adapters should similarly
-have an 'odpapi_adapters' directory under their project root, containing
-adapter and config classes. The namespace package mechanism enables these
-classes to be discovered at runtime by the ODP API.
