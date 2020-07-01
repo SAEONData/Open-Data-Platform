@@ -1,4 +1,4 @@
-from setuptools import setup, find_namespace_packages
+from setuptools import setup, find_packages
 
 version = '1.1.0'
 
@@ -10,7 +10,7 @@ setup(
     author='Mark Jacobson',
     author_email='mark@saeon.ac.za',
     license='MIT',
-    packages=find_namespace_packages(),
+    packages=find_packages() + ['odp_api_adapters'],
     include_package_data=True,
     python_requires='~=3.8',
     install_requires=[
