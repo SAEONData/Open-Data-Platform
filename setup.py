@@ -1,6 +1,6 @@
 from setuptools import setup, find_namespace_packages
 
-version = '1.0.0'
+version = '1.1.0'
 
 setup(
     name='ODP-API-ElasticAdapter',
@@ -16,6 +16,6 @@ setup(
         'elasticsearch>=6.0.0,<7.0.0',
     ],
     extras_require={
-        'test': ['pytest', 'coverage']
+        'test': ['pytest', 'pytest-cov'],
     },
 )

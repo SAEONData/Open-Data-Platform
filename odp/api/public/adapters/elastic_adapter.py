@@ -1,13 +1,13 @@
 from typing import List
 
-from pydantic import AnyHttpUrl, validator
-from fastapi.exceptions import HTTPException
-from starlette.status import HTTP_503_SERVICE_UNAVAILABLE, HTTP_400_BAD_REQUEST
 from elasticsearch import Elasticsearch, ElasticsearchException, TransportError
+from fastapi.exceptions import HTTPException
+from pydantic import AnyHttpUrl, validator
+from starlette.status import HTTP_503_SERVICE_UNAVAILABLE, HTTP_400_BAD_REQUEST
 
-from odpapi.adapters import ODPAPIAdapter, ODPAPIAdapterConfig
-from odpapi.models import Pagination
-from odpapi.models.search import QueryDSL, SearchHit, SearchResult
+from odp.api.models import Pagination
+from odp.api.models.search import QueryDSL, SearchHit, SearchResult
+from odp.api.public.adapter import ODPAPIAdapter, ODPAPIAdapterConfig
 
 
 class ElasticAdapterConfig(ODPAPIAdapterConfig):
@@ -32,6 +32,7 @@ class ElasticAdapter(ODPAPIAdapter):
     def __init__(self, app, config: ElasticAdapterConfig):
         super().__init__(app, config)
         self.es_client = Elasticsearch([config.ES_URL])
+        self.es_indices = config.INDICES
 
     @staticmethod
     def _parse_elastic_response(r) -> SearchResult:
@@ -49,7 +50,7 @@ class ElasticAdapter(ODPAPIAdapter):
     async def search_metadata(self, query_dsl: QueryDSL, pagination: Pagination) -> SearchResult:
         try:
             response = self.es_client.search(
-                index=','.join(self.config.INDICES),
+                index=','.join(self.es_indices),
                 body={'query': query_dsl.query},
                 from_=pagination.offset,
                 size=pagination.limit,
