@@ -37,7 +37,7 @@ access of the specified type.
 An adapter (e.g. [ODP-API-CKANAdapter](https://github.com/SAEONData/ODP-API-CKANAdapter))
 consists of a class that inherits from `odp.api.public.adapter.ODPAPIAdapter`, along with
 a corresponding `-Config` class that inherits from `odp.api.public.adapter.ODPAPIAdapterConfig`.
-These classes should be defined in a module (or modules) located under the `odp.api.public.adapters`
+These classes should be defined in a module (or modules) located under the `odp_api_adapters`
 namespace package in the adapter's project directory. The adapter is enabled by installing
 it into the ODP Python environment, and setting the applicable `<ROUTER>.ADAPTER` environment
 variable for any router that should use the adapter.
