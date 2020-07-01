@@ -1,21 +1,21 @@
-from typing import List, Dict, Any
 import json
 import logging
+from typing import List, Dict, Any
 
+import ckanapi
+from fastapi import HTTPException
 from pydantic import AnyHttpUrl
 from requests import RequestException
-from fastapi import HTTPException
-import ckanapi
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_503_SERVICE_UNAVAILABLE
 
-from odpapi.adapters import ODPAPIAdapter, ODPAPIAdapterConfig
-from odpapi.models import Pagination
-from odpapi.models.metadata import (
+from odp.api.models import Pagination
+from odp.api.models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
     MetadataValidationResult,
     MetadataWorkflowResult,
 )
+from odp.api.public.adapter import ODPAPIAdapter, ODPAPIAdapterConfig
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,10 @@ class CKANAdapterConfig(ODPAPIAdapterConfig):
 
 
 class CKANAdapter(ODPAPIAdapter):
+
+    def __init__(self, app, config: CKANAdapterConfig):
+        super().__init__(app, config)
+        self.ckan_server_url = config.CKAN_URL
 
     def _call_ckan(self, action, access_token, **kwargs):
         """
@@ -51,7 +55,7 @@ class CKANAdapter(ODPAPIAdapter):
         else:
             authorization_header = 'Bearer ' + access_token
         try:
-            with ckanapi.RemoteCKAN(self.config.CKAN_URL) as ckan:
+            with ckanapi.RemoteCKAN(self.ckan_server_url) as ckan:
                 return ckan.call_action(action, data_dict=kwargs, apikey=authorization_header,
                                         requests_kwargs={'verify': self.app_config.SERVER_ENV != 'development'})
 

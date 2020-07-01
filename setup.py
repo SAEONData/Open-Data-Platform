@@ -1,6 +1,6 @@
 from setuptools import setup, find_namespace_packages
 
-version = '1.0.0'
+version = '1.1.0'
 
 setup(
     name='ODP-API-CKANAdapter',
@@ -11,11 +11,11 @@ setup(
     author_email='mark@saeon.ac.za',
     license='MIT',
     packages=find_namespace_packages(),
-    python_requires='~=3.6',
+    python_requires='~=3.8',
     install_requires=[
         'ckanapi',
     ],
     extras_require={
-        'test': ['pytest', 'coverage']
+        'test': ['pytest', 'pytest-cov'],
     },
 )
