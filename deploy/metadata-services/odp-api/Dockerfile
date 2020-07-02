@@ -4,8 +4,8 @@ WORKDIR /srv
 
 COPY odp Open-Data-Platform/odp/
 COPY setup.py requirements.txt Open-Data-Platform/
-RUN git clone -b development https://github.com/SAEONData/ODP-API-CKANAdapter.git
-RUN git clone -b development https://github.com/SAEONData/ODP-API-ElasticAdapter.git
+RUN git clone https://github.com/SAEONData/ODP-API-CKANAdapter.git
+RUN git clone https://github.com/SAEONData/ODP-API-ElasticAdapter.git
 
 RUN cd Open-Data-Platform && pip install -r requirements.txt
 RUN cd Open-Data-Platform && pip install -e .[api]
