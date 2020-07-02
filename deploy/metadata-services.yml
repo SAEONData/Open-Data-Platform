@@ -37,7 +37,7 @@ services:
       - SEARCH.ADAPTER=ElasticAdapter
       - SEARCH.OAUTH2_SCOPE=ODP.Metadata
       - ELASTIC_ADAPTER.ES_URL=http://elasticsearch:9200
-      - ELASTIC_ADAPTER.INDICES=["saeon-odp-4-2","sans-1878-mims-1","sans-1878-mims-historical-1","sans-1878-sadco-historical-1"]
+      - ELASTIC_ADAPTER.INDICES=["saeon-odp-4-2","sans-1878-mims-1","sans-1878-mims-historical-1","sans-1878-sadco-historical-1","sans-1878-mims-parent-records-1"]
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
 
