@@ -14,8 +14,8 @@ services:
   odp-metadata-api:
     container_name: odp-metadata-api
     build:
-      context: metadata-services/odp-api
-      dockerfile: Dockerfile-${SERVER_ENV}
+      context: ..
+      dockerfile: deploy/metadata-services/odp-api/Dockerfile-${SERVER_ENV}
       args:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
