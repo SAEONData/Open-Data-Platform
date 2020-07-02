@@ -2,15 +2,15 @@
 
 ## Installation
 
-Requires Python 3.6
+Requires Python 3.8
 
 The package should be installed into the same virtual environment as the
-[ODP API](https://github.com/SAEONData/ODP-API).
+[ODP API](https://github.com/SAEONData/Open-Data-Platform).
 
 ## Configuration
 
 The adapter is configured using the environment variables specified below. 
-See the [ODP API](https://github.com/SAEONData/ODP-API) README for more info.
+See the [ODP API](https://github.com/SAEONData/Open-Data-Platform) README for more info.
 
 ### Environment variables
 
