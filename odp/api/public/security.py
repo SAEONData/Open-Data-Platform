@@ -89,9 +89,16 @@ class Authorizer(HTTPBearer):
                     detail = e.response.json()
                 except ValueError:
                     detail = e.response.reason
-                raise HTTPException(status_code=e.response.status_code, detail=detail) from e
+
+                raise HTTPException(
+                    status_code=e.response.status_code,
+                    detail={"ODP Admin API": detail},
+                ) from e
 
             except requests.RequestException as e:
-                raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail=str(e)) from e
+                raise HTTPException(
+                    status_code=HTTP_503_SERVICE_UNAVAILABLE,
+                    detail={"ODP Admin API": str(e)},
+                ) from e
 
         return AuthData(access_token, access_info)
