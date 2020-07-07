@@ -7,7 +7,7 @@ def create_app(config=None):
     :param config: config dict or filename
     :return: Flask app instance
     """
-    from . import db, views, cli
+    from . import db, views
     from .config import Config
 
     app = Flask(__name__)
@@ -21,6 +21,5 @@ def create_app(config=None):
 
     db.init_app(app)
     views.init_app(app)
-    cli.init_app(app)
 
     return app

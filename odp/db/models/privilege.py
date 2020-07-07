@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKeyConstraint
 from sqlalchemy.orm import relationship
 
-from . import Base
+from odp.db import Base
 
 
 class Privilege(Base):

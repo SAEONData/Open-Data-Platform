@@ -2,8 +2,8 @@ from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from . import Base
-from .privilege import Privilege
+from odp.db import Base
+from odp.db.models.privilege import Privilege
 
 
 class Capability(Base):

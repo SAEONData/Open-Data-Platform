@@ -2,8 +2,8 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from . import Base
-from .capability import Capability
+from odp.db import Base
+from odp.db.models.capability import Capability
 
 
 class Role(Base):

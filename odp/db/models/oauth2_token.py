@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy_utils import JSONType
 
-from . import Base
+from odp.db import Base
 
 
 class OAuth2Token(Base):

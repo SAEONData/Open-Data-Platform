@@ -1,7 +1,6 @@
 # SAEON Open Data Platform
 
 ## Deployment
-
 This project provides a unified environment for the deployment of core framework
 services and metadata services of the SAEON Open Data Platform.
 
@@ -18,17 +17,20 @@ ODP metadata services include:
 - Elasticsearch metadata discovery catalogue
 
 ### Configuration
-
 Create a `.env` file in the `deploy` subdirectory on the target machine,
 containing the following environment variables as applicable:
 
 #### General configuration
+Set these options for all deployments:
+
 - **`SERVER_ENV`**: deployment environment: `development`|`testing`|`staging`|`production`
 - **`ODP_PUBLIC_URL`**: URL of the ODP web-facing server
 - **`ODP_ADMIN_URL`**: URL of the ODP admin server
 - **`CORS_ORIGINS`**: JSON-encoded list of allowed CORS origins
 
 #### Core services configuration
+Set these options if deploying core framework services:
+
 - **`ACCOUNTS_DB_HOST`**: ODP accounts database hostname / IP address
 - **`ACCOUNTS_DB_PASSWORD`**: ODP accounts database password
 - **`MAIL_SERVER`**: IP / hostname of mail server used for sending email verifications / password resets
@@ -42,15 +44,27 @@ containing the following environment variables as applicable:
 - **`HYDRA_SYSTEM_SECRET`**: secret for encrypting the Hydra database; note that key rotation is not supported
 
 #### Metadata services configuration
+Set these options if deploying metadata services:
+
 - **`CKAN_URL`**: URL of the CKAN server
 - **`CKAN_DB_HOST`**: CKAN database hostname / IP address
 - **`CKAN_DB_PASSWORD`**: CKAN database password
 - **`CKAN_OAUTH2_SECRET`**: OAuth2 client secret for the CKAN UI
 
 ### Core services installation / upgrade
+_Note: The following instructions assume that the ODP and Hydra databases already exist
+(though their schemas may be empty)._
 
-#### Hydra database migrations
+#### ODP accounts DB initialization & migrations
+Create a Python 3.8 virtual environment in the project root directory on the target machine,
+activate the environment and `pip install -e` the project (no extras required). Switch to the
+`migrate` subdirectory and create a `.env` file containing an appropriately set `DATABASE_URL`
+environment variable. Then run:
 
+    python -m initdb
+    alembic upgrade head
+
+#### Hydra DB initialization & migrations
 _Note: Do this before starting the Hydra container._
 
     source .env
@@ -61,16 +75,9 @@ _Note: Do this before starting the Hydra container._
     docker-compose -f core-services build --no-cache
     docker-compose -f core-services up -d
 
-#### Accounts database migrations
-
-_Note: Do this after starting the ODP Admin container._
-
-    docker exec odp-admin flask initdb
-
 ### Metadata services installation / upgrade
 
 #### System configuration
-
 The following command must be run on the host in order for the elasticsearch container to work:
 
     sudo sysctl -w vm.max_map_count=262144
@@ -87,7 +94,6 @@ To make the change permanent, edit the file `/etc/sysctl.conf` and add the follo
 ## Development
 
 ### Project installation
-
 Clone the relevant projects from GitHub:
 
     git clone -b development https://github.com/SAEONData/Open-Data-Platform.git
@@ -110,17 +116,9 @@ Install the projects:
     pip install -e ODP-API-CKANAdapter/
     pip install -e ODP-API-ElasticAdapter/
 
-### Service configurations
-
-Create `.env` files in the following locations by copying the adjacent `.env.example` and updating
-any settings as needed. See the corresponding README files for further info.
-- [odp/identity](odp/identity)
-- [odp/admin](odp/admin)
-- [odp/api/admin](odp/api/admin)
-- [odp/api/public](odp/api/public)
-
 ### ODP accounts database setup
 
+#### Database creation
 Run the following commands to create the accounts DB and a DB user, entering `pass` (or a
 password of your choice, which must be set in the various local `.env` files) when prompted
 for a password:
@@ -128,12 +126,28 @@ for a password:
     sudo -u postgres createuser -P odp_user
     sudo -u postgres createdb -O odp_user odp_accounts
 
-Activate the Python virtual environment, switch to the `odp/admin/` subdirectory, and run:
+Switch to the `migrate` subdirectory and create a `.env` file by copying the adjacent `.env.example`
+and updating the `DATABASE_URL` if necessary.
 
-    flask initdb
+Activate the Python virtual environment and run:
+
+    python -m initdb
+
+#### Database upgrade
+If you already have an instance of the accounts DB, then switch to the `migrate` subdirectory
+and run the SQL migrations:
+
+    alembic upgrade head
+
+### Service configurations
+Create `.env` files in the following locations by copying the adjacent `.env.example` and updating
+any settings as needed. See the corresponding README files for further info.
+- [odp/identity](odp/identity)
+- [odp/admin](odp/admin)
+- [odp/api/admin](odp/api/admin)
+- [odp/api/public](odp/api/public)
 
 ### ORY Hydra setup
-
 Switch to the `develop` subdirectory and run the following commands:
 
     cp .env.example .env
@@ -142,7 +156,6 @@ Switch to the `develop` subdirectory and run the following commands:
     ./setup-hydra-clients.sh
 
 ### Metadata services setup
-
 _Note: this is still a work in progress!_
 
 Switch to the `develop` subdirectory and run the following commands:
@@ -150,7 +163,6 @@ Switch to the `develop` subdirectory and run the following commands:
     docker-compose -f metadata.yml up -d
 
 ### Upgrading Python dependencies
-
 To upgrade dependencies and re-generate the `requirements.txt` file,
 carry out the following steps:
 
