@@ -40,44 +40,42 @@ class CKANAdapter(ODPAPIAdapter):
         """
         Call a CKAN API action function.
 
-        For development/internal usage:
-        If the NO_AUTH environment variable has been set to ``True``, we assume that the access_token
-        parameter contains a CKAN API key instead of an access token.
-
         :param action: CKAN action function name
         :param access_token: the access token string to be forwarded to CKAN in the Authorization header
         :param kwargs: parameters to populate the data_dict for the action function
         :returns: the response dictionary / value returned from CKAN
         :raises HTTPException
         """
-        if self.app_config.NO_AUTH:
-            authorization_header = access_token  # assume it's a CKAN API key
-        else:
-            authorization_header = 'Bearer ' + access_token
         try:
             with ckanapi.RemoteCKAN(self.ckan_server_url) as ckan:
-                return ckan.call_action(action, data_dict=kwargs, apikey=authorization_header,
-                                        requests_kwargs={'verify': self.app_config.SERVER_ENV != 'development'})
+                return ckan.call_action(
+                    action,
+                    data_dict=kwargs,
+                    apikey=f'Bearer {access_token}',
+                    requests_kwargs={
+                        'verify': self.app_config.SERVER_ENV != 'development'
+                    },
+                )
 
         except RequestException as e:
             raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE,
-                                detail="Error sending request to CKAN: {}".format(e)) from e
+                                detail=f"Error sending request to CKAN: {e}") from e
 
         except ckanapi.ValidationError as e:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST,
-                                detail="CKAN validation error: {}".format(e)) from e
+                                detail=f"CKAN validation error: {e}") from e
 
         except ckanapi.NotAuthorized as e:
             raise HTTPException(status_code=HTTP_403_FORBIDDEN,
-                                detail="Not authorized to access CKAN resource: {}".format(e)) from e
+                                detail=f"Not authorized to access CKAN resource: {e}") from e
 
         except ckanapi.NotFound as e:
             raise HTTPException(status_code=HTTP_404_NOT_FOUND,
-                                detail="CKAN resource not found: {}".format(e)) from e
+                                detail=f"CKAN resource not found: {e}") from e
 
         except ckanapi.CKANAPIError as e:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST,
-                                detail="CKAN error: {}".format(e)) from e
+                                detail=f"CKAN error: {e}") from e
 
     @staticmethod
     def _translate_from_ckan_record(ckan_record):
