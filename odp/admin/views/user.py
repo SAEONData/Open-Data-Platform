@@ -3,11 +3,11 @@ from flask_admin import expose
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.helpers import get_mdict_item_or_list
 from flask_login import current_user
+from sqlalchemy import Boolean, String
 
 from odp.db import session as db_session
 from odp.db.models.institution import Institution
 from odp.db.models.user import User
-
 from .base import AdminModelView
 
 
@@ -24,13 +24,24 @@ class UserModelView(AdminModelView):
         'institutions': lambda vw, ctx, model, prop: ', '.join(sorted([i.name for i in model.institutions]))
     }
 
-    form_columns = ['email', 'active', 'institutions']
+    form_columns = ['id', 'email', 'active', 'institutions']
     form_args = {
         'institutions': dict(
             get_label='name',
             query_factory=lambda: db_session.query(Institution).order_by('name'),
         )
     }
+    form_widget_args = {
+        'id': dict(
+            disabled=True,
+            style='color: black; width: 30%',
+        ),
+        'email': dict(
+            disabled=True,
+            style='color: black; width: 30%',
+        ),
+    }
+    form_optional_types = (Boolean, String)  # force email field to be non-mandatory
     edit_template = 'user_edit.html'
 
     @expose('/edit/', methods=('GET', 'POST'))
