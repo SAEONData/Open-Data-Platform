@@ -44,61 +44,54 @@ class Authorizer(HTTPBearer):
         http_auth = await super().__call__(request)
         access_token = http_auth.credentials
 
-        if config.NO_AUTH:
-            access_info = AccessInfo(
-                superuser=True,
-                user_id='',
-                access_rights=[],
-            )
-        else:
+        try:
+            if self.admin_only:
+                roles = []
+            elif self.read_only:
+                roles = request.state.config.READONLY_ROLES + request.state.config.READWRITE_ROLES
+            else:
+                roles = request.state.config.READWRITE_ROLES
+
+            if institution_key:
+                institutional_roles = roles
+                super_roles = request.state.config.ADMIN_ROLES
+            else:
+                institutional_roles = []
+                super_roles = request.state.config.ADMIN_ROLES + roles
+
+            r = requests.post(config.ADMIN_API_URL + '/authorization/',
+                              json={
+                                  'token': access_token,
+                                  'scope': request.state.config.OAUTH2_SCOPE,
+                                  'institution': institution_key,
+                                  'institutional_roles': institutional_roles,
+                                  'super_roles': super_roles,
+                              },
+                              headers={
+                                  'Content-Type': 'application/json',
+                                  'Accept': 'application/json',
+                              },
+                              verify=config.SERVER_ENV != 'development',
+                              timeout=5.0 if config.SERVER_ENV != 'development' else 300,
+                              )
+            r.raise_for_status()
+            access_info = AccessInfo(**r.json())
+
+        except requests.HTTPError as e:
             try:
-                if self.admin_only:
-                    roles = []
-                elif self.read_only:
-                    roles = request.state.config.READONLY_ROLES + request.state.config.READWRITE_ROLES
-                else:
-                    roles = request.state.config.READWRITE_ROLES
+                detail = e.response.json()
+            except ValueError:
+                detail = e.response.reason
 
-                if institution_key:
-                    institutional_roles = roles
-                    super_roles = request.state.config.ADMIN_ROLES
-                else:
-                    institutional_roles = []
-                    super_roles = request.state.config.ADMIN_ROLES + roles
+            raise HTTPException(
+                status_code=e.response.status_code,
+                detail={"ODP Admin API": detail},
+            ) from e
 
-                r = requests.post(config.ADMIN_API_URL + '/authorization/',
-                                  json={
-                                      'token': access_token,
-                                      'scope': request.state.config.OAUTH2_SCOPE,
-                                      'institution': institution_key,
-                                      'institutional_roles': institutional_roles,
-                                      'super_roles': super_roles,
-                                  },
-                                  headers={
-                                      'Content-Type': 'application/json',
-                                      'Accept': 'application/json',
-                                  },
-                                  verify=config.SERVER_ENV != 'development',
-                                  timeout=5.0 if config.SERVER_ENV != 'development' else 300,
-                                  )
-                r.raise_for_status()
-                access_info = AccessInfo(**r.json())
-
-            except requests.HTTPError as e:
-                try:
-                    detail = e.response.json()
-                except ValueError:
-                    detail = e.response.reason
-
-                raise HTTPException(
-                    status_code=e.response.status_code,
-                    detail={"ODP Admin API": detail},
-                ) from e
-
-            except requests.RequestException as e:
-                raise HTTPException(
-                    status_code=HTTP_503_SERVICE_UNAVAILABLE,
-                    detail={"ODP Admin API": str(e)},
-                ) from e
+        except requests.RequestException as e:
+            raise HTTPException(
+                status_code=HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"ODP Admin API": str(e)},
+            ) from e
 
         return AuthData(access_token, access_info)

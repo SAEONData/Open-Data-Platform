@@ -12,19 +12,7 @@ class AppConfig(BaseSettings):
     SERVER_ENV: ServerEnv
     PATH_PREFIX: constr(regex=r'^(/\w+)*$') = ''
     ALLOW_ORIGINS: List[Union[Literal['*'], AnyHttpUrl]] = []
-    ADMIN_API_URL: Optional[AnyHttpUrl]
-    # todo: remove NO_AUTH
-    NO_AUTH: Optional[bool]
-
-    @validator('NO_AUTH', pre=True, always=True)
-    def validate_no_auth(cls, value):
-        return value
-
-    @validator('ADMIN_API_URL', always=True)
-    def require_auth_settings(cls, value, values):
-        if not values.get('NO_AUTH', False) and not value:
-            raise ValueError("Value is required if NO_AUTH is False")
-        return value
+    ADMIN_API_URL: AnyHttpUrl
 
 
 class RouterConfig(BaseSettings):
