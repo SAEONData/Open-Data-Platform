@@ -16,7 +16,7 @@ class User(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     email = Column(String, unique=True, nullable=False)
-    password = Column(String, nullable=False)
+    password = Column(String)
     superuser = Column(Boolean, nullable=False)
     active = Column(Boolean, nullable=False)
     verified = Column(Boolean, nullable=False)
