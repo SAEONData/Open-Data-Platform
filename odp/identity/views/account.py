@@ -2,7 +2,6 @@ from flask import Blueprint, redirect, request, url_for, current_app, flash, ren
 from flask_mail import Message
 from flask_wtf import FlaskForm
 
-from hydra import HydraAdminError
 from odp.lib import exceptions as x
 from odp.lib.users import validate_password_reset, update_user_password, update_user_verified, validate_auto_login, validate_email_verification
 
@@ -38,7 +37,7 @@ def verify_email():
 
         return redirect(redirect_to)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)
 
 
@@ -68,7 +67,7 @@ def verify_email_complete():
 
         return render_template('verify_email_complete.html', form=form, token=token)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)
 
 
@@ -109,7 +108,7 @@ def reset_password():
 
         return render_template('reset_password.html', form=form, token=token)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)
 
 
@@ -139,7 +138,7 @@ def reset_password_complete():
 
         return render_template('reset_password_complete.html', form=form, token=token)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)
 
 

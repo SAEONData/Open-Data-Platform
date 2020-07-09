@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_wtf import FlaskForm
 
-from hydra import HydraAdminError
 from odp.lib import exceptions as x
 from odp.lib.users import validate_auto_login, validate_user_login, validate_forgot_password
 
@@ -75,7 +74,7 @@ def login():
 
         return redirect(redirect_to)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)
 
 
@@ -96,7 +95,7 @@ def verify():
 
         return render_template('login_verify.html', form=form, token=token)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)
 
 
@@ -131,5 +130,5 @@ def forgot_password():
 
         return render_template('forgot_password.html', form=form, token=token, sent=sent)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)

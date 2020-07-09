@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_wtf import FlaskForm
 
-from hydra import HydraAdminError
 from odp.lib import exceptions as x
 from odp.lib.users import create_user_account, validate_user_signup
 
@@ -20,14 +19,16 @@ def signup():
     """
     token = request.args.get('token')
     try:
-        # the token scope 'login' here is correct - it enables us to easily switch between login and signup using the same token
+        # the token scope 'login' here is correct - it enables us to easily
+        # switch between login and signup using the same token
         login_request, challenge, params = decode_token(token, 'login')
 
         form = SignupForm()
         try:
             if request.method == 'GET':
-                # if the user is already authenticated with Hydra, their user id is associated with the login challenge;
-                # we cannot then associate a new user id with the same login challenge
+                # if the user is already authenticated with Hydra, their user id is
+                # associated with the login challenge; we cannot then associate a new
+                # user id with the same login challenge
                 authenticated = login_request['skip']
                 if authenticated:
                     raise x.ODPSignupAuthenticatedUser
@@ -58,7 +59,7 @@ def signup():
             redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
             return redirect(redirect_to)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)
 
 
@@ -79,5 +80,5 @@ def verify():
 
         return render_template('signup_verify.html', form=form, token=token)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)

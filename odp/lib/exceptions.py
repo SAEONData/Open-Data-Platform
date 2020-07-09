@@ -44,3 +44,13 @@ class ODPPasswordComplexityError(ODPIdentityError):
 class ODPSignupAuthenticatedUser(ODPIdentityError):
     error_code = 'signup_authenticated_user'
     error_description = "An authenticated user cannot sign up."
+
+
+class HydraAdminError(Exception):
+    """ Exception raised when a call to the Hydra admin API fails """
+
+    def __init__(self, *args, **kwargs):
+        self.method = kwargs.pop('method')
+        self.endpoint = kwargs.pop('endpoint')
+        self.status_code = kwargs.pop('status_code')
+        self.error_detail = kwargs.pop('error_detail', str(args))

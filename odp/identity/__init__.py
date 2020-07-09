@@ -1,9 +1,9 @@
 from flask_login import LoginManager
 from flask_mail import Mail
 
-from hydra import HydraAdminClient
 from odp.db import session as db_session
 from odp.db.models.user import User
+from odp.lib.hydra import HydraAdminClient
 
 
 login_manager = LoginManager()

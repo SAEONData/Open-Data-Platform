@@ -1,8 +1,8 @@
-from typing import List, Optional
+from typing import List
 
 import requests
 
-from .exceptions import HydraAdminError
+from odp.lib.exceptions import HydraAdminError
 
 
 class HydraAdminClient:

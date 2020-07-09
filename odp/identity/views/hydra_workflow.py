@@ -3,9 +3,9 @@ from urllib.parse import urlparse, parse_qs
 
 from flask import Blueprint, request, redirect, url_for
 
-from hydra import HydraAdminError
 from odp.db import session as db_session
 from odp.db.models.user import User
+from odp.lib import exceptions as x
 from odp.lib.auth import get_token_data
 
 from . import hydra_error_page, encode_token
@@ -49,7 +49,7 @@ def login():
         redirect_to = url_for(target_endpoint, token=token)
         return redirect(redirect_to)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)
 
 
@@ -77,7 +77,7 @@ def consent():
 
         return redirect(redirect_to)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)
 
 
@@ -94,5 +94,5 @@ def logout():
         redirect_to = hydra_admin.accept_logout_request(challenge)
         return redirect(redirect_to)
 
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         return hydra_error_page(e)

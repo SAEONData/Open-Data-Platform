@@ -5,9 +5,9 @@ from fastapi.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.status import HTTP_403_FORBIDDEN
 
-from hydra import HydraAdminClient, HydraAdminError
-
 from odp.api.models.auth import AuthorizationRequest, AccessToken, AccessInfo
+from odp.lib import exceptions as x
+from odp.lib.hydra import HydraAdminClient
 
 router = APIRouter()
 
@@ -28,7 +28,7 @@ async def validate_and_introspect_token(
             token=auth_request.token,
             require_scope=[auth_request.scope],
         )
-    except HydraAdminError as e:
+    except x.HydraAdminError as e:
         raise HTTPException(status_code=e.status_code, detail=e.error_detail) from e
 
     access_token = AccessToken(**token_data)
