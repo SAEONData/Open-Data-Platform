@@ -97,7 +97,6 @@ To make the change permanent, edit the file `/etc/sysctl.conf` and add the follo
 Clone the relevant projects from GitHub:
 
     git clone -b development https://github.com/SAEONData/Open-Data-Platform.git
-    git clone https://github.com/SAEONData/Hydra-Admin-Client.git
     git clone https://github.com/SAEONData/Hydra-OAuth2-Blueprint.git
     git clone -b development https://github.com/SAEONData/ODP-API-CKANAdapter.git
     git clone -b development https://github.com/SAEONData/ODP-API-ElasticAdapter.git
@@ -111,7 +110,6 @@ Create and activate the Python virtual environment:
 Install the projects:
 
     pip install -e Open-Data-Platform/[api,ui,test]
-    pip install -e Hydra-Admin-Client/
     pip install -e Hydra-OAuth2-Blueprint/
     pip install -e ODP-API-CKANAdapter/
     pip install -e ODP-API-ElasticAdapter/
