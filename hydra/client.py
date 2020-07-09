@@ -38,8 +38,8 @@ class HydraAdminClient:
         Fetch information about an OAuth2 login request from Hydra. This should be called by
         the login provider after being redirected to the login endpoint from Hydra.
 
-        https://www.ory.sh/docs/hydra/sdk/api#get-an-login-request
-        https://www.ory.sh/docs/hydra/sdk/api#schemaloginrequest
+        https://www.ory.sh/hydra/docs/reference/api/#get-a-login-request
+        https://www.ory.sh/hydra/docs/reference/api/#schemaloginrequest
 
         :param login_challenge: the value of the 'login_challenge' param in the login URL
         :return: dict
@@ -55,7 +55,7 @@ class HydraAdminClient:
         Inform Hydra that the user has successfully authenticated, and return a redirect URL
         which the login provider should redirect to next.
 
-        https://www.ory.sh/docs/hydra/sdk/api#accept-an-login-request
+        https://www.ory.sh/hydra/docs/reference/api/#accept-a-login-request
 
         :param login_challenge: the value of the 'login_challenge' param in the login URL
         :param user_id: the id of the authenticated user
@@ -80,7 +80,7 @@ class HydraAdminClient:
         Inform Hydra that the user has not authenticated, and return a redirect URL which the
         login provider should redirect to next.
 
-        https://www.ory.sh/docs/hydra/sdk/api#reject-a-login-request
+        https://www.ory.sh/hydra/docs/reference/api/#reject-a-login-request
 
         :param login_challenge: the value of the 'login_challenge' param in the login URL
         :param error_code: a short string representing the error
@@ -103,8 +103,8 @@ class HydraAdminClient:
         Fetch information about an OAuth2 consent request from Hydra. This should be called by
         the consent provider after being redirected to the consent endpoint from Hydra.
 
-        https://www.ory.sh/docs/hydra/sdk/api#get-consent-request-information
-        https://www.ory.sh/docs/hydra/sdk/api#schemaconsentrequest
+        https://www.ory.sh/hydra/docs/reference/api/#get-consent-request-information
+        https://www.ory.sh/hydra/docs/reference/api/#schemaconsentrequest
 
         :param consent_challenge: the value of the 'consent_challenge' param in the consent URL
         :return: dict
@@ -123,7 +123,7 @@ class HydraAdminClient:
         Inform Hydra that the user has authorized the OAuth2 client to access resources on his/her
         behalf, and return a redirect URL which the consent provider should redirect to next.
 
-        https://www.ory.sh/docs/hydra/sdk/api#accept-an-consent-request
+        https://www.ory.sh/hydra/docs/reference/api/#accept-a-consent-request
 
         :param consent_challenge: the value of the 'consent_challenge' param in the consent URL
         :param grant_scope: list of scopes authorized for the client; should be a subset of
@@ -158,7 +158,7 @@ class HydraAdminClient:
         Inform Hydra that the user has *not* authorized the OAuth2 client to access resources on his/her
         behalf, and return a redirect URL which the consent provider should redirect to next.
 
-        https://www.ory.sh/docs/hydra/sdk/api#reject-an-consent-request
+        https://www.ory.sh/hydra/docs/reference/api/#reject-a-consent-request
 
         :param consent_challenge: the value of the 'consent_challenge' param in the consent URL
         :param error_code: a short string representing the error
@@ -181,8 +181,8 @@ class HydraAdminClient:
         Fetch information about an OAuth2 logout request from Hydra. This should be called by
         the logout provider after being redirected to the logout endpoint from Hydra.
 
-        https://www.ory.sh/docs/hydra/sdk/api#get-a-logout-request
-        https://www.ory.sh/docs/hydra/sdk/api#schemalogoutrequest
+        https://www.ory.sh/hydra/docs/reference/api/#get-a-logout-request
+        https://www.ory.sh/hydra/docs/reference/api/#schemalogoutrequest
 
         :param logout_challenge: the value of the 'logout_challenge' param in the logout URL
         :return: dict
@@ -197,7 +197,7 @@ class HydraAdminClient:
         Confirm a logout with Hydra, and return a redirect URL which the logout provider
         should redirect to next.
 
-        https://www.ory.sh/docs/hydra/sdk/api#accept-a-logout-request
+        https://www.ory.sh/hydra/docs/reference/api/#accept-a-logout-request
 
         :param logout_challenge: the value of the 'logout_challenge' param in the logout URL
         :return: str
@@ -216,7 +216,7 @@ class HydraAdminClient:
         """
         Deny a logout request with Hydra.
 
-        https://www.ory.sh/docs/hydra/sdk/api#reject-a-logout-request
+        https://www.ory.sh/hydra/docs/reference/api/#reject-a-logout-request
 
         :param logout_challenge: the value of the 'logout_challenge' param in the logout URL
         :param error_code: a short string representing the error
@@ -238,7 +238,8 @@ class HydraAdminClient:
         """
         Validate an OAuth2 access/refresh token and return additional information about the token.
 
-        https://www.ory.sh/docs/hydra/sdk/api#introspect-oauth2-tokens
+        https://www.ory.sh/hydra/docs/reference/api/#introspect-oauth2-tokens
+        https://www.ory.sh/hydra/docs/reference/api/#schemaoauth2tokenintrospection
 
         :param token: opaque access/refresh token string
         :param require_scope: (optional) list of scopes that the token is expected to be valid for
