@@ -7,12 +7,14 @@ from .exceptions import HydraAdminError
 
 class HydraAdminClient:
 
-    def __init__(self, server_url: str,
-                 verify_tls: bool = True,
-                 timeout: float = 5.0,
-                 remember_login_for: int = 30 * 86400,  # 30 days
-                 remember_consent_for: int = 0,
-                 ):
+    def __init__(
+            self,
+            server_url: str,
+            verify_tls: bool = True,
+            timeout: float = 5.0,
+            remember_login_for: int = 30 * 86400,  # 30 days
+            remember_consent_for: int = 0,
+    ):
         """
         Constructor.
 
@@ -28,7 +30,10 @@ class HydraAdminClient:
         self.remember_login_for = remember_login_for
         self.remember_consent_for = remember_consent_for
 
-    def get_login_request(self, login_challenge: str) -> dict:
+    def get_login_request(
+            self,
+            login_challenge: str,
+    ) -> dict:
         """
         Fetch information about an OAuth2 login request from Hydra. This should be called by
         the login provider after being redirected to the login endpoint from Hydra.
@@ -41,7 +46,11 @@ class HydraAdminClient:
         """
         return self._request('GET', '/oauth2/auth/requests/login', params={'login_challenge': login_challenge})
 
-    def accept_login_request(self, login_challenge: str, user_id: str) -> str:
+    def accept_login_request(
+            self,
+            login_challenge: str,
+            user_id: str,
+    ) -> str:
         """
         Inform Hydra that the user has successfully authenticated, and return a redirect URL
         which the login provider should redirect to next.
@@ -61,7 +70,12 @@ class HydraAdminClient:
                           })
         return r['redirect_to']
 
-    def reject_login_request(self, login_challenge: str, error_code: str, error_description: str) -> str:
+    def reject_login_request(
+            self,
+            login_challenge: str,
+            error_code: str,
+            error_description: str,
+    ) -> str:
         """
         Inform Hydra that the user has not authenticated, and return a redirect URL which the
         login provider should redirect to next.
@@ -81,7 +95,10 @@ class HydraAdminClient:
                           })
         return r['redirect_to']
 
-    def get_consent_request(self, consent_challenge: str) -> dict:
+    def get_consent_request(
+            self,
+            consent_challenge: str,
+    ) -> dict:
         """
         Fetch information about an OAuth2 consent request from Hydra. This should be called by
         the consent provider after being redirected to the consent endpoint from Hydra.
@@ -94,8 +111,14 @@ class HydraAdminClient:
         """
         return self._request('GET', '/oauth2/auth/requests/consent', params={'consent_challenge': consent_challenge})
 
-    def accept_consent_request(self, consent_challenge: str, grant_scope: List[str], grant_audience: List[str],
-                               access_token_data: dict, id_token_data: dict) -> str:
+    def accept_consent_request(
+            self,
+            consent_challenge: str,
+            grant_scope: List[str],
+            grant_audience: List[str],
+            access_token_data: dict,
+            id_token_data: dict,
+    ) -> str:
         """
         Inform Hydra that the user has authorized the OAuth2 client to access resources on his/her
         behalf, and return a redirect URL which the consent provider should redirect to next.
@@ -125,7 +148,12 @@ class HydraAdminClient:
                           })
         return r['redirect_to']
 
-    def reject_consent_request(self, consent_challenge: str, error_code: str, error_description: str) -> str:
+    def reject_consent_request(
+            self,
+            consent_challenge: str,
+            error_code: str,
+            error_description: str,
+    ) -> str:
         """
         Inform Hydra that the user has *not* authorized the OAuth2 client to access resources on his/her
         behalf, and return a redirect URL which the consent provider should redirect to next.
@@ -145,7 +173,10 @@ class HydraAdminClient:
                           })
         return r['redirect_to']
 
-    def get_logout_request(self, logout_challenge: str) -> dict:
+    def get_logout_request(
+            self,
+            logout_challenge: str,
+    ) -> dict:
         """
         Fetch information about an OAuth2 logout request from Hydra. This should be called by
         the logout provider after being redirected to the logout endpoint from Hydra.
@@ -158,7 +189,10 @@ class HydraAdminClient:
         """
         return self._request('GET', '/oauth2/auth/requests/logout', params={'logout_challenge': logout_challenge})
 
-    def accept_logout_request(self, logout_challenge: str) -> str:
+    def accept_logout_request(
+            self,
+            logout_challenge: str,
+    ) -> str:
         """
         Confirm a logout with Hydra, and return a redirect URL which the logout provider
         should redirect to next.
@@ -173,7 +207,12 @@ class HydraAdminClient:
                           )
         return r['redirect_to']
 
-    def reject_logout_request(self, logout_challenge: str, error_code: str, error_description: str) -> None:
+    def reject_logout_request(
+            self,
+            logout_challenge: str,
+            error_code: str,
+            error_description: str,
+    ) -> None:
         """
         Deny a logout request with Hydra.
 
@@ -190,26 +229,30 @@ class HydraAdminClient:
                           'error_description': error_description,
                       })
 
-    def introspect_token(self, token: str, require_scope: List[str],
-                         require_audience: Optional[List[str]] = None) -> dict:
+    def introspect_token(
+            self,
+            token: str,
+            require_scope: List[str] = None,
+            require_audience: List[str] = None,
+    ) -> dict:
         """
         Validate an OAuth2 access/refresh token and return additional information about the token.
-        If the token is invalid, raise a ``HydraAdminError`` with 403 (forbidden) HTTP status code.
 
         https://www.ory.sh/docs/hydra/sdk/api#introspect-oauth2-tokens
 
         :param token: opaque access/refresh token string
-        :param require_scope: list of scopes that the token is expected to be valid for
+        :param require_scope: (optional) list of scopes that the token is expected to be valid for
         :param require_audience: (optional) list of audiences that the token is expected to be valid for
         :return: dict
+        :raise HydraAdminError: with a 403 status code, if the token is invalid
         """
         token_info = self._request('POST', '/oauth2/introspect',
                                    headers={'Content-Type': 'application/x-www-form-urlencoded'},
                                    data={
                                        'token': token,
-                                       'scope': ' '.join(require_scope),
+                                       'scope': ' '.join(require_scope) if require_scope is not None else None,
                                    })
-        if not require_audience:
+        if require_audience is None:
             require_audience = []
         if not token_info['active'] or not (set(require_audience) <= set(token_info.get('aud', []))):
             raise HydraAdminError(status_code=403,
