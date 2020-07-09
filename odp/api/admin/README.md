@@ -8,6 +8,7 @@ built on [FastAPI](https://fastapi.tiangolo.com/).
 - `SERVER_ENV`: `development` | `testing` | `staging` | `production`
 - `PATH_PREFIX`: (optional) URL path prefix at which the API is mounted, e.g. `/api`
 - `DATABASE_URL`: URL of the ODP accounts database, e.g. `postgresql://odp_user:pw@host/odp_accounts`
+- `ADMIN_INSTITUTION`: institution key of the institution that owns the platform
 - `HYDRA_ADMIN_URL`: URL of the Hydra admin API
 
 ## Development quick start

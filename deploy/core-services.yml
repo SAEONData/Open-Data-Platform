@@ -21,6 +21,7 @@ services:
       - FLASK_SECRET_KEY=${IDENTITY_FLASK_KEY}
       - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
       - MAIL_SERVER
+      - ADMIN_INSTITUTION=saeon
       - OAUTH2_CLIENT_ID=odp-identity
       - OAUTH2_CLIENT_SECRET=${IDENTITY_OAUTH2_SECRET}
       - OAUTH2_SCOPES=openid
@@ -75,6 +76,7 @@ services:
       - PATH_PREFIX=/api
       - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
+      - ADMIN_INSTITUTION=saeon
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
 

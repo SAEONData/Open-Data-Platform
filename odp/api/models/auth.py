@@ -17,7 +17,7 @@ class AccessRight(BaseModel):
     scope_key: str
 
 
-class AccessInfo(BaseModel):
+class AccessTokenData(BaseModel):
     user_id: str
     superuser: bool
     access_rights: List[AccessRight]
@@ -33,12 +33,19 @@ class AccessToken(BaseModel):
     iss: str
     iat: int
     exp: int
-    ext: Optional[AccessInfo]
+    ext: Optional[AccessTokenData]
 
 
-class UserProfile(BaseModel):
+class IDTokenData(BaseModel):
     user_id: str
     email: EmailStr
+
+    # The `role` field is used strictly for the special case of indicating a user's
+    # role(s) within the admin institution, for the requested scope.
+    # If the user is not a member of the admin institution, or multiple applicable
+    # capabilities were found (unlikely: an access token will typically be issued
+    # for one application scope) then `role` will be left empty.
+    role: List[str]
 
 
 class AuthorizationRequest(BaseModel):

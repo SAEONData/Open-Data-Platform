@@ -6,12 +6,12 @@ from fastapi.security import HTTPBearer
 from starlette.requests import Request
 from starlette.status import HTTP_503_SERVICE_UNAVAILABLE
 
-from odp.api.models.auth import AccessInfo
+from odp.api.models.auth import AccessTokenData
 
 
 class AuthData(NamedTuple):
     access_token: str
-    access_info: AccessInfo
+    access_info: AccessTokenData
 
 
 class Authorizer(HTTPBearer):
@@ -75,7 +75,7 @@ class Authorizer(HTTPBearer):
                               timeout=5.0 if config.SERVER_ENV != 'development' else 300,
                               )
             r.raise_for_status()
-            access_info = AccessInfo(**r.json())
+            access_info = AccessTokenData(**r.json())
 
         except requests.HTTPError as e:
             try:

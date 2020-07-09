@@ -6,7 +6,7 @@ from flask import Blueprint, request, redirect, url_for
 from hydra import HydraAdminError
 from odp.db import session as db_session
 from odp.db.models.user import User
-from odp.lib.auth import get_access_info, get_user_profile
+from odp.lib.auth import get_token_data
 
 from . import hydra_error_page, encode_token
 from .. import hydra_admin
@@ -65,15 +65,13 @@ def consent():
         consent_request = hydra_admin.get_consent_request(challenge)
         user_id = consent_request['subject']
         user = db_session.query(User).get(user_id)
-
-        access_info = get_access_info(user, consent_request['requested_scope'])
-        user_profile = get_user_profile(user)
+        access_token_data, id_token_data = get_token_data(user, consent_request['requested_scope'])
 
         consent_params = {
             'grant_scope': consent_request['requested_scope'],
             'grant_audience': consent_request['requested_access_token_audience'],
-            'access_token_data': access_info.dict(),
-            'id_token_data': user_profile.dict(),
+            'access_token_data': access_token_data.dict(),
+            'id_token_data': id_token_data.dict(),
         }
         redirect_to = hydra_admin.accept_consent_request(challenge, **consent_params)
 
