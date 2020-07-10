@@ -245,7 +245,6 @@ class HydraAdminClient:
         :param require_scope: (optional) list of scopes that the token is expected to be valid for
         :param require_audience: (optional) list of audiences that the token is expected to be valid for
         :return: dict
-        :raise HydraAdminError: with a 403 status code, if the token is invalid
         """
         token_info = self._request('POST', '/oauth2/introspect',
                                    headers={'Content-Type': 'application/x-www-form-urlencoded'},
@@ -253,13 +252,9 @@ class HydraAdminClient:
                                        'token': token,
                                        'scope': ' '.join(require_scope) if require_scope is not None else None,
                                    })
-        if require_audience is None:
-            require_audience = []
-        if not token_info['active'] or not (set(require_audience) <= set(token_info.get('aud', []))):
-            raise HydraAdminError(status_code=403,
-                                  error_detail="Invalid token",
-                                  method='POST',
-                                  endpoint='/oauth2/introspect')
+        if token_info['active']:
+            if require_audience is not None and not (set(require_audience) <= set(token_info.get('aud', []))):
+                token_info = {'active': False}
 
         return token_info
 
