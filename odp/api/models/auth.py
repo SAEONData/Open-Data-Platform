@@ -23,17 +23,21 @@ class AccessTokenData(BaseModel):
     access_rights: List[AccessRight]
 
 
-class AccessToken(BaseModel):
-    token_type: TokenType
+class TokenIntrospection(BaseModel):
     active: bool
-    client_id: str
-    scope: str
+    token_type: Optional[TokenType]
+    client_id: Optional[str]
+    scope: Optional[str]
+    sub: Optional[str]
     aud: Optional[List[str]]
-    sub: str
-    iss: str
-    iat: int
-    exp: int
+    iss: Optional[str]
+    iat: Optional[int]
+    exp: Optional[int]
+    nbf: Optional[int]
+    username: Optional[str]
+    obfuscated_subject: Optional[str]
     ext: Optional[AccessTokenData]
+    error: Optional[str]
 
 
 class IDTokenData(BaseModel):

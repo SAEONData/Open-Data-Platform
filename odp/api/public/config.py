@@ -1,6 +1,6 @@
-from typing import Optional, List, Union, Literal
+from typing import List, Union, Literal
 
-from pydantic import BaseSettings, AnyHttpUrl, validator, constr
+from pydantic import BaseSettings, AnyHttpUrl, constr
 
 from odp.api.models.env import ServerEnv
 

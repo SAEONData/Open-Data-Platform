@@ -6,6 +6,7 @@ from odp.lib.exceptions import HydraAdminError
 
 
 class HydraAdminClient:
+    """ A client for the ORY Hydra admin API """
 
     def __init__(
             self,
