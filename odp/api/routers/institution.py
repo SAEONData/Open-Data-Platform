@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp.api import db_session
+from odp.api.db import get_db_session
 from odp.api.models.institution import Institution
 from odp.db.models.institution import Institution as InstitutionORM
 
@@ -17,7 +17,7 @@ router = APIRouter()
 @router.post('/', response_model=Institution)
 async def create_institution(
         institution: Institution,
-        session: Session = Depends(db_session),
+        session: Session = Depends(get_db_session),
 ):
     institution_orm = InstitutionORM(
         key=institution.key,
@@ -42,7 +42,7 @@ async def create_institution(
 
 @router.get('/', response_model=List[Institution])
 async def list_institutions(
-        session: Session = Depends(db_session),
+        session: Session = Depends(get_db_session),
 ):
     return [
         Institution(
