@@ -11,6 +11,7 @@ Built on [FastAPI](https://fastapi.tiangolo.com/).
 - `PATH_PREFIX`: (optional) URL path prefix at which the API is mounted, e.g. `/api`
 - `ALLOW_ORIGINS`: (optional) list of allowed CORS origins; `["*"]` to allow any origin
 - `ADMIN_API_URL`: URL of the ODP Admin API
+- `ADMIN_INSTITUTION`: institution key of the institution that owns the platform
 
 Router-specific environment variables are prefixed with the uppercased name of the router module,
 e.g. `METADATA.ADAPTER`, etc. Following are the options that are applicable per router:

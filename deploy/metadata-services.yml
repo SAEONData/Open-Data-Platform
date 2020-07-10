@@ -28,6 +28,7 @@ services:
       - PATH_PREFIX=/api
       - ALLOW_ORIGINS=${CORS_ORIGINS}
       - ADMIN_API_URL=${ODP_ADMIN_URL}/api
+      - ADMIN_INSTITUTION=saeon
       - METADATA.ADAPTER=CKANAdapter
       - METADATA.OAUTH2_SCOPE=ODP.Metadata
       - METADATA.READONLY_ROLES=["member"]
