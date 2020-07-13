@@ -4,7 +4,14 @@ from typing import List, Optional
 from pydantic import BaseModel, EmailStr, Field
 
 
-class TokenType(Enum):
+class Role(str, Enum):
+    admin = 'admin'
+    curator = 'curator'
+    contributor = 'contributor'
+    member = 'member'
+
+
+class TokenType(str, Enum):
     access = 'access_token'
     refresh = 'refresh_token'
 
