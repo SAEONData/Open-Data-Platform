@@ -27,6 +27,7 @@ services:
       - SERVER_ENV
       - PATH_PREFIX=/api
       - ALLOW_ORIGINS=${CORS_ORIGINS}
+      - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
       - ADMIN_API_URL=${ODP_ADMIN_URL}/api
       - ADMIN_INSTITUTION=saeon
       - METADATA.ADAPTER=CKANAdapter
