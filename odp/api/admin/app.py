@@ -18,7 +18,7 @@ app = FastAPI(
 
 app.include_router(
     authorization.router,
-    prefix='/authorization',
+    prefix='/auth',
     tags=['Authorization'],
 )
 

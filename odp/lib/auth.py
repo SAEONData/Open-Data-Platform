@@ -1,7 +1,7 @@
 import os
 from typing import List, Tuple
 
-from odp.api.models.auth import AccessTokenData, AccessRight, IDTokenData
+from odp.api.models.auth import AccessTokenData, AccessRight, IDTokenData, Role
 from odp.db import session as db_session
 from odp.db.models.privilege import Privilege
 from odp.db.models.scope import Scope
@@ -30,6 +30,7 @@ def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTo
     if user.superuser:
         access_token_data = AccessTokenData(
             user_id=user.id,
+            email=user.email,
             superuser=True,
             access_rights=[],
         )
@@ -40,6 +41,7 @@ def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTo
 
         access_token_data = AccessTokenData(
             user_id=user.id,
+            email=user.email,
             superuser=False,
             access_rights=[AccessRight(
                 institution_key=privilege.institution.key,
@@ -64,42 +66,36 @@ def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTo
 
 def check_access(
         access_token_data: AccessTokenData,
-        require_superuser: bool = False,
-        require_scope: str = None,
-        require_role: str = None,
         require_institution: str = None,
-        allow_admin_institution_override: bool = False,
+        require_scope: str = None,
+        require_role: Tuple[Role, ...] = (),
 ) -> bool:
     """
     Determine whether the access rights associated with a user's access
     token fulfil the parameterised access requirements for a request.
 
-    If require_superuser is True, the remaining parameters are ignored;
-    the user must be a superuser in order to carry out the request.
+    require_institution, require_scope and require_role indicate the
+    corresponding tuple that must be present in the access token data,
+    in order for the request to be allowed. Any of the require_role
+    values may match.
 
-    Otherwise, require_scope, require_role and require_institution
-    indicate the corresponding tuple that must be present in the
-    access token data, in order for the request to be allowed.
-
-    If allow_admin_institution_override is True, a user with the required
-    scope and role within the admin institution will be considered to
-    have that capability within all institutions. An example of such a
-    usage would be for a curator-type role.
-
-    To ensure that a request is only allowed for members of the admin
-    institution with the specified capability, call this function with
-    allow_admin_institution_override=True and require_institution=None.
+    A user with an admin-type role (e.g. 'admin' or 'curator') within
+    the admin institution will be considered to have the associated
+    capabilities across all institutions.
     """
-    if require_superuser:
-        return access_token_data.superuser
+
+    def is_admin_role(role_key):
+        return db_session.query(Role.admin).filter_by(key=role_key).scalar()
+
+    if access_token_data.superuser:
+        return True
 
     admin_institution = os.environ['ADMIN_INSTITUTION']
 
     return any(
-        access_right.scope_key == require_scope and
-        access_right.role_key == require_role and
-        (access_right.institution_key == require_institution or
-         (access_right.institution_key == admin_institution and
-          allow_admin_institution_override))
-        for access_right in access_token_data.access_rights
+        ar.scope_key == require_scope and
+        ar.role_key in require_role and
+        (ar.institution_key == require_institution or
+         (ar.institution_key == admin_institution and is_admin_role(ar.role_key)))
+        for ar in access_token_data.access_rights
     )

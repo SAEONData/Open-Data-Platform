@@ -10,6 +10,10 @@ class Role(str, Enum):
     contributor = 'contributor'
     member = 'member'
 
+    @staticmethod
+    def all():
+        return tuple(role for role in Role)
+
 
 class TokenType(str, Enum):
     access = 'access_token'
@@ -26,6 +30,7 @@ class AccessRight(BaseModel):
 
 class AccessTokenData(BaseModel):
     user_id: str
+    email: EmailStr
     superuser: bool
     access_rights: List[AccessRight]
 

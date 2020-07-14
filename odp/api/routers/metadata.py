@@ -1,8 +1,7 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
-from starlette.requests import Request
-
+from fastapi import APIRouter, Depends, Request
+from odp.api.models.auth import Role
 from odp.api.models import Pagination
 from odp.api.models.metadata import (
     MetadataRecord,
@@ -19,7 +18,7 @@ router = APIRouter()
 async def list_metadata_records(
         request: Request,
         institution_key: str,
-        auth_data: AuthData = Depends(Authorizer(read_only=True)),
+        auth_data: AuthData = Depends(Authorizer(Role.all())),
         pagination: Pagination = Depends(),
 ):
     return request.state.adapter.list_metadata_records(
@@ -31,7 +30,7 @@ async def get_metadata_record(
         request: Request,
         institution_key: str,
         record_id: str,
-        auth_data: AuthData = Depends(Authorizer(read_only=True)),
+        auth_data: AuthData = Depends(Authorizer(Role.all())),
 ):
     return request.state.adapter.get_metadata_record(
         institution_key, record_id, auth_data.access_token)
@@ -42,7 +41,7 @@ async def create_or_update_metadata_record(
         request: Request,
         institution_key: str,
         metadata_record: MetadataRecordIn,
-        auth_data: AuthData = Depends(Authorizer()),
+        auth_data: AuthData = Depends(Authorizer(Role.curator, Role.contributor)),
 ):
     return request.state.adapter.create_or_update_metadata_record(
         institution_key, metadata_record, auth_data.access_token)
@@ -54,7 +53,7 @@ async def update_metadata_record(
         institution_key: str,
         record_id: str,
         metadata_record: MetadataRecordIn,
-        auth_data: AuthData = Depends(Authorizer()),
+        auth_data: AuthData = Depends(Authorizer(Role.curator)),
 ):
     return request.state.adapter.update_metadata_record(
         institution_key, record_id, metadata_record, auth_data.access_token)
@@ -65,7 +64,7 @@ async def delete_metadata_record(
         request: Request,
         institution_key: str,
         record_id: str,
-        auth_data: AuthData = Depends(Authorizer()),
+        auth_data: AuthData = Depends(Authorizer(Role.curator)),
 ):
     return request.state.adapter.delete_metadata_record(
         institution_key, record_id, auth_data.access_token)
@@ -76,7 +75,7 @@ async def validate_metadata_record(
         request: Request,
         institution_key: str,
         record_id: str,
-        auth_data: AuthData = Depends(Authorizer()),
+        auth_data: AuthData = Depends(Authorizer(Role.curator)),
 ):
     return request.state.adapter.validate_metadata_record(
         institution_key, record_id, auth_data.access_token)
@@ -88,7 +87,7 @@ async def change_state_of_metadata_record(
         institution_key: str,
         record_id: str,
         state: str,
-        auth_data: AuthData = Depends(Authorizer(admin_only=True)),
+        auth_data: AuthData = Depends(Authorizer(Role.curator)),
 ):
     return request.state.adapter.change_state_of_metadata_record(
         institution_key, record_id, state, auth_data.access_token)
