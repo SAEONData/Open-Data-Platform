@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -15,6 +15,10 @@ class Role(Base):
     id = Column(Integer, primary_key=True)
     key = Column(String, unique=True, nullable=False)
     name = Column(String, unique=True, nullable=False)
+
+    # a user with an admin role in the admin institution will be considered
+    # to have any associated capabilities across all institutions
+    admin = Column(Boolean, nullable=False)
 
     # many-to-many relationship between scope and role represented by capability
     capabilities = relationship('Capability',
