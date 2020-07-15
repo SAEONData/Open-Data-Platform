@@ -9,8 +9,8 @@ DOI_REGEX = r'^(|10\.\d{4,}(\.\d+)*/[-._;()/:a-zA-Z0-9]+)$'
 
 
 class CaptureMethod(str, Enum):
-    wizard = 'wizard'
-    harvester = 'harvester'
+    WIZARD = 'wizard'
+    HARVESTER = 'harvester'
 
 
 class MetadataRecordIn(BaseModel):

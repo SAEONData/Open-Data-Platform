@@ -5,10 +5,10 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 class Role(str, Enum):
-    admin = 'admin'
-    curator = 'curator'
-    contributor = 'contributor'
-    member = 'member'
+    ADMIN = 'admin'
+    CURATOR = 'curator'
+    CONTRIBUTOR = 'contributor'
+    MEMBER = 'member'
 
     @staticmethod
     def all():
@@ -16,8 +16,8 @@ class Role(str, Enum):
 
 
 class TokenType(str, Enum):
-    access = 'access_token'
-    refresh = 'refresh_token'
+    ACCESS_TOKEN = 'access_token'
+    REFRESH_TOKEN = 'refresh_token'
 
 
 class AccessRight(BaseModel):

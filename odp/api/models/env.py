@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class ServerEnv(str, Enum):
-    development = 'development'
-    testing = 'testing'
-    staging = 'staging'
-    production = 'production'
+    DEVELOPMENT = 'development'
+    TESTING = 'testing'
+    STAGING = 'staging'
+    PRODUCTION = 'production'
