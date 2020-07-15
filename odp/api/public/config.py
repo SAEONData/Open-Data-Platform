@@ -24,12 +24,6 @@ class RouterConfig(BaseSettings):
     ADAPTER: str
     # scope applicable to this router
     OAUTH2_SCOPE: str
-    # roles that may read resources (belonging to the same institution, if the router is institution-aware)
-    READONLY_ROLES: List[str] = []
-    # roles that may read or write resources (belonging to the same institution, if the router is institution-aware)
-    READWRITE_ROLES: List[str] = []
-    # roles that may read or write resources belonging to any institution, and that may access admin-only functions
-    ADMIN_ROLES: List[str] = []
 
 
 def router_config_factory(router_module: str):

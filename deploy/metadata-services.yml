@@ -32,9 +32,6 @@ services:
       - ADMIN_INSTITUTION=saeon
       - METADATA.ADAPTER=CKANAdapter
       - METADATA.OAUTH2_SCOPE=ODP.Metadata
-      - METADATA.READONLY_ROLES=["member"]
-      - METADATA.READWRITE_ROLES=["contributor"]
-      - METADATA.ADMIN_ROLES=["curator"]
       - CKAN_ADAPTER.CKAN_URL=http://ckan:5000
       - SEARCH.ADAPTER=ElasticAdapter
       - SEARCH.OAUTH2_SCOPE=ODP.Metadata
