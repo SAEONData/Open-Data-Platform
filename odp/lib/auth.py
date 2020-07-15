@@ -1,11 +1,12 @@
 import os
 from typing import List, Tuple
 
-from odp.api.models.auth import AccessTokenData, AccessRight, IDTokenData, Role
+from odp.api.models.auth import AccessTokenData, AccessRight, IDTokenData, Role as RoleEnum
 from odp.db import session as db_session
 from odp.db.models.privilege import Privilege
 from odp.db.models.scope import Scope
 from odp.db.models.user import User
+from odp.db.models.role import Role
 
 
 def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTokenData]:
@@ -68,7 +69,7 @@ def check_access(
         access_token_data: AccessTokenData,
         require_institution: str = None,
         require_scope: str = None,
-        require_role: Tuple[Role, ...] = (),
+        require_role: Tuple[RoleEnum, ...] = (),
 ) -> bool:
     """
     Determine whether the access rights associated with a user's access
