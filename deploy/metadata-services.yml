@@ -62,7 +62,7 @@ services:
         - REDIS_URL=http://redis:6379/0
         - RABBITMQ_HOST=rabbitmq
         - CKAN_ADMIN_ORG=saeon
-        - CKAN_ADMIN_ROLE=administrator
+        - CKAN_ADMIN_ROLE=admin
         - CKAN_CURATOR_ROLE=curator
         - CKAN_CONTRIBUTOR_ROLE=contributor
     networks:

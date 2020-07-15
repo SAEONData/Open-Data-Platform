@@ -54,7 +54,7 @@ services:
       - OAUTH2_CLIENT_SECRET=${ADMIN_OAUTH2_SECRET}
       - OAUTH2_SCOPES=openid ODP.Admin
       - ADMIN_INSTITUTION=saeon
-      - ADMIN_ROLE=administrator
+      - ADMIN_ROLE=admin
       - ADMIN_SCOPE=ODP.Admin
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
