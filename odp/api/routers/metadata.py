@@ -18,7 +18,7 @@ router = APIRouter()
 async def list_metadata_records(
         request: Request,
         institution_key: str,
-        auth_data: AuthData = Depends(Authorizer(Role.all())),
+        auth_data: AuthData = Depends(Authorizer(*Role.all())),
         pagination: Pagination = Depends(),
 ):
     return request.state.adapter.list_metadata_records(
@@ -30,7 +30,7 @@ async def get_metadata_record(
         request: Request,
         institution_key: str,
         record_id: str,
-        auth_data: AuthData = Depends(Authorizer(Role.all())),
+        auth_data: AuthData = Depends(Authorizer(*Role.all())),
 ):
     return request.state.adapter.get_metadata_record(
         institution_key, record_id, auth_data.access_token)

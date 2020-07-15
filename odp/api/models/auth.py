@@ -12,7 +12,7 @@ class Role(str, Enum):
 
     @staticmethod
     def all():
-        return tuple(role for role in Role)
+        return (role for role in Role)
 
 
 class TokenType(str, Enum):
