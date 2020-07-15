@@ -6,7 +6,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from starlette.status import HTTP_503_SERVICE_UNAVAILABLE, HTTP_403_FORBIDDEN
 
-from odp.api.models.auth import AccessTokenData, TokenIntrospection, Role
+from odp.api.models.auth import AccessTokenData, ValidToken, Role
 from odp.lib.auth import check_access
 
 
@@ -58,15 +58,20 @@ class Authorizer(HTTPBearer):
                 timeout=None if development_env else 5.0,
             )
             r.raise_for_status()
-            token_data = TokenIntrospection(**r.json())
+            token_data = r.json()
+            if not token_data['active']:
+                raise HTTPException(
+                    status_code=HTTP_403_FORBIDDEN,
+                    detail="Invalid token",
+                )
 
+            valid_token = ValidToken(**token_data)
             allow_access = check_access(
-                access_token_data := token_data.ext,
+                access_token_data := valid_token.ext,
                 require_institution=institution_key,
                 require_scope=router_scope,
                 require_role=self.allowed_roles,
             )
-
             if not allow_access:
                 raise HTTPException(
                     status_code=HTTP_403_FORBIDDEN,

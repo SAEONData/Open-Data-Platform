@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class Role(str, Enum):
@@ -35,21 +35,27 @@ class AccessTokenData(BaseModel):
     access_rights: List[AccessRight]
 
 
-class TokenIntrospection(BaseModel):
-    active: bool
-    token_type: Optional[TokenType]
-    client_id: Optional[str]
-    scope: Optional[str]
-    sub: Optional[str]
-    aud: Optional[List[str]]
-    iss: Optional[str]
-    iat: Optional[int]
-    exp: Optional[int]
+class ValidToken(BaseModel):
+    """ Token introspection response for a valid token """
+    active: bool = Field(default=True, const=True)
+    token_type: TokenType
+    client_id: str
+    scope: str
+    sub: str
+    iss: str
+    iat: int
+    exp: int
     nbf: Optional[int]
+    aud: Optional[List[str]]
     username: Optional[str]
     obfuscated_subject: Optional[str]
     ext: Optional[AccessTokenData]
-    error: Optional[str]
+
+
+class InvalidToken(BaseModel):
+    """ Token introspection response for an invalid token """
+    active: bool = Field(default=False, const=False)
+    error: str
 
 
 class IDTokenData(BaseModel):
