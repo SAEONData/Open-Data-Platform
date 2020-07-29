@@ -7,12 +7,12 @@ from odp.api.routers import authorization, institution
 
 load_dotenv()
 
-app_config = config.Config()
+app_config = config.AdminAPIConfig()
 app = FastAPI(
     title="ODP Admin API",
     description="The SAEON Open Data Platform Administrative API",
     version=pkg_resources.require('Open-Data-Platform')[0].version,
-    openapi_prefix=app_config.PATH_PREFIX,
+    root_path=app_config.PATH_PREFIX,
     config=app_config,
 )
 

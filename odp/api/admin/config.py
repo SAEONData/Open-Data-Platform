@@ -1,12 +1,8 @@
-from pydantic import BaseSettings, AnyHttpUrl, constr
+from pydantic import AnyHttpUrl
 
-from odp.api.models.env import ServerEnv
+from odp.api.config import APIConfig
 
 
-class Config(BaseSettings):
-    """
-    Application config, populated from the environment.
-    """
-    SERVER_ENV: ServerEnv
-    PATH_PREFIX: constr(regex=r'^(/\w+)*$') = ''
+class AdminAPIConfig(APIConfig):
+    """ Config specific to the admin API """
     HYDRA_ADMIN_URL: AnyHttpUrl

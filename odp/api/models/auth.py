@@ -15,6 +15,11 @@ class Role(str, Enum):
         return (role for role in Role)
 
 
+class Scope(str, Enum):
+    ADMIN = 'ODP.Admin'
+    METADATA = 'ODP.Metadata'
+
+
 class TokenType(str, Enum):
     ACCESS_TOKEN = 'access_token'
     REFRESH_TOKEN = 'refresh_token'

@@ -1,29 +1,21 @@
 from typing import List, Union, Literal
 
-from pydantic import BaseSettings, AnyHttpUrl, constr
+from pydantic import BaseSettings, AnyHttpUrl
 
-from odp.api.models.env import ServerEnv
+from odp.api.config import APIConfig
 
 
-class AppConfig(BaseSettings):
-    """
-    Application config, populated from the environment.
-    """
-    SERVER_ENV: ServerEnv
-    PATH_PREFIX: constr(regex=r'^(/\w+)*$') = ''
+class PublicAPIConfig(APIConfig):
+    """ Config specific to the public API """
     ALLOW_ORIGINS: List[Union[Literal['*'], AnyHttpUrl]] = []
-    ADMIN_API_URL: AnyHttpUrl
 
 
 class RouterConfig(BaseSettings):
-    """
-    Router config base class. Router-specific descendants are created dynamically
-    using the factory method below.
+    """ Router config base class. Router-specific descendants are created
+    dynamically using the factory method below.
     """
     # class name of the adapter that will fulfil requests to this router
     ADAPTER: str
-    # scope applicable to this router
-    OAUTH2_SCOPE: str
 
 
 def router_config_factory(router_module: str):

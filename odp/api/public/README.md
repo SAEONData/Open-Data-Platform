@@ -18,7 +18,6 @@ Router-specific environment variables are prefixed with the uppercased name of t
 e.g. `METADATA.ADAPTER`, etc. Following are the options that are applicable per router:
 
 - `<ROUTER>.ADAPTER`: class name of the adapter that will fulfil requests to the router
-- `<ROUTER>.OAUTH2_SCOPE`: OAuth2 scope applicable to the router
 
 ## Adapters
 

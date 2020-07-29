@@ -8,12 +8,12 @@ from odp.api.routers import metadata, search
 
 load_dotenv()
 
-app_config = config.AppConfig()
+app_config = config.PublicAPIConfig()
 app = FastAPI(
     title="ODP API",
     description="The SAEON Open Data Platform API",
     version=pkg_resources.require('Open-Data-Platform')[0].version,
-    openapi_prefix=app_config.PATH_PREFIX,
+    root_path=app_config.PATH_PREFIX,
     config=app_config,
 )
 
