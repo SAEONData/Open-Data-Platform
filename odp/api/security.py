@@ -18,15 +18,18 @@ class AuthData(NamedTuple):
 class Authorizer(HTTPBearer):
     """ Dependency class which authorizes the current request. """
 
-    def __init__(self, scope: Scope, *allowed_roles: Role):
+    def __init__(self, scope: Scope, *allowed_roles: Role, institution_key: str = None):
         """ Constructor.
 
         :param scope: the scope required for accessing the API function
         :param allowed_roles: the role(s) that are allowed access to the API function
+        :param institution_key: if specified, the API function may only be accessed by
+            members of this institution (or the admin institution)
         """
         super().__init__(auto_error=True)
         self.scope = scope
         self.allowed_roles = allowed_roles
+        self.institution_key = institution_key
 
     async def __call__(self, request: Request, institution_key: str = None) -> AuthData:
         """ Validate the access token that was supplied in the Authorization header,
@@ -59,13 +62,13 @@ class Authorizer(HTTPBearer):
             if not token_data['active']:
                 raise HTTPException(
                     status_code=HTTP_403_FORBIDDEN,
-                    detail="Invalid token",
+                    detail=token_data['error'],
                 )
 
             valid_token = ValidToken(**token_data)
             allow_access = check_access(
                 access_token_data := valid_token.ext,
-                require_institution=institution_key,
+                require_institution=self.institution_key or institution_key,
                 require_scope=self.scope,
                 require_role=self.allowed_roles,
             )
