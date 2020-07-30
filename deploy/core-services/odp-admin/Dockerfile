@@ -14,4 +14,4 @@ ARG CA_CERT_URL
 RUN curl ${CA_CERT_URL} -k -o /usr/local/share/ca-certificates/saeon-ca.crt
 RUN update-ca-certificates
 
-CMD ["gunicorn", "odp.admin.app:create_app()", "--bind=0.0.0.0:9025"]
+CMD ["gunicorn", "odp.admin.app:create_app()", "--bind=0.0.0.0:9025", "--workers=4"]
