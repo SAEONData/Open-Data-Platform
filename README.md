@@ -35,7 +35,6 @@ Set these options if deploying core framework services:
 - **`ACCOUNTS_DB_PASSWORD`**: ODP accounts database password
 - **`MAIL_SERVER`**: IP / hostname of mail server used for sending email verifications / password resets
 - **`IDENTITY_FLASK_KEY`**: Flask secret key for the identity service
-- **`IDENTITY_OAUTH2_SECRET`**: OAuth2 client secret for the identity service UI
 - **`ADMIN_FLASK_KEY`**: Flask secret key for the admin service
 - **`ADMIN_OAUTH2_SECRET`**: OAuth2 client secret for the admin service UI
 - **`HYDRA_IMAGE`**: the Hydra Docker image, e.g. `oryd/hydra:v1.4.10`

@@ -16,10 +16,6 @@ issuance of ID, access and refresh tokens.
 - `ADMIN_INSTITUTION`: institution key of the institution that owns the platform
 - `HYDRA_ADMIN_URL`: URL of the Hydra admin API
 - `HYDRA_LOGIN_EXPIRY`: number of seconds to remember a successful login (default `86400` = 24 hours)
-- `HYDRA_PUBLIC_URL`: URL of the Hydra public API
-- `OAUTH2_CLIENT_ID`: client ID of this service as registered with Hydra
-- `OAUTH2_CLIENT_SECRET`: client secret of this service as registered with Hydra
-- `OAUTH2_SCOPES`: `openid`
 
 ## Development quick start
 

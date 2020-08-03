@@ -2,7 +2,7 @@ from flask import Flask
 from flask.helpers import get_env
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from odp.identity import login_manager, mail, hydra_admin
+from odp.identity import mail, hydra_admin
 
 
 def create_app(config=None):
@@ -27,7 +27,6 @@ def create_app(config=None):
     db.init_app(app)
     views.init_app(app)
 
-    login_manager.init_app(app)
     mail.init_app(app)
 
     hydra_admin.server_url = app.config['HYDRA_ADMIN_URL']
