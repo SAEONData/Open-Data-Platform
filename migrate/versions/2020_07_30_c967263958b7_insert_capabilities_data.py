@@ -17,7 +17,7 @@ depends_on = None
 def upgrade():
     capabilities = {
         'ODP.Admin': ['admin', 'member'],
-        'ODP.Metadata': ['curator', 'contributor', 'member'],
+        'ODP.Metadata': ['admin', 'curator', 'contributor', 'member'],
         'SAEON.Observations.WebAPI': ['admin', 'contributor'],
     }
 
