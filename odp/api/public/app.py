@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from odp.api.public import config, load_adapters, load_configs, set_adapter, set_config
-from odp.api.routers import metadata, search
+from odp.api.routers import metadata, search, project
 
 load_dotenv()
 
@@ -18,13 +18,25 @@ app = FastAPI(
 )
 
 load_adapters(app)
-load_configs(app, metadata.__name__, search.__name__)
+load_configs(
+    app,
+    metadata.__name__,
+    project.__name__,
+    search.__name__,
+)
 
 app.include_router(
     metadata.router,
     prefix='/{institution_key}/metadata',
     tags=['Metadata Management'],
     dependencies=[Depends(set_config), Depends(set_adapter)],
+)
+
+app.include_router(
+    project.router,
+    prefix='/project',
+    tags=['Projects'],
+    dependencies=[Depends(set_config), Depends(set_adapter)]
 )
 
 app.include_router(

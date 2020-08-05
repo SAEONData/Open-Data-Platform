@@ -31,6 +31,7 @@ services:
       - ADMIN_API_URL=${ODP_ADMIN_URL}/api
       - ADMIN_INSTITUTION=saeon
       - METADATA.ADAPTER=CKANAdapter
+      - PROJECT.ADAPTER=CKANAdapter
       - CKAN_ADAPTER.CKAN_URL=http://ckan:5000
       - SEARCH.ADAPTER=ElasticAdapter
       - ELASTIC_ADAPTER.ES_URL=http://elasticsearch:9200
