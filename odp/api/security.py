@@ -15,6 +15,10 @@ class AuthData(NamedTuple):
     access_token_data: AccessTokenData
 
 
+# TODO: this needs to be specialized for API functions that do / don't relate to
+#  institutional resources; for those that don't, we don't want the institution_key
+#  parameter appearing in the API signature, which happens automatically because
+#  of the __call__ signature below
 class Authorizer(HTTPBearer):
     """ Dependency class which authorizes the current request. """
 
