@@ -6,7 +6,12 @@ import ckanapi
 from fastapi import HTTPException
 from pydantic import AnyHttpUrl
 from requests import RequestException
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_503_SERVICE_UNAVAILABLE
+from starlette.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_403_FORBIDDEN,
+    HTTP_404_NOT_FOUND,
+    HTTP_503_SERVICE_UNAVAILABLE,
+)
 
 from odp.api.models import Pagination
 from odp.api.models.metadata import (
@@ -15,6 +20,7 @@ from odp.api.models.metadata import (
     MetadataValidationResult,
     MetadataWorkflowResult,
 )
+from odp.api.models.project import Project
 from odp.api.public.adapter import ODPAPIAdapter, ODPAPIAdapterConfig
 
 logger = logging.getLogger(__name__)
@@ -303,3 +309,24 @@ class CKANAdapter(ODPAPIAdapter):
             key='capture_info',
             value={'capture_method': metadata_record.capture_method},
         )
+
+    @staticmethod
+    def _translate_from_ckan_project(ckan_project):
+        """
+        Convert a CKAN project (infrastructure) dict into a Project.
+        """
+        return Project(
+            key=ckan_project['name'],
+            name=ckan_project['title'],
+            description=ckan_project['description'],
+        )
+
+    def list_projects(self,
+                      access_token: str,
+                      ) -> List[Project]:
+        project_list = self._call_ckan(
+            'infrastructure_list',
+            access_token,
+            all_fields=True,
+        )
+        return [self._translate_from_ckan_project(project) for project in project_list]
