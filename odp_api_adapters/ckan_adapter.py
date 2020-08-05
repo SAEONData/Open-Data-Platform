@@ -326,8 +326,6 @@ class CKANAdapter(ODPAPIAdapter):
         """
         Convert a Project into a CKAN project (infrastructure) dict.
         """
-        if not project.key.endswith(PROJECT_SUFFIX):
-            project.key += PROJECT_SUFFIX
         return {
             'name': project.key,
             'title': project.name,
@@ -348,6 +346,11 @@ class CKANAdapter(ODPAPIAdapter):
                        project: Project,
                        access_token: str,
                        ) -> Project:
+        # we do this because in CKAN, organizations, collections and projects share
+        # the same key namespace, by virtue of them all being CKAN groups
+        if not project.key.endswith(PROJECT_SUFFIX):
+            project.key += PROJECT_SUFFIX
+
         input_dict = self._translate_to_ckan_project(project)
         ckan_project = self._call_ckan(
             'infrastructure_create',
