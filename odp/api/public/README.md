@@ -38,4 +38,4 @@ which will also be automatically loaded from the environment at startup.
 
 Create a `.env` file in `odp/api/public`, activate the Python virtual environment, and run:
 
-    uvicorn odp.api.public.app:app --port 8888 --reload --env-file .env
+    uvicorn odp.api.public.app:app --port 8888 --env-file .env
