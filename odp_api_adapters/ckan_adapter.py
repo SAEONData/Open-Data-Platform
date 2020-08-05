@@ -20,7 +20,7 @@ from odp.api.models.metadata import (
     MetadataValidationResult,
     MetadataWorkflowResult,
 )
-from odp.api.models.project import Project
+from odp.api.models.project import Project, PROJECT_SUFFIX
 from odp.api.public.adapter import ODPAPIAdapter, ODPAPIAdapterConfig
 
 logger = logging.getLogger(__name__)
@@ -84,7 +84,7 @@ class CKANAdapter(ODPAPIAdapter):
                                 detail=f"CKAN error: {e}") from e
 
     @staticmethod
-    def _translate_from_ckan_record(ckan_record):
+    def _translate_from_ckan_record(ckan_record: dict) -> MetadataRecord:
         """
         Convert a CKAN metadata record dict into a MetadataRecord object.
         """
@@ -102,7 +102,7 @@ class CKANAdapter(ODPAPIAdapter):
         )
 
     @staticmethod
-    def _translate_to_ckan_record(institution_key: str, metadata_record: MetadataRecordIn):
+    def _translate_to_ckan_record(institution_key: str, metadata_record: MetadataRecordIn) -> dict:
         """
         Convert a MetadataRecordIn object into a CKAN metadata record dict.
         """
@@ -311,7 +311,7 @@ class CKANAdapter(ODPAPIAdapter):
         )
 
     @staticmethod
-    def _translate_from_ckan_project(ckan_project):
+    def _translate_from_ckan_project(ckan_project: dict) -> Project:
         """
         Convert a CKAN project (infrastructure) dict into a Project.
         """
@@ -320,6 +320,19 @@ class CKANAdapter(ODPAPIAdapter):
             name=ckan_project['title'],
             description=ckan_project['description'],
         )
+
+    @staticmethod
+    def _translate_to_ckan_project(project: Project) -> dict:
+        """
+        Convert a Project into a CKAN project (infrastructure) dict.
+        """
+        if not project.key.endswith(PROJECT_SUFFIX):
+            project.key += PROJECT_SUFFIX
+        return {
+            'name': project.key,
+            'title': project.name,
+            'description': project.description,
+        }
 
     def list_projects(self,
                       access_token: str,
@@ -330,3 +343,15 @@ class CKANAdapter(ODPAPIAdapter):
             all_fields=True,
         )
         return [self._translate_from_ckan_project(project) for project in project_list]
+
+    def create_project(self,
+                       project: Project,
+                       access_token: str,
+                       ) -> Project:
+        input_dict = self._translate_to_ckan_project(project)
+        ckan_project = self._call_ckan(
+            'infrastructure_create',
+            access_token,
+            **input_dict,
+        )
+        return self._translate_from_ckan_project(ckan_project)
