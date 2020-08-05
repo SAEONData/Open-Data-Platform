@@ -19,3 +19,15 @@ async def list_projects(
             institution_key=os.environ['ADMIN_INSTITUTION'])),
 ):
     return request.state.adapter.list_projects(auth_data.access_token)
+
+
+@router.post('/', response_model=Project)
+async def create_project(
+        request: Request,
+        project: Project,
+        auth_data: AuthData = Depends(Authorizer(
+            Scope.METADATA,
+            Role.ADMIN,
+            institution_key=os.environ['ADMIN_INSTITUTION'])),
+):
+    return request.state.adapter.create_project(project, auth_data.access_token)
