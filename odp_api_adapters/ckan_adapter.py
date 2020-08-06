@@ -14,6 +14,7 @@ from starlette.status import (
 )
 
 from odp.api.models import Pagination
+from odp.api.models.collection import Collection, CollectionIn, COLLECTION_SUFFIX
 from odp.api.models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
@@ -309,6 +310,64 @@ class CKANAdapter(ODPAPIAdapter):
             key='capture_info',
             value={'capture_method': metadata_record.capture_method},
         )
+
+    @staticmethod
+    def _translate_from_ckan_collection(ckan_collection: dict) -> Collection:
+        """
+        Convert a CKAN collection dict into a Collection.
+        """
+        return Collection(
+            institution_key=ckan_collection['organization_id'],
+            key=ckan_collection['name'],
+            name=ckan_collection['title'],
+            description=ckan_collection['description'],
+            doi_scope=ckan_collection['doi_collection'],
+            project_keys=[project_dict['id'] for project_dict in ckan_collection['infrastructures']]
+        )
+
+    @staticmethod
+    def _translate_to_ckan_collection(institution_key: str, collection: CollectionIn) -> dict:
+        """
+        Convert a CollectionIn into a CKAN collection dict.
+        """
+        return {
+            'name': collection.key,
+            'title': collection.name,
+            'description': collection.description,
+            'organization_id': institution_key,
+            'doi_collection': collection.doi_scope,
+            'infrastructures': [{'id': key} for key in collection.project_keys],
+        }
+
+    def list_collections(self,
+                         institution_key: str,
+                         access_token: str,
+                         ) -> List[Collection]:
+        collection_list = self._call_ckan(
+            'metadata_collection_list',
+            access_token,
+            owner_org=institution_key,
+            all_fields=True,
+        )
+        return [self._translate_from_ckan_collection(collection) for collection in collection_list]
+
+    def create_collection(self,
+                          institution_key: str,
+                          collection: CollectionIn,
+                          access_token: str,
+                          ) -> Collection:
+        # we do this because in CKAN, organizations, collections and collections share
+        # the same key namespace, by virtue of them all being CKAN groups
+        if not collection.key.endswith(COLLECTION_SUFFIX):
+            collection.key += COLLECTION_SUFFIX
+
+        input_dict = self._translate_to_ckan_collection(institution_key, collection)
+        ckan_collection = self._call_ckan(
+            'metadata_collection_create',
+            access_token,
+            **input_dict,
+        )
+        return self._translate_from_ckan_collection(ckan_collection)
 
     @staticmethod
     def _translate_from_ckan_project(ckan_project: dict) -> Project:
