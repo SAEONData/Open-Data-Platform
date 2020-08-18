@@ -401,19 +401,31 @@ class CKANAdapter(ODPAPIAdapter):
         )
         return [self._translate_from_ckan_project(project) for project in project_list]
 
-    def create_project(self,
-                       project: Project,
-                       access_token: str,
-                       ) -> Project:
+    def create_or_update_project(self,
+                                 project: Project,
+                                 access_token: str,
+                                 ) -> Project:
         # we do this because in CKAN, organizations, collections and projects share
         # the same key namespace, by virtue of them all being CKAN groups
         if not project.key.endswith(PROJECT_SUFFIX):
             project.key += PROJECT_SUFFIX
 
         input_dict = self._translate_to_ckan_project(project)
-        ckan_project = self._call_ckan(
-            'infrastructure_create',
-            access_token,
-            **input_dict,
-        )
+        try:
+            ckan_project = self._call_ckan(
+                'infrastructure_create',
+                access_token,
+                **input_dict,
+            )
+        except HTTPException as e:
+            if e.status_code == HTTP_400_BAD_REQUEST and 'Group name already exists in database' in e.detail:
+                input_dict['id'] = input_dict['name']
+                ckan_project = self._call_ckan(
+                    'infrastructure_update',
+                    access_token,
+                    **input_dict,
+                )
+            else:
+                raise
+
         return self._translate_from_ckan_project(ckan_project)
