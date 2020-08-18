@@ -14,6 +14,8 @@ Built on [FastAPI](https://fastapi.tiangolo.com/).
 - `DATABASE_URL`: URL of the ODP accounts database, e.g. `postgresql://odp_user:pw@host/odp_accounts`
 - `HYDRA_ADMIN_URL`: URL of the Hydra admin API
 - `CKAN_URL`: URL of the CKAN metadata management server
+- `ES_URL`: URL of the Elasticsearch instance; must include port
+- `INDICES`: JSON-encoded list of Elasticsearch indexes to search
 
 ## Development quick start
 

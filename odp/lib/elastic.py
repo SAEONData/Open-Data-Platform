@@ -2,37 +2,22 @@ from typing import List
 
 from elasticsearch import Elasticsearch, ElasticsearchException, TransportError
 from fastapi.exceptions import HTTPException
-from pydantic import AnyHttpUrl, validator
 from starlette.status import HTTP_503_SERVICE_UNAVAILABLE, HTTP_400_BAD_REQUEST
 
 from odp.api.models import Pagination
 from odp.api.models.search import QueryDSL, SearchHit, SearchResult
-from odp.api.public.adapter import ODPAPIAdapter, ODPAPIAdapterConfig
 
 
-class ElasticAdapterConfig(ODPAPIAdapterConfig):
-    """
-    Config for the Elastic adapter, populated from the environment.
-    """
-    ES_URL: AnyHttpUrl
-    INDICES: List[str]
+class ElasticClient:
+    """ A client for the Elasticsearch metadata discovery catalogue """
 
-    @validator('ES_URL')
-    def check_port(cls, v):
-        if not v.port:
-            raise ValueError("Port must be specified in the Elasticsearch URL")
-        return v
-
-    class Config:
-        env_prefix = 'ELASTIC_ADAPTER.'
-
-
-class ElasticAdapter(ODPAPIAdapter):
-
-    def __init__(self, app, config: ElasticAdapterConfig):
-        super().__init__(app, config)
-        self.es_client = Elasticsearch([config.ES_URL])
-        self.es_indices = config.INDICES
+    def __init__(
+            self,
+            server_url: str,
+            indices: List[str],
+    ):
+        self.es_client = Elasticsearch([server_url])
+        self.es_indices = indices
 
     @staticmethod
     def _parse_elastic_response(r) -> SearchResult:
