@@ -11,6 +11,7 @@ built on [FastAPI](https://fastapi.tiangolo.com/).
 - `ADMIN_INSTITUTION`: institution key of the institution that owns the platform
 - `DATABASE_URL`: URL of the ODP accounts database, e.g. `postgresql://odp_user:pw@host/odp_accounts`
 - `HYDRA_ADMIN_URL`: URL of the Hydra admin API
+- `CKAN_URL`: URL of the CKAN metadata management server
 
 ## Development quick start
 

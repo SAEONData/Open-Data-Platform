@@ -29,6 +29,7 @@ setup(
             'fastapi',
             'uvicorn',
             'python-multipart',
+            'ckanapi',
         ],
         'ui': [
             'flask',

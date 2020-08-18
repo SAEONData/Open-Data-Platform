@@ -1,8 +1,7 @@
 # The Open Data Platform API
 
 A public API providing a stable interface to ODP back-end systems, with automatic,
-interactive API documentation using the OpenAPI standard. API requests are fulfilled
-by _adapters_ configured to handle particular routes.
+interactive API documentation using the OpenAPI standard.
 Built on [FastAPI](https://fastapi.tiangolo.com/).
 
 ## Environment variables
@@ -13,26 +12,8 @@ Built on [FastAPI](https://fastapi.tiangolo.com/).
 - `ADMIN_API_URL`: URL of the ODP Admin API
 - `ADMIN_INSTITUTION`: institution key of the institution that owns the platform
 - `DATABASE_URL`: URL of the ODP accounts database, e.g. `postgresql://odp_user:pw@host/odp_accounts`
-
-Router-specific environment variables are prefixed with the uppercased name of the router module,
-e.g. `METADATA.ADAPTER`, etc. Following are the options that are applicable per router:
-
-- `<ROUTER>.ADAPTER`: class name of the adapter that will fulfil requests to the router
-
-## Adapters
-
-An adapter (e.g. [ODP-API-CKANAdapter](https://github.com/SAEONData/ODP-API-CKANAdapter))
-consists of a class that inherits from `odp.api.public.adapter.ODPAPIAdapter`, along with
-a corresponding `-Config` class that inherits from `odp.api.public.adapter.ODPAPIAdapterConfig`.
-These classes should be defined in a module (or modules) located under the `odp_api_adapters`
-namespace package in the adapter's project directory. The adapter is enabled by installing
-it into the ODP Python environment, and setting the applicable `<ROUTER>.ADAPTER` environment
-variable for any router that should use the adapter.
-
-The adapter class contains methods that fulfil adapter calls as defined in one or more
-`odp.api.routers.*` modules. The adapter's config class should define an environment
-variable prefix (e.g. `'CKAN_ADAPTER.'`), and may define additional settings as needed,
-which will also be automatically loaded from the environment at startup.
+- `HYDRA_ADMIN_URL`: URL of the Hydra admin API
+- `CKAN_URL`: URL of the CKAN metadata management server
 
 ## Development quick start
 

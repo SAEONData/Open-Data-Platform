@@ -4,7 +4,6 @@ from typing import List, Dict, Any
 
 import ckanapi
 from fastapi import HTTPException
-from pydantic import AnyHttpUrl
 from requests import RequestException
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
@@ -22,26 +21,20 @@ from odp.api.models.metadata import (
     MetadataWorkflowResult,
 )
 from odp.api.models.project import Project, PROJECT_SUFFIX
-from odp.api.public.adapter import ODPAPIAdapter, ODPAPIAdapterConfig
 
 logger = logging.getLogger(__name__)
 
 
-class CKANAdapterConfig(ODPAPIAdapterConfig):
-    """
-    Config for the CKAN adapter, populated from the environment.
-    """
-    CKAN_URL: AnyHttpUrl
+class CKANClient:
+    """ A client for the CKAN-based metadata management system """
 
-    class Config:
-        env_prefix = 'CKAN_ADAPTER.'
-
-
-class CKANAdapter(ODPAPIAdapter):
-
-    def __init__(self, app, config: CKANAdapterConfig):
-        super().__init__(app, config)
-        self.ckan_server_url = config.CKAN_URL
+    def __init__(
+            self,
+            server_url: str,
+            verify_tls: bool = True,
+    ):
+        self.server_url = server_url
+        self.verify_tls = verify_tls
 
     def _call_ckan(self, action, access_token, **kwargs):
         """
@@ -54,14 +47,12 @@ class CKANAdapter(ODPAPIAdapter):
         :raises HTTPException
         """
         try:
-            with ckanapi.RemoteCKAN(self.ckan_server_url) as ckan:
+            with ckanapi.RemoteCKAN(self.server_url) as ckan:
                 return ckan.call_action(
                     action,
                     data_dict=kwargs,
                     apikey=f'Bearer {access_token}',
-                    requests_kwargs={
-                        'verify': self.app_config.SERVER_ENV != 'development'
-                    },
+                    requests_kwargs={'verify': self.verify_tls},
                 )
 
         except RequestException as e:

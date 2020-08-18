@@ -8,10 +8,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp.api.db import get_db_session
+from odp.api.dependencies.auth import Authorizer
+from odp.api.dependencies.db import get_db_session
 from odp.api.models.auth import Role, Scope
 from odp.api.models.institution import Institution
-from odp.api.security import Authorizer
 from odp.db.models.institution import Institution as InstitutionORM
 
 router = APIRouter()

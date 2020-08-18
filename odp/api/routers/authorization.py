@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, Form
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 
-from odp.api.admin import get_hydra_admin
-from odp.api.db import get_db_session
+from odp.api.dependencies.db import get_db_session
+from odp.api.dependencies.hydra import get_hydra_admin
 from odp.api.models.auth import ValidToken, InvalidToken
 from odp.db.models.user import User
 from odp.lib import exceptions as x
