@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 from pydantic import BaseModel, UUID4, Field
 
@@ -24,6 +24,6 @@ class SearchHit(BaseModel):
 
 class SearchResult(BaseModel):
     total_hits: int
-    max_score: float
-    query_time: int = Field(..., description="Search execution time in milliseconds")
+    max_score: Optional[float]
+    query_time: Optional[int] = Field(..., description="Search execution time in milliseconds")
     hits: List[SearchHit]

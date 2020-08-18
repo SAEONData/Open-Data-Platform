@@ -23,8 +23,8 @@ class ElasticClient:
     def _parse_elastic_response(r) -> SearchResult:
         return SearchResult(
             total_hits=(es_hits_dict := r.get('hits', {})).get('total', 0),
-            max_score=es_hits_dict.get('max_score', 0.0),
-            query_time=r.get('took', 0),
+            max_score=es_hits_dict.get('max_score'),
+            query_time=r.get('took'),
             hits=[SearchHit(
                 metadata=hit['_source']['metadata_json'],
                 metadata_id=hit['_source']['record_id'],
