@@ -22,7 +22,7 @@ async def list_projects(
 
 
 @router.post('/', response_model=Project)
-async def create_project(
+async def create_or_update_project(
         request: Request,
         project: Project,
         auth_data: AuthData = Depends(Authorizer(
@@ -30,4 +30,4 @@ async def create_project(
             Role.ADMIN,
             institution_key=os.environ['ADMIN_INSTITUTION'])),
 ):
-    return request.state.adapter.create_project(project, auth_data.access_token)
+    return request.state.adapter.create_or_update_project(project, auth_data.access_token)
