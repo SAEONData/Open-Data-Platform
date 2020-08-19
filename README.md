@@ -17,10 +17,29 @@ built on [FastAPI](https://fastapi.tiangolo.com/).
 - [entry point](odp/api/admin.py)
 
 ### ODP Admin UI
+Administrative interface for the ODP, built on [Flask](https://flask.palletsprojects.com/)
+and [Flask-Admin](https://flask-admin.readthedocs.io/en/latest/).
 
 ### ODP Identity Service
+A [Flask](https://flask.palletsprojects.com/) web application providing a unified
+signup and login experience across the entire platform.
 
 ## Dependencies
+
+### ORY Hydra
+[ORY Hydra](https://www.ory.sh/hydra/docs/) is an open source, self-hosted OAuth 2.0
+and OpenID Connect provider, which performs authentication, session management and
+issuance of ID, access and refresh tokens.
+
+### CKAN-based metadata management system
+
+### PyCSW metadata harvest endpoint
+
+### Elasticsearch metadata discovery catalogue
+
+## Development
+
+See the development [README](develop).
 
 ## Deployment
 This project provides a unified environment for the deployment of core framework

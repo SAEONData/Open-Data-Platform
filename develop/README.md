@@ -21,9 +21,6 @@ Install the projects:
 Switch to the `develop` subdirectory and create a `.env` file by copying the adjacent
 `.env.example` and updating any values as needed.
 
-### Environment variables
-
-
 ## ODP accounts database
 
 ### Database creation
@@ -71,10 +68,10 @@ so as to use the `.env` file located there.
     uvicorn odp.api.admin:app --port 9999 --workers 2 --env-file .env
 
 ### ODP Admin UI
-    todo...
+    flask run --host=odpadmin.localhost --port=9025
 
 ### ODP Identity Service
-    todo...
+    flask run --host=odpidentity.localhost --port=9024
 
 ## Upgrading Python dependencies
 To upgrade dependencies and re-generate the `requirements.txt` file for the ODP,

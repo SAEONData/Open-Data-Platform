@@ -7,7 +7,7 @@ echo "Creating OAuth2 client for the admin service..."
 docker run -it --rm --network odp-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${HYDRA_IMAGE} \
   clients create --skip-tls-verify \
     --id odp-admin \
-    --secret ${ADMIN_SECRET} \
+    --secret ${ADMIN_OAUTH2_SECRET} \
     --grant-types authorization_code \
     --response-types code \
     --scope openid,ODP.Admin \
@@ -18,7 +18,7 @@ echo "Creating OAuth2 client for the metadata manager..."
 docker run -it --rm --network odp-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${HYDRA_IMAGE} \
   clients create --skip-tls-verify \
     --id ckan-ui \
-    --secret ${CKAN_SECRET} \
+    --secret ${CKAN_OAUTH2_SECRET} \
     --grant-types authorization_code \
     --response-types code \
     --scope openid,ODP.Metadata \
