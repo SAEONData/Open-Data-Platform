@@ -1,5 +1,27 @@
 # SAEON Open Data Platform
 
+## Services
+This project provides the codebase for the following services:
+
+### ODP Public API
+A public API providing a stable interface to ODP back-end systems, with automatic,
+interactive API documentation using the OpenAPI standard.
+Built on [FastAPI](https://fastapi.tiangolo.com/).
+
+- [entry point](odp/api/public.py)
+
+### ODP Admin API
+Back-office API providing administrative and security-related functions,
+built on [FastAPI](https://fastapi.tiangolo.com/).
+
+- [entry point](odp/api/admin.py)
+
+### ODP Admin UI
+
+### ODP Identity Service
+
+## Dependencies
+
 ## Deployment
 This project provides a unified environment for the deployment of core framework
 services and metadata services of the SAEON Open Data Platform.
@@ -7,8 +29,8 @@ services and metadata services of the SAEON Open Data Platform.
 ODP core framework services include:
 - [ODP Identity Service](odp/identity)
 - [ODP Admin Interface](odp/admin)
-- [ODP Admin API](odp/api/admin)
-- [ODP Public API](odp/api/public)
+- [ODP Admin API](odp/api/admin.py)
+- [ODP Public API](odp/api/public.py)
 - ORY Hydra OAuth2 & OpenID Connect server
 
 ODP metadata services include:
@@ -89,84 +111,3 @@ To make the change permanent, edit the file `/etc/sysctl.conf` and add the follo
 
     docker-compose -f metadata-services build --no-cache
     docker-compose -f metadata-services up -d
-
-## Development
-
-### Project installation
-Clone the relevant projects from GitHub:
-
-    git clone -b development https://github.com/SAEONData/Open-Data-Platform.git
-    git clone https://github.com/SAEONData/Hydra-OAuth2-Blueprint.git
-    git clone -b development https://github.com/SAEONData/ODP-API-CKANAdapter.git
-    git clone -b development https://github.com/SAEONData/ODP-API-ElasticAdapter.git
-
-Create and activate the Python virtual environment:
-
-    python3.8 -m venv Open-Data-Platform/.venv
-    source Open-Data-Platform/.venv/bin/activate
-    pip install -U pip setuptools
-
-Install the projects:
-
-    pip install -e Open-Data-Platform/[api,ui,test]
-    pip install -e Hydra-OAuth2-Blueprint/
-    pip install -e ODP-API-CKANAdapter/
-    pip install -e ODP-API-ElasticAdapter/
-
-### ODP accounts database setup
-
-#### Database creation
-Run the following commands to create the accounts DB and a DB user, entering `pass` (or a
-password of your choice, which must be set in the various local `.env` files) when prompted
-for a password:
-
-    sudo -u postgres createuser -P odp_user
-    sudo -u postgres createdb -O odp_user odp_accounts
-
-Switch to the `migrate` subdirectory and create a `.env` file by copying the adjacent `.env.example`
-and updating the `DATABASE_URL` if necessary.
-
-Activate the Python virtual environment and run:
-
-    python -m initdb
-
-#### Database upgrade
-If you already have an instance of the accounts DB, then switch to the `migrate` subdirectory
-and run the SQL migrations:
-
-    alembic upgrade head
-
-### Service configurations
-Create `.env` files in the following locations by copying the adjacent `.env.example` and updating
-any settings as needed. See the corresponding README files for further info.
-- [odp/identity](odp/identity)
-- [odp/admin](odp/admin)
-- [odp/api/admin](odp/api/admin)
-- [odp/api/public](odp/api/public)
-
-### ORY Hydra setup
-Switch to the `develop` subdirectory and run the following commands:
-
-    cp .env.example .env
-    ./setup-hydra-db.sh
-    docker-compose -f hydra.yml up -d
-    ./setup-hydra-clients.sh
-
-### Metadata services setup
-_Note: this is still a work in progress!_
-
-Switch to the `develop` subdirectory and run the following commands:
-
-    docker-compose -f metadata.yml up -d
-
-### Upgrading Python dependencies
-To upgrade dependencies and re-generate the `requirements.txt` file,
-carry out the following steps:
-
-- Activate the Python virtual environment.
-- Upgrade Python libraries as necessary.
-- Start up all ODP applications and services as described in the respective README's,
-and check that everything works as expected.
-- Ensure that unit tests all pass. (still to be implemented)
-- Switch to the project root directory and run the following command:
-`pip freeze | sed -E '/^(-e\s|pkg-resources==)/d' > requirements.txt`

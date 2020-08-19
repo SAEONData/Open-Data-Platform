@@ -17,4 +17,4 @@ ARG CA_CERT_URL
 RUN curl ${CA_CERT_URL} -k -o /usr/local/share/ca-certificates/saeon-ca.crt
 RUN update-ca-certificates
 
-CMD ["uvicorn", "odp.api.public.app:app", "--host", "0.0.0.0", "--port", "8888", "--workers", "4"]
+CMD ["uvicorn", "odp.api.public:app", "--host", "0.0.0.0", "--port", "8888", "--workers", "4"]

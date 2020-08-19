@@ -4,7 +4,7 @@ echo "Loading environment variables..."
 source .env
 
 echo "Creating OAuth2 client for the admin service..."
-docker run -it --rm --network hydra-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${HYDRA_IMAGE} \
+docker run -it --rm --network odp-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${HYDRA_IMAGE} \
   clients create --skip-tls-verify \
     --id odp-admin \
     --secret ${ADMIN_SECRET} \
@@ -15,7 +15,7 @@ docker run -it --rm --network hydra-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${
     --post-logout-callbacks ${ADMIN_URL}/oauth2/logged_out
 
 echo "Creating OAuth2 client for the metadata manager..."
-docker run -it --rm --network hydra-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${HYDRA_IMAGE} \
+docker run -it --rm --network odp-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${HYDRA_IMAGE} \
   clients create --skip-tls-verify \
     --id ckan-ui \
     --secret ${CKAN_SECRET} \

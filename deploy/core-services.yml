@@ -1,8 +1,8 @@
 version: "3.5"
 
 networks:
-  odp-core-net:
-    name: odp-core-net
+  odp-net:
+    name: odp-net
 
 services:
   odp-identity:
@@ -13,7 +13,7 @@ services:
       args:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
-      - odp-core-net
+      - odp-net
     ports:
       - "9024:9024"
     environment:
@@ -36,7 +36,7 @@ services:
       args:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
-      - odp-core-net
+      - odp-net
     ports:
       - "9025:9025"
     environment:
@@ -64,7 +64,7 @@ services:
       args:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
-      - odp-core-net
+      - odp-net
     ports:
       - "9999:9999"
     environment:
@@ -81,7 +81,7 @@ services:
     container_name: hydra
     image: ${HYDRA_IMAGE}
     networks:
-      - odp-core-net
+      - odp-net
     ports:
       - "9000:4444"
       - "9001:4445"
