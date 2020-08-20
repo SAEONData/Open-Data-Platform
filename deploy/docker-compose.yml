@@ -1,0 +1,237 @@
+version: "3.5"
+
+networks:
+  odp-net:
+    name: odp-net
+  ckan-net:
+    name: ckan-net
+  elastic-net:
+    name: elastic-net
+
+volumes:
+  elastic-data:
+    name: elastic-data
+
+services:
+  odp-identity:
+    container_name: odp-identity
+    build:
+      context: ..
+      args:
+        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
+    networks:
+      - odp-net
+    ports:
+      - "9024:9024"
+    environment:
+      - FLASK_ENV=${SERVER_ENV}
+      - IDENTITY_FLASK_KEY
+      - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
+      - MAIL_SERVER
+      - ADMIN_INSTITUTION=saeon
+      - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
+      - HYDRA_LOGIN_EXPIRY=2592000
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
+    restart: always
+
+  odp-admin:
+    container_name: odp-admin
+    build:
+      context: ..
+      args:
+        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
+    networks:
+      - odp-net
+    ports:
+      - "9025:9025"
+    environment:
+      - FLASK_ENV=${SERVER_ENV}
+      - ADMIN_FLASK_KEY
+      - FLASK_ADMIN_SWATCH=flatly
+      - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
+      - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
+      - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
+      - ADMIN_OAUTH2_ID=odp-admin
+      - ADMIN_OAUTH2_SECRET
+      - ADMIN_OAUTH2_SCOPES=openid ODP.Admin
+      - ADMIN_INSTITUTION=saeon
+      - ADMIN_ROLE=admin
+      - ADMIN_SCOPE=ODP.Admin
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
+    restart: always
+
+  odp-admin-api:
+    container_name: odp-admin-api
+    build:
+      context: ..
+      args:
+        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
+    networks:
+      - odp-net
+    ports:
+      - "9999:9999"
+    environment:
+      - SERVER_ENV
+      - PATH_PREFIX=/api
+      - ADMIN_API_URL=${ODP_ADMIN_URL}/api
+      - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
+      - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
+      - ADMIN_INSTITUTION=saeon
+      - CKAN_URL=http://ckan-metadata:5000
+      - ES_URL=http://elasticsearch:9200
+      - ES_INDICES=[]
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    restart: always
+
+  hydra:
+    container_name: hydra
+    image: ${HYDRA_IMAGE}
+    networks:
+      - odp-net
+    ports:
+      - "9000:4444"
+      - "9001:4445"
+    environment:
+      - URLS_SELF_ISSUER=${ODP_PUBLIC_URL}/auth
+      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
+      - DSN=postgres://hydra_user:${HYDRA_DB_PASSWORD}@${HYDRA_DB_HOST}:5432/hydra_db?sslmode=disable
+      - URLS_LOGIN=${ODP_PUBLIC_URL}/id/hydra/login
+      - URLS_CONSENT=${ODP_PUBLIC_URL}/id/hydra/consent
+      - URLS_LOGOUT=${ODP_PUBLIC_URL}/id/hydra/logout
+      # TODO remove; the following makes access token lifetime 1 week (the default is 1 hour),
+      # as a workaround until such time as we've implemented token refresh on the client side
+      - TTL_ACCESS_TOKEN=168h
+    restart: always
+
+  odp-public-api:
+    container_name: odp-public-api
+    build:
+      context: ..
+      args:
+        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
+    networks:
+      - ckan-net
+      - elastic-net
+    ports:
+      - "8888:8888"
+    environment:
+      - SERVER_ENV
+      - PATH_PREFIX=/api
+      - ALLOW_ORIGINS=${CORS_ORIGINS}
+      - DATABASE_URL=postgresql://odp_user:${ACCOUNTS_DB_PASSWORD}@${ACCOUNTS_DB_HOST}:5432/odp_accounts
+      - ADMIN_API_URL=${ODP_ADMIN_URL}/api
+      - ADMIN_INSTITUTION=saeon
+      - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
+      - CKAN_URL=http://ckan-metadata:5000
+      - ES_URL=http://elasticsearch:9200
+      - ES_INDICES=["saeon-odp-4-2","sans-1878-mims-1","sans-1878-mims-historical-1","sans-1878-sadco-historical-1","sans-1878-mims-parent-records-1"]
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    restart: always
+
+  ckan-metadata:
+    container_name: ckan-metadata
+    build:
+      context: ckan-metadata
+      args:
+        - SERVER_ENV
+        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
+        - CKAN_URL
+        - CKAN_DB_URL=postgresql://ckan_default:${CKAN_DB_PASSWORD}@${CKAN_DB_HOST}/ckan_default
+        - DOI_PREFIX=10.15493
+        - ODP_INTROSPECTION_URL=${ODP_ADMIN_URL}/api/auth/introspect
+        - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
+        - OAUTH2_CLIENT_SECRET=${CKAN_OAUTH2_SECRET}
+        - IDENTITY_SERVICE_URL=${ODP_PUBLIC_URL}/id
+        - ELASTIC_AGENT_URL=http://es-agent:9210
+        - SOLR_URL=http://solr:8983/solr
+        - REDIS_URL=http://redis:6379/0
+        - RABBITMQ_HOST=rabbitmq
+        - CKAN_ADMIN_ORG=saeon
+        - CKAN_ADMIN_ROLE=admin
+        - CKAN_CURATOR_ROLE=curator
+        - CKAN_CONTRIBUTOR_ROLE=contributor
+    networks:
+      - ckan-net
+      - elastic-net
+    ports:
+      - "5000:5000"
+    environment:
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    depends_on:
+      - solr
+      - redis
+      - rabbitmq
+    restart: always
+
+  pycsw:
+    container_name: pycsw
+    build:
+      context: pycsw
+      args:
+        - ELASTIC_AGENT_SEARCH_URL=http://es-agent:9210/search
+    networks:
+      - elastic-net
+    ports:
+      - "8000:8000"
+    depends_on:
+      - es-agent
+    restart: always
+
+  es-agent:
+    container_name: es-agent
+    build:
+      context: es-agent
+    networks:
+      - elastic-net
+    ports:
+      - "9210:9210"
+    environment:
+      - ELASTIC_AGENT_HOST=localhost
+      - ELASTIC_AGENT_PORT=9210
+      - ELASTIC_SEARCH_HOST=elasticsearch
+      - ELASTIC_SEARCH_PORT=9200
+    depends_on:
+      - elasticsearch
+    restart: always
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.2
+    networks:
+      - elastic-net
+    ports:
+      - "9200:9200"
+    environment:
+      - cluster.name=docker-cluster
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data/
+    restart: always
+
+  solr:
+    container_name: solr
+    build:
+      context: solr
+    networks:
+      - ckan-net
+    restart: always
+
+  redis:
+    container_name: redis
+    image: redis:5
+    networks:
+      - ckan-net
+    restart: always
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3
+    networks:
+      - ckan-net
+    restart: always

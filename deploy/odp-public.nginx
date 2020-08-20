@@ -1,0 +1,101 @@
+server {
+    listen              80;
+    server_name         *.odp.saeon.ac.za;
+    return 301          https://$host$request_uri;
+}
+
+server {
+    listen              443 ssl;
+    server_name         odp.saeon.ac.za;
+
+    ssl_certificate     /etc/ssl/certs/odp-public.crt;
+    ssl_certificate_key /etc/ssl/private/odp-public.key;
+
+    access_log          /var/log/nginx/odp-public-access.log;
+    error_log           /var/log/nginx/odp-public-error.log;
+
+    # Identity Service
+    location /id/ {
+        proxy_pass          http://ODP_PRODUCTION_SERVER_IP:9024/;
+        proxy_set_header    Host                $host;
+        proxy_set_header    X-Real-IP           $remote_addr;
+        proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto   $scheme;
+        proxy_set_header    X-Forwarded-Prefix  /id;
+    }
+
+    # Hydra Public API
+    location /auth/ {
+        proxy_pass          https://ODP_PRODUCTION_SERVER_IP:9000/;
+        proxy_set_header    Host                $host;
+        proxy_set_header    X-Real-IP           $remote_addr;
+        proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto   $scheme;
+    }
+
+    # ODP Public API
+    location /api/ {
+        proxy_pass          http://ODP_PRODUCTION_SERVER_IP:8888/;
+        proxy_set_header    Host                $host;
+        proxy_set_header    X-Real-IP           $remote_addr;
+        proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto   $scheme;
+    }
+
+    # PyCSW
+    location /csw/ {
+        proxy_pass          http://ODP_PRODUCTION_SERVER_IP:8000/;
+        proxy_set_header    Host                $host;
+        proxy_set_header    X-Real-IP           $remote_addr;
+        proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto   $scheme;
+    }
+}
+
+server {
+    listen              443 ssl;
+    server_name         beta.odp.saeon.ac.za;
+
+    ssl_certificate     /etc/ssl/certs/odp-public.crt;
+    ssl_certificate_key /etc/ssl/private/odp-public.key;
+
+    access_log          /var/log/nginx/odp-public-beta-access.log;
+    error_log           /var/log/nginx/odp-public-beta-error.log;
+
+    # Identity Service
+    location /id/ {
+        proxy_pass          http://ODP_STAGING_SERVER_IP:9024/;
+        proxy_set_header    Host                $host;
+        proxy_set_header    X-Real-IP           $remote_addr;
+        proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto   $scheme;
+        proxy_set_header    X-Forwarded-Prefix  /id;
+    }
+
+    # Hydra Public API
+    location /auth/ {
+        proxy_pass          https://ODP_STAGING_SERVER_IP:9000/;
+        proxy_set_header    Host                $host;
+        proxy_set_header    X-Real-IP           $remote_addr;
+        proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto   $scheme;
+    }
+
+    # ODP Public API
+    location /api/ {
+        proxy_pass          http://ODP_STAGING_SERVER_IP:8888/;
+        proxy_set_header    Host                $host;
+        proxy_set_header    X-Real-IP           $remote_addr;
+        proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto   $scheme;
+    }
+
+    # PyCSW
+    location /csw/ {
+        proxy_pass          http://ODP_STAGING_SERVER_IP:8000/;
+        proxy_set_header    Host                $host;
+        proxy_set_header    X-Real-IP           $remote_addr;
+        proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto   $scheme;
+    }
+}

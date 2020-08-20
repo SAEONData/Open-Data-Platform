@@ -14,7 +14,7 @@ services:
   es-agent:
     container_name: es-agent
     build:
-      context: ../deploy/metadata-services/es-agent
+      context: ../deploy/es-agent
     networks:
       - elastic-net
     environment:
@@ -47,7 +47,7 @@ services:
   solr:
     container_name: solr
     build:
-      context: ../deploy/metadata-services/solr
+      context: ../deploy/solr
     networks:
       - ckan-net
     ports:
