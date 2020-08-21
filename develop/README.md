@@ -68,9 +68,11 @@ so as to use the `.env` file located there.
     uvicorn odp.api.admin:app --port 9999 --workers 2 --env-file .env
 
 ### ODP Admin UI
+    export FLASK_APP=odp.admin.app
     flask run --host=odpadmin.localhost --port=9025
 
 ### ODP Identity Service
+    export FLASK_APP=odp.identity.app
     flask run --host=odpidentity.localhost --port=9024
 
 ## Upgrading Python dependencies
