@@ -30,6 +30,20 @@ signup and login experience across the entire platform.
 
 ## Dependencies
 
+### Python
+The SAEON ODP is made with love and [Python](https://www.python.org/)!
+
+Python version 3.8 is required.
+
+### PostgreSQL
+ODP data and metadata are stored in [PostgreSQL](https://www.postgresql.org/) databases.
+
+PostgreSQL version 11 is currently in use.
+
+### Docker
+ODP services are deployed using [Docker](https://docs.docker.com/reference/)
+containerization technology.
+
 ### ORY Hydra
 [ORY Hydra](https://www.ory.sh/hydra/docs/) is an open source, self-hosted OAuth 2.0
 and OpenID Connect provider, which performs authentication, session management and
@@ -53,10 +67,10 @@ OGC-compliant CSW server providing a harvesting endpoint for published metadata.
 Source repository:
 - https://github.com/SAEONData/pycsw
 
-## Development
-
-See the development [README](develop).
-
 ## Deployment
 
 See the deployment [README](deploy).
+
+## Development
+
+See the development [README](develop).
