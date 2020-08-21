@@ -15,7 +15,7 @@ docker run -d --name hydra-db --network odp-net --volume hydra-data:/var/lib/pos
     -e POSTGRES_DB=hydra_db \
     -e POSTGRES_USER=hydra_user \
     -e POSTGRES_PASSWORD="${HYDRA_DB_PASSWORD}" \
-    postgres:9.6
+    postgres:11
 
 echo "Running SQL migrations..."
 docker run -it --rm --network odp-net "${HYDRA_IMAGE}" migrate sql --yes \
