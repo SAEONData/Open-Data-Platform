@@ -140,7 +140,7 @@ services:
         - CKAN_URL
         - CKAN_DB_URL=postgresql://ckan_default:${CKAN_DB_PASSWORD}@${CKAN_DB_HOST}/ckan_default
         - DOI_PREFIX=10.15493
-        - ODP_INTROSPECTION_URL=http://odp-admin-api:9999/auth/introspect
+        - ODP_INTROSPECTION_URL=${ODP_ADMIN_URL}/api/auth/introspect
         - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
         - OAUTH2_CLIENT_SECRET=${CKAN_OAUTH2_SECRET}
         - IDENTITY_SERVICE_URL=${ODP_PUBLIC_URL}/id
