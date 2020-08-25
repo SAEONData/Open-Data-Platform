@@ -14,6 +14,7 @@ from starlette.status import (
 
 from odp.api.models import Pagination
 from odp.api.models.collection import Collection, CollectionIn, COLLECTION_SUFFIX
+from odp.api.models.institution import Institution
 from odp.api.models.metadata import (
     MetadataRecord,
     MetadataRecordIn,
@@ -420,3 +421,35 @@ class CKANClient:
                 raise
 
         return self._translate_from_ckan_project(ckan_project)
+
+    def create_or_update_institution(self,
+                                     institution: Institution,
+                                     access_token: str,
+                                     ) -> Institution:
+        input_dict = {
+            'name': institution.key,
+            'title': institution.name,
+            'state': 'active',
+        }
+        try:
+            ckan_institution = self._call_ckan(
+                'organization_create',
+                access_token,
+                **input_dict,
+            )
+        except HTTPException as e:
+            if e.status_code == HTTP_400_BAD_REQUEST and 'Group name already exists in database' in e.detail:
+                input_dict['id'] = input_dict['name']
+                ckan_institution = self._call_ckan(
+                    'organization_update',
+                    access_token,
+                    **input_dict,
+                )
+            else:
+                raise
+
+        return Institution(
+            key=ckan_institution['name'],
+            name=ckan_institution['title'],
+            parent_key=None,
+        )
