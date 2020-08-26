@@ -22,11 +22,11 @@ async def list_metadata_collections(
 
 
 @router.post('/', response_model=Collection)
-async def create_metadata_collection(
+async def create_or_update_metadata_collection(
         institution_key: str,
         collection: CollectionIn,
         ckan: CKANClient = Depends(get_ckan_client),
         auth_data: AuthData = Depends(Authorizer(Scope.METADATA, Role.CURATOR)),
 ):
-    return ckan.create_collection(
+    return ckan.create_or_update_collection(
         institution_key, collection, auth_data.access_token)

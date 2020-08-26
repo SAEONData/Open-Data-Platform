@@ -343,22 +343,34 @@ class CKANClient:
         )
         return [self._translate_from_ckan_collection(collection) for collection in collection_list]
 
-    def create_collection(self,
-                          institution_key: str,
-                          collection: CollectionIn,
-                          access_token: str,
-                          ) -> Collection:
-        # we do this because in CKAN, organizations, collections and collections share
+    def create_or_update_collection(self,
+                                    institution_key: str,
+                                    collection: CollectionIn,
+                                    access_token: str,
+                                    ) -> Collection:
+        # we do this because in CKAN, organizations, collections and projects share
         # the same key namespace, by virtue of them all being CKAN groups
         if not collection.key.endswith(COLLECTION_SUFFIX):
             collection.key += COLLECTION_SUFFIX
 
         input_dict = self._translate_to_ckan_collection(institution_key, collection)
-        ckan_collection = self._call_ckan(
-            'metadata_collection_create',
-            access_token,
-            **input_dict,
-        )
+        try:
+            ckan_collection = self._call_ckan(
+                'metadata_collection_create',
+                access_token,
+                **input_dict,
+            )
+        except HTTPException as e:
+            if e.status_code == HTTP_400_BAD_REQUEST and 'Group name already exists in database' in e.detail:
+                input_dict['id'] = input_dict['name']
+                ckan_collection = self._call_ckan(
+                    'metadata_collection_update',
+                    access_token,
+                    **input_dict,
+                )
+            else:
+                raise
+
         return self._translate_from_ckan_collection(ckan_collection)
 
     @staticmethod
