@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -12,7 +12,7 @@ class CollectionIn(BaseModel):
     key: str = Field(..., regex=KEY_REGEX)
     name: str
     description: str = None
-    doi_scope: str = Field('', regex=DOI_SCOPE_REGEX)
+    doi_scope: str = Field(None, regex=DOI_SCOPE_REGEX)
     project_keys: List[str] = []
 
 
@@ -21,5 +21,5 @@ class Collection(BaseModel):
     key: str
     name: str
     description: str
-    doi_scope: str
+    doi_scope: Optional[str]
     project_keys: List[str]

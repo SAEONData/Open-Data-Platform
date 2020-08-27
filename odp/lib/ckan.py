@@ -313,7 +313,7 @@ class CKANClient:
             key=ckan_collection['name'],
             name=ckan_collection['title'],
             description=ckan_collection['description'],
-            doi_scope=ckan_collection['doi_collection'],
+            doi_scope=ckan_collection['doi_collection'] or None,
             project_keys=[project_dict['id'] for project_dict in ckan_collection['infrastructures']]
         )
 
@@ -327,7 +327,7 @@ class CKANClient:
             'title': collection.name,
             'description': collection.description,
             'organization_id': institution_key,
-            'doi_collection': collection.doi_scope,
+            'doi_collection': collection.doi_scope or '',
             'infrastructures': [{'id': key} for key in collection.project_keys],
         }
 
