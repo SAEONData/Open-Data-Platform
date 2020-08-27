@@ -54,3 +54,19 @@ class HydraAdminError(Exception):
         self.endpoint = kwargs.pop('endpoint')
         self.status_code = kwargs.pop('status_code')
         self.error_detail = kwargs.pop('error_detail', str(args))
+
+
+class ODPInstitutionError(Exception):
+    pass
+
+
+class ODPInstitutionNotFound(ODPInstitutionError):
+    pass
+
+
+class ODPParentInstitutionNotFound(ODPInstitutionError):
+    pass
+
+
+class ODPInstitutionNameConflict(ODPInstitutionError):
+    pass

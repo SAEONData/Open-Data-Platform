@@ -441,7 +441,6 @@ class CKANClient:
         input_dict = {
             'name': institution.key,
             'title': institution.name,
-            'state': 'active',
         }
         try:
             ckan_institution = self._call_ckan(
