@@ -17,6 +17,7 @@ services:
     container_name: odp-identity
     build:
       context: ..
+      dockerfile: deploy/odp-identity/Dockerfile
       args:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
@@ -39,6 +40,7 @@ services:
     container_name: odp-admin
     build:
       context: ..
+      dockerfile: deploy/odp-admin/Dockerfile
       args:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
@@ -66,6 +68,7 @@ services:
     container_name: odp-admin-api
     build:
       context: ..
+      dockerfile: deploy/odp-admin-api/Dockerfile
       args:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
@@ -109,6 +112,7 @@ services:
     container_name: odp-public-api
     build:
       context: ..
+      dockerfile: deploy/odp-public-api/Dockerfile
       args:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
