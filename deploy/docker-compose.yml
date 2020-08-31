@@ -116,6 +116,7 @@ services:
       args:
         - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
     networks:
+      - odp-net
       - ckan-net
       - elastic-net
     ports:
