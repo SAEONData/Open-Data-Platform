@@ -88,7 +88,7 @@ class CKANClient:
             metadata=ckan_record['metadata_json'],
             id=ckan_record['id'],
             pid=ckan_record['name'] if ckan_record['name'] != ckan_record['id'] else None,
-            doi=ckan_record['doi'],
+            doi=ckan_record['doi'] or None,
             validated=ckan_record['validated'],
             errors=ckan_record['errors'],
             state=ckan_record['workflow_state_id'],
@@ -104,7 +104,7 @@ class CKANClient:
             'metadata_collection_id': metadata_record.collection_key,
             'metadata_standard_id': metadata_record.schema_key,
             'metadata_json': json.dumps(metadata_record.metadata),
-            'doi': metadata_record.doi,
+            'doi': metadata_record.doi or '',
             'auto_assign_doi': metadata_record.auto_assign_doi,
         }
 

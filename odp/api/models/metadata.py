@@ -4,8 +4,7 @@ from typing import Dict, Optional
 from pydantic import BaseModel, Field, UUID4, AnyHttpUrl
 
 # adapted from https://www.crossref.org/blog/dois-and-matching-regular-expressions
-# Note: this allows either a DOI string or an empty string
-DOI_REGEX = r'^(|10\.\d{4,}(\.\d+)*/[-._;()/:a-zA-Z0-9]+)$'
+DOI_REGEX = r'^10\.\d{4,}(\.\d+)*/[-._;()/:a-zA-Z0-9]+$'
 
 
 class CaptureMethod(str, Enum):
@@ -17,7 +16,7 @@ class MetadataRecordIn(BaseModel):
     collection_key: str
     schema_key: str
     metadata: Dict
-    doi: str = Field('', regex=DOI_REGEX)
+    doi: str = Field(None, regex=DOI_REGEX)
     auto_assign_doi: bool = False
     terms_conditions_accepted: bool
     data_agreement_accepted: bool
@@ -28,7 +27,7 @@ class MetadataRecordIn(BaseModel):
 class MetadataRecord(BaseModel):
     id: UUID4
     pid: Optional[str]
-    doi: str
+    doi: Optional[str]
     institution_key: str
     collection_key: str
     schema_key: str
