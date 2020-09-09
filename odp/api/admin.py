@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from odp.api.config import Config
-from odp.api.routers import authorization, institution
+from odp.api.routers import authorization, institution, datacite
 
 load_dotenv()
 config = Config()
@@ -26,4 +26,10 @@ app.include_router(
     institution.router,
     prefix='/institution',
     tags=['Institutions'],
+)
+
+app.include_router(
+    datacite.router,
+    prefix='/datacite',
+    tags=['DataCite'],
 )
