@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from odp.api.config import Config
-from odp.api.routers import metadata, search, project, collection
+from odp.api.routers import metadata, catalogue, project, collection
 
 load_dotenv()
 config = Config()
@@ -36,9 +36,9 @@ app.include_router(
 )
 
 app.include_router(
-    search.router,
-    prefix='/search',
-    tags=['Search'],
+    catalogue.router,
+    prefix='/catalogue',
+    tags=['Catalogue'],
 )
 
 app.add_middleware(

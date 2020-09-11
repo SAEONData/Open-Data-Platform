@@ -83,8 +83,6 @@ services:
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - ADMIN_INSTITUTION=saeon
       - CKAN_URL=http://ckan-metadata:5000
-      - ES_URL=http://elasticsearch:9200
-      - ES_INDICES=[]
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
 
@@ -110,8 +108,9 @@ services:
       - ADMIN_INSTITUTION=saeon
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - CKAN_URL=http://ckan-metadata:5000
-      - ES_URL=http://elasticsearch:9200
-      - ES_INDICES=["saeon-odp-4-2","sans-1878-mims-1","sans-1878-mims-historical-1","sans-1878-sadco-historical-1","sans-1878-mims-parent-records-1"]
+      - CATALOGUE.ES_URL=http://elasticsearch:9200
+      - CATALOGUE.ES_INDICES=["saeon-odp-4-2","sans-1878-mims-1","sans-1878-mims-historical-1","sans-1878-sadco-historical-1","sans-1878-mims-parent-records-1"]
+      - CATALOGUE.METADATA_LANDING_PAGE_BASE_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
 

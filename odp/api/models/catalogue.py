@@ -3,6 +3,15 @@ from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, UUID4, Field
 
 
+class CatalogueRecord(BaseModel):
+    id: UUID4
+    doi: Optional[str]
+    institution: str
+    collection: str
+    projects: List[str]
+    metadata: Dict[str, Any]
+
+
 class QueryDSL(BaseModel):
     query: Dict[str, Any]
 
@@ -18,8 +27,7 @@ class QueryDSL(BaseModel):
 
 class SearchHit(BaseModel):
     score: float
-    metadata_id: UUID4
-    metadata: Dict[str, Any]
+    record: CatalogueRecord
 
 
 class SearchResult(BaseModel):

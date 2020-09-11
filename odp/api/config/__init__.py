@@ -1,7 +1,8 @@
 from typing import List, Union, Literal, Dict, Type
 
-from pydantic import BaseSettings, constr, AnyHttpUrl, validator, PostgresDsn
+from pydantic import BaseSettings, constr, AnyHttpUrl, PostgresDsn
 
+from odp.api.config.catalogue import CatalogueConfig
 from odp.api.config.datacite import DataCiteConfig
 from odp.api.models import KEY_REGEX
 from odp.api.models.env import ServerEnv
@@ -34,18 +35,15 @@ class Config(BaseSettings):
     # URL of the CKAN metadata management server
     CKAN_URL: AnyHttpUrl
 
-    # URL of the Elasticsearch metadata discovery instance; must include port
-    ES_URL: AnyHttpUrl
-
-    # JSON-encoded list of Elasticsearch indices to use for search queries
-    ES_INDICES: List[str]
-
     _extras: Dict[str, Union[Type[BaseSettings], BaseSettings]] = {
+        'CATALOGUE': CatalogueConfig,
         'DATACITE': DataCiteConfig,
     }
 
     def __getattr__(self, name) -> BaseSettings:
-        """ This allows us to reference an additional settings instance in an
+        """ Provides lazy loading of environment variable subgroups.
+
+        This allows us to reference an additional settings instance in an
         intuitive way (using the dotted form as defined by the ``env_prefix``
         of the settings class), without having to either optionalize all its
         attributes or force them to appear in the environment of services that
@@ -57,9 +55,3 @@ class Config(BaseSettings):
             return self._extras[name]
 
         raise AttributeError
-
-    @validator('ES_URL')
-    def check_port(cls, v):
-        if not v.port:
-            raise ValueError("Port must be specified in the Elasticsearch URL")
-        return v
