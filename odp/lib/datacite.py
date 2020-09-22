@@ -1,11 +1,10 @@
 import requests
-from fastapi.exceptions import HTTPException
-from starlette.status import HTTP_503_SERVICE_UNAVAILABLE, HTTP_404_NOT_FOUND, HTTP_405_METHOD_NOT_ALLOWED
 
-from odp.api.models.datacite import DataCiteMetadata, DataCiteMetadataList
+from odp.api.models.datacite import DataciteRecordIn, DataciteRecord, DataciteRecordList
+from odp.lib.exceptions import DataciteError
 
 
-class DataCiteClient:
+class DataciteClient:
 
     def __init__(
             self,
@@ -20,7 +19,7 @@ class DataCiteClient:
         self.password = password
         self.timeout = 60.0
 
-    def list_dois(self, page_size: int, page_num: int) -> DataCiteMetadataList:
+    def list_dois(self, page_size: int, page_num: int) -> DataciteRecordList:
         """
         Get a list of metadata records from DataCite, which have a DOI matching
         our configured prefix.
@@ -33,7 +32,6 @@ class DataCiteClient:
 
         :param page_size: the number of records to be returned per page
         :param page_num: the page number
-        :return: DataCiteMetadataList
         """
         result = self._request('GET', '/dois/', params={
             'query': f'id:{self.doi_prefix}/*',
@@ -41,8 +39,8 @@ class DataCiteClient:
             'page[number]': page_num,
         })
 
-        return DataCiteMetadataList(
-            records=[DataCiteMetadata(
+        return DataciteRecordList(
+            records=[DataciteRecord(
                 doi=item['id'],
                 url=item['attributes']['url'],
                 metadata=item['attributes'],
@@ -52,42 +50,34 @@ class DataCiteClient:
             this_page=result['meta']['page'],
         )
 
-    def get_doi(self, doi: str) -> DataCiteMetadata:
+    def get_doi(self, doi: str) -> DataciteRecord:
         """
         Fetch a metadata record from DataCite.
-
-        :param doi: the DOI string
-        :return: DataCiteMetadata
         """
         result = self._request('GET', f'/dois/{doi}')
 
-        return DataCiteMetadata(
+        return DataciteRecord(
             doi=result['data']['id'],
             url=result['data']['attributes']['url'],
             metadata=result['data']['attributes'],
         )
 
-    def publish_doi(self, doi: str, url: str, metadata: dict) -> DataCiteMetadata:
+    def publish_doi(self, record: DataciteRecordIn) -> DataciteRecord:
         """
         Publish a DOI and associated metadata to DataCite. This creates or updates
         the record on DataCite servers, and sets its state to ``findable``.
-
-        :param doi: the DOI string
-        :param url: the metadata landing page in the ODP
-        :param metadata: the metadata dictionary
-        :return: DataCiteMetadata
         """
-        metadata['url'] = url
-        metadata['event'] = 'publish'
+        record.metadata['url'] = record.url
+        record.metadata['event'] = 'publish'
         payload = {
             'data': {
-                'id': doi,
-                'attributes': metadata,
+                'id': record.doi,
+                'attributes': record.metadata,
             }
         }
-        result = self._request('PUT', f'/dois/{doi}', json=payload)
+        result = self._request('PUT', f'/dois/{record.doi}', json=payload)
 
-        return DataCiteMetadata(
+        return DataciteRecord(
             doi=result['data']['id'],
             url=result['data']['attributes']['url'],
             metadata=result['data']['attributes'],
@@ -98,16 +88,14 @@ class DataCiteClient:
         Un-publish a DOI from DataCite. This attempts a delete, falling
         through to an update of the metadata record on DataCite servers
         that sets its state to ``registered``.
-
-        :param doi: the DOI string
         """
         try:
             self._request('DELETE', f'/dois/{doi}')
             return  # it was a draft DOI and could be deleted
-        except HTTPException as e:
-            if e.status_code == HTTP_404_NOT_FOUND:
+        except DataciteError as e:
+            if e.status_code == 404:
                 pass  # nothing to do
-            elif e.status_code == HTTP_405_METHOD_NOT_ALLOWED:
+            elif e.status_code == 405:
                 # the DOI has already been registered and/or published;
                 # it cannot be deleted so we hide it
                 payload = {
@@ -140,7 +128,7 @@ class DataCiteClient:
                 error_detail = e.response.json()
             except ValueError:
                 error_detail = e.response.reason
-            raise HTTPException(status_code=e.response.status_code, detail=error_detail)
+            raise DataciteError(status_code=e.response.status_code, error_detail=error_detail) from e
 
         except requests.RequestException as e:
-            raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
+            raise DataciteError(status_code=503) from e

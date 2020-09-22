@@ -34,6 +34,7 @@ class ElasticClient:
                     collection=hit['_source']['collection'],
                     projects=hit['_source']['infrastructures'],
                     metadata=hit['_source']['metadata_json'],
+                    published=True,
                 )
             ) for hit in es_hits_dict.get('hits', [])],
         )

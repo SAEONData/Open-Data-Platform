@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from pydantic import BaseModel, Field
 from pydantic.networks import AnyHttpUrl
@@ -6,20 +6,20 @@ from pydantic.networks import AnyHttpUrl
 from odp.api.models.metadata import DOI_REGEX
 
 
-class DataCiteMetadataIn(BaseModel):
+class DataciteRecordIn(BaseModel):
     doi: str = Field(..., regex=DOI_REGEX)
-    url: AnyHttpUrl
-    metadata: dict
+    url: AnyHttpUrl = Field(..., description="The metadata landing page in the ODP")
+    metadata: Dict[str, Any]
 
 
-class DataCiteMetadata(BaseModel):
+class DataciteRecord(BaseModel):
     doi: str
     url: Optional[AnyHttpUrl]
-    metadata: dict
+    metadata: Dict[str, Any]
 
 
-class DataCiteMetadataList(BaseModel):
+class DataciteRecordList(BaseModel):
     total_records: int
     total_pages: int
     this_page: int
-    records: List[DataCiteMetadata]
+    records: List[DataciteRecord]

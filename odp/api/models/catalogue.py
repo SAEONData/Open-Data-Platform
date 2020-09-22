@@ -1,14 +1,19 @@
 from typing import Dict, Any, List, Optional
 
-from pydantic import BaseModel, UUID4, Field
+from pydantic import BaseModel, Field
 
 
 class CatalogueRecord(BaseModel):
-    id: UUID4
+    """ Model of a metadata record as published to a catalogue.
+
+    This must be strictly JSON-serializable.
+    """
+    id: str
     doi: Optional[str]
     institution: str
     collection: str
     projects: List[str]
+    published: bool
     metadata: Dict[str, Any]
 
 

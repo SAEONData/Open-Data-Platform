@@ -3,7 +3,7 @@ from typing import List, Union, Literal, Dict, Type
 from pydantic import BaseSettings, constr, AnyHttpUrl, PostgresDsn
 
 from odp.api.config.catalogue import CatalogueConfig
-from odp.api.config.datacite import DataCiteConfig
+from odp.api.config.datacite import DataciteConfig
 from odp.api.models import KEY_REGEX
 from odp.api.models.env import ServerEnv
 
@@ -37,7 +37,7 @@ class Config(BaseSettings):
 
     _extras: Dict[str, Union[Type[BaseSettings], BaseSettings]] = {
         'CATALOGUE': CatalogueConfig,
-        'DATACITE': DataCiteConfig,
+        'DATACITE': DataciteConfig,
     }
 
     def __getattr__(self, name) -> BaseSettings:

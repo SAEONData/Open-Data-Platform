@@ -1,9 +1,9 @@
 from fastapi import Request
 
-from odp.lib.datacite import DataCiteClient
+from odp.lib.datacite import DataciteClient
 
 
-def get_datacite_client(request: Request) -> DataCiteClient:
+def get_datacite_client(request: Request) -> DataciteClient:
     """
     DataCite API dependency.
     """
@@ -12,7 +12,7 @@ def get_datacite_client(request: Request) -> DataCiteClient:
         if config.SERVER_ENV in ('production', 'staging') \
         else config.DATACITE.API_TEST_URL
 
-    return DataCiteClient(
+    return DataciteClient(
         api_url=api_url,
         doi_prefix=config.DATACITE.DOI_PREFIX,
         username=config.DATACITE.USERNAME,

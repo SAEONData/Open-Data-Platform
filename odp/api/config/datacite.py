@@ -2,7 +2,7 @@ from pydantic import BaseSettings
 from pydantic.networks import AnyHttpUrl
 
 
-class DataCiteConfig(BaseSettings):
+class DataciteConfig(BaseSettings):
     # URL of the DataCite REST API
     API_URL: AnyHttpUrl
 

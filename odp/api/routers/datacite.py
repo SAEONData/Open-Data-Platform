@@ -1,17 +1,19 @@
 from fastapi import APIRouter, Depends, Query
+from fastapi.exceptions import HTTPException
 
 from odp.api.dependencies.auth import Authorizer
 from odp.api.dependencies.datacite import get_datacite_client
 from odp.api.models.auth import Role, Scope
-from odp.api.models.datacite import DataCiteMetadataIn, DataCiteMetadata, DataCiteMetadataList
-from odp.lib.datacite import DataCiteClient
+from odp.api.models.datacite import DataciteRecordIn, DataciteRecord, DataciteRecordList
+from odp.lib.datacite import DataciteClient
+from odp.lib.exceptions import DataciteError
 
 router = APIRouter()
 
 
 @router.get(
     '/',
-    response_model=DataCiteMetadataList,
+    response_model=DataciteRecordList,
     dependencies=[Depends(Authorizer(
         Scope.METADATA,
         Role.ADMIN, Role.CURATOR,
@@ -21,14 +23,17 @@ router = APIRouter()
 async def list_dois(
         page_size: int = Query(default=20, ge=1, le=1000),
         page_num: int = Query(default=1, ge=1),
-        datacite: DataCiteClient = Depends(get_datacite_client),
+        datacite: DataciteClient = Depends(get_datacite_client),
 ):
-    return datacite.list_dois(page_size, page_num)
+    try:
+        return datacite.list_dois(page_size, page_num)
+    except DataciteError as e:
+        raise HTTPException(e.status_code, e.error_detail) from e
 
 
 @router.get(
     '/{doi:path}',
-    response_model=DataCiteMetadata,
+    response_model=DataciteRecord,
     dependencies=[Depends(Authorizer(
         Scope.METADATA,
         Role.ADMIN, Role.CURATOR,
@@ -37,14 +42,17 @@ async def list_dois(
 )
 async def get_doi(
         doi: str,
-        datacite: DataCiteClient = Depends(get_datacite_client),
+        datacite: DataciteClient = Depends(get_datacite_client),
 ):
-    return datacite.get_doi(doi)
+    try:
+        return datacite.get_doi(doi)
+    except DataciteError as e:
+        raise HTTPException(e.status_code, e.error_detail) from e
 
 
 @router.post(
     '/',
-    response_model=DataCiteMetadata,
+    response_model=DataciteRecord,
     dependencies=[Depends(Authorizer(
         Scope.METADATA,
         Role.ADMIN, Role.CURATOR,
@@ -52,10 +60,13 @@ async def get_doi(
     summary="Publish DOI",
 )
 async def publish_doi(
-        metadata: DataCiteMetadataIn,
-        datacite: DataCiteClient = Depends(get_datacite_client),
+        record: DataciteRecordIn,
+        datacite: DataciteClient = Depends(get_datacite_client),
 ):
-    return datacite.publish_doi(metadata.doi, metadata.url, metadata.metadata)
+    try:
+        return datacite.publish_doi(record)
+    except DataciteError as e:
+        raise HTTPException(e.status_code, e.error_detail) from e
 
 
 @router.delete(
@@ -68,6 +79,9 @@ async def publish_doi(
 )
 async def unpublish_doi(
         doi: str,
-        datacite: DataCiteClient = Depends(get_datacite_client),
+        datacite: DataciteClient = Depends(get_datacite_client),
 ):
-    datacite.unpublish_doi(doi)
+    try:
+        datacite.unpublish_doi(doi)
+    except DataciteError as e:
+        raise HTTPException(e.status_code, e.error_detail) from e

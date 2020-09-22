@@ -1,4 +1,8 @@
-class ODPIdentityError(Exception):
+class ODPException(Exception):
+    pass
+
+
+class ODPIdentityError(ODPException):
     """ Base exception class for identity service errors """
 
     # code and description are sent to Hydra when rejecting a login request
@@ -46,7 +50,7 @@ class ODPSignupAuthenticatedUser(ODPIdentityError):
     error_description = "An authenticated user cannot sign up."
 
 
-class HydraAdminError(Exception):
+class HydraAdminError(ODPException):
     """ Exception raised when a call to the Hydra admin API fails """
 
     def __init__(self, *args, **kwargs):
@@ -56,7 +60,7 @@ class HydraAdminError(Exception):
         self.error_detail = kwargs.pop('error_detail', str(args))
 
 
-class ODPInstitutionError(Exception):
+class ODPInstitutionError(ODPException):
     pass
 
 
@@ -70,3 +74,11 @@ class ODPParentInstitutionNotFound(ODPInstitutionError):
 
 class ODPInstitutionNameConflict(ODPInstitutionError):
     pass
+
+
+class DataciteError(ODPException):
+    """ Exception raised when a call to the DataCite API fails """
+
+    def __init__(self, *args, **kwargs):
+        self.status_code = kwargs.pop('status_code')
+        self.error_detail = kwargs.pop('error_detail', str(args))
