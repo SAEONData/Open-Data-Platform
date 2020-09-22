@@ -86,6 +86,26 @@ services:
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
 
+  hydra:
+    container_name: hydra
+    image: ${HYDRA_IMAGE}
+    networks:
+      - odp-net
+    ports:
+      - "9000:4444"
+      - "9001:4445"
+    environment:
+      - URLS_SELF_ISSUER=${ODP_PUBLIC_URL}/auth
+      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
+      - DSN=postgres://hydra_user:${HYDRA_DB_PASSWORD}@${HYDRA_DB_HOST}:5432/hydra_db?sslmode=disable
+      - URLS_LOGIN=${ODP_PUBLIC_URL}/id/hydra/login
+      - URLS_CONSENT=${ODP_PUBLIC_URL}/id/hydra/consent
+      - URLS_LOGOUT=${ODP_PUBLIC_URL}/id/hydra/logout
+      # TODO remove; the following makes access token lifetime 1 week (the default is 1 hour),
+      # as a workaround until such time as we've implemented token refresh on the client side
+      - TTL_ACCESS_TOKEN=168h
+    restart: always
+
   odp-public-api:
     container_name: odp-public-api
     build:
@@ -114,26 +134,6 @@ services:
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
 
-  hydra:
-    container_name: hydra
-    image: ${HYDRA_IMAGE}
-    networks:
-      - odp-net
-    ports:
-      - "9000:4444"
-      - "9001:4445"
-    environment:
-      - URLS_SELF_ISSUER=${ODP_PUBLIC_URL}/auth
-      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
-      - DSN=postgres://hydra_user:${HYDRA_DB_PASSWORD}@${HYDRA_DB_HOST}:5432/hydra_db?sslmode=disable
-      - URLS_LOGIN=${ODP_PUBLIC_URL}/id/hydra/login
-      - URLS_CONSENT=${ODP_PUBLIC_URL}/id/hydra/consent
-      - URLS_LOGOUT=${ODP_PUBLIC_URL}/id/hydra/logout
-      # TODO remove; the following makes access token lifetime 1 week (the default is 1 hour),
-      # as a workaround until such time as we've implemented token refresh on the client side
-      - TTL_ACCESS_TOKEN=168h
-    restart: always
-
   ckan-metadata:
     container_name: ckan-metadata
     build:
@@ -149,8 +149,6 @@ services:
         - OAUTH2_CLIENT_SECRET=${CKAN_OAUTH2_SECRET}
         - IDENTITY_SERVICE_URL=${ODP_PUBLIC_URL}/id
         - ELASTIC_AGENT_URL=http://es-agent:9210
-        - DATACITE_API_URL=${ODP_ADMIN_URL}/api/datacite
-        - DOI_TARGET_BASE_URL=${ODP_PUBLIC_URL}/api/catalogue/go
         - SOLR_URL=http://solr:8983/solr
         - REDIS_URL=http://redis:6379/0
         - RABBITMQ_HOST=rabbitmq
