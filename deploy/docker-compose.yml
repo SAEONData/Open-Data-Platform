@@ -86,26 +86,6 @@ services:
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
 
-  hydra:
-    container_name: hydra
-    image: ${HYDRA_IMAGE}
-    networks:
-      - odp-net
-    ports:
-      - "9000:4444"
-      - "9001:4445"
-    environment:
-      - URLS_SELF_ISSUER=${ODP_PUBLIC_URL}/auth
-      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
-      - DSN=postgres://hydra_user:${HYDRA_DB_PASSWORD}@${HYDRA_DB_HOST}:5432/hydra_db?sslmode=disable
-      - URLS_LOGIN=${ODP_PUBLIC_URL}/id/hydra/login
-      - URLS_CONSENT=${ODP_PUBLIC_URL}/id/hydra/consent
-      - URLS_LOGOUT=${ODP_PUBLIC_URL}/id/hydra/logout
-      # TODO remove; the following makes access token lifetime 1 week (the default is 1 hour),
-      # as a workaround until such time as we've implemented token refresh on the client side
-      - TTL_ACCESS_TOKEN=168h
-    restart: always
-
   odp-public-api:
     container_name: odp-public-api
     build:
@@ -132,6 +112,26 @@ services:
       - CATALOGUE.ES_INDICES=["saeon-odp-4-2","sans-1878-mims-1","sans-1878-mims-historical-1","sans-1878-sadco-historical-1","sans-1878-mims-parent-records-1"]
       - CATALOGUE.METADATA_LANDING_PAGE_BASE_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    restart: always
+
+  hydra:
+    container_name: hydra
+    image: ${HYDRA_IMAGE}
+    networks:
+      - odp-net
+    ports:
+      - "9000:4444"
+      - "9001:4445"
+    environment:
+      - URLS_SELF_ISSUER=${ODP_PUBLIC_URL}/auth
+      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
+      - DSN=postgres://hydra_user:${HYDRA_DB_PASSWORD}@${HYDRA_DB_HOST}:5432/hydra_db?sslmode=disable
+      - URLS_LOGIN=${ODP_PUBLIC_URL}/id/hydra/login
+      - URLS_CONSENT=${ODP_PUBLIC_URL}/id/hydra/consent
+      - URLS_LOGOUT=${ODP_PUBLIC_URL}/id/hydra/logout
+      # TODO remove; the following makes access token lifetime 1 week (the default is 1 hour),
+      # as a workaround until such time as we've implemented token refresh on the client side
+      - TTL_ACCESS_TOKEN=168h
     restart: always
 
   ckan-metadata:
