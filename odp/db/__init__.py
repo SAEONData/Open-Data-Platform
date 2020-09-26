@@ -1,14 +1,12 @@
-import os
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-engine = create_engine(
-    os.environ['DATABASE_URL'],
-    echo=os.getenv('DATABASE_ECHO', '').lower() == 'true',
-)
+from odp.config import config
+
+engine = create_engine(config.ODP.DB.URL, echo=config.ODP.DB.ECHO)
 
 session = scoped_session(sessionmaker(bind=engine))
 

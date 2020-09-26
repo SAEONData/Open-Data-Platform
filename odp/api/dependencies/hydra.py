@@ -1,14 +1,12 @@
-from fastapi import Request
-
+from odp.config import config
 from odp.lib.hydra import HydraAdminClient
 
 
-def get_hydra_admin(request: Request) -> HydraAdminClient:
+def get_hydra_admin() -> HydraAdminClient:
     """
     Hydra Admin dependency.
     """
-    config = request.app.extra['config']
     return HydraAdminClient(
-        server_url=config.HYDRA_ADMIN_URL,
-        verify_tls=config.SERVER_ENV != 'development',
+        server_url=config.HYDRA.ADMIN.URL,
+        verify_tls=config.ODP.ENV != 'development',
     )

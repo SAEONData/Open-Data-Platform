@@ -7,6 +7,7 @@ from fastapi.security import HTTPBearer
 from starlette.status import HTTP_503_SERVICE_UNAVAILABLE, HTTP_403_FORBIDDEN
 
 from odp.api.models.auth import AccessTokenData, ValidToken, Role, Scope
+from odp.config import config
 from odp.lib.auth import check_access
 
 
@@ -45,11 +46,10 @@ class Authorizer(HTTPBearer):
         """
         http_auth = await super().__call__(request)
         access_token = http_auth.credentials
-        config = request.app.extra['config']
-        development_env = config.SERVER_ENV == 'development'
+        development_env = config.ODP.ENV == 'development'
         try:
             r = requests.post(
-                config.ADMIN_API_URL + '/auth/introspect',
+                config.ODP.API.ADMIN_API_URL + '/auth/introspect',
                 data={
                     'token': access_token,
                     'scope': self.scope.value,

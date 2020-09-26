@@ -22,10 +22,10 @@ services:
     environment:
       - URLS_SELF_ISSUER=https://localhost:9000
       - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
-      - DSN=postgres://hydra_user:${HYDRA_DB_PASSWORD}@hydra-db:5432/hydra_db?sslmode=disable
-      - URLS_LOGIN=${IDENTITY_URL}/hydra/login
-      - URLS_CONSENT=${IDENTITY_URL}/hydra/consent
-      - URLS_LOGOUT=${IDENTITY_URL}/hydra/logout
+      - DSN=postgres://hydra_user:${HYDRA_DB_PASS}@hydra-db:5432/hydra_db?sslmode=disable
+      - URLS_LOGIN=${ODP_IDENTITY_URL}/hydra/login
+      - URLS_CONSENT=${ODP_IDENTITY_URL}/hydra/consent
+      - URLS_LOGOUT=${ODP_IDENTITY_URL}/hydra/logout
       - TTL_ACCESS_TOKEN=10000h
     depends_on:
       - hydra-db
@@ -42,5 +42,5 @@ services:
       - PGDATA=/var/lib/postgresql/data
       - POSTGRES_DB=hydra_db
       - POSTGRES_USER=hydra_user
-      - POSTGRES_PASSWORD=${HYDRA_DB_PASSWORD}
+      - POSTGRES_PASSWORD=${HYDRA_DB_PASS}
     restart: always

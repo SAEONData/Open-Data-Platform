@@ -22,7 +22,7 @@ class DataciteCatalogue(Catalogue):
             datacite_username: str,
             datacite_password: str,
             doi_prefix: str,
-            doi_landing_base_url: str,
+            doi_landing_page_base_url: str,
     ):
         self.datacite = DataciteClient(
             api_url=datacite_api_url,
@@ -30,7 +30,7 @@ class DataciteCatalogue(Catalogue):
             password=datacite_password,
             doi_prefix=doi_prefix,
         )
-        self.doi_landing_base_url = doi_landing_base_url
+        self.doi_landing_page_base_url = doi_landing_page_base_url
 
     @property
     def model(self) -> Type[CatalogueStatusMixin]:
@@ -51,7 +51,7 @@ class DataciteCatalogue(Catalogue):
             try:
                 datacite_record = DataciteRecordIn(
                     doi=doi,
-                    url=f'{self.doi_landing_base_url}/{record_id}',
+                    url=f'{self.doi_landing_page_base_url}/{record_id}',
                     metadata=mdstatus.catalogue_record['metadata'],
                 )
                 datacite_record_dict = datacite_record.dict()

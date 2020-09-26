@@ -1,17 +1,18 @@
 import re
 
-from flask import current_app, flash, redirect
+from flask import flash, redirect
 from flask_admin import expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.helpers import get_redirect_target
 from flask_login import current_user
 from wtforms import StringField
 
+from odp.config import config
 from odp.db import session as db_session
-from odp.db.models.role import Role
-from odp.db.models.scope import Scope
 from odp.db.models.institution import Institution
 from odp.db.models.privilege import Privilege
+from odp.db.models.role import Role
+from odp.db.models.scope import Scope
 
 
 class KeyField(StringField):
@@ -52,9 +53,9 @@ class AdminModelView(ModelView):
 
         # TODO: cache the result of this query; it's called repeatedly
         admin_privilege = db_session.query(Privilege).filter_by(user_id=current_user.id) \
-            .join(Institution, Privilege.institution_id == Institution.id).filter_by(key=current_app.config['ADMIN_INSTITUTION']) \
-            .join(Role, Privilege.role_id == Role.id).filter_by(key=current_app.config['ADMIN_ROLE']) \
-            .join(Scope, Privilege.scope_id == Scope.id).filter_by(key=current_app.config['ADMIN_SCOPE']) \
+            .join(Institution, Privilege.institution_id == Institution.id).filter_by(key=config.ODP.ADMIN.INSTITUTION) \
+            .join(Role, Privilege.role_id == Role.id).filter_by(key=config.ODP.ADMIN.ROLE) \
+            .join(Scope, Privilege.scope_id == Scope.id).filter_by(key=config.ODP.ADMIN.SCOPE) \
             .one_or_none()
         return admin_privilege is not None
 

@@ -1,14 +1,11 @@
-import os
 from logging.config import fileConfig
 
 from alembic import context
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy import pool
 
-load_dotenv()
-
 import odp.db.models
+from odp.config import config as odp_config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -43,7 +40,7 @@ def run_migrations_offline():
 
     """
     # url = config.get_main_option("sqlalchemy.url")
-    url = os.environ['DATABASE_URL']
+    url = odp_config.ODP.DB.URL
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -67,7 +64,7 @@ def run_migrations_online():
     #     prefix="sqlalchemy.",
     #     poolclass=pool.NullPool,
     # )
-    url = os.environ['DATABASE_URL']
+    url = odp_config.ODP.DB.URL
     connectable = create_engine(
         url,
         poolclass=pool.NullPool,

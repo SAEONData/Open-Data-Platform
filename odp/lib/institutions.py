@@ -10,7 +10,7 @@ from odp.lib import exceptions as x
 
 
 def create_or_update_institution(institution: Institution) -> Institution:
-    """ Create an institution record in the ODP accounts DB, or update an
+    """ Create an institution record in the ODP database, or update an
     existing record if a matching key is found.
 
     :raise ODPParentInstitutionNotFound: if the given parent key does not exist

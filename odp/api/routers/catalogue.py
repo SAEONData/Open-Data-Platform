@@ -3,7 +3,8 @@ from typing import List
 from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 
-from odp.api.dependencies.catalogue import get_elastic_client, get_metadata_landing_page_url
+from odp.api.dependencies.catalogue import get_metadata_landing_page_url
+from odp.api.dependencies.elastic import get_elastic_client
 from odp.api.models import Pagination
 from odp.api.models.catalogue import QueryDSL, SearchResult, CatalogueRecord
 from odp.lib.elastic import ElasticClient

@@ -1,23 +1,23 @@
 from flask import Flask
 
+from odp.config import config
 
-def create_app(config=None):
+
+def create_app():
     """
     Flask application factory.
-    :param config: config dict or filename
-    :return: Flask app instance
     """
     from . import db, views
-    from .config import Config
 
     app = Flask(__name__)
-    app.config.from_object(Config)
-
-    if config is not None:
-        if isinstance(config, dict):
-            app.config.from_mapping(config)
-        else:
-            app.config.from_pyfile(config, silent=True)
+    app.config.from_mapping({
+        'SECRET_KEY': config.ODP.ADMIN.UI.FLASK_KEY,
+        'FLASK_ADMIN_SWATCH': config.ODP.ADMIN.UI.THEME,
+        'HYDRA_PUBLIC_URL': config.HYDRA.PUBLIC.URL,
+        'OAUTH2_CLIENT_ID': config.ODP.ADMIN.UI.CLIENT_ID,
+        'OAUTH2_CLIENT_SECRET': config.ODP.ADMIN.UI.CLIENT_SECRET,
+        'OAUTH2_SCOPES': config.ODP.ADMIN.UI.SCOPE,
+    })
 
     db.init_app(app)
     views.init_app(app)

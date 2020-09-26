@@ -1,4 +1,3 @@
-import os
 from typing import List, Tuple
 
 from odp.api.models.auth import (
@@ -8,6 +7,7 @@ from odp.api.models.auth import (
     Role as RoleEnum,
     Scope as ScopeEnum,
 )
+from odp.config import config
 from odp.db import session as db_session
 from odp.db.models.privilege import Privilege
 from odp.db.models.role import Role
@@ -62,7 +62,7 @@ def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTo
         # see comments in IDTokenData regarding usage of the `role` field
         scope_hits = set()
         for privilege in privileges:
-            if privilege.institution.key == os.environ['ADMIN_INSTITUTION']:
+            if privilege.institution.key == config.ODP.ADMIN.INSTITUTION:
                 scope_hits |= {privilege.scope.key}
                 id_token_data.role += [privilege.role.key]
         if len(scope_hits) > 1:
@@ -97,7 +97,7 @@ def check_access(
     if access_token_data.superuser:
         return True
 
-    admin_institution = os.environ['ADMIN_INSTITUTION']
+    admin_institution = config.ODP.ADMIN.INSTITUTION
 
     return any(
         ar.scope_key == require_scope and

@@ -35,7 +35,9 @@ ARG CKAN_CONTRIBUTOR_ROLE
 ARG DOI_PREFIX
 ARG ELASTIC_AGENT_URL
 ARG HYDRA_PUBLIC_URL
+ARG OAUTH2_CLIENT_ID
 ARG OAUTH2_CLIENT_SECRET
+ARG OAUTH2_SCOPE
 ARG IDENTITY_SERVICE_URL
 ARG ODP_INTROSPECTION_URL
 ARG SOLR_URL
@@ -61,9 +63,9 @@ RUN sed -i "/\[app:main\]/a ckan.openidconnect.authorization_endpoint = ${HYDRA_
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.token_endpoint = ${HYDRA_PUBLIC_URL}/oauth2/token" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.endsession_endpoint = ${HYDRA_PUBLIC_URL}/oauth2/sessions/logout" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.introspection_endpoint = ${ODP_INTROSPECTION_URL}" ckan.ini
-RUN sed -i "/\[app:main\]/a ckan.openidconnect.client_id = ckan-ui" ckan.ini
+RUN sed -i "/\[app:main\]/a ckan.openidconnect.client_id = ${OAUTH2_CLIENT_ID}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.client_secret = ${OAUTH2_CLIENT_SECRET}" ckan.ini
-RUN sed -i "/\[app:main\]/a ckan.openidconnect.api_scope = ODP.Metadata" ckan.ini
+RUN sed -i "/\[app:main\]/a ckan.openidconnect.api_scope = ${OAUTH2_SCOPE}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.api_id = not used" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.api_secret = not used" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.edit_url = ${IDENTITY_SERVICE_URL}/user/profile" ckan.ini

@@ -21,24 +21,24 @@ Install the projects:
 Switch to the `develop` subdirectory and create a `.env` file by copying the adjacent
 `.env.example` and updating any values as needed.
 
-## ODP accounts database
+## ODP database
 
 ### Database creation
-Run the following commands to create the accounts DB and a DB user. The password you
-enter must match that specified by the `DATABASE_URL` settings in your local `.env` files.
+Run the following commands to create the ODP database and a database user. The password you
+enter must match that specified by the `ODP_DB_PASS` variable in your local `.env` files.
 
     sudo -u postgres createuser -P odp_user
-    sudo -u postgres createdb -O odp_user odp_accounts
+    sudo -u postgres createdb -O odp_user odp_db
 
 Switch to the `migrate` subdirectory and create a `.env` file by copying the adjacent
-`.env.example` and updating the `DATABASE_URL` if necessary.
+`.env.example` and updating any values as needed.
 
 Activate the ODP Python virtual environment and run:
 
     python -m initdb
 
 ### Database upgrade
-If you already have an instance of the accounts DB, then switch to the `migrate` subdirectory
+If you already have an instance of the ODP database, then switch to the `migrate` subdirectory
 and run the SQL migrations:
 
     alembic upgrade head
@@ -62,10 +62,10 @@ Activate the ODP Python virtual environment and switch to the `develop` subdirec
 so as to use the `.env` file located there.
 
 ### ODP Public API
-    uvicorn odp.api.public:app --port 8888 --env-file .env
+    uvicorn odp.api.public:app --port 8888
 
 ### ODP Admin API
-    uvicorn odp.api.admin:app --port 9999 --workers 2 --env-file .env
+    uvicorn odp.api.admin:app --port 9999 --workers 2
 
 ### ODP Admin UI
     export FLASK_APP=odp.admin.app

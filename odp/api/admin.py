@@ -1,19 +1,14 @@
 import pkg_resources
-from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from odp.api.config import Config
 from odp.api.routers import authorization, institution, datacite
-
-load_dotenv()
-config = Config()
+from odp.config import config
 
 app = FastAPI(
     title="ODP Admin API",
     description="The SAEON Open Data Platform Administrative API",
     version=pkg_resources.require('Open-Data-Platform')[0].version,
-    root_path=config.PATH_PREFIX,
-    config=config,
+    root_path=config.ODP.API.PATH_PREFIX,
 )
 
 app.include_router(
