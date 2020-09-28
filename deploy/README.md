@@ -41,8 +41,8 @@ containing the following environment variables:
 ## ODP database initialization & migrations
 Create a Python 3.8 virtual environment in the project root directory on the target machine,
 activate the environment and `pip install -e` the project (no extras required). Switch to the
-`migrate` subdirectory and create a `.env` file containing an appropriately set `DATABASE_URL`
-environment variable. Then run:
+`migrate` subdirectory and create a `.env` file containing appropriately set `ODP_DB_*`
+environment variables. Then run:
 
     python -m initdb
     alembic upgrade head
