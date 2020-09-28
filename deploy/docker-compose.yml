@@ -34,6 +34,8 @@ services:
       - ODP_DB_PASS
       - ODP_MAIL_HOST
       - ODP_ADMIN_INSTITUTION=saeon
+      - ODP_ADMIN_ROLE=admin
+      - ODP_ADMIN_SCOPE=ODP.Admin
       - ODP_IDENTITY_LOGIN_EXPIRY=2592000
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
@@ -93,6 +95,8 @@ services:
       - ODP_DB_PASS
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - ODP_ADMIN_INSTITUTION=saeon
+      - ODP_ADMIN_ROLE=admin
+      - ODP_ADMIN_SCOPE=ODP.Admin
       - CKAN_URL=http://ckan-metadata:5000
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     restart: always
@@ -115,7 +119,13 @@ services:
       - ODP_API_PATH_PREFIX=/api
       - ODP_API_ALLOW_ORIGINS
       - ODP_API_ADMIN_API_URL=http://odp-admin-api:9999
+      - ODP_DB_HOST
+      - ODP_DB_NAME
+      - ODP_DB_USER
+      - ODP_DB_PASS
       - ODP_ADMIN_INSTITUTION=saeon
+      - ODP_ADMIN_ROLE=admin
+      - ODP_ADMIN_SCOPE=ODP.Admin
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - CKAN_URL=http://ckan-metadata:5000
       - ELASTIC_URL=http://elasticsearch:9200
