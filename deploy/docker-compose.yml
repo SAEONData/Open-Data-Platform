@@ -150,6 +150,7 @@ services:
       - ODP_DB_NAME
       - ODP_DB_USER
       - ODP_DB_PASS
+      - CKAN_URL
       - CKAN_DB_HOST
       - CKAN_DB_NAME
       - CKAN_DB_USER
