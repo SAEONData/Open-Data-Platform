@@ -78,6 +78,18 @@ class ODPMailConfig(BaseConfig):
     PORT: int = 25  # mail server port
 
 
+class ODPPublishConfig(BaseConfig):
+    class Config:
+        env_prefix = 'ODP_PUBLISH_'
+
+    # minimum number of hours before re-checking an already harvested metadata record
+    HARVEST_CHECK_INTERVAL: int
+
+    # number of times to retry syncing (i.e. publishing/unpublishing) a record with
+    # a given catalogue after failure
+    MAX_RETRIES: int
+
+
 class ODPConfig(BaseConfig):
     class Config:
         env_prefix = 'ODP_'
@@ -91,4 +103,5 @@ class ODPConfig(BaseConfig):
         'ADMIN': ODPAdminConfig,
         'IDENTITY': ODPIdentityConfig,
         'MAIL': ODPMailConfig,
+        'PUBLISH': ODPPublishConfig,
     }

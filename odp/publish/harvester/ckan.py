@@ -17,36 +17,46 @@ logger = logging.getLogger(__name__)
 
 
 class CKANHarvester(Harvester):
-    select_records = text("""
-        SELECT p.id, p.private, p.state, p_doi.value doi, p_json.value metadata,
-               g_inst.title institution, g_coll.title collection, g_coll.id collection_id
-        FROM package p JOIN package_extra p_doi ON p.id = p_doi.package_id AND p_doi.key = 'doi'
-                       JOIN package_extra p_json ON p.id = p_json.package_id AND p_json.key = 'metadata_json'
-                       JOIN package_extra p_coll ON p.id = p_coll.package_id AND p_coll.key = 'metadata_collection_id'
-                       JOIN "group" g_inst ON p.owner_org = g_inst.id
-                       JOIN "group" g_coll ON p_coll.value = g_coll.id
-        WHERE p.last_publish_check IS NULL OR localtimestamp - p.last_publish_check > interval '1 hour'
-        LIMIT 1000
-    """)
-
-    select_projects = text("""
-        SELECT g.title project
-        FROM "group" g JOIN member m ON g.id = m.group_id
-        WHERE g.type = 'infrastructure'
-          AND g.state = 'active'
-          AND m.table_name = 'group'
-          AND m.table_id = :collection_id
-          AND m.state = 'active'
-    """)
-
-    stamp_record = text("""
-        UPDATE package
-        SET last_publish_check = :timestamp
-        WHERE id = :record_id
-    """)
-
-    def __init__(self, db_url, db_echo):
+    def __init__(
+            self,
+            db_url: str,
+            db_echo: bool,
+            harvest_check_interval_hrs: int,
+    ):
         self.engine = create_engine(db_url, echo=db_echo)
+
+        # runtime typecheck as a safeguard against SQL injection
+        if not isinstance(harvest_check_interval_hrs, int):
+            raise TypeError
+
+        self.select_records = text(f"""
+            SELECT p.id, p.private, p.state, p_doi.value doi, p_json.value metadata,
+                   g_inst.title institution, g_coll.title collection, g_coll.id collection_id
+            FROM package p JOIN package_extra p_doi ON p.id = p_doi.package_id AND p_doi.key = 'doi'
+                           JOIN package_extra p_json ON p.id = p_json.package_id AND p_json.key = 'metadata_json'
+                           JOIN package_extra p_coll ON p.id = p_coll.package_id AND p_coll.key = 'metadata_collection_id'
+                           JOIN "group" g_inst ON p.owner_org = g_inst.id
+                           JOIN "group" g_coll ON p_coll.value = g_coll.id
+            WHERE p.last_publish_check IS NULL
+               OR localtimestamp - p.last_publish_check > interval '{harvest_check_interval_hrs} hours'
+            LIMIT 1000
+        """)
+
+        self.select_projects = text("""
+            SELECT g.title project
+            FROM "group" g JOIN member m ON g.id = m.group_id
+            WHERE g.type = 'infrastructure'
+              AND g.state = 'active'
+              AND m.table_name = 'group'
+              AND m.table_id = :collection_id
+              AND m.state = 'active'
+        """)
+
+        self.stamp_record = text("""
+            UPDATE package
+            SET last_publish_check = :timestamp
+            WHERE id = :record_id
+        """)
 
     def getrecords(self) -> Iterator[CatalogueRecord]:
         conn = self.engine.connect()
