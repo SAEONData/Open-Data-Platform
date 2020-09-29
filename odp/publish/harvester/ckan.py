@@ -12,10 +12,6 @@ from odp.publish.harvester import Harvester
 logger = logging.getLogger(__name__)
 
 
-# TODO
-#  alter table package add column last_publish_check timestamp without time zone;
-
-
 class CKANHarvester(Harvester):
     def __init__(
             self,
