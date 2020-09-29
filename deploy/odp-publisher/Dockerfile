@@ -14,8 +14,10 @@ WORKDIR /etc/cron.d
 COPY deploy/odp-publisher/crontab odp-publisher
 ARG ODP_PUBLISH_JOB_INTERVAL
 RUN sed -i "s/ODP_PUBLISH_JOB_INTERVAL/${ODP_PUBLISH_JOB_INTERVAL}/" odp-publisher
-RUN chmod 0644 odp-publisher
 RUN crontab odp-publisher
 
-RUN touch /var/log/cron.log
-CMD cron && tail -f /var/log/cron.log
+# use a FIFO to capture cron task output in the Docker log
+RUN mkfifo /tmp/stdout
+
+# ensure that the cron task gets our environment variables
+CMD env | grep -E 'ODP_|CKAN_|DATACITE_' >> /etc/environment && cron -L 7 && tail -f /tmp/stdout
