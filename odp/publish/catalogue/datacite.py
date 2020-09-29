@@ -96,6 +96,9 @@ class DataciteCatalogue(Catalogue):
                 dcstatus.error = f'{e.status_code}: {e.error_detail}'
                 dcstatus.retries = dcstatus.retries + 1 if dcstatus.retries is not None else 0
                 logger.error(f"Error syncing record {record_id} with DataCite: {dcstatus.error}")
+                # updated might be True here if the record had first to be unpublished
+                # before being (unsuccessfully) republished
+                updated = False
 
             dcstatus.checked = datetime.now()
             session.add(dcstatus)

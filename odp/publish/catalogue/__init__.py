@@ -16,8 +16,7 @@ class Catalogue:
         """ Publish/unpublish a record to/from the catalogue, if its
         content and/or status has changed with respect to the catalogue.
 
-        :return: True indicates that the catalogue was updated (even if
-            it was a partial, failed update); False that an update was not
-            required
+        :return: True if the catalogue was successfully updated,
+            False upon error or if an update was not required
         """
         raise NotImplementedError
