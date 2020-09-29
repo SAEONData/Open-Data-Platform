@@ -1,5 +1,4 @@
 import json
-import logging
 from datetime import datetime
 from typing import Iterator
 
@@ -9,19 +8,20 @@ from sqlalchemy.sql import text
 from odp.api.models.catalogue import CatalogueRecord
 from odp.publish.harvester import Harvester
 
-logger = logging.getLogger(__name__)
-
 
 class CKANHarvester(Harvester):
     def __init__(
             self,
             db_url: str,
             db_echo: bool,
+            batch_size: int,
             harvest_check_interval_hrs: int,
     ):
         self.engine = create_engine(db_url, echo=db_echo)
 
-        # runtime typecheck as a safeguard against SQL injection
+        # runtime type checks to safeguard against SQL injection
+        if not isinstance(batch_size, int):
+            raise TypeError
         if not isinstance(harvest_check_interval_hrs, int):
             raise TypeError
 
@@ -35,7 +35,7 @@ class CKANHarvester(Harvester):
                            JOIN "group" g_coll ON p_coll.value = g_coll.id
             WHERE p.last_publish_check IS NULL
                OR localtimestamp - p.last_publish_check > interval '{harvest_check_interval_hrs} hours'
-            LIMIT 1000
+            LIMIT {batch_size}
         """)
 
         self.select_projects = text("""
@@ -57,7 +57,6 @@ class CKANHarvester(Harvester):
     def getrecords(self) -> Iterator[CatalogueRecord]:
         conn = self.engine.connect()
         records = conn.execute(self.select_records)
-        logger.info(f"Harvested {records.rowcount} records from CKAN")
         for record in records:
             projects = conn.execute(self.select_projects, collection_id=record['collection_id'])
             yield CatalogueRecord(

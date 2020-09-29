@@ -15,6 +15,7 @@ if __name__ == '__main__':
     harvester = CKANHarvester(
         db_url=config.CKAN.DB.URL,
         db_echo=config.CKAN.DB.ECHO,
+        batch_size=config.ODP.PUBLISH.BATCH_SIZE,
         harvest_check_interval_hrs=config.ODP.PUBLISH.HARVEST_CHECK_INTERVAL,
     )
     elastic_cat = ElasticsearchCatalogue(
@@ -31,6 +32,7 @@ if __name__ == '__main__':
         harvester,
         elastic_cat,
         datacite_cat,
+        batch_size=config.ODP.PUBLISH.BATCH_SIZE,
         max_retries=config.ODP.PUBLISH.MAX_RETRIES,
     )
     publisher.run()

@@ -36,9 +36,10 @@ class DataciteCatalogue(Catalogue):
     def model(self) -> Type[CatalogueStatusMixin]:
         return DataciteStatus
 
-    def syncrecord(self, record_id: str) -> None:
+    def syncrecord(self, record_id: str) -> bool:
         logger.debug(f"Syncing record {record_id}")
 
+        updated = False
         with transactional_session() as session:
             mdstatus, dcstatus = session.query(MetadataStatus, DataciteStatus).outerjoin(DataciteStatus). \
                 filter(MetadataStatus.metadata_id == record_id). \
@@ -60,7 +61,6 @@ class DataciteCatalogue(Catalogue):
                 datacite_record_dict = None
 
             publish = mdstatus.published and doi is not None and datacite_record is not None
-            updated = False
             try:
                 if dcstatus.published and (not publish or dcstatus.doi != doi):
                     # the record is currently published and should be unpublished;
@@ -99,3 +99,5 @@ class DataciteCatalogue(Catalogue):
 
             dcstatus.checked = datetime.now()
             session.add(dcstatus)
+
+        return updated

@@ -10,5 +10,5 @@ class ElasticsearchCatalogue(Catalogue):
     def model(self) -> Type[CatalogueStatusMixin]:
         return ElasticsearchStatus
 
-    def syncrecord(self, record_id: str) -> None:
-        pass
+    def syncrecord(self, record_id: str) -> bool:
+        return False
