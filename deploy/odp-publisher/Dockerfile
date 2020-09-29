@@ -20,4 +20,5 @@ RUN crontab odp-publisher
 RUN mkfifo /tmp/stdout
 
 # ensure that the cron task gets our environment variables
-CMD env | grep -E 'ODP_|CKAN_|DATACITE_' >> /etc/environment && cron -L 7 && tail -f /tmp/stdout
+# `cat <> fifo` ensures that the fifo pipe stays open
+CMD env | grep -E 'ODP_|CKAN_|DATACITE_' >> /etc/environment && cron -L 7 && cat <> /tmp/stdout
