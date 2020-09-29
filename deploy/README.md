@@ -39,6 +39,7 @@ containing the following environment variables:
 - **`DATACITE_DOI_PREFIX`**: DOI prefix
 - **`ODP_PUBLISH_JOB_INTERVAL`**: interval in minutes between publishing job runs
 - **`ODP_PUBLISH_HARVEST_CHECK_INTERVAL`**: minimum interval in hours before re-checking an already harvested metadata record
+- **`ODP_PUBLISH_BATCH_SIZE`**: maximum number of records to harvest or sync in a given publishing run
 - **`ODP_PUBLISH_MAX_RETRIES`**: number of times to retry syncing a record with a catalogue after failure
 
 ## ODP database initialization & migrations

@@ -28,6 +28,12 @@ signup and login experience across the entire platform.
 
 - [entry point](odp/identity/app.py)
 
+### ODP Publisher
+A scheduled background process for publishing ODP metadata to one or more
+catalogues.
+
+- [entry point](odp/publish/main.py)
+
 ## Dependencies
 
 ### Python
