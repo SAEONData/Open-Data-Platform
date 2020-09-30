@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Iterator
 
 from sqlalchemy import create_engine
@@ -69,6 +69,6 @@ class CKANHarvester(Harvester):
                 metadata=json.loads(record['metadata']),
             )
 
-    def setchecked(self, record_id: str, timestamp: datetime) -> None:
+    def setchecked(self, record_id: str) -> None:
         conn = self.engine.connect()
-        conn.execute(self.stamp_record, record_id=record_id, timestamp=timestamp)
+        conn.execute(self.stamp_record, record_id=record_id, timestamp=datetime.now(timezone.utc))

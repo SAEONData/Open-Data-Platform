@@ -1,15 +1,15 @@
 """Add publishing tables
 
-Revision ID: 087581f76d96
+Revision ID: b0c257ff9b5e
 Revises: c967263958b7
-Create Date: 2020-09-22 12:19:03.279507
+Create Date: 2020-09-30 15:43:38.282282
 
 """
 from alembic import op
 import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
-revision = '087581f76d96'
+revision = 'b0c257ff9b5e'
 down_revision = 'c967263958b7'
 branch_labels = None
 depends_on = None
@@ -21,14 +21,14 @@ def upgrade():
                     sa.Column('metadata_id', sa.String(), nullable=False),
                     sa.Column('catalogue_record', sa.JSON(), nullable=False),
                     sa.Column('published', sa.Boolean(), nullable=False),
-                    sa.Column('updated', sa.DateTime(), nullable=False),
-                    sa.Column('checked', sa.DateTime(), nullable=False),
+                    sa.Column('updated', sa.TIMESTAMP(timezone=True), nullable=False),
+                    sa.Column('checked', sa.TIMESTAMP(timezone=True), nullable=False),
                     sa.PrimaryKeyConstraint('metadata_id')
                     )
     op.create_table('datacite_status',
                     sa.Column('published', sa.Boolean(), nullable=False),
-                    sa.Column('updated', sa.DateTime(), nullable=True),
-                    sa.Column('checked', sa.DateTime(), nullable=False),
+                    sa.Column('updated', sa.TIMESTAMP(timezone=True), nullable=True),
+                    sa.Column('checked', sa.TIMESTAMP(timezone=True), nullable=False),
                     sa.Column('error', sa.String(), nullable=True),
                     sa.Column('retries', sa.Integer(), nullable=True),
                     sa.Column('doi', sa.String(), nullable=True),
@@ -40,8 +40,8 @@ def upgrade():
                     )
     op.create_table('elasticsearch_status',
                     sa.Column('published', sa.Boolean(), nullable=False),
-                    sa.Column('updated', sa.DateTime(), nullable=True),
-                    sa.Column('checked', sa.DateTime(), nullable=False),
+                    sa.Column('updated', sa.TIMESTAMP(timezone=True), nullable=True),
+                    sa.Column('checked', sa.TIMESTAMP(timezone=True), nullable=False),
                     sa.Column('error', sa.String(), nullable=True),
                     sa.Column('retries', sa.Integer(), nullable=True),
                     sa.Column('index', sa.String(), nullable=True),

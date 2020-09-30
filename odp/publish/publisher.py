@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Tuple
 
 from sqlalchemy import or_, and_
@@ -35,7 +35,7 @@ class Publisher:
                     if mdstatus is None:
                         mdstatus = MetadataStatus(metadata_id=record.id)
 
-                    mdstatus.checked = (now := datetime.now())
+                    mdstatus.checked = (now := datetime.now(timezone.utc))
                     if mdstatus.catalogue_record != (catalogue_record := record.dict()):
                         mdstatus.catalogue_record = catalogue_record
                         mdstatus.published = record.published
@@ -45,7 +45,7 @@ class Publisher:
                     session.add(mdstatus)
 
                 harvested += 1
-                self.harvester.setchecked(record.id, now)
+                self.harvester.setchecked(record.id)
         finally:
             logger.info(f"Harvested {harvested} records from {self.harvester.name}; {updated} records were added/updated")
 

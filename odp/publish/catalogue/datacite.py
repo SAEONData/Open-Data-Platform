@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Type
 
 import pydantic
@@ -70,7 +70,7 @@ class DataciteCatalogue(Catalogue):
                         dcstatus.doi,
                     )
                     dcstatus.published = False
-                    dcstatus.updated = datetime.now()
+                    dcstatus.updated = datetime.now(timezone.utc)
                     updated = True
 
                 if publish and (not dcstatus.published or dcstatus.datacite_record != datacite_record_dict):
@@ -83,7 +83,7 @@ class DataciteCatalogue(Catalogue):
                     dcstatus.doi = doi
                     dcstatus.datacite_record = datacite_record_dict
                     dcstatus.published = True
-                    dcstatus.updated = datetime.now()
+                    dcstatus.updated = datetime.now(timezone.utc)
                     updated = True
 
                 if not updated:
@@ -100,7 +100,7 @@ class DataciteCatalogue(Catalogue):
                 # before being (unsuccessfully) republished
                 updated = False
 
-            dcstatus.checked = datetime.now()
+            dcstatus.checked = datetime.now(timezone.utc)
             session.add(dcstatus)
 
         return updated

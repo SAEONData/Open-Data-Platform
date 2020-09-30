@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, JSON, DateTime, Boolean, ForeignKey, Integer
+from sqlalchemy import Column, String, JSON, Boolean, ForeignKey, Integer, TIMESTAMP
 from sqlalchemy.ext.declarative import declared_attr
 
 from odp.db import Base
@@ -10,8 +10,8 @@ class MetadataStatus(Base):
     metadata_id = Column(String, primary_key=True)
     catalogue_record = Column(JSON, nullable=False)
     published = Column(Boolean, nullable=False)
-    updated = Column(DateTime, nullable=False)
-    checked = Column(DateTime, nullable=False)
+    updated = Column(TIMESTAMP(timezone=True), nullable=False)
+    checked = Column(TIMESTAMP(timezone=True), nullable=False)
 
 
 class CatalogueStatusMixin:
@@ -20,7 +20,7 @@ class CatalogueStatusMixin:
         return Column(String, ForeignKey('metadata_status.metadata_id', ondelete='RESTRICT'), primary_key=True)
 
     published = Column(Boolean, nullable=False)
-    updated = Column(DateTime)
-    checked = Column(DateTime, nullable=False)
+    updated = Column(TIMESTAMP(timezone=True))
+    checked = Column(TIMESTAMP(timezone=True), nullable=False)
     error = Column(String)
     retries = Column(Integer)
