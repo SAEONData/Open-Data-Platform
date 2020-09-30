@@ -16,7 +16,7 @@ if __name__ == '__main__':
         db_url=config.CKAN.DB.URL,
         db_echo=config.CKAN.DB.ECHO,
         batch_size=config.ODP.PUBLISH.BATCH_SIZE,
-        harvest_check_interval_hrs=config.ODP.PUBLISH.HARVEST_CHECK_INTERVAL,
+        harvest_check_interval_minutes=config.ODP.PUBLISH.HARVEST_CHECK_INTERVAL,
     )
     elastic_cat = ElasticsearchCatalogue(
         # stub for now

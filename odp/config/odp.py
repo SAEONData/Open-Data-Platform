@@ -82,7 +82,7 @@ class ODPPublishConfig(BaseConfig):
     class Config:
         env_prefix = 'ODP_PUBLISH_'
 
-    # minimum number of hours before re-checking an already harvested metadata record
+    # minimum interval in minutes before re-checking an already harvested metadata record
     HARVEST_CHECK_INTERVAL: int
 
     # maximum number of records to harvest or sync in a given publishing run

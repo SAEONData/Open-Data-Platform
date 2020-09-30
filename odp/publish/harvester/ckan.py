@@ -15,14 +15,14 @@ class CKANHarvester(Harvester):
             db_url: str,
             db_echo: bool,
             batch_size: int,
-            harvest_check_interval_hrs: int,
+            harvest_check_interval_minutes: int,
     ):
         self.engine = create_engine(db_url, echo=db_echo)
 
         # runtime type checks to safeguard against SQL injection
         if not isinstance(batch_size, int):
             raise TypeError
-        if not isinstance(harvest_check_interval_hrs, int):
+        if not isinstance(harvest_check_interval_minutes, int):
             raise TypeError
 
         self.select_records = text(f"""
@@ -34,7 +34,7 @@ class CKANHarvester(Harvester):
                            JOIN "group" g_inst ON p.owner_org = g_inst.id
                            JOIN "group" g_coll ON p_coll.value = g_coll.id
             WHERE p.last_publish_check IS NULL
-               OR localtimestamp - p.last_publish_check > interval '{harvest_check_interval_hrs} hours'
+               OR localtimestamp - p.last_publish_check > interval '{harvest_check_interval_minutes} minutes'
             LIMIT {batch_size}
         """)
 
