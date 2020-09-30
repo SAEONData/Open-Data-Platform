@@ -34,7 +34,7 @@ class CKANHarvester(Harvester):
                            JOIN "group" g_inst ON p.owner_org = g_inst.id
                            JOIN "group" g_coll ON p_coll.value = g_coll.id
             WHERE p.last_publish_check IS NULL
-               OR localtimestamp - p.last_publish_check > interval '{harvest_check_interval_minutes} minutes'
+               OR current_timestamp - p.last_publish_check > interval '{harvest_check_interval_minutes} minutes'
             LIMIT {batch_size}
         """)
 
