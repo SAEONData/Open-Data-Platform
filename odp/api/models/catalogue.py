@@ -1,6 +1,6 @@
 from typing import Dict, Any, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class CatalogueRecord(BaseModel):
@@ -15,6 +15,10 @@ class CatalogueRecord(BaseModel):
     projects: List[str]
     published: bool
     metadata: Dict[str, Any]
+
+    @validator('projects')
+    def normalize_projects_list(cls, v):
+        return sorted(set(v))
 
 
 class QueryDSL(BaseModel):
