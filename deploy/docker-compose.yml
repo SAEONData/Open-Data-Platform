@@ -40,6 +40,7 @@ services:
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
+      - TZ
     restart: always
 
   odp-admin:
@@ -72,6 +73,7 @@ services:
       - ODP_ADMIN_SCOPE=ODP.Admin
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
+      - TZ
     restart: always
 
   odp-admin-api:
@@ -99,6 +101,7 @@ services:
       - ODP_ADMIN_SCOPE=ODP.Admin
       - CKAN_URL=http://ckan-metadata:5000
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - TZ
     restart: always
 
   odp-public-api:
@@ -132,6 +135,7 @@ services:
       - ELASTIC_INDICES
       - CATALOGUE_METADATA_LANDING_PAGE_BASE_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - TZ
     restart: always
 
   odp-publisher:
@@ -161,6 +165,7 @@ services:
       - DATACITE_PASSWORD
       - DATACITE_DOI_PREFIX
       - DATACITE_DOI_LANDING_PAGE_BASE_URL=${ODP_PUBLIC_URL}/api/catalogue/go
+      - TZ
     restart: always
 
   hydra:
@@ -214,6 +219,7 @@ services:
       - "5000:5000"
     environment:
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - TZ
     depends_on:
       - solr
       - redis

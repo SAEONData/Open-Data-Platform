@@ -41,6 +41,7 @@ containing the following environment variables:
 - **`ODP_PUBLISH_HARVEST_CHECK_INTERVAL`**: minimum interval in minutes before re-checking an already harvested metadata record
 - **`ODP_PUBLISH_BATCH_SIZE`**: maximum number of records to harvest or sync in a given publishing run
 - **`ODP_PUBLISH_MAX_RETRIES`**: number of times to retry syncing a record with a catalogue after failure
+- **`TZ`**: sets the timezone of containers; e.g. `Africa/Johannesburg`
 
 ## ODP database initialization & migrations
 Create a Python 3.8 virtual environment in the project root directory on the target machine,
