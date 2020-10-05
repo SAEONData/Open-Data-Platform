@@ -77,7 +77,15 @@ class ODPInstitutionNameConflict(ODPInstitutionError):
 
 
 class DataciteError(ODPException):
-    """ Exception raised when a call to the DataCite API fails """
+    """ Exception raised when a request to the DataCite API fails """
+
+    def __init__(self, *args, **kwargs):
+        self.status_code = kwargs.pop('status_code')
+        self.error_detail = kwargs.pop('error_detail', str(args))
+
+
+class ElasticsearchError(ODPException):
+    """ Exception raised when a request to the Elasticsearch catalogue fails """
 
     def __init__(self, *args, **kwargs):
         self.status_code = kwargs.pop('status_code')

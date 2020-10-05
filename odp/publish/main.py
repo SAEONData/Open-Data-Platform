@@ -19,7 +19,8 @@ if __name__ == '__main__':
         harvest_check_interval_minutes=config.ODP.PUBLISH.HARVEST_CHECK_INTERVAL,
     )
     elastic_cat = ElasticsearchCatalogue(
-        # stub for now
+        es_url=config.ELASTIC.URL,
+        es_indices=config.ELASTIC.INDICES,
     )
     datacite_cat = DataciteCatalogue(
         datacite_api_url=config.DATACITE.API_URL,
@@ -30,7 +31,7 @@ if __name__ == '__main__':
     )
     publisher = Publisher(
         harvester,
-        elastic_cat,
+        # elastic_cat,
         datacite_cat,
         batch_size=config.ODP.PUBLISH.BATCH_SIZE,
         max_retries=config.ODP.PUBLISH.MAX_RETRIES,
