@@ -1,7 +1,7 @@
 """Add publishing tables
 
 Revision ID: b0c257ff9b5e
-Revises: c967263958b7
+Revises: b1ed6dd977b0
 Create Date: 2020-09-30 15:43:38.282282
 
 """
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'b0c257ff9b5e'
-down_revision = 'c967263958b7'
+down_revision = 'b1ed6dd977b0'
 branch_labels = None
 depends_on = None
 

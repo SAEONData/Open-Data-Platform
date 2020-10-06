@@ -1,7 +1,7 @@
 """Add role admin flag
 
 Revision ID: b1ed6dd977b0
-Revises: 0aeab1efe71b
+Revises: f11e224a11f5
 Create Date: 2020-07-14 11:00:41.522744
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'b1ed6dd977b0'
-down_revision = '0aeab1efe71b'
+down_revision = 'f11e224a11f5'
 branch_labels = None
 depends_on = None
 
