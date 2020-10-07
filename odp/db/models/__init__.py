@@ -11,4 +11,3 @@ from .oauth2_token import OAuth2Token
 # publishing
 from .metadata_status import MetadataStatus
 from .datacite_status import DataciteStatus
-from .elasticsearch_status import ElasticsearchStatus

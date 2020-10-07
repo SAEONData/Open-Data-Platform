@@ -1,13 +1,13 @@
 import logging
 from datetime import datetime, timezone
-from typing import Type
+from typing import Tuple
 
 import pydantic
+from sqlalchemy import or_, and_
 
 from odp.api.models.datacite import DataciteRecordIn
 from odp.db import transactional_session
 from odp.db.models import MetadataStatus, DataciteStatus
-from odp.db.models.metadata_status import CatalogueStatusMixin
 from odp.lib.datacite import DataciteClient
 from odp.lib.exceptions import DataciteError
 from odp.publish.catalogue import Catalogue
@@ -23,6 +23,8 @@ class DataciteCatalogue(Catalogue):
             datacite_password: str,
             doi_prefix: str,
             doi_landing_page_base_url: str,
+            batch_size: int,
+            max_retries: int,
     ):
         self.datacite = DataciteClient(
             api_url=datacite_api_url,
@@ -31,15 +33,56 @@ class DataciteCatalogue(Catalogue):
             doi_prefix=doi_prefix,
         )
         self.doi_landing_page_base_url = doi_landing_page_base_url
+        self.batch_size = batch_size
+        self.max_retries = max_retries
 
-    @property
-    def model(self) -> Type[CatalogueStatusMixin]:
-        return DataciteStatus
+    def synchronize(self) -> None:
+        with transactional_session() as session:
+            updated_records = session.query(MetadataStatus.metadata_id, DataciteStatus). \
+                outerjoin(DataciteStatus).filter(
+                or_(
+                    DataciteStatus.metadata_id == None,
+                    DataciteStatus.checked < MetadataStatus.updated,
+                )
+            ).limit(self.batch_size).all()
 
-    def syncrecord(self, record_id: str) -> bool:
+            # clear errors and retries for updated records
+            for record_id, dcstatus in updated_records:
+                if dcstatus is not None and dcstatus.error is not None:
+                    dcstatus.error = None
+                    dcstatus.retries = None
+
+            failed_ids = session.query(MetadataStatus.metadata_id).join(DataciteStatus).filter(
+                and_(
+                    DataciteStatus.error != None,
+                    DataciteStatus.retries < self.max_retries,
+                ),
+            ).limit(self.batch_size).all()
+
+        syncable_ids = [record_id for record_id, dcstatus in updated_records] + \
+                       [record_id for (record_id,) in failed_ids]
+        published = 0
+        unpublished = 0
+        errors = 0
+        try:
+            logger.info(f"Selected {len(updated_records)} updated records and {len(failed_ids)} "
+                        "previously failed records to sync with DataCite")
+            for record_id in syncable_ids:
+                pub, unpub, err = self._syncrecord(record_id)
+                published += pub
+                unpublished += unpub
+                errors += err
+        finally:
+            logger.info(f"Published {published} records to DataCite; "
+                        f"un-published {unpublished} records from DataCite; "
+                        f"{errors} errors")
+
+    def _syncrecord(self, record_id: str) -> Tuple[bool, bool, bool]:
         logger.debug(f"Syncing record {record_id}")
+        published = False
+        unpublished = False
+        error = False
 
-        updated = False
         with transactional_session() as session:
             mdstatus, dcstatus = session.query(MetadataStatus, DataciteStatus).outerjoin(DataciteStatus). \
                 filter(MetadataStatus.metadata_id == record_id). \
@@ -47,6 +90,7 @@ class DataciteCatalogue(Catalogue):
 
             if dcstatus is None:
                 dcstatus = DataciteStatus(metadata_id=record_id, published=False)
+                session.add(dcstatus)
 
             doi = mdstatus.catalogue_record['doi']
             try:
@@ -71,7 +115,7 @@ class DataciteCatalogue(Catalogue):
                     )
                     dcstatus.published = False
                     dcstatus.updated = datetime.now(timezone.utc)
-                    updated = True
+                    unpublished = True
 
                 if publish and (not dcstatus.published or dcstatus.datacite_record != datacite_record_dict):
                     # the record should be published; it is either not currently published,
@@ -84,9 +128,9 @@ class DataciteCatalogue(Catalogue):
                     dcstatus.datacite_record = datacite_record_dict
                     dcstatus.published = True
                     dcstatus.updated = datetime.now(timezone.utc)
-                    updated = True
+                    published = True
 
-                if not updated:
+                if not (published or unpublished):
                     logger.debug(f"No change for record {record_id}")
 
                 dcstatus.error = None
@@ -96,11 +140,8 @@ class DataciteCatalogue(Catalogue):
                 dcstatus.error = f'{e.status_code}: {e.error_detail}'
                 dcstatus.retries = dcstatus.retries + 1 if dcstatus.retries is not None else 0
                 logger.error(f"Error syncing record {record_id} with DataCite: {dcstatus.error}")
-                # updated might be True here if the record had first to be unpublished
-                # before being (unsuccessfully) republished
-                updated = False
+                error = True
 
             dcstatus.checked = datetime.now(timezone.utc)
-            session.add(dcstatus)
 
-        return updated
+        return published, unpublished, error
