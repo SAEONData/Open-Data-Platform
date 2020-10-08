@@ -13,8 +13,9 @@ class CatalogueRecord(BaseModel):
     institution: str
     collection: str
     projects: List[str]
-    published: bool
+    schema: str
     metadata: Dict[str, Any]
+    published: bool
 
     @validator('projects')
     def normalize_projects_list(cls, v):

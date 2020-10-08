@@ -45,4 +45,4 @@ class ODPCatalogue(Catalogue):
             logger.critical(str(e))
         finally:
             logger.info(f"Harvested {harvested} records from {self.harvester.name}; "
-                        f"{updated} records were added/updated")
+                        f"{updated} catalogue records were added/updated")
