@@ -33,14 +33,15 @@ containing the following environment variables:
 - **`CKAN_CLIENT_SECRET`**: OAuth2 client secret for the CKAN UI
 - **`ELASTIC_INDICES`**: JSON-encoded list of indices to use for search queries
 - **`CATALOGUE_METADATA_LANDING_PAGE_BASE_URL`**: base URL for published metadata landing pages
+- **`ODP_PUBLISH_JOB_INTERVAL`**: interval in minutes between publishing job runs
+- **`ODP_PUBLISH_HARVEST_CHECK_INTERVAL`**: minimum interval in minutes before re-checking an already harvested metadata record
+- **`ODP_PUBLISH_BATCH_SIZE`**: maximum number of records to harvest or sync in a given publishing run
 - **`DATACITE_API_URL`**: URL of the DataCite REST API
 - **`DATACITE_USERNAME`**: DataCite account username
 - **`DATACITE_PASSWORD`**: DataCite account password
 - **`DATACITE_DOI_PREFIX`**: DOI prefix
-- **`ODP_PUBLISH_JOB_INTERVAL`**: interval in minutes between publishing job runs
-- **`ODP_PUBLISH_HARVEST_CHECK_INTERVAL`**: minimum interval in minutes before re-checking an already harvested metadata record
-- **`ODP_PUBLISH_BATCH_SIZE`**: maximum number of records to harvest or sync in a given publishing run
-- **`ODP_PUBLISH_MAX_RETRIES`**: number of times to retry syncing a record with a catalogue after failure
+- **`DATACITE_PUBLISH_JOB_INTERVAL`**: interval in minutes between publishing job runs
+- **`DATACITE_PUBLISH_BATCH_SIZE`**: maximum number of records to sync in a given publishing run
 - **`TZ`**: sets the timezone of containers; e.g. `Africa/Johannesburg`
 
 ## ODP database initialization & migrations

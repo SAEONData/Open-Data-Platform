@@ -1,7 +1,7 @@
 # SAEON Open Data Platform
 
 ## Services
-This project provides the codebase for the following services:
+This repository provides the codebase for the following services:
 
 ### ODP Public API
 A public API providing a stable interface to ODP back-end systems, with automatic,
@@ -17,7 +17,7 @@ built on [FastAPI](https://fastapi.tiangolo.com/).
 - [entry point](odp/api/admin.py)
 
 ### ODP Admin UI
-Administrative interface for the ODP, built on [Flask](https://flask.palletsprojects.com/)
+Back-office admin interface for the ODP, built on [Flask](https://flask.palletsprojects.com/)
 and [Flask-Admin](https://flask-admin.readthedocs.io/en/latest/).
 
 - [entry point](odp/admin/app.py)
@@ -29,10 +29,15 @@ signup and login experience across the entire platform.
 - [entry point](odp/identity/app.py)
 
 ### ODP Publisher
-A scheduled background process for publishing ODP metadata to one or more
-catalogues.
+A scheduled background process for publishing ODP metadata from the metadata
+management system, making it available at the ODP catalogue harvest endpoint.
 
 - [entry point](odp/publish/main.py)
+
+### DataCite Publisher
+A scheduled background process for publishing ODP metadata to DataCite.
+
+- [entry point](odp/publish/datacite.py)
 
 ## Dependencies
 
@@ -47,11 +52,11 @@ ODP data and metadata are stored in [PostgreSQL](https://www.postgresql.org/) da
 PostgreSQL version 11 is currently in use.
 
 ### Docker
-ODP services are deployed using [Docker](https://docs.docker.com/reference/)
+ODP services are deployed using [Docker](https://www.docker.com/)
 containerization technology.
 
 ### ORY Hydra
-[ORY Hydra](https://www.ory.sh/hydra/docs/) is an open source, self-hosted OAuth 2.0
+[ORY Hydra](https://www.ory.sh/hydra/) is an open source, self-hosted OAuth 2.0
 and OpenID Connect provider, which performs authentication, session management and
 issuance of ID, access and refresh tokens.
 

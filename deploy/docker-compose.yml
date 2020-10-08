@@ -150,7 +150,6 @@ services:
       - ODP_LOG_LEVEL
       - ODP_PUBLISH_HARVEST_CHECK_INTERVAL
       - ODP_PUBLISH_BATCH_SIZE
-      - ODP_PUBLISH_MAX_RETRIES
       - ODP_DB_HOST
       - ODP_DB_NAME
       - ODP_DB_USER
@@ -160,11 +159,30 @@ services:
       - CKAN_DB_NAME
       - CKAN_DB_USER
       - CKAN_DB_PASS
+      - TZ
+    restart: always
+
+  datacite-publisher:
+    container_name: datacite-publisher
+    build:
+      context: ..
+      dockerfile: deploy/datacite-publisher/Dockerfile
+      args:
+        - DATACITE_PUBLISH_JOB_INTERVAL
+    environment:
+      - ODP_ENV
+      - ODP_LOG_LEVEL
+      - ODP_DB_HOST
+      - ODP_DB_NAME
+      - ODP_DB_USER
+      - ODP_DB_PASS
       - DATACITE_API_URL
       - DATACITE_USERNAME
       - DATACITE_PASSWORD
       - DATACITE_DOI_PREFIX
       - DATACITE_DOI_LANDING_PAGE_BASE_URL=${ODP_PUBLIC_URL}/api/catalogue/go
+      - DATACITE_PUBLISH_BATCH_SIZE
+      - DATACITE_PUBLISH_MAX_RETRIES=3
       - TZ
     restart: always
 

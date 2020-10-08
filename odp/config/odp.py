@@ -85,12 +85,8 @@ class ODPPublishConfig(BaseConfig):
     # minimum interval in minutes before re-checking an already harvested metadata record
     HARVEST_CHECK_INTERVAL: int
 
-    # maximum number of records to harvest or sync in a given publishing run
+    # maximum number of records to harvest or sync in a publishing run
     BATCH_SIZE: int
-
-    # number of times to retry syncing (i.e. publishing/unpublishing) a record with
-    # a given catalogue after failure
-    MAX_RETRIES: int
 
 
 class ODPConfig(BaseConfig):
