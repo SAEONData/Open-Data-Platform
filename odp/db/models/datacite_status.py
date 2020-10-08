@@ -1,4 +1,5 @@
-from sqlalchemy import Column, String, JSON, Boolean, ForeignKey, Integer, TIMESTAMP
+from sqlalchemy import Column, String, Boolean, ForeignKey, Integer, TIMESTAMP
+from sqlalchemy.dialects.postgresql import JSONB
 
 from odp.db import Base
 
@@ -10,7 +11,7 @@ class DataciteStatus(Base):
 
     metadata_id = Column(String, ForeignKey('metadata_status.metadata_id', ondelete='RESTRICT'), primary_key=True)
     doi = Column(String, unique=True)
-    datacite_record = Column(JSON)
+    datacite_record = Column(JSONB)
     published = Column(Boolean, nullable=False)
     updated = Column(TIMESTAMP(timezone=True))
     checked = Column(TIMESTAMP(timezone=True), nullable=False)
