@@ -31,7 +31,6 @@ containing the following environment variables:
 - **`CKAN_DB_PASS`**: CKAN DB password
 - **`CKAN_CLIENT_ID`**: OAuth2 client ID for the CKAN UI
 - **`CKAN_CLIENT_SECRET`**: OAuth2 client secret for the CKAN UI
-- **`ELASTIC_INDICES`**: JSON-encoded list of indices to use for search queries
 - **`CATALOGUE_METADATA_LANDING_PAGE_BASE_URL`**: base URL for published metadata landing pages
 - **`ODP_PUBLISH_JOB_INTERVAL`**: interval in minutes between publishing job runs
 - **`ODP_PUBLISH_HARVEST_CHECK_INTERVAL`**: minimum interval in minutes before re-checking an already harvested metadata record

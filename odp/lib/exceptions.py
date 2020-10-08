@@ -82,11 +82,3 @@ class DataciteError(ODPException):
     def __init__(self, *args, **kwargs):
         self.status_code = kwargs.pop('status_code')
         self.error_detail = kwargs.pop('error_detail', str(args))
-
-
-class ElasticsearchError(ODPException):
-    """ Exception raised when a request to the Elasticsearch catalogue fails """
-
-    def __init__(self, *args, **kwargs):
-        self.status_code = kwargs.pop('status_code')
-        self.error_detail = kwargs.pop('error_detail', str(args))

@@ -32,7 +32,7 @@ class ODPCatalogue(Catalogue):
 
                     if mdstatus is not None:
                         mdstatus.checked = (now := datetime.now(timezone.utc))
-                        if mdstatus.catalogue_record != (catalogue_record := record.dict()):
+                        if mdstatus.catalogue_record != (catalogue_record := record.dict(by_alias=True)):
                             mdstatus.catalogue_record = catalogue_record
                             mdstatus.published = record.published
                             mdstatus.updated = now

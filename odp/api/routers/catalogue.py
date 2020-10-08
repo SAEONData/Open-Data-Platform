@@ -3,49 +3,27 @@ from typing import List
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse
+from starlette.status import HTTP_404_NOT_FOUND
 
 from odp.api.dependencies.catalogue import get_metadata_landing_page_url
-from odp.api.dependencies.elastic import get_elastic_client
 from odp.api.models import Pagination
-from odp.api.models.catalogue import QueryDSL, SearchResult, CatalogueRecord
-from odp.lib.elastic import ElasticClient
-from odp.lib.exceptions import ElasticsearchError
+from odp.api.models.catalogue import CatalogueRecord
+from odp.lib import catalogue
 
 router = APIRouter()
 
 
-@router.post('/query', response_model=SearchResult)
-async def query_catalogue(
-        query_dsl: QueryDSL,
-        pagination: Pagination = Depends(),
-        elastic: ElasticClient = Depends(get_elastic_client),
-):
-    try:
-        return elastic.query(query_dsl, pagination)
-    except ElasticsearchError as e:
-        raise HTTPException(e.status_code, e.error_detail) from e
+@router.get('/', response_model=List[CatalogueRecord])
+async def list_catalogue_records(pagination: Pagination = Depends()):
+    return catalogue.list_catalogue_records(pagination)
 
 
-@router.get('/get/', response_model=List[CatalogueRecord])
-async def list_catalogue_records(
-        pagination: Pagination = Depends(),
-        elastic: ElasticClient = Depends(get_elastic_client),
-):
-    try:
-        return elastic.list(pagination)
-    except ElasticsearchError as e:
-        raise HTTPException(e.status_code, e.error_detail) from e
+@router.get('/{record_id}', response_model=CatalogueRecord)
+async def get_catalogue_record(record_id: str):
+    if record := catalogue.get_catalogue_record(record_id):
+        return record
 
-
-@router.get('/get/{record_id}', response_model=CatalogueRecord)
-async def get_catalogue_record(
-        record_id: str,
-        elastic: ElasticClient = Depends(get_elastic_client),
-):
-    try:
-        return elastic.get(record_id)
-    except ElasticsearchError as e:
-        raise HTTPException(e.status_code, e.error_detail) from e
+    raise HTTPException(HTTP_404_NOT_FOUND)
 
 
 @router.get('/go/{record_id}')

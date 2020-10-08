@@ -13,15 +13,9 @@ app = FastAPI(
 )
 
 app.include_router(
-    metadata.router,
-    prefix='/{institution_key}/metadata',
-    tags=['Metadata Records'],
-)
-
-app.include_router(
-    collection.router,
-    prefix='/{institution_key}/collection',
-    tags=['Metadata Collections'],
+    catalogue.router,
+    prefix='/catalogue',
+    tags=['Catalogue'],
 )
 
 app.include_router(
@@ -31,9 +25,15 @@ app.include_router(
 )
 
 app.include_router(
-    catalogue.router,
-    prefix='/catalogue',
-    tags=['Catalogue'],
+    collection.router,
+    prefix='/{institution_key}/collection',
+    tags=['Collections'],
+)
+
+app.include_router(
+    metadata.router,
+    prefix='/{institution_key}/metadata',
+    tags=['Metadata'],
 )
 
 app.add_middleware(

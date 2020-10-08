@@ -114,7 +114,6 @@ services:
     networks:
       - odp-net
       - ckan-net
-      - elastic-net
     ports:
       - "8888:8888"
     environment:
@@ -131,8 +130,6 @@ services:
       - ODP_ADMIN_SCOPE=ODP.Admin
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - CKAN_URL=http://ckan-metadata:5000
-      - ELASTIC_URL=http://elasticsearch:9200
-      - ELASTIC_INDICES
       - CATALOGUE_METADATA_LANDING_PAGE_BASE_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - TZ

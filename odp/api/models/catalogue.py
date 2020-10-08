@@ -1,47 +1,27 @@
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 
 from pydantic import BaseModel, Field, validator
 
 
 class CatalogueRecord(BaseModel):
-    """ Model of a metadata record as published to a catalogue.
+    """Model representing a metadata record published to the ODP catalogue.
 
-    This must be strictly JSON-serializable.
+    Records that are later un-published are retained in the catalogue, but
+    when harvested will only indicate their ``id`` and ``published`` state.
     """
+    # this model must be strictly JSON-serializable,
+    # as it is stored to a back-end JSONB column
     id: str
-    doi: Optional[str]
-    institution: str
-    collection: str
-    projects: List[str]
-    schema: str
-    metadata: Dict[str, Any]
+    doi: str = None
+    institution: str = None
+    collection: str = None
+    projects: List[str] = None
+    schema_: str = Field(None, alias='schema')
+    metadata: Dict[str, Any] = None
     published: bool
 
     @validator('projects')
     def normalize_projects_list(cls, v):
-        return sorted(set(v))
-
-
-class QueryDSL(BaseModel):
-    query: Dict[str, Any]
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "query": {
-                    "match_all": {}
-                }
-            }
-        }
-
-
-class SearchHit(BaseModel):
-    score: float
-    record: CatalogueRecord
-
-
-class SearchResult(BaseModel):
-    total_hits: int
-    max_score: Optional[float]
-    query_time: Optional[int] = Field(..., description="Search execution time in milliseconds")
-    hits: List[SearchHit]
+        if v is not None:
+            return sorted(set(v))
+        return v
