@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timezone
 
-from odp.db import transactional_session
+from odp.db import transaction
 from odp.db.models import MetadataStatus
 from odp.publish.catalogue import Catalogue
 from odp.publish.harvester import Harvester
@@ -18,8 +18,8 @@ class ODPCatalogue(Catalogue):
         updated = 0
         try:
             for record in self.harvester.getrecords():
-                with transactional_session() as session:
-                    mdstatus = session.query(MetadataStatus).get(record.id)
+                with transaction():
+                    mdstatus = MetadataStatus.query.get(record.id)
 
                     # only add new records to the catalogue if they're marked as
                     # published in the primary metadata store; if a record is later
@@ -28,7 +28,6 @@ class ODPCatalogue(Catalogue):
                     # that have never been published appearing in the catalogue
                     if mdstatus is None and record.published:
                         mdstatus = MetadataStatus(metadata_id=record.id)
-                        session.add(mdstatus)
 
                     if mdstatus is not None:
                         mdstatus.checked = (now := datetime.now(timezone.utc))
@@ -37,6 +36,7 @@ class ODPCatalogue(Catalogue):
                             mdstatus.published = record.published
                             mdstatus.updated = now
                             updated += 1
+                        mdstatus.save()
 
                 harvested += 1
                 self.harvester.setchecked(record.id)

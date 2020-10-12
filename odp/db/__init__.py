@@ -10,16 +10,38 @@ engine = create_engine(config.ODP.DB.URL, echo=config.ODP.DB.ECHO)
 
 session = scoped_session(sessionmaker(bind=engine))
 
-Base = declarative_base()
-
 
 @contextmanager
-def transactional_session():
+def transaction():
+    """Provides an ad-hoc transaction scope around the session."""
     try:
-        yield (s := session())
-        s.commit()
-    except:
-        s.rollback()
+        yield
+        session.commit()
+    except Exception:
+        session.rollback()
         raise
     finally:
-        s.close()
+        session.remove()
+
+
+class _Base:
+    query = session.query_property()
+
+    def save(self):
+        session.add(self)
+        self._flush()
+
+    def delete(self):
+        session.delete(self)
+        self._flush()
+
+    @staticmethod
+    def _flush():
+        try:
+            session.flush()
+        except Exception:
+            session.rollback()
+            raise
+
+
+Base = declarative_base(cls=_Base)

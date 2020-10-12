@@ -6,7 +6,7 @@ import pydantic
 from sqlalchemy import or_, and_
 
 from odp.api.models.datacite import DataciteRecordIn
-from odp.db import transactional_session
+from odp.db import session, transaction
 from odp.db.models import MetadataStatus, DataciteStatus
 from odp.lib.datacite import DataciteClient
 from odp.lib.exceptions import DataciteError
@@ -37,27 +37,26 @@ class DataciteCatalogue(Catalogue):
         self.max_retries = max_retries
 
     def synchronize(self) -> None:
-        with transactional_session() as session:
-            updated_records = session.query(MetadataStatus.metadata_id, DataciteStatus). \
-                outerjoin(DataciteStatus).filter(
-                or_(
-                    DataciteStatus.metadata_id == None,
-                    DataciteStatus.checked < MetadataStatus.updated,
-                )
-            ).limit(self.batch_size).all()
+        updated_records = session.query(MetadataStatus.metadata_id, DataciteStatus). \
+            outerjoin(DataciteStatus).filter(
+            or_(
+                DataciteStatus.metadata_id == None,
+                DataciteStatus.checked < MetadataStatus.updated,
+            )
+        ).limit(self.batch_size).all()
 
-            # clear errors and retries for updated records
-            for record_id, dcstatus in updated_records:
-                if dcstatus is not None and dcstatus.error is not None:
-                    dcstatus.error = None
-                    dcstatus.retries = None
+        # clear errors and retries for updated records
+        for record_id, dcstatus in updated_records:
+            if dcstatus is not None and dcstatus.error is not None:
+                dcstatus.error = None
+                dcstatus.retries = None
 
-            failed_ids = session.query(MetadataStatus.metadata_id).join(DataciteStatus).filter(
-                and_(
-                    DataciteStatus.error != None,
-                    DataciteStatus.retries < self.max_retries,
-                ),
-            ).limit(self.batch_size).all()
+        failed_ids = session.query(MetadataStatus.metadata_id).join(DataciteStatus).filter(
+            and_(
+                DataciteStatus.error != None,
+                DataciteStatus.retries < self.max_retries,
+            ),
+        ).limit(self.batch_size).all()
 
         syncable_ids = [record_id for record_id, dcstatus in updated_records] + \
                        [record_id for (record_id,) in failed_ids]
@@ -83,14 +82,13 @@ class DataciteCatalogue(Catalogue):
         unpublished = False
         error = False
 
-        with transactional_session() as session:
+        with transaction():
             mdstatus, dcstatus = session.query(MetadataStatus, DataciteStatus).outerjoin(DataciteStatus). \
                 filter(MetadataStatus.metadata_id == record_id). \
                 one()
 
             if dcstatus is None:
                 dcstatus = DataciteStatus(metadata_id=record_id, published=False)
-                session.add(dcstatus)
 
             doi = mdstatus.catalogue_record['doi']
             try:
@@ -143,5 +141,6 @@ class DataciteCatalogue(Catalogue):
                 error = True
 
             dcstatus.checked = datetime.now(timezone.utc)
+            dcstatus.save()
 
         return published, unpublished, error
