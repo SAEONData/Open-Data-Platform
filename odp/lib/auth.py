@@ -9,7 +9,7 @@ from odp.api.models.auth import (
 )
 from odp.config import config
 from odp.db import session as db_session
-from odp.db.models.privilege import Privilege
+from odp.db.models.user_privilege import UserPrivilege
 from odp.db.models.role import Role
 from odp.db.models.scope import Scope
 from odp.db.models.user import User
@@ -42,8 +42,8 @@ def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTo
             access_rights=[],
         )
     else:
-        privileges = db_session.query(Privilege).filter_by(user_id=user.id) \
-            .join(Scope, Privilege.scope_id == Scope.id).filter(Scope.key.in_(scopes)) \
+        privileges = db_session.query(UserPrivilege).filter_by(user_id=user.id) \
+            .join(Scope, UserPrivilege.scope_id == Scope.id).filter(Scope.key.in_(scopes)) \
             .all()
 
         access_token_data = AccessTokenData(

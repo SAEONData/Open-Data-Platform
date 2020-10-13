@@ -10,7 +10,7 @@ from wtforms import StringField
 from odp.config import config
 from odp.db import session as db_session
 from odp.db.models.institution import Institution
-from odp.db.models.privilege import Privilege
+from odp.db.models.user_privilege import UserPrivilege
 from odp.db.models.role import Role
 from odp.db.models.scope import Scope
 
@@ -52,10 +52,10 @@ class AdminModelView(ModelView):
             return True
 
         # TODO: cache the result of this query; it's called repeatedly
-        admin_privilege = db_session.query(Privilege).filter_by(user_id=current_user.id) \
-            .join(Institution, Privilege.institution_id == Institution.id).filter_by(key=config.ODP.ADMIN.INSTITUTION) \
-            .join(Role, Privilege.role_id == Role.id).filter_by(key=config.ODP.ADMIN.ROLE) \
-            .join(Scope, Privilege.scope_id == Scope.id).filter_by(key=config.ODP.ADMIN.SCOPE) \
+        admin_privilege = db_session.query(UserPrivilege).filter_by(user_id=current_user.id) \
+            .join(Institution, UserPrivilege.institution_id == Institution.id).filter_by(key=config.ODP.ADMIN.INSTITUTION) \
+            .join(Role, UserPrivilege.role_id == Role.id).filter_by(key=config.ODP.ADMIN.ROLE) \
+            .join(Scope, UserPrivilege.scope_id == Scope.id).filter_by(key=config.ODP.ADMIN.SCOPE) \
             .one_or_none()
         return admin_privilege is not None
 

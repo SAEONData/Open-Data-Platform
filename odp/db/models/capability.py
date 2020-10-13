@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from odp.db import Base
-from odp.db.models.privilege import Privilege
+from odp.db.models.user_privilege import UserPrivilege
 
 
 class Capability(Base):
@@ -19,14 +19,14 @@ class Capability(Base):
     scope = relationship('Scope', back_populates='capabilities')
     role = relationship('Role', back_populates='capabilities')
 
-    # many-to-many relationship between member and capability represented by privilege
-    privileges = relationship('Privilege',
-                              back_populates='capability',
-                              cascade='all, delete-orphan',
-                              passive_deletes=True)
+    # many-to-many relationship between member and capability represented by user_privilege
+    user_privileges = relationship('UserPrivilege',
+                                   back_populates='capability',
+                                   cascade='all, delete-orphan',
+                                   passive_deletes=True)
     # enables working with the other side of the relationship transparently
-    members = association_proxy('privileges', 'member',
-                                creator=lambda m: Privilege(member=m))
+    members = association_proxy('user_privileges', 'member',
+                                creator=lambda m: UserPrivilege(member=m))
 
     @property
     def label(self):

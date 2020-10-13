@@ -5,7 +5,7 @@ from .member import Member
 from .role import Role
 from .scope import Scope
 from .capability import Capability
-from .privilege import Privilege
+from .user_privilege import UserPrivilege
 from .oauth2_token import OAuth2Token
 
 # publishing
