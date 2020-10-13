@@ -32,5 +32,11 @@ class Institution(Base):
     users = association_proxy('members', 'user',
                               creator=lambda u: Member(user=u))
 
+    # one-to-many relationship with clients
+    clients = relationship('Client',
+                           back_populates='institution',
+                           cascade='all, delete-orphan',
+                           passive_deletes=True)
+
     def __repr__(self):
         return '<Institution %s>' % self.key

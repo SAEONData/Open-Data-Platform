@@ -1,13 +1,12 @@
-# access control
-from .user import User
+from .capability import Capability
+from .client import Client
+from .client_capability import ClientCapability
+from .datacite_status import DataciteStatus
 from .institution import Institution
 from .member import Member
+from .metadata_status import MetadataStatus
+from .oauth2_token import OAuth2Token
 from .role import Role
 from .scope import Scope
-from .capability import Capability
+from .user import User
 from .user_privilege import UserPrivilege
-from .oauth2_token import OAuth2Token
-
-# publishing
-from .metadata_status import MetadataStatus
-from .datacite_status import DataciteStatus

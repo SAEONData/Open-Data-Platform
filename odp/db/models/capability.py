@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import relationship
 
 from odp.db import Base
+from odp.db.models.client_capability import ClientCapability
 from odp.db.models.user_privilege import UserPrivilege
 
 
@@ -27,6 +28,15 @@ class Capability(Base):
     # enables working with the other side of the relationship transparently
     members = association_proxy('user_privileges', 'member',
                                 creator=lambda m: UserPrivilege(member=m))
+
+    # many-to-many relationship between client and capability represented by client_capability
+    client_capabilities = relationship('ClientCapability',
+                                       back_populates='capability',
+                                       cascade='all, delete-orphan',
+                                       passive_deletes=True)
+    # enables working with the other side of the relationship transparently
+    clients = association_proxy('client_capabilities', 'client',
+                                creator=lambda c: ClientCapability(client=c))
 
     @property
     def label(self):

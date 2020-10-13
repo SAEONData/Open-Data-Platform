@@ -37,27 +37,11 @@ class UserPrivilege(Base):
         ),
     )
 
-    user = relationship(
-        'User',
-        viewonly=True,
-        foreign_keys=user_id,
-        primaryjoin='UserPrivilege.user_id == User.id',
-    )
-    institution = relationship(
-        'Institution',
-        viewonly=True,
-        foreign_keys=institution_id,
-        primaryjoin='UserPrivilege.institution_id == Institution.id',
-    )
-    scope = relationship(
-        'Scope',
-        viewonly=True,
-        foreign_keys=scope_id,
-        primaryjoin='UserPrivilege.scope_id == Scope.id',
-    )
-    role = relationship(
-        'Role',
-        viewonly=True,
-        foreign_keys=role_id,
-        primaryjoin='UserPrivilege.role_id == Role.id',
-    )
+    user = relationship('User', viewonly=True, foreign_keys=user_id,
+                        primaryjoin='UserPrivilege.user_id == User.id')
+    institution = relationship('Institution', viewonly=True, foreign_keys=institution_id,
+                               primaryjoin='UserPrivilege.institution_id == Institution.id')
+    scope = relationship('Scope', viewonly=True, foreign_keys=scope_id,
+                         primaryjoin='UserPrivilege.scope_id == Scope.id')
+    role = relationship('Role', viewonly=True, foreign_keys=role_id,
+                        primaryjoin='UserPrivilege.role_id == Role.id')
