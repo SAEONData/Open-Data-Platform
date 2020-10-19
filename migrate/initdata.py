@@ -9,6 +9,7 @@ def initialize_roles():
     rows = [
         {'key': 'admin', 'name': 'Admin', 'admin': True},
         {'key': 'curator', 'name': 'Curator', 'admin': True},
+        {'key': 'harvester', 'name': 'Harvester', 'admin': False},
         {'key': 'contributor', 'name': 'Contributor', 'admin': False},
         {'key': 'member', 'name': 'Member', 'admin': False},
     ]
@@ -44,7 +45,7 @@ def initialize_scopes():
 def initialize_capabilities():
     capabilities = {
         'ODP.Admin': ['admin', 'member'],
-        'ODP.Metadata': ['admin', 'curator', 'contributor', 'member'],
+        'ODP.Metadata': ['admin', 'curator', 'harvester', 'contributor', 'member'],
         'SAEON.Observations.WebAPI': ['admin', 'contributor'],
     }
     for scope, roles in capabilities.items():

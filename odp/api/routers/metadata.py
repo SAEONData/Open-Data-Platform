@@ -44,7 +44,7 @@ async def create_or_update_metadata_record(
         institution_key: str,
         metadata_record: MetadataRecordIn,
         ckan: CKANClient = Depends(get_ckan_client),
-        auth_data: AuthData = Depends(Authorizer(Scope.METADATA, Role.CURATOR, Role.CONTRIBUTOR)),
+        auth_data: AuthData = Depends(Authorizer(Scope.METADATA, Role.CURATOR, Role.HARVESTER, Role.CONTRIBUTOR)),
 ):
     return ckan.create_or_update_metadata_record(
         institution_key, metadata_record, auth_data.access_token)
@@ -90,7 +90,7 @@ async def change_state_of_metadata_record(
         record_id: str,
         state: str,
         ckan: CKANClient = Depends(get_ckan_client),
-        auth_data: AuthData = Depends(Authorizer(Scope.METADATA, Role.CURATOR)),
+        auth_data: AuthData = Depends(Authorizer(Scope.METADATA, Role.CURATOR, Role.HARVESTER)),
 ):
     return ckan.change_state_of_metadata_record(
         institution_key, record_id, state, auth_data.access_token)

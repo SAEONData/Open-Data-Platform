@@ -7,6 +7,7 @@ from pydantic import BaseModel, EmailStr, Field
 class Role(str, Enum):
     ADMIN = 'admin'
     CURATOR = 'curator'
+    HARVESTER = 'harvester'
     CONTRIBUTOR = 'contributor'
     MEMBER = 'member'
 
