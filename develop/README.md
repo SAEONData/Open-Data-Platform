@@ -36,12 +36,17 @@ Switch to the `migrate` subdirectory and create a `.env` file by copying the adj
 Activate the ODP Python virtual environment and run:
 
     python -m initdb
+    python -m initdata
 
 ### Database upgrade
 If you already have an instance of the ODP database, then switch to the `migrate` subdirectory
 and run the SQL migrations:
 
     alembic upgrade head
+
+Also, make sure the static data is up-to-date:
+
+    python -m initdata
 
 ## ORY Hydra setup
 Switch to the `develop` subdirectory and run the following commands:

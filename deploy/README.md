@@ -43,16 +43,23 @@ containing the following environment variables:
 - **`DATACITE_PUBLISH_BATCH_SIZE`**: maximum number of records to sync in a given publishing run
 - **`TZ`**: sets the timezone of containers; e.g. `Africa/Johannesburg`
 
-## ODP database initialization & migrations
+## ODP database initialization
 Create a Python 3.8 virtual environment in the project root directory on the target machine,
 activate the environment and `pip install -e` the project (no extras required). Switch to the
 `migrate` subdirectory and create a `.env` file containing appropriately set `ODP_DB_*`
-environment variables. Then run:
+environment variables.
+
+For a new database instance, run:
 
     python -m initdb
-    alembic upgrade head
+    python -m initdata
 
-## Hydra database initialization & migrations
+To upgrade an existing instance, run:
+
+    alembic upgrade head
+    python -m initdata
+
+## Hydra database initialization
 _Note: Do this before starting the Hydra container._
 
 Run the following commands in the `deploy` subdirectory:
