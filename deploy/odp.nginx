@@ -8,8 +8,8 @@ server {
     listen              443 ssl;
     server_name         odp.saeon.ac.za;
 
-    ssl_certificate     /etc/ssl/certs/odp.crt;
-    ssl_certificate_key /etc/ssl/private/odp.key;
+    ssl_certificate     /etc/pki/tls/certs/odp.crt;
+    ssl_certificate_key /etc/pki/tls/private/odp.key;
 
     access_log          /var/log/nginx/odp-access.log;
     error_log           /var/log/nginx/odp-error.log;

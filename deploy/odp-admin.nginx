@@ -8,8 +8,8 @@ server {
     listen              443 ssl;
     server_name         odp-admin.saeon.ac.za;
 
-    ssl_certificate     /etc/ssl/certs/odp-admin.crt;
-    ssl_certificate_key /etc/ssl/private/odp-admin.key;
+    ssl_certificate     /etc/pki/tls/certs/odp-admin.crt;
+    ssl_certificate_key /etc/pki/tls/private/odp-admin.key;
 
     access_log          /var/log/nginx/odp-admin-access.log;
     error_log           /var/log/nginx/odp-admin-error.log;
@@ -51,8 +51,8 @@ server {
     listen              443 ssl;
     server_name         metadata.saeon.ac.za;
 
-    ssl_certificate     /etc/ssl/certs/odp-admin.crt;
-    ssl_certificate_key /etc/ssl/private/odp-admin.key;
+    ssl_certificate     /etc/pki/tls/certs/odp-admin.crt;
+    ssl_certificate_key /etc/pki/tls/private/odp-admin.key;
 
     access_log          /var/log/nginx/odp-metadata-access.log;
     error_log           /var/log/nginx/odp-metadata-error.log;
