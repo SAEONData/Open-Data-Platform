@@ -21,7 +21,7 @@ router = APIRouter()
     summary="List DOIs",
 )
 async def list_dois(
-        page_size: int = Query(default=20, ge=1, le=10000),
+        page_size: int = Query(default=20, ge=1, le=1000),
         page_num: int = Query(default=1, ge=1),
         datacite: DataciteClient = Depends(get_datacite_client),
 ):
