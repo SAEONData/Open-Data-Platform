@@ -114,7 +114,7 @@ def validate_user_signup(email, password):
     if user:
         raise x.ODPEmailInUse
 
-    if not check_password_complexity(password):
+    if not check_password_complexity(email, password):
         raise x.ODPPasswordComplexityError
 
 
@@ -157,7 +157,7 @@ def validate_password_reset(email, password):
     if not user:
         raise x.ODPUserNotFound
 
-    if not check_password_complexity(password):
+    if not check_password_complexity(email, password):
         raise x.ODPPasswordComplexityError
 
     return user
@@ -225,16 +225,35 @@ def update_user_password(user, password):
     db_session.commit()
 
 
-def check_password_complexity(password):
+def check_password_complexity(email, password):
     """
-    Check that a password meets the minimum complexity requirements, returning True if the
-    requirements are met, False otherwise.
+    Check that a password meets the minimum complexity requirements,
+    returning True if the requirements are satisfied, False otherwise.
 
+    The rules are:
+        - minimum length 10
+        - at least one lowercase letter
+        - at least one uppercase letter
+        - at least one numeric character
+        - at least one symbol character
+        - a maximum of 3 consecutive characters from the email address
+
+    :param email: the user's email address
     :param password: the input plain-text password
     :return: boolean
     """
-    # todo...
-    valid = len(password) >= 8
-    valid = valid and re.search(r'[a-zA-Z]', password) is not None
-    valid = valid and re.search(r'[0-9]', password) is not None
-    return valid
+    if len(password) < 10:
+        return False
+    if not re.search(r'[a-z]', password):
+        return False
+    if not re.search(r'[A-Z]', password):
+        return False
+    if not re.search(r'[0-9]', password):
+        return False
+    if not re.search(r'''[`~!@#$%^&*()\-=_+\[\]{}\\|;:'",.<>/?]''', password):
+        return False
+    for i in range(len(email) - 3):
+        if email[i:(i + 4)] in password:
+            return False
+
+    return True
