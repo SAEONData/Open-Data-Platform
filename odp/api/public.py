@@ -2,7 +2,7 @@ import pkg_resources
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from odp.api.routers import metadata, catalogue, project, collection
+from odp.api.routers import metadata, catalogue, collection
 from odp.config import config
 
 app = FastAPI(
@@ -16,12 +16,6 @@ app.include_router(
     catalogue.router,
     prefix='/catalogue',
     tags=['Catalogue'],
-)
-
-app.include_router(
-    project.router,
-    prefix='/project',
-    tags=['Projects'],
 )
 
 app.include_router(

@@ -1,7 +1,7 @@
 import pkg_resources
 from fastapi import FastAPI
 
-from odp.api.routers import authorization, institution, datacite
+from odp.api.routers import authorization, institution, datacite, project
 from odp.config import config
 
 app = FastAPI(
@@ -21,6 +21,12 @@ app.include_router(
     institution.router,
     prefix='/institution',
     tags=['Institutions'],
+)
+
+app.include_router(
+    project.router,
+    prefix='/project',
+    tags=['Projects'],
 )
 
 app.include_router(
