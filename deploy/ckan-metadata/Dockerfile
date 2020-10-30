@@ -31,6 +31,7 @@ ARG CKAN_URL
 ARG CKAN_ADMIN_ORG
 ARG CKAN_ADMIN_ROLE
 ARG CKAN_CURATOR_ROLE
+ARG CKAN_HARVESTER_ROLE
 ARG CKAN_CONTRIBUTOR_ROLE
 ARG DOI_PREFIX
 ARG ELASTIC_AGENT_URL
@@ -55,6 +56,7 @@ RUN sed -i "s/ckan.plugins =.*/ckan.plugins = metadata_framework openidconnect j
 RUN sed -i "/\[app:main\]/a ckan.metadata.admin_org = ${CKAN_ADMIN_ORG}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.metadata.admin_role = ${CKAN_ADMIN_ROLE}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.metadata.curator_role = ${CKAN_CURATOR_ROLE}" ckan.ini
+RUN sed -i "/\[app:main\]/a ckan.metadata.harvester_role = ${CKAN_HARVESTER_ROLE}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.metadata.contributor_role = ${CKAN_CONTRIBUTOR_ROLE}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.metadata.doi_prefix = ${DOI_PREFIX}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.metadata.elastic.search_agent_url = ${ELASTIC_AGENT_URL}" ckan.ini

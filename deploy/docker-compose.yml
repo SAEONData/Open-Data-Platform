@@ -226,6 +226,7 @@ services:
         - CKAN_ADMIN_ORG=saeon
         - CKAN_ADMIN_ROLE=admin
         - CKAN_CURATOR_ROLE=curator
+        - CKAN_HARVESTER_ROLE=harvester
         - CKAN_CONTRIBUTOR_ROLE=contributor
     networks:
       - ckan-net
