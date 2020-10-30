@@ -527,7 +527,7 @@ class CKANClient:
         try:
             ckan_md_schema = self._call_ckan('metadata_schema_create', access_token, deserialize_json=True, **input_dict)
         except HTTPException as e:
-            if e.status_code == HTTP_400_BAD_REQUEST and 'Duplicate name: Metadata Schema' in e.detail:
+            if e.status_code == HTTP_400_BAD_REQUEST and 'Unique constraint violation' in e.detail:
                 input_dict['id'] = input_dict['name']
                 ckan_md_schema = self._call_ckan('metadata_schema_update', access_token, deserialize_json=True, **input_dict)
             else:
