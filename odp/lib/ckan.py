@@ -22,6 +22,7 @@ from odp.api.models.metadata import (
     MetadataWorkflowResult,
 )
 from odp.api.models.project import Project, PROJECT_SUFFIX
+from odp.api.models.schema import MetadataSchema, MetadataSchemaIn
 
 logger = logging.getLogger(__name__)
 
@@ -463,4 +464,77 @@ class CKANClient:
             key=ckan_institution['name'],
             name=ckan_institution['title'],
             parent_key=None,
+        )
+
+    def list_metadata_schemas(self,
+                              access_token: str,
+                              ) -> List[MetadataSchema]:
+        schema_list = self._call_ckan(
+            'metadata_schema_list',
+            access_token,
+            all_fields=True,
+            deserialize_json=True,
+        )
+        return [MetadataSchema(
+            key=schema_dict['name'],
+            name=schema_dict['display_name'],
+            schema=schema_dict['schema_json'],
+        ) for schema_dict in schema_list]
+
+    def create_or_update_metadata_schema(self,
+                                         metadata_schema: MetadataSchemaIn,
+                                         access_token: str,
+                                         ) -> MetadataSchema:
+        input_dict = {
+            'name': metadata_schema.key,
+            'standard_name': metadata_schema.name,
+            'standard_version': '',
+            'parent_standard_id': '',
+            'metadata_template_json': json.dumps(metadata_schema.template),
+        }
+        try:
+            ckan_md_standard = self._call_ckan('metadata_standard_create', access_token, **input_dict)
+        except HTTPException as e:
+            if e.status_code == HTTP_400_BAD_REQUEST and 'Duplicate name: Metadata Standard' in e.detail:
+                input_dict['id'] = input_dict['name']
+                ckan_md_standard = self._call_ckan('metadata_standard_update', access_token, **input_dict)
+                # clear out all existing attribute mappings prior to recreating them,
+                # rather than trying to figure out which ones to create, update or delete;
+                # this also ensures that they're all valid against the (possibly new) template
+                ckan_attrmap_list = self._call_ckan('metadata_json_attr_map_list', access_token,
+                                                    metadata_standard_id=ckan_md_standard['id'], all_fields=False)
+                for ckan_attrmap_id in ckan_attrmap_list:
+                    self._call_ckan('metadata_json_attr_map_delete', access_token, id=ckan_attrmap_id)
+            else:
+                raise
+
+        for attr_mapping in metadata_schema.attr_mappings:
+            input_dict = {
+                'metadata_standard_id': ckan_md_standard['id'],
+                'record_attr': attr_mapping.record_attr,
+                'json_path': attr_mapping.json_path,
+                'is_key': attr_mapping.is_key,
+            }
+            self._call_ckan('metadata_json_attr_map_create', access_token, **input_dict)
+
+        input_dict = {
+            'name': metadata_schema.key,
+            'schema_json': json.dumps(metadata_schema.schema_),
+            'metadata_standard_id': ckan_md_standard['id'],
+            'organization_id': '',
+            'infrastructure_id': '',
+        }
+        try:
+            ckan_md_schema = self._call_ckan('metadata_schema_create', access_token, deserialize_json=True, **input_dict)
+        except HTTPException as e:
+            if e.status_code == HTTP_400_BAD_REQUEST and 'Duplicate name: Metadata Schema' in e.detail:
+                input_dict['id'] = input_dict['name']
+                ckan_md_schema = self._call_ckan('metadata_schema_update', access_token, deserialize_json=True, **input_dict)
+            else:
+                raise
+
+        return MetadataSchema(
+            key=ckan_md_schema['name'],
+            name=ckan_md_schema['display_name'],
+            schema=ckan_md_schema['schema_json'],
         )
