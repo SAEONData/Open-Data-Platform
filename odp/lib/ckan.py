@@ -318,20 +318,6 @@ class CKANClient:
             project_keys=[project_dict['id'] for project_dict in ckan_collection['infrastructures']]
         )
 
-    @staticmethod
-    def _translate_to_ckan_collection(institution_key: str, collection: CollectionIn) -> dict:
-        """
-        Convert a CollectionIn into a CKAN collection dict.
-        """
-        return {
-            'name': collection.key,
-            'title': collection.name,
-            'description': collection.description,
-            'organization_id': institution_key,
-            'doi_collection': collection.doi_scope or '',
-            'infrastructures': [{'id': key} for key in collection.project_keys],
-        }
-
     def list_collections(self,
                          institution_key: str,
                          access_token: str,
@@ -354,7 +340,14 @@ class CKANClient:
         if not collection.key.endswith(COLLECTION_SUFFIX):
             collection.key += COLLECTION_SUFFIX
 
-        input_dict = self._translate_to_ckan_collection(institution_key, collection)
+        input_dict = {
+            'name': collection.key,
+            'title': collection.name,
+            'description': collection.description,
+            'organization_id': institution_key,
+            'doi_collection': collection.doi_scope or '',
+            'infrastructures': [{'id': key} for key in collection.project_keys],
+        }
         try:
             ckan_collection = self._call_ckan(
                 'metadata_collection_create',
@@ -374,28 +367,6 @@ class CKANClient:
 
         return self._translate_from_ckan_collection(ckan_collection)
 
-    @staticmethod
-    def _translate_from_ckan_project(ckan_project: dict) -> Project:
-        """
-        Convert a CKAN project (infrastructure) dict into a Project.
-        """
-        return Project(
-            key=ckan_project['name'],
-            name=ckan_project['title'],
-            description=ckan_project['description'],
-        )
-
-    @staticmethod
-    def _translate_to_ckan_project(project: Project) -> dict:
-        """
-        Convert a Project into a CKAN project (infrastructure) dict.
-        """
-        return {
-            'name': project.key,
-            'title': project.name,
-            'description': project.description,
-        }
-
     def list_projects(self,
                       access_token: str,
                       ) -> List[Project]:
@@ -404,7 +375,11 @@ class CKANClient:
             access_token,
             all_fields=True,
         )
-        return [self._translate_from_ckan_project(project) for project in project_list]
+        return [Project(
+            key=project['name'],
+            name=project['title'],
+            description=project['description'],
+        ) for project in project_list]
 
     def create_or_update_project(self,
                                  project: Project,
@@ -415,7 +390,11 @@ class CKANClient:
         if not project.key.endswith(PROJECT_SUFFIX):
             project.key += PROJECT_SUFFIX
 
-        input_dict = self._translate_to_ckan_project(project)
+        input_dict = {
+            'name': project.key,
+            'title': project.name,
+            'description': project.description,
+        }
         try:
             ckan_project = self._call_ckan(
                 'infrastructure_create',
@@ -433,7 +412,11 @@ class CKANClient:
             else:
                 raise
 
-        return self._translate_from_ckan_project(ckan_project)
+        return Project(
+            key=ckan_project['name'],
+            name=ckan_project['title'],
+            description=ckan_project['description'],
+        )
 
     def create_or_update_institution(self,
                                      institution: Institution,
