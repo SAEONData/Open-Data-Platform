@@ -7,6 +7,7 @@ from odp.api.routers import (
     datacite,
     project,
     schema,
+    workflow,
 )
 from odp.config import config
 
@@ -39,6 +40,12 @@ app.include_router(
     schema.router,
     prefix='/schema',
     tags=['Schemas'],
+)
+
+app.include_router(
+    workflow.router,
+    prefix='/workflow',
+    tags=['Workflows'],
 )
 
 app.include_router(

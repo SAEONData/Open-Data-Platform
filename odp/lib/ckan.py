@@ -23,6 +23,7 @@ from odp.api.models.metadata import (
 )
 from odp.api.models.project import Project, PROJECT_SUFFIX
 from odp.api.models.schema import MetadataSchema, MetadataSchemaIn
+from odp.api.models.workflow import WorkflowState, WorkflowTransition, WorkflowAnnotation
 
 logger = logging.getLogger(__name__)
 
@@ -520,4 +521,120 @@ class CKANClient:
             key=ckan_md_schema['name'],
             name=ckan_md_schema['display_name'],
             schema=ckan_md_schema['schema_json'],
+        )
+
+    def list_workflow_states(self,
+                             access_token: str,
+                             ) -> List[WorkflowState]:
+        workflow_state_list = self._call_ckan(
+            'workflow_state_list',
+            access_token,
+            all_fields=True,
+            deserialize_json=True,
+        )
+        return [WorkflowState(
+            key=workflow_state['name'],
+            name=workflow_state['title'],
+            rules=workflow_state['workflow_rules_json'],
+            revert_key=workflow_state['revert_state_id'],
+            publish=not workflow_state['metadata_records_private'],
+        ) for workflow_state in workflow_state_list]
+
+    def create_or_update_workflow_state(self,
+                                        workflow_state: WorkflowState,
+                                        access_token: str,
+                                        ) -> WorkflowState:
+        input_dict = {
+            'name': workflow_state.key,
+            'title': workflow_state.name,
+            'workflow_rules_json': json.dumps(workflow_state.rules),
+            'revert_state_id': workflow_state.revert_key or '',
+            'metadata_records_private': not workflow_state.publish,
+        }
+        try:
+            ckan_workflow_state = self._call_ckan('workflow_state_create', access_token, deserialize_json=True, **input_dict)
+        except HTTPException as e:
+            if e.status_code == HTTP_400_BAD_REQUEST and 'Duplicate name: Workflow State' in e.detail:
+                input_dict['id'] = input_dict['name']
+                ckan_workflow_state = self._call_ckan('workflow_state_update', access_token, deserialize_json=True, **input_dict)
+            else:
+                raise
+
+        return WorkflowState(
+            key=ckan_workflow_state['name'],
+            name=ckan_workflow_state['title'],
+            rules=ckan_workflow_state['workflow_rules_json'],
+            revert_key=ckan_workflow_state['revert_state_id'],
+            publish=not ckan_workflow_state['metadata_records_private'],
+        )
+
+    def list_workflow_transitions(self,
+                                  access_token: str,
+                                  ) -> List[WorkflowTransition]:
+        workflow_transition_list = self._call_ckan(
+            'workflow_transition_list',
+            access_token,
+            all_fields=True,
+        )
+        return [WorkflowTransition(
+            from_key=workflow_transition['from_state_id'],
+            to_key=workflow_transition['to_state_id'],
+        ) for workflow_transition in workflow_transition_list]
+
+    def create_or_update_workflow_transition(self,
+                                             workflow_transition: WorkflowTransition,
+                                             access_token: str,
+                                             ) -> WorkflowTransition:
+        input_dict = {
+            'from_state_id': workflow_transition.from_key or '',
+            'to_state_id': workflow_transition.to_key,
+        }
+        try:
+            ckan_workflow_transition = self._call_ckan('workflow_transition_create', access_token, **input_dict)
+        except HTTPException as e:
+            if e.status_code == HTTP_400_BAD_REQUEST and 'Unique constraint violation' in e.detail:
+                # the transition already exists; nothing to do
+                return workflow_transition
+            else:
+                raise
+
+        return WorkflowTransition(
+            from_key=ckan_workflow_transition['from_state_id'],
+            to_key=ckan_workflow_transition['to_state_id'],
+        )
+
+    def list_workflow_annotations(self,
+                                  access_token: str,
+                                  ) -> List[WorkflowAnnotation]:
+        workflow_annotation_list = self._call_ckan(
+            'workflow_annotation_list',
+            access_token,
+            all_fields=True,
+            deserialize_json=True,
+        )
+        return [WorkflowAnnotation(
+            key=workflow_annotation['name'],
+            attributes=workflow_annotation['attributes'],
+        ) for workflow_annotation in workflow_annotation_list]
+
+    def create_or_update_workflow_annotation(self,
+                                             workflow_annotation: WorkflowAnnotation,
+                                             access_token: str,
+                                             ) -> WorkflowAnnotation:
+        input_dict = {
+            'name': workflow_annotation.key,
+            'attributes': json.dumps(workflow_annotation.attributes),
+        }
+        try:
+            ckan_workflow_annotation = self._call_ckan('workflow_annotation_create', access_token, **input_dict)
+        except HTTPException as e:
+            if e.status_code == HTTP_400_BAD_REQUEST and 'Duplicate name: Workflow Annotation' in e.detail:
+                input_dict['id'] = input_dict['name']
+                ckan_workflow_annotation = self._call_ckan('workflow_annotation_update', access_token, **input_dict)
+            else:
+                raise
+
+        return WorkflowAnnotation(
+            key=ckan_workflow_annotation['name'],
+            attributes=json.loads(ckan_workflow_annotation['attributes']),
         )
