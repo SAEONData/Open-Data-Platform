@@ -89,8 +89,8 @@ class CKANClient:
             schema_key=ckan_record['metadata_standard_id'],
             metadata=ckan_record['metadata_json'],
             id=ckan_record['id'],
-            pid=ckan_record['name'] if ckan_record['name'] != ckan_record['id'] else None,
             doi=ckan_record['doi'] or None,
+            sid=ckan_record['sid'] or None,
             validated=ckan_record['validated'],
             errors=ckan_record['errors'],
             state=ckan_record['workflow_state_id'],
@@ -102,12 +102,12 @@ class CKANClient:
         Convert a MetadataRecordIn object into a CKAN metadata record dict.
         """
         return {
+            'doi': metadata_record.doi or '',
+            'sid': metadata_record.sid or '',
             'owner_org': institution_key,
             'metadata_collection_id': metadata_record.collection_key,
             'metadata_standard_id': metadata_record.schema_key,
             'metadata_json': json.dumps(metadata_record.metadata),
-            'doi': metadata_record.doi or '',
-            'auto_assign_doi': metadata_record.auto_assign_doi,
         }
 
     def list_metadata_records(self,
