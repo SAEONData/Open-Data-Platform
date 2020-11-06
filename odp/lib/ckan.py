@@ -492,12 +492,11 @@ class CKANClient:
             else:
                 raise
 
-        for attr_mapping in metadata_schema.attr_mappings:
+        for record_attr, json_path in metadata_schema.attr_mappings.items():
             input_dict = {
                 'metadata_standard_id': ckan_md_standard['id'],
-                'record_attr': attr_mapping.record_attr,
-                'json_path': attr_mapping.json_path,
-                'is_key': attr_mapping.is_key,
+                'record_attr': record_attr,
+                'json_path': json_path,
             }
             self._call_ckan('metadata_json_attr_map_create', access_token, **input_dict)
 
