@@ -68,17 +68,6 @@ Run the following commands in the `deploy` subdirectory:
     docker run -it --rm "${HYDRA_IMAGE}" migrate sql --yes "postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASS}@${HYDRA_DB_HOST}:5432/${HYDRA_DB_NAME}?sslmode=disable"
 
 ## Installing / upgrading ODP services:
-
-### System configuration
-The following command must be run on the host in order for the elasticsearch container to work:
-
-    sudo sysctl -w vm.max_map_count=262144
-
-To make the change permanent, edit the file `/etc/sysctl.conf` and add the following line:
-
-    vm.max_map_count=262144
-
-### Docker containers
 Run the following commands in the `deploy` subdirectory:
 
     docker-compose build --no-cache

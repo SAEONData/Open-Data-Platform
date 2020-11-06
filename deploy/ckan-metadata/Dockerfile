@@ -34,7 +34,6 @@ ARG CKAN_CURATOR_ROLE
 ARG CKAN_HARVESTER_ROLE
 ARG CKAN_CONTRIBUTOR_ROLE
 ARG DOI_PREFIX
-ARG ELASTIC_AGENT_URL
 ARG HYDRA_PUBLIC_URL
 ARG OAUTH2_CLIENT_ID
 ARG OAUTH2_CLIENT_SECRET
@@ -43,7 +42,6 @@ ARG IDENTITY_SERVICE_URL
 ARG ODP_INTROSPECTION_URL
 ARG SOLR_URL
 ARG REDIS_URL
-ARG RABBITMQ_HOST
 
 RUN paster make-config ckan ckan.ini
 RUN sed -i "s%sqlalchemy.url =.*%sqlalchemy.url = ${CKAN_DB_URL}%" ckan.ini
@@ -52,14 +50,13 @@ RUN sed -i "s/ckan.auth.user_create_groups =.*/ckan.auth.user_create_groups = tr
 RUN sed -i "s/ckan.auth.create_user_via_api =.*/ckan.auth.create_user_via_api = true/" ckan.ini
 RUN sed -i "s%#solr_url =.*%solr_url = ${SOLR_URL}%" ckan.ini
 RUN sed -i "s%#ckan.redis.url =.*%ckan.redis.url = ${REDIS_URL}%" ckan.ini
-RUN sed -i "s/ckan.plugins =.*/ckan.plugins = metadata_framework openidconnect jsonpatch metadata_elasticsearch metadata_infrastructure_ui/" ckan.ini
+RUN sed -i "s/ckan.plugins =.*/ckan.plugins = metadata_framework openidconnect jsonpatch metadata_infrastructure_ui/" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.metadata.admin_org = ${CKAN_ADMIN_ORG}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.metadata.admin_role = ${CKAN_ADMIN_ROLE}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.metadata.curator_role = ${CKAN_CURATOR_ROLE}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.metadata.harvester_role = ${CKAN_HARVESTER_ROLE}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.metadata.contributor_role = ${CKAN_CONTRIBUTOR_ROLE}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.metadata.doi_prefix = ${DOI_PREFIX}" ckan.ini
-RUN sed -i "/\[app:main\]/a ckan.metadata.elastic.search_agent_url = ${ELASTIC_AGENT_URL}" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.userinfo_endpoint = ${HYDRA_PUBLIC_URL}/userinfo" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.authorization_endpoint = ${HYDRA_PUBLIC_URL}/oauth2/auth" ckan.ini
 RUN sed -i "/\[app:main\]/a ckan.openidconnect.token_endpoint = ${HYDRA_PUBLIC_URL}/oauth2/token" ckan.ini

@@ -5,12 +5,6 @@ networks:
     name: odp-net
   ckan-net:
     name: ckan-net
-  elastic-net:
-    name: elastic-net
-
-volumes:
-  elastic-data:
-    name: elastic-data
 
 services:
   odp-identity:
@@ -220,10 +214,8 @@ services:
         - OAUTH2_CLIENT_SECRET=${CKAN_CLIENT_SECRET}
         - OAUTH2_SCOPE=ODP.Metadata
         - IDENTITY_SERVICE_URL=${ODP_PUBLIC_URL}/id
-        - ELASTIC_AGENT_URL=http://es-agent:9210
         - SOLR_URL=http://solr:8983/solr
         - REDIS_URL=http://redis:6379/0
-        - RABBITMQ_HOST=rabbitmq
         - CKAN_ADMIN_ORG=saeon
         - CKAN_ADMIN_ROLE=admin
         - CKAN_CURATOR_ROLE=curator
@@ -231,7 +223,6 @@ services:
         - CKAN_CONTRIBUTOR_ROLE=contributor
     networks:
       - ckan-net
-      - elastic-net
     ports:
       - "5000:5000"
     environment:
@@ -240,56 +231,6 @@ services:
     depends_on:
       - solr
       - redis
-      - rabbitmq
-    restart: always
-
-  pycsw:
-    container_name: pycsw
-    build:
-      context: pycsw
-      args:
-        - ELASTIC_AGENT_SEARCH_URL=http://es-agent:9210/search
-    networks:
-      - elastic-net
-    ports:
-      - "8000:8000"
-    depends_on:
-      - es-agent
-    restart: always
-
-  es-agent:
-    container_name: es-agent
-    build:
-      context: es-agent
-    networks:
-      - elastic-net
-    ports:
-      - "9210:9210"
-    environment:
-      - ELASTIC_AGENT_HOST=localhost
-      - ELASTIC_AGENT_PORT=9210
-      - ELASTIC_SEARCH_HOST=elasticsearch
-      - ELASTIC_SEARCH_PORT=9200
-    depends_on:
-      - elasticsearch
-    restart: always
-
-  elasticsearch:
-    container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.2
-    networks:
-      - elastic-net
-    ports:
-      - "9200:9200"
-    environment:
-      - cluster.name=docker-cluster
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - elastic-data:/usr/share/elasticsearch/data/
     restart: always
 
   solr:
@@ -303,13 +244,6 @@ services:
   redis:
     container_name: redis
     image: redis:5
-    networks:
-      - ckan-net
-    restart: always
-
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:3
     networks:
       - ckan-net
     restart: always

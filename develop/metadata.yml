@@ -1,51 +1,10 @@
 version: "3.5"
 
 networks:
-  elastic-net:
-    name: elastic-net
   ckan-net:
     name: ckan-net
 
-volumes:
-  elastic-data:
-    name: elastic-data
-
 services:
-  es-agent:
-    container_name: es-agent
-    build:
-      context: ../deploy/es-agent
-    networks:
-      - elastic-net
-    ports:
-      - "9210:9210"
-    environment:
-      - ELASTIC_AGENT_HOST=localhost
-      - ELASTIC_AGENT_PORT=9210
-      - ELASTIC_SEARCH_HOST=elasticsearch
-      - ELASTIC_SEARCH_PORT=9200
-    depends_on:
-      - elasticsearch
-    restart: always
-
-  elasticsearch:
-    container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.2
-    networks:
-      - elastic-net
-    ports:
-      - "9200:9200"
-    environment:
-      - cluster.name=docker-cluster
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - elastic-data:/usr/share/elasticsearch/data/
-    restart: always
-
   solr:
     container_name: solr
     build:
@@ -63,13 +22,4 @@ services:
       - ckan-net
     ports:
       - "6379:6379"
-    restart: always
-
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:3
-    networks:
-      - ckan-net
-    ports:
-      - "5672:5672"
     restart: always

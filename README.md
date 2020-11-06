@@ -60,9 +60,6 @@ containerization technology.
 and OpenID Connect provider, which performs authentication, session management and
 issuance of ID, access and refresh tokens.
 
-### Elasticsearch
-SAEON's metadata discovery catalogue runs on [Elasticsearch](https://www.elastic.co/).
-
 ### Metadata Management System
 The CKAN-based metadata management system provides storage and curation functions
 for SAEON-hosted metadata.
@@ -71,12 +68,6 @@ Source repositories:
 - https://github.com/SAEONData/ckanext-metadata
 - https://github.com/SAEONData/ckanext-accesscontrol
 - https://github.com/SAEONData/ckanext-jsonpatch
-
-### PyCSW
-OGC-compliant CSW server providing a harvesting endpoint for published metadata.
-
-Source repository:
-- https://github.com/SAEONData/pycsw
 
 ## Deployment
 
