@@ -26,10 +26,11 @@ class CKANHarvester(Harvester):
             raise TypeError
 
         self.select_records = text(f"""
-            SELECT p.id, p.private, p.state, p_doi.value doi, p_json.value metadata,
+            SELECT p.id, p.private, p.state, p_doi.value doi, p_sid.value sid, p_json.value metadata,
                    g_inst.title institution, g_coll.title collection, g_coll.id collection_id,
                    ms.standard_name || ' ' || ms.standard_version "schema"
             FROM package p JOIN package_extra p_doi ON p.id = p_doi.package_id AND p_doi.key = 'doi'
+                           JOIN package_extra p_sid ON p.id = p_sid.package_id AND p_sid.key = 'sid'
                            JOIN package_extra p_json ON p.id = p_json.package_id AND p_json.key = 'metadata_json'
                            JOIN package_extra p_coll ON p.id = p_coll.package_id AND p_coll.key = 'metadata_collection_id'
                            JOIN package_extra p_schema ON p.id = p_schema.package_id AND p_schema.key = 'metadata_standard_id'
@@ -65,6 +66,7 @@ class CKANHarvester(Harvester):
             yield CatalogueRecord(
                 id=record['id'],
                 doi=record['doi'] or None,
+                sid=record['sid'] or None,
                 institution=record['institution'],
                 collection=record['collection'],
                 projects=[project['project'] for project in projects],

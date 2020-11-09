@@ -13,6 +13,7 @@ class CatalogueRecord(BaseModel):
     # as it is stored to a back-end JSONB column
     id: str
     doi: str = None
+    sid: str = None
     institution: str = None
     collection: str = None
     projects: List[str] = None
