@@ -37,33 +37,33 @@ class DataciteCatalogue(Catalogue):
         self.max_retries = max_retries
 
     def synchronize(self) -> None:
-        updated_records = session.query(MetadataStatus.metadata_id, DataciteStatus). \
-            outerjoin(DataciteStatus).filter(
-            or_(
-                DataciteStatus.metadata_id == None,
-                DataciteStatus.checked < MetadataStatus.updated,
-            )
-        ).limit(self.batch_size).all()
-
-        # clear errors and retries for updated records
-        for record_id, dcstatus in updated_records:
-            if dcstatus is not None and dcstatus.error is not None:
-                dcstatus.error = None
-                dcstatus.retries = None
-
-        failed_ids = session.query(MetadataStatus.metadata_id).join(DataciteStatus).filter(
-            and_(
-                DataciteStatus.error != None,
-                DataciteStatus.retries < self.max_retries,
-            ),
-        ).limit(self.batch_size).all()
-
-        syncable_ids = [record_id for record_id, dcstatus in updated_records] + \
-                       [record_id for (record_id,) in failed_ids]
         published = 0
         unpublished = 0
         errors = 0
         try:
+            updated_records = session.query(MetadataStatus.metadata_id, DataciteStatus). \
+                outerjoin(DataciteStatus).filter(
+                or_(
+                    DataciteStatus.metadata_id == None,
+                    DataciteStatus.checked < MetadataStatus.updated,
+                )
+            ).limit(self.batch_size).all()
+
+            # clear errors and retries for updated records
+            for record_id, dcstatus in updated_records:
+                if dcstatus is not None and dcstatus.error is not None:
+                    dcstatus.error = None
+                    dcstatus.retries = None
+
+            failed_ids = session.query(MetadataStatus.metadata_id).join(DataciteStatus).filter(
+                and_(
+                    DataciteStatus.error != None,
+                    DataciteStatus.retries < self.max_retries,
+                ),
+            ).limit(self.batch_size).all()
+
+            syncable_ids = [record_id for record_id, dcstatus in updated_records] + \
+                           [record_id for (record_id,) in failed_ids]
             logger.info(f"Selected {len(updated_records)} updated records and {len(failed_ids)} "
                         "previously failed records to sync with DataCite")
             for record_id in syncable_ids:
@@ -71,6 +71,9 @@ class DataciteCatalogue(Catalogue):
                 published += pub
                 unpublished += unpub
                 errors += err
+
+        except Exception as e:
+            logger.critical(str(e))
         finally:
             logger.info(f"Published {published} records to DataCite; "
                         f"un-published {unpublished} records from DataCite; "
@@ -87,60 +90,61 @@ class DataciteCatalogue(Catalogue):
                 filter(MetadataStatus.metadata_id == record_id). \
                 one()
 
-            if dcstatus is None:
-                dcstatus = DataciteStatus(metadata_id=record_id, published=False)
-
             doi = mdstatus.catalogue_record['doi']
-            try:
-                datacite_record = DataciteRecordIn(
-                    doi=doi,
-                    url=f'{self.doi_landing_page_base_url}/{record_id}',
-                    metadata=mdstatus.catalogue_record['metadata'],
-                )
-                datacite_record_dict = datacite_record.dict()
-            except pydantic.ValidationError:
-                datacite_record = None
-                datacite_record_dict = None
+            if dcstatus is None and doi is not None:
+                dcstatus = DataciteStatus(metadata_id=record_id, doi=doi, published=False)
 
-            publish = mdstatus.published and doi is not None and datacite_record is not None
-            try:
-                if dcstatus.published and (not publish or dcstatus.doi != doi):
-                    # the record is currently published and should be unpublished;
-                    # if the DOI has changed, we must also first unpublish the record
-                    logger.info(f"Unpublishing record {record_id} with DOI {dcstatus.doi}")
-                    self.datacite.unpublish_doi(
-                        dcstatus.doi,
+            if dcstatus is not None:
+                try:
+                    datacite_record = DataciteRecordIn(
+                        doi=doi,
+                        url=f'{self.doi_landing_page_base_url}/{record_id}',
+                        metadata=mdstatus.catalogue_record['metadata'],
                     )
-                    dcstatus.published = False
-                    dcstatus.updated = datetime.now(timezone.utc)
-                    unpublished = True
+                    datacite_record_dict = datacite_record.dict()
+                except pydantic.ValidationError:
+                    datacite_record = None
+                    datacite_record_dict = None
 
-                if publish and (not dcstatus.published or dcstatus.datacite_record != datacite_record_dict):
-                    # the record should be published; it is either not currently published,
-                    # or it is published but one or more properties has changed
-                    logger.info(f"Publishing record {record_id} with DOI {doi}")
-                    self.datacite.publish_doi(
-                        datacite_record,
-                    )
-                    dcstatus.doi = doi
-                    dcstatus.datacite_record = datacite_record_dict
-                    dcstatus.published = True
-                    dcstatus.updated = datetime.now(timezone.utc)
-                    published = True
+                publish = mdstatus.published and doi is not None and datacite_record is not None
+                try:
+                    if dcstatus.published and (not publish or dcstatus.doi.lower() != doi.lower()):
+                        # the record is currently published and should be unpublished;
+                        # if the DOI has changed, we must also first unpublish the record
+                        logger.info(f"Unpublishing record {record_id} with DOI {dcstatus.doi}")
+                        self.datacite.unpublish_doi(
+                            dcstatus.doi,
+                        )
+                        dcstatus.published = False
+                        dcstatus.updated = datetime.now(timezone.utc)
+                        unpublished = True
 
-                if not (published or unpublished):
-                    logger.debug(f"No change for record {record_id}")
+                    if publish and (not dcstatus.published or dcstatus.datacite_record != datacite_record_dict):
+                        # the record should be published; it is either not currently published,
+                        # or it is published but one or more properties has changed
+                        logger.info(f"Publishing record {record_id} with DOI {doi}")
+                        self.datacite.publish_doi(
+                            datacite_record,
+                        )
+                        dcstatus.doi = doi
+                        dcstatus.datacite_record = datacite_record_dict
+                        dcstatus.published = True
+                        dcstatus.updated = datetime.now(timezone.utc)
+                        published = True
 
-                dcstatus.error = None
-                dcstatus.retries = None
+                    if not (published or unpublished):
+                        logger.debug(f"No change for record {record_id}")
 
-            except DataciteError as e:
-                dcstatus.error = f'{e.status_code}: {e.error_detail}'
-                dcstatus.retries = dcstatus.retries + 1 if dcstatus.retries is not None else 0
-                logger.error(f"Error syncing record {record_id} with DataCite: {dcstatus.error}")
-                error = True
+                    dcstatus.error = None
+                    dcstatus.retries = None
 
-            dcstatus.checked = datetime.now(timezone.utc)
-            dcstatus.save()
+                except DataciteError as e:
+                    dcstatus.error = f'{e.status_code}: {e.error_detail}'
+                    dcstatus.retries = dcstatus.retries + 1 if dcstatus.retries is not None else 0
+                    logger.error(f"Error syncing record {record_id} with DataCite: {dcstatus.error}")
+                    error = True
+
+                dcstatus.checked = datetime.now(timezone.utc)
+                dcstatus.save()
 
         return published, unpublished, error
