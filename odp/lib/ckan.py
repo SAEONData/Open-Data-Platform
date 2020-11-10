@@ -157,7 +157,6 @@ class CKANClient:
             **input_dict,
         )
         record_id = ckan_record['id']
-        self._annotate_metadata_record(record_id, metadata_record, access_token)
 
         if not ckan_record['validated']:
             # try to validate the record, for convenience
@@ -190,7 +189,6 @@ class CKANClient:
             deserialize_json=True,
             **input_dict,
         )
-        self._annotate_metadata_record(record_id, metadata_record, access_token)
 
         if not ckan_record['validated']:
             # try to validate the record, for convenience
@@ -264,45 +262,6 @@ class CKANClient:
         return MetadataWorkflowResult(
             success=not workflow_errors,
             errors=workflow_errors,
-        )
-
-    def _annotate_metadata_record(self,
-                                  record_id: str,
-                                  metadata_record: MetadataRecordIn,
-                                  access_token: str,
-                                  ) -> None:
-
-        def annotate(key: str, value: Dict[str, Any]):
-            try:
-                self._call_ckan('metadata_record_workflow_annotation_create', access_token,
-                                id=record_id, key=key, value=json.dumps(value))
-            except HTTPException as e:
-                err = None
-                if e.status_code == 400:
-                    # if we are doing a metadata record update, create annotation may fail with a 400 (duplicate),
-                    # so we try updating the annotation
-                    try:
-                        self._call_ckan('metadata_record_workflow_annotation_update', access_token,
-                                        id=record_id, key=key, value=json.dumps(value))
-                    except HTTPException as e:
-                        err = e.detail
-                else:
-                    err = e.detail
-
-                if err:
-                    logger.error(f'Error setting "{key}" annotation on metadata record {record_id}: {err}')
-
-        annotate(
-            key='terms_and_conditions',
-            value={'accepted': metadata_record.terms_conditions_accepted},
-        )
-        annotate(
-            key='data_agreement',
-            value={'accepted': metadata_record.data_agreement_accepted, 'href': metadata_record.data_agreement_url},
-        )
-        annotate(
-            key='capture_info',
-            value={'capture_method': metadata_record.capture_method},
         )
 
     @staticmethod

@@ -11,21 +11,12 @@ DOI_REGEX = r'^10\.\d{4,}(\.\d+)*/[-._;()/:a-zA-Z0-9]+$'
 SID_REGEX = r'^[-._;()/:a-zA-Z0-9]+$'
 
 
-class CaptureMethod(str, Enum):
-    WIZARD = 'wizard'
-    HARVESTER = 'harvester'
-
-
 class MetadataRecordIn(BaseModel):
     doi: str = Field(None, regex=DOI_REGEX, description="Digital Object Identifier (DOI)")
     sid: str = Field(None, regex=SID_REGEX, description="Secondary Identifier; mandatory if DOI is not given")
     collection_key: str
     schema_key: str
     metadata: Dict[str, Any]
-    terms_conditions_accepted: bool
-    data_agreement_accepted: bool
-    data_agreement_url: AnyHttpUrl
-    capture_method: CaptureMethod
 
     @validator('sid', always=True)
     def validate_sid(cls, sid, values):
@@ -48,7 +39,7 @@ class MetadataRecord(BaseModel):
     institution_key: str
     collection_key: str
     schema_key: str
-    metadata: Dict
+    metadata: Dict[str, Any]
     validated: bool
     errors: Dict
     state: Optional[str]
