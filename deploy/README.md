@@ -43,7 +43,7 @@ containing the following environment variables:
 - **`DATACITE_PUBLISH_BATCH_SIZE`**: maximum number of records to sync in a given publishing run
 - **`TZ`**: sets the timezone of containers; e.g. `Africa/Johannesburg`
 
-## ODP database initialization
+## ODP database
 Create a Python 3.8 virtual environment in the project root directory on the target machine,
 activate the environment and `pip install -e` the project (no extras required). Switch to the
 `migrate` subdirectory and create a `.env` file containing appropriately set `ODP_DB_*`
@@ -59,16 +59,18 @@ To upgrade an existing instance, run:
     alembic upgrade head
     python -m initdata
 
-## Hydra database initialization
-_Note: Do this before starting the Hydra container._
+## Hydra database
+_N.B._
+- Make sure the `HYDRA_IMAGE` configuration value has been updated to the desired version of Hydra.
+- Make sure the Hydra container is stopped before running the Hydra SQL migrations.
 
 Run the following commands in the `deploy` subdirectory:
 
     source .env
     docker run -it --rm "${HYDRA_IMAGE}" migrate sql --yes "postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASS}@${HYDRA_DB_HOST}:5432/${HYDRA_DB_NAME}?sslmode=disable"
 
-## Installing / upgrading ODP services:
-Run the following commands in the `deploy` subdirectory:
+## ODP services
+To (re)build and install all ODP services, run the following commands in the `deploy` subdirectory:
 
     docker-compose build --no-cache
     docker-compose up -d
