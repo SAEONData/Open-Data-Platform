@@ -28,7 +28,7 @@ class CKANHarvester(Harvester):
         self.select_records = text(f"""
             SELECT p.id, p.private, p.state, p_doi.value doi, p_sid.value sid, p_json.value metadata,
                    g_inst.title institution, g_coll.title collection, g_coll.id collection_id,
-                   ms.standard_name || ' ' || ms.standard_version "schema"
+                   ms.standard_name "schema"
             FROM package p JOIN package_extra p_doi ON p.id = p_doi.package_id AND p_doi.key = 'doi'
                            JOIN package_extra p_sid ON p.id = p_sid.package_id AND p_sid.key = 'sid'
                            JOIN package_extra p_json ON p.id = p_json.package_id AND p_json.key = 'metadata_json'
