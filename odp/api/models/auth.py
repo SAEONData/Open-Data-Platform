@@ -19,6 +19,7 @@ class Role(str, Enum):
 class Scope(str, Enum):
     ADMIN = 'ODP.Admin'
     METADATA = 'ODP.Metadata'
+    CATALOGUE = 'ODP.Catalogue'
 
 
 class TokenType(str, Enum):

@@ -29,6 +29,7 @@ def initialize_scopes():
     rows = [
         {'key': 'ODP.Admin', 'description': 'Platform administration functions'},
         {'key': 'ODP.Metadata', 'description': 'Metadata management functions'},
+        {'key': 'ODP.Catalogue', 'description': 'The ODP Metadata Catalogue'},
         {'key': 'SAEON.Observations.WebAPI', 'description': 'The SAEON Observations Database'},
     ]
     for row in rows:
@@ -46,6 +47,7 @@ def initialize_capabilities():
     capabilities = {
         'ODP.Admin': ['admin', 'member'],
         'ODP.Metadata': ['admin', 'curator', 'harvester', 'contributor', 'member'],
+        'ODP.Catalogue': ['harvester'],
         'SAEON.Observations.WebAPI': ['admin', 'contributor'],
     }
     for scope, roles in capabilities.items():

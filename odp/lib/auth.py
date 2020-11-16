@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from odp.api.models.auth import (
     AccessTokenData,
@@ -9,10 +9,10 @@ from odp.api.models.auth import (
 )
 from odp.config import config
 from odp.db import session as db_session
-from odp.db.models.user_privilege import UserPrivilege
 from odp.db.models.role import Role
 from odp.db.models.scope import Scope
 from odp.db.models.user import User
+from odp.db.models.user_privilege import UserPrivilege
 
 
 def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTokenData]:
@@ -73,9 +73,9 @@ def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTo
 
 def check_access(
         access_token_data: AccessTokenData,
-        require_institution: str = None,
-        require_scope: ScopeEnum = None,
-        require_role: Tuple[RoleEnum, ...] = (),
+        require_institution: Optional[str],
+        require_scope: ScopeEnum,
+        require_role: Tuple[RoleEnum, ...],
 ) -> bool:
     """
     Determine whether the access rights associated with a user's access
@@ -84,7 +84,8 @@ def check_access(
     require_institution, require_scope and require_role indicate the
     corresponding tuple that must be present in the access token data,
     in order for the request to be allowed. Any of the require_role
-    values may match.
+    values may match. If require_institution is None, only scope and
+    role need match.
 
     A user with an admin-type role (e.g. 'admin' or 'curator') within
     the admin institution will be considered to have the associated
@@ -94,6 +95,9 @@ def check_access(
     def is_admin_role(role_key):
         return db_session.query(Role.admin).filter_by(key=role_key).scalar()
 
+    if not require_scope or not require_role:
+        raise ValueError("require_scope and require_role are mandatory")
+
     if access_token_data.superuser:
         return True
 
@@ -102,7 +106,8 @@ def check_access(
     return any(
         ar.scope_key == require_scope and
         ar.role_key in require_role and
-        (ar.institution_key == require_institution or
+        (require_institution is None or
+         ar.institution_key == require_institution or
          (ar.institution_key == admin_institution and is_admin_role(ar.role_key)))
         for ar in access_token_data.access_rights
     )
