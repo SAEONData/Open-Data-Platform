@@ -4,14 +4,14 @@ from sqlalchemy.dialects.postgresql import JSONB
 from odp.db import Base
 
 
-class DataciteStatus(Base):
-    """Model representing the status of metadata on DataCite servers."""
+class DataciteRecord(Base):
+    """Model of a metadata record as published to DataCite."""
 
-    __tablename__ = 'datacite_status'
+    __tablename__ = 'datacite_record'
 
-    metadata_id = Column(String, ForeignKey('metadata_status.metadata_id', ondelete='RESTRICT'), primary_key=True)
+    metadata_id = Column(String, ForeignKey('catalogue_record.metadata_id', ondelete='RESTRICT'), primary_key=True)
     doi = Column(String, unique=True, nullable=False)
-    datacite_record = Column(JSONB)
+    datacite_record = Column(JSONB)  # odp.api.models.datacite.DataciteRecord
     published = Column(Boolean, nullable=False)
     updated = Column(TIMESTAMP(timezone=True))
     checked = Column(TIMESTAMP(timezone=True), nullable=False)

@@ -6,13 +6,13 @@ from sqlalchemy.dialects.postgresql import JSONB
 from odp.db import Base
 
 
-class MetadataStatus(Base):
-    """Model representing the ODP metadata catalogue."""
+class CatalogueRecord(Base):
+    """Model of a metadata record as published to the ODP catalogue."""
 
-    __tablename__ = 'metadata_status'
+    __tablename__ = 'catalogue_record'
 
     metadata_id = Column(String, primary_key=True)
-    catalogue_record = Column(JSONB, nullable=False)
+    catalogue_record = Column(JSONB, nullable=False)  # odp.api.models.catalogue.CatalogueRecord
     published = Column(Boolean, nullable=False)
     created = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc))
     updated = Column(TIMESTAMP(timezone=True), nullable=False)
@@ -21,4 +21,4 @@ class MetadataStatus(Base):
     # We want to be able to sort on created to provide a stable ordering at the
     # catalogue harvest endpoint. However, given that a series of consecutive
     # records might have identical timestamps, we order by id as well.
-    __table_args__ = (Index('ix_metadata_status_created_metadata_id', 'created', 'metadata_id'),)
+    __table_args__ = (Index('ix_catalogue_record_created_metadata_id', 'created', 'metadata_id'),)

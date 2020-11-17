@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timezone
 
 from odp.db import transaction
-from odp.db.models import MetadataStatus
+from odp.db.models import CatalogueRecord
 from odp.publish.catalogue import Catalogue
 from odp.publish.harvester import Harvester
 
@@ -19,24 +19,24 @@ class ODPCatalogue(Catalogue):
         try:
             for record in self.harvester.getrecords():
                 with transaction():
-                    mdstatus = MetadataStatus.query.get(record.id)
+                    catrec = CatalogueRecord.query.get(record.id)
 
                     # only add new records to the catalogue if they're marked as
                     # published in the primary metadata store; if a record is later
                     # un-published, it will be flagged as such to enable external
                     # harvesters to handle as appropriate, but we don't need records
                     # that have never been published appearing in the catalogue
-                    if mdstatus is None and record.published:
-                        mdstatus = MetadataStatus(metadata_id=record.id)
+                    if catrec is None and record.published:
+                        catrec = CatalogueRecord(metadata_id=record.id)
 
-                    if mdstatus is not None:
-                        mdstatus.checked = (now := datetime.now(timezone.utc))
-                        if mdstatus.catalogue_record != (catalogue_record := record.dict(by_alias=True)):
-                            mdstatus.catalogue_record = catalogue_record
-                            mdstatus.published = record.published
-                            mdstatus.updated = now
+                    if catrec is not None:
+                        catrec.checked = (now := datetime.now(timezone.utc))
+                        if catrec.catalogue_record != (catalogue_record := record.dict(by_alias=True)):
+                            catrec.catalogue_record = catalogue_record
+                            catrec.published = record.published
+                            catrec.updated = now
                             updated += 1
-                        mdstatus.save()
+                        catrec.save()
 
                 harvested += 1
                 self.harvester.setchecked(record.id)
