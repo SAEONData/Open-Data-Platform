@@ -16,6 +16,8 @@ app = FastAPI(
     description="The SAEON Open Data Platform Administrative API",
     version=pkg_resources.require('Open-Data-Platform')[0].version,
     root_path=config.ODP.API.PATH_PREFIX,
+    docs_url='/interactive',
+    redoc_url='/docs',
 )
 
 app.include_router(
