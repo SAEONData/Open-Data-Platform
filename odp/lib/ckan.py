@@ -144,6 +144,42 @@ class CKANClient:
 
         return self._translate_from_ckan_record(ckan_record)
 
+    def get_metadata_record_by_doi(self,
+                                   institution_key: str,
+                                   doi: str,
+                                   access_token: str,
+                                   ) -> MetadataRecord:
+        ckan_record = self._call_ckan(
+            'metadata_record_by_doi',
+            access_token,
+            doi=doi,
+            deserialize_json=True,
+        )
+        # check that the record has not been marked as deleted in CKAN, and
+        # that it belongs to the given institution
+        if ckan_record['state'] != 'active' or ckan_record['owner_org'] != institution_key:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="CKAN resource not found")
+
+        return self._translate_from_ckan_record(ckan_record)
+
+    def get_metadata_record_by_sid(self,
+                                   institution_key: str,
+                                   sid: str,
+                                   access_token: str,
+                                   ) -> MetadataRecord:
+        ckan_record = self._call_ckan(
+            'metadata_record_by_sid',
+            access_token,
+            sid=sid,
+            deserialize_json=True,
+        )
+        # check that the record has not been marked as deleted in CKAN, and
+        # that it belongs to the given institution
+        if ckan_record['state'] != 'active' or ckan_record['owner_org'] != institution_key:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="CKAN resource not found")
+
+        return self._translate_from_ckan_record(ckan_record)
+
     def create_or_update_metadata_record(self,
                                          institution_key: str,
                                          metadata_record: MetadataRecordIn,

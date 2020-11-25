@@ -28,7 +28,7 @@ async def list_metadata_records(
         institution_key, pagination, auth_data.access_token)
 
 
-@router.get('/{record_id:path}', response_model=MetadataRecord)
+@router.get('/{record_id}', response_model=MetadataRecord)
 async def get_metadata_record(
         institution_key: str,
         record_id: str,
@@ -37,6 +37,28 @@ async def get_metadata_record(
 ):
     return ckan.get_metadata_record(
         institution_key, record_id, auth_data.access_token)
+
+
+@router.get('/doi/{doi:path}', response_model=MetadataRecord)
+async def get_metadata_record_by_doi(
+        institution_key: str,
+        doi: str,
+        ckan: CKANClient = Depends(get_ckan_client),
+        auth_data: AuthData = Depends(Authorizer(Scope.METADATA, *Role.all())),
+):
+    return ckan.get_metadata_record_by_doi(
+        institution_key, doi, auth_data.access_token)
+
+
+@router.get('/sid/{sid:path}', response_model=MetadataRecord)
+async def get_metadata_record_by_sid(
+        institution_key: str,
+        sid: str,
+        ckan: CKANClient = Depends(get_ckan_client),
+        auth_data: AuthData = Depends(Authorizer(Scope.METADATA, *Role.all())),
+):
+    return ckan.get_metadata_record_by_sid(
+        institution_key, sid, auth_data.access_token)
 
 
 @router.post('/', response_model=MetadataRecord)
@@ -50,7 +72,7 @@ async def create_or_update_metadata_record(
         institution_key, metadata_record, auth_data.access_token)
 
 
-@router.put('/{record_id:path}', response_model=MetadataRecord)
+@router.put('/{record_id}', response_model=MetadataRecord)
 async def update_metadata_record(
         institution_key: str,
         record_id: str,
@@ -62,7 +84,7 @@ async def update_metadata_record(
         institution_key, record_id, metadata_record, auth_data.access_token)
 
 
-@router.delete('/{record_id:path}', response_model=bool)
+@router.delete('/{record_id}', response_model=bool)
 async def delete_metadata_record(
         institution_key: str,
         record_id: str,
@@ -73,7 +95,7 @@ async def delete_metadata_record(
         institution_key, record_id, auth_data.access_token)
 
 
-@router.post('/validate/{record_id:path}', response_model=MetadataValidationResult)
+@router.post('/validate/{record_id}', response_model=MetadataValidationResult)
 async def validate_metadata_record(
         institution_key: str,
         record_id: str,
@@ -84,7 +106,7 @@ async def validate_metadata_record(
         institution_key, record_id, auth_data.access_token)
 
 
-@router.post('/workflow/{record_id:path}', response_model=MetadataWorkflowResult)
+@router.post('/workflow/{record_id}', response_model=MetadataWorkflowResult)
 async def change_state_of_metadata_record(
         institution_key: str,
         record_id: str,
