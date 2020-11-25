@@ -107,7 +107,7 @@ class CKANClient:
             'owner_org': institution_key,
             'metadata_collection_id': metadata_record.collection_key,
             'metadata_standard_id': metadata_record.schema_key,
-            'metadata_json': json.dumps(metadata_record.metadata),
+            'metadata_json': json.dumps(metadata_record.metadata, ensure_ascii=False),
         }
 
     def list_metadata_records(self,
@@ -433,7 +433,7 @@ class CKANClient:
             'standard_name': metadata_schema.name,
             'standard_version': '',
             'parent_standard_id': '',
-            'metadata_template_json': json.dumps(metadata_schema.template),
+            'metadata_template_json': json.dumps(metadata_schema.template, ensure_ascii=False),
         }
         try:
             ckan_md_standard = self._call_ckan('metadata_standard_create', access_token, **input_dict)
@@ -461,7 +461,7 @@ class CKANClient:
 
         input_dict = {
             'name': metadata_schema.key,
-            'schema_json': json.dumps(metadata_schema.schema_),
+            'schema_json': json.dumps(metadata_schema.schema_, ensure_ascii=False),
             'metadata_standard_id': ckan_md_standard['id'],
             'organization_id': '',
             'infrastructure_id': '',
@@ -505,7 +505,7 @@ class CKANClient:
         input_dict = {
             'name': workflow_state.key,
             'title': workflow_state.name,
-            'workflow_rules_json': json.dumps(workflow_state.rules),
+            'workflow_rules_json': json.dumps(workflow_state.rules, ensure_ascii=False),
             'revert_state_id': workflow_state.revert_key or '',
             'metadata_records_private': not workflow_state.publish,
         }
@@ -581,7 +581,7 @@ class CKANClient:
                                              ) -> WorkflowAnnotation:
         input_dict = {
             'name': workflow_annotation.key,
-            'attributes': json.dumps(workflow_annotation.attributes),
+            'attributes': json.dumps(workflow_annotation.attributes, ensure_ascii=False),
         }
         try:
             ckan_workflow_annotation = self._call_ckan('workflow_annotation_create', access_token, **input_dict)
