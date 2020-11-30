@@ -22,3 +22,16 @@ def get_catalogue_record(record_id: str) -> Optional[CatalogueRecord]:
     catrec = db_session.query(CatalogueRecordORM).get(record_id)
     if catrec and catrec.published:
         return CatalogueRecord(**catrec.catalogue_record)
+
+
+def select_catalogue_records(ids: List[str], pagination: Pagination) -> List[CatalogueRecord]:
+    return [
+        CatalogueRecord(**catrec.catalogue_record)
+        for catrec in db_session.query(CatalogueRecordORM).
+            filter(CatalogueRecordORM.metadata_id.in_(ids)).
+            filter(CatalogueRecordORM.published == True).
+            order_by(CatalogueRecordORM.created, CatalogueRecordORM.metadata_id).
+            limit(pagination.limit).
+            offset(pagination.offset).
+            all()
+    ]
