@@ -1,7 +1,7 @@
 from flask_mail import Mail
 
 from odp.config import config
-from odp.lib.hydra import HydraAdminClient
+from odp.lib.hydra_admin import HydraAdminClient
 
 mail = Mail()
 

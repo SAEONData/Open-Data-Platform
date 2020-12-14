@@ -1,15 +1,12 @@
-from flask_login import LoginManager
 from flask_admin import Admin, AdminIndexView
+from flask_login import LoginManager
 
+from odp.admin.views import hydra_oauth2, user, member, institution, role, scope
 from odp.db import session as db_session
-from odp.db.models.user import User
-from odp.db.models.role import Role
-from odp.db.models.member import Member
-from odp.db.models.scope import Scope
-from odp.db.models.institution import Institution
+from odp.db.models import Institution, Member, Role, Scope, User
 
 login_manager = LoginManager()
-login_manager.login_view = 'odpadmin.login'
+login_manager.login_view = 'hydra.login'
 
 
 @login_manager.user_loader
@@ -19,8 +16,6 @@ def load_user(user_id):
 
 def init_app(app):
     login_manager.init_app(app)
-
-    from . import hydra_oauth2, user, member, institution, role, scope
     app.register_blueprint(hydra_oauth2.bp, url_prefix='/oauth2')
 
     home = AdminIndexView(

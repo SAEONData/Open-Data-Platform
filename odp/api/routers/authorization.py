@@ -11,7 +11,7 @@ from odp.api.models.auth import ValidToken, InvalidToken
 from odp.db.models.user import User
 from odp.lib import exceptions as x
 from odp.lib.auth import get_token_data
-from odp.lib.hydra import HydraAdminClient
+from odp.lib.hydra_admin import HydraAdminClient
 
 router = APIRouter()
 

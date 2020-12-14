@@ -26,7 +26,7 @@ services:
       - URLS_LOGIN=${ODP_IDENTITY_URL}/hydra/login
       - URLS_CONSENT=${ODP_IDENTITY_URL}/hydra/consent
       - URLS_LOGOUT=${ODP_IDENTITY_URL}/hydra/logout
-      - TTL_ACCESS_TOKEN=10000h
+      - TTL_ACCESS_TOKEN=168h
     depends_on:
       - hydra-db
     restart: always

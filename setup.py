@@ -15,13 +15,13 @@ setup(
     python_requires='~=3.8',
     install_requires=[
         'sqlalchemy',
-        'sqlalchemy-utils',
         'psycopg2',
         'alembic',
         'pydantic[email,dotenv]',
         'itsdangerous',
         'argon2-cffi',
         'requests',
+        'redis',
     ],
     extras_require={
         'api': [
@@ -38,13 +38,11 @@ setup(
             'flask-mail',
             'wtforms',
             'gunicorn',
+            'authlib',
         ],
         'test': [
             'pytest',
             'pytest-cov',
         ],
     },
-    dependency_links=[
-        'git+https://github.com/SAEONData/Hydra-OAuth2-Blueprint.git#egg=Hydra_OAuth2_Blueprint',
-    ],
 )

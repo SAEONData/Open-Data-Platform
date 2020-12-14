@@ -1,7 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.mutable import MutableDict
-from sqlalchemy_utils import JSONType
 
 from odp.db import Base
 
@@ -9,14 +7,26 @@ from odp.db import Base
 class OAuth2Token(Base):
     """
     Represents the OAuth2 token for a logged in user.
-
-    ``provider`` indicates the application for which the token is valid.
     """
     __tablename__ = 'oauth2_token'
-    __table_args__ = (UniqueConstraint('provider', 'user_id'),)
+    __table_args__ = (UniqueConstraint('client_id', 'user_id'),)
 
     id = Column(Integer, primary_key=True)
-    provider = Column(String, nullable=False, index=True)
+    client_id = Column(String, nullable=False)  # todo: foreign key ref to client
     user_id = Column(String, ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User')
-    token = Column(MutableDict.as_mutable(JSONType), nullable=False)
+
+    token_type = Column(String)
+    access_token = Column(String)
+    refresh_token = Column(String)
+    id_token = Column(String)
+    expires_at = Column(Integer)
+
+    def dict(self):
+        return {
+            'token_type': self.token_type,
+            'access_token': self.access_token,
+            'refresh_token': self.refresh_token,
+            'id_token': self.id_token,
+            'expires_at': self.expires_at,
+        }

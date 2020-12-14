@@ -1,5 +1,5 @@
 from odp.config import config
-from odp.lib.hydra import HydraAdminClient
+from odp.lib.hydra_admin import HydraAdminClient
 
 
 def get_hydra_admin() -> HydraAdminClient:

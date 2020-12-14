@@ -1,7 +1,15 @@
-from odp.db import session as db_session
-from odp.db.models.user import User
-from odp.db.models.oauth2_token import OAuth2Token
-from hydra_oauth2 import HydraOAuth2Blueprint
+from odp.config import config
+from odp.lib.hydra_oauth2 import HydraOAuth2Blueprint
 
-# Note: the blueprint name 'odpadmin' becomes the provider in the token model
-bp = HydraOAuth2Blueprint('odpadmin', __name__, db_session, User, OAuth2Token, 'admin.index')
+bp = HydraOAuth2Blueprint(
+    'hydra', __name__,
+    server_url=config.HYDRA.PUBLIC.URL,
+    client_id=config.ODP.ADMIN.UI.CLIENT_ID,
+    client_secret=config.ODP.ADMIN.UI.CLIENT_SECRET,
+    scope=config.ODP.ADMIN.UI.SCOPE,
+    verify_tls=config.ODP.ENV != 'development',
+    redirect_to='admin.index',
+    redis_host=config.REDIS.HOST,
+    redis_port=config.REDIS.PORT,
+    redis_db=config.REDIS.DB,
+)

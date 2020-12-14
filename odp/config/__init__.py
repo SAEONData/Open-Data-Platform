@@ -4,6 +4,7 @@ from odp.config.ckan import CKANConfig
 from odp.config.datacite import DataciteConfig
 from odp.config.hydra import HydraConfig
 from odp.config.odp import ODPConfig
+from odp.config.redis import RedisConfig
 
 
 class Config(BaseConfig):
@@ -15,6 +16,7 @@ class Config(BaseConfig):
         'CKAN': CKANConfig,
         'CATALOGUE': CatalogueConfig,
         'DATACITE': DataciteConfig,
+        'REDIS': RedisConfig,
     }
 
 
