@@ -61,7 +61,7 @@ services:
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - ODP_ADMIN_UI_CLIENT_ID
       - ODP_ADMIN_UI_CLIENT_SECRET
-      - ODP_ADMIN_UI_SCOPE=["openid","ODP.Admin"]
+      - ODP_ADMIN_UI_SCOPE=["openid","offline","ODP.Admin"]
       - ODP_ADMIN_INSTITUTION=saeon
       - ODP_ADMIN_ROLE=admin
       - ODP_ADMIN_SCOPE=ODP.Admin
