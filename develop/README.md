@@ -7,13 +7,14 @@ Clone the development branch of the ODP repo:
 
 Create and activate the Python virtual environment:
 
-    python3.8 -m venv Open-Data-Platform/.venv
-    source Open-Data-Platform/.venv/bin/activate
+    cd Open-Data-Platform/
+    python3.8 -m venv .venv
+    source .venv/bin/activate
     pip install -U pip setuptools
 
 Install the project and its dependencies:
 
-    pip install -e Open-Data-Platform/[api,ui,test]
+    pip install -e .[api,ui,test]
 
 ## Environment configuration
 Switch to the `develop` subdirectory and create a `.env` file by copying the adjacent
@@ -82,9 +83,10 @@ so as to use the `.env` file located there.
 To upgrade dependencies and re-generate the `requirements.txt` file for the ODP,
 carry out the following steps:
 
-- Activate the ODP Python virtual environment.
-- Upgrade Python libraries as necessary.
+- Delete your local ODP virtual environment: `rm -rf .venv`
+- Create a new virtual environment, and install the ODP project, as described under
+  [project installation](#project-installation).
 - Start up all ODP services as described above, and check that everything works as expected.
 - Ensure that unit tests all pass. (still to be implemented)
-- Switch to the project root directory and run the following command:
+- Run the following command in the project root directory:
 `pip freeze | sed -E '/^(-e\s|pkg-resources==)/d' > requirements.txt`
