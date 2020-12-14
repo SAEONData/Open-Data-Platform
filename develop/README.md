@@ -1,10 +1,9 @@
 # ODP Development
 
 ## Project installation
-Clone the relevant projects from GitHub:
+Clone the development branch of the ODP repo:
 
     git clone -b development https://github.com/SAEONData/Open-Data-Platform.git
-    git clone https://github.com/SAEONData/Hydra-OAuth2-Blueprint.git
 
 Create and activate the Python virtual environment:
 
@@ -12,10 +11,9 @@ Create and activate the Python virtual environment:
     source Open-Data-Platform/.venv/bin/activate
     pip install -U pip setuptools
 
-Install the projects:
+Install the project and its dependencies:
 
     pip install -e Open-Data-Platform/[api,ui,test]
-    pip install -e Hydra-OAuth2-Blueprint/
 
 ## Environment configuration
 Switch to the `develop` subdirectory and create a `.env` file by copying the adjacent

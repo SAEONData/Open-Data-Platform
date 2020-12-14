@@ -68,6 +68,7 @@ services:
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
       - TZ
+      - REDIS_HOST=redis
     restart: always
 
   odp-admin-api:
@@ -245,5 +246,6 @@ services:
     container_name: redis
     image: redis:5
     networks:
+      - odp-net
       - ckan-net
     restart: always
