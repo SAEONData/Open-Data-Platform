@@ -1,16 +1,15 @@
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from odp.app import db
 from odp.config import config
-from odp.identity import mail
+from odp.identity import mail, views
 
 
 def create_app():
     """
     Flask application factory.
     """
-    from . import db, views
-
     app = Flask(__name__)
     app.config.from_mapping({
         'SECRET_KEY': config.ODP.IDENTITY.FLASK_KEY,

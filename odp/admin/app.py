@@ -1,5 +1,7 @@
 from flask import Flask
 
+from odp.admin import views
+from odp.app import db
 from odp.config import config
 
 
@@ -7,8 +9,6 @@ def create_app():
     """
     Flask application factory.
     """
-    from . import db, views
-
     app = Flask(__name__)
     app.config.from_mapping({
         'SECRET_KEY': config.ODP.ADMIN.UI.FLASK_KEY,

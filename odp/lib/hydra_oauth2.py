@@ -8,7 +8,6 @@ from flask import Blueprint, url_for, redirect, flash, request
 from flask_login import login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 
-from odp.db import session as db_session
 from odp.db.models import User, OAuth2Token
 
 
@@ -110,8 +109,6 @@ class HydraOAuth2Blueprint(Blueprint):
             token_model.id_token = token.get('id_token')
             token_model.expires_at = token.get('expires_at')
             token_model.save()
-            # todo: handle commit/rollback in framework
-            db_session.commit()
 
             login_user(user)
 
@@ -157,5 +154,3 @@ class HydraOAuth2Blueprint(Blueprint):
         token_model.refresh_token = token.get('refresh_token')
         token_model.expires_at = token.get('expires_at')
         token_model.save()
-        # todo: handle commit/rollback in framework
-        db_session.commit()

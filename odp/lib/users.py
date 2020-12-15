@@ -3,7 +3,6 @@ import re
 import argon2
 from argon2.exceptions import VerifyMismatchError
 
-from odp.db import session as db_session
 from odp.db.models.user import User
 from odp.lib import exceptions as x
 
@@ -25,7 +24,7 @@ def validate_user_login(email, password):
     :raises ODPAccountDisabled: if the user account has been deactivated
     :raises ODPEmailNotVerified: if the email address has not yet been verified
     """
-    user = db_session.query(User).filter_by(email=email).first()
+    user = User.query.filter_by(email=email).first()
     if not user:
         raise x.ODPUserNotFound
 
@@ -41,8 +40,7 @@ def validate_user_login(email, password):
         # if argon2_cffi's password hashing defaults have changed, we rehash the user's password
         if ph.check_needs_rehash(user.password):
             user.password = ph.hash(password)
-            db_session.add(user)
-            db_session.commit()
+            user.save()
 
     except VerifyMismatchError:
         if lock_account(user):
@@ -73,7 +71,7 @@ def validate_auto_login(user_id):
     :raises ODPEmailNotVerified: if the user changed their email address since their last login,
         but have not yet verified it
     """
-    user = db_session.query(User).get(user_id)
+    user = User.query.get(user_id)
     if not user:
         raise x.ODPUserNotFound
 
@@ -110,7 +108,7 @@ def validate_user_signup(email, password):
     :raises ODPEmailInUse: if the email address is already associated with a user account
     :raises ODPPasswordComplexityError: if the password does not meet the minimum complexity requirements
     """
-    user = db_session.query(User).filter_by(email=email).first()
+    user = User.query.filter_by(email=email).first()
     if user:
         raise x.ODPEmailInUse
 
@@ -129,7 +127,7 @@ def validate_forgot_password(email):
     :raises ODPAccountLocked: if the user account has been temporarily locked
     :raises ODPAccountDisabled: if the user account has been deactivated
     """
-    user = db_session.query(User).filter_by(email=email).first()
+    user = User.query.filter_by(email=email).first()
     if not user:
         raise x.ODPUserNotFound
 
@@ -153,7 +151,7 @@ def validate_password_reset(email, password):
     :raises ODPUserNotFound: if the email address is not associated with any user account
     :raises ODPPasswordComplexityError: if the password does not meet the minimum complexity requirements
     """
-    user = db_session.query(User).filter_by(email=email).first()
+    user = User.query.filter_by(email=email).first()
     if not user:
         raise x.ODPUserNotFound
 
@@ -172,7 +170,7 @@ def validate_email_verification(email):
 
     :raises ODPUserNotFound: if the email address is not associated with any user account
     """
-    user = db_session.query(User).filter_by(email=email).first()
+    user = User.query.filter_by(email=email).first()
     if not user:
         raise x.ODPUserNotFound
 
@@ -195,9 +193,7 @@ def create_user_account(email, password):
         active=True,
         verified=False,
     )
-    db_session.add(user)
-    db_session.commit()
-
+    user.save()
     return user
 
 
@@ -209,8 +205,7 @@ def update_user_verified(user, verified):
     :param verified: True/False
     """
     user.verified = verified
-    db_session.add(user)
-    db_session.commit()
+    user.save()
 
 
 def update_user_password(user, password):
@@ -221,8 +216,7 @@ def update_user_password(user, password):
     :param password: the input plain-text password
     """
     user.password = ph.hash(password)
-    db_session.add(user)
-    db_session.commit()
+    user.save()
 
 
 def check_password_complexity(email, password):
