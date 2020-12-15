@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import Tuple
 
 import pydantic
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, not_
 
 from odp.api.models.datacite import DataciteRecordIn
 from odp.db import session, transaction
@@ -41,16 +41,19 @@ class DataciteCatalogue(Catalogue):
         unpublished = 0
         errors = 0
         try:
-            updated_records = session.query(CatalogueRecord.metadata_id, DataciteRecord). \
-                outerjoin(DataciteRecord).filter(
-                or_(
+            updated_records = session.query(CatalogueRecord, DataciteRecord). \
+                outerjoin(DataciteRecord). \
+                filter(not_(  # exclude records without DOIs
+                    CatalogueRecord.catalogue_record.comparator.contains({'doi': None})
+                )). \
+                filter(or_(
                     DataciteRecord.metadata_id == None,
                     DataciteRecord.checked < CatalogueRecord.updated,
-                )
-            ).limit(self.batch_size).all()
+                )). \
+                limit(self.batch_size).all()
 
             # clear errors and retries for updated records
-            for record_id, dcrec in updated_records:
+            for catrec, dcrec in updated_records:
                 if dcrec is not None and dcrec.error is not None:
                     dcrec.error = None
                     dcrec.retries = None
@@ -62,7 +65,7 @@ class DataciteCatalogue(Catalogue):
                 ),
             ).limit(self.batch_size).all()
 
-            syncable_ids = [record_id for record_id, _ in updated_records] + \
+            syncable_ids = [catrec.metadata_id for catrec, dcrec in updated_records] + \
                            [record_id for record_id, in failed_ids]
             logger.info(f"Selected {len(updated_records)} updated records and {len(failed_ids)} "
                         "previously failed records to sync with DataCite")
