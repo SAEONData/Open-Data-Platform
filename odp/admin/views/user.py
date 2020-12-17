@@ -5,10 +5,8 @@ from flask_admin.model.helpers import get_mdict_item_or_list
 from flask_login import current_user
 from sqlalchemy import Boolean, String
 
-from odp.db import session as db_session
-from odp.db.models.institution import Institution
-from odp.db.models.user import User
-from .base import AdminModelView
+from odp.admin.views.base import AdminModelView
+from odp.db.models import Institution, User
 
 
 class UserModelView(AdminModelView):
@@ -28,7 +26,7 @@ class UserModelView(AdminModelView):
     form_args = {
         'institutions': dict(
             get_label='name',
-            query_factory=lambda: db_session.query(Institution).order_by('name'),
+            query_factory=lambda: Institution.query.order_by('name'),
         )
     }
     form_widget_args = {
@@ -48,7 +46,7 @@ class UserModelView(AdminModelView):
     def edit_view(self):
         id = get_mdict_item_or_list(request.args, 'id')
         if id is not None:
-            user = db_session.query(User).get(id)
+            user = User.query.get(id)
             if user and user.superuser and not current_user.superuser:
                 flash("Only superusers may perform this action.")
                 return redirect(get_redirect_target())
@@ -58,7 +56,7 @@ class UserModelView(AdminModelView):
     def delete_view(self):
         id = request.form.get('id')
         if id is not None:
-            user = db_session.query(User).get(id)
+            user = User.query.get(id)
             if user and user.superuser and not current_user.superuser:
                 flash("Only superusers may perform this action.")
                 return redirect(get_redirect_target())

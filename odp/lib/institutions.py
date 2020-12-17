@@ -5,7 +5,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from odp.api.models.institution import Institution
 from odp.db import session as db_session
-from odp.db.models.institution import Institution as InstitutionORM
+from odp.db.models import Institution as InstitutionORM
 from odp.lib import exceptions as x
 
 
@@ -17,7 +17,7 @@ def create_or_update_institution(institution: Institution) -> Institution:
     :raise ODPInstitutionNameConflict: if the given name is already in use
     """
     try:
-        institution_orm = db_session.query(InstitutionORM).filter_by(key=institution.key).one()
+        institution_orm = InstitutionORM.query.filter_by(key=institution.key).one()
         institution_orm.name = institution.name
     except NoResultFound:
         institution_orm = InstitutionORM(
@@ -26,7 +26,7 @@ def create_or_update_institution(institution: Institution) -> Institution:
         )
 
     try:
-        institution_orm.parent = db_session.query(InstitutionORM).filter_by(
+        institution_orm.parent = InstitutionORM.query.filter_by(
             key=institution.parent_key).one() if institution.parent_key else None
     except NoResultFound as e:
         raise x.ODPParentInstitutionNotFound from e
@@ -49,7 +49,7 @@ def list_institutions() -> List[Institution]:
             key=institution_orm.key,
             name=institution_orm.name,
             parent_key=institution_orm.parent.key if institution_orm.parent else None,
-        ) for institution_orm in db_session.query(InstitutionORM).all()
+        ) for institution_orm in InstitutionORM.query.all()
     ]
 
 
@@ -59,7 +59,7 @@ def get_institution(institution_key: str) -> Institution:
     :raise ODPInstitutionNotFound: if the given key does not exist
     """
     try:
-        institution_orm = db_session.query(InstitutionORM).filter_by(key=institution_key).one()
+        institution_orm = InstitutionORM.query.filter_by(key=institution_key).one()
         return Institution(
             key=institution_orm.key,
             name=institution_orm.name,

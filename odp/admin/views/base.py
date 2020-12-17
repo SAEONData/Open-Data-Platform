@@ -8,11 +8,7 @@ from flask_login import current_user
 from wtforms import StringField
 
 from odp.config import config
-from odp.db import session as db_session
-from odp.db.models.institution import Institution
-from odp.db.models.user_privilege import UserPrivilege
-from odp.db.models.role import Role
-from odp.db.models.scope import Scope
+from odp.db.models import Institution, UserPrivilege, Role, Scope
 
 
 class KeyField(StringField):
@@ -52,7 +48,7 @@ class AdminModelView(ModelView):
             return True
 
         # TODO: cache the result of this query; it's called repeatedly
-        admin_privilege = db_session.query(UserPrivilege).filter_by(user_id=current_user.id) \
+        admin_privilege = UserPrivilege.query.filter_by(user_id=current_user.id) \
             .join(Institution, UserPrivilege.institution_id == Institution.id).filter_by(key=config.ODP.ADMIN.INSTITUTION) \
             .join(Role, UserPrivilege.role_id == Role.id).filter_by(key=config.ODP.ADMIN.ROLE) \
             .join(Scope, UserPrivilege.scope_id == Scope.id).filter_by(key=config.ODP.ADMIN.SCOPE) \

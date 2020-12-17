@@ -11,7 +11,7 @@ login_manager.login_view = 'hydra.login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db_session.query(User).get(user_id)
+    return User.query.get(user_id)
 
 
 def init_app(app):

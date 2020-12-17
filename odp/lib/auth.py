@@ -8,11 +8,8 @@ from odp.api.models.auth import (
     Scope as ScopeEnum,
 )
 from odp.config import config
-from odp.db import session as db_session
-from odp.db.models.role import Role
-from odp.db.models.scope import Scope
-from odp.db.models.user import User
-from odp.db.models.user_privilege import UserPrivilege
+from odp.db import session
+from odp.db.models import Role, Scope, User, UserPrivilege
 
 
 def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTokenData]:
@@ -42,7 +39,7 @@ def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTo
             access_rights=[],
         )
     else:
-        privileges = db_session.query(UserPrivilege).filter_by(user_id=user.id) \
+        privileges = UserPrivilege.query.filter_by(user_id=user.id) \
             .join(Scope, UserPrivilege.scope_id == Scope.id).filter(Scope.key.in_(scopes)) \
             .all()
 
@@ -93,7 +90,7 @@ def check_access(
     """
 
     def is_admin_role(role_key):
-        return db_session.query(Role.admin).filter_by(key=role_key).scalar()
+        return session.query(Role.admin).filter_by(key=role_key).scalar()
 
     if not require_scope or not require_role:
         raise ValueError("require_scope and require_role are mandatory")

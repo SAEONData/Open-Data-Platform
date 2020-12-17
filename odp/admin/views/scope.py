@@ -1,7 +1,5 @@
-from odp.db import session as db_session
-from odp.db.models.role import Role
-
-from .base import SysAdminModelView
+from odp.admin.views.base import SysAdminModelView
+from odp.db.models import Role
 
 
 class ScopeModelView(SysAdminModelView):
@@ -21,7 +19,7 @@ class ScopeModelView(SysAdminModelView):
         ),
         'roles': dict(
             get_label='name',
-            query_factory=lambda: db_session.query(Role).order_by('name'),
+            query_factory=lambda: Role.query.order_by('name'),
         )
     }
     create_template = 'scope_create.html'

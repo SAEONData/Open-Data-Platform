@@ -1,8 +1,5 @@
-from odp.db import session as db_session
-from odp.db.models.institution import Institution
-from odp.db.models.user import User
-
-from .base import AdminModelView, KeyField
+from odp.admin.views.base import AdminModelView, KeyField
+from odp.db.models import Institution, User
 
 
 class InstitutionModelView(AdminModelView):
@@ -25,11 +22,11 @@ class InstitutionModelView(AdminModelView):
     form_args = {
         'parent': dict(
             get_label='name',
-            query_factory=lambda: db_session.query(Institution).order_by('name'),
+            query_factory=lambda: Institution.query.order_by('name'),
         ),
         'users': dict(
             get_label='email',
-            query_factory=lambda: db_session.query(User).order_by('email'),
+            query_factory=lambda: User.query.order_by('email'),
         ),
     }
     create_template = 'institution_create.html'

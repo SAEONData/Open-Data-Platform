@@ -3,9 +3,7 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, Form
 from fastapi.exceptions import HTTPException
-from sqlalchemy.orm import Session
 
-from odp.api.dependencies.db import get_db_session
 from odp.api.dependencies.hydra import get_hydra_admin
 from odp.api.models.auth import ValidToken, InvalidToken
 from odp.db.models.user import User
@@ -21,7 +19,6 @@ async def introspect_token(
         token: str = Form(...),
         scope: str = Form(None),
         hydra: HydraAdminClient = Depends(get_hydra_admin),
-        session: Session = Depends(get_db_session),
 ):
     """ Token introspection endpoint.
 
@@ -50,7 +47,7 @@ async def introspect_token(
     except TypeError:
         pass
 
-    user = session.query(User).get(valid_token.sub)
+    user = User.query.get(valid_token.sub)
     if not user:
         return InvalidToken(error=f"User {valid_token.sub} not found")
     if not user.active:
