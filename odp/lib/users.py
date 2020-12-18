@@ -3,7 +3,8 @@ import re
 import argon2
 from argon2.exceptions import VerifyMismatchError
 
-from odp.db.models.user import User
+from odp.db import transaction
+from odp.db.models import User
 from odp.lib import exceptions as x
 
 ph = argon2.PasswordHasher()
@@ -16,7 +17,7 @@ def validate_user_login(email, password):
 
     :param email: the input email address
     :param password: the input plain-text password
-    :return: a User object
+    :return: the user id
 
     :raises ODPUserNotFound: if the email address is not associated with any user account
     :raises ODPAccountLocked: if the user account has been temporarily locked
@@ -29,7 +30,7 @@ def validate_user_login(email, password):
         raise x.ODPUserNotFound
 
     # first check whether the account is currently locked and should still be locked, unlocking it if necessary
-    if is_account_locked(user):
+    if is_account_locked(user.id):
         raise x.ODPAccountLocked
 
     # check the password before checking further account properties, to minimize the amount of knowledge
@@ -39,11 +40,12 @@ def validate_user_login(email, password):
 
         # if argon2_cffi's password hashing defaults have changed, we rehash the user's password
         if ph.check_needs_rehash(user.password):
-            user.password = ph.hash(password)
-            user.save()
+            with transaction():
+                user.password = ph.hash(password)
+                user.save()
 
     except VerifyMismatchError:
-        if lock_account(user):
+        if lock_account(user.id):
             raise x.ODPAccountLocked
         raise x.ODPIncorrectPassword
 
@@ -53,7 +55,7 @@ def validate_user_login(email, password):
     if not user.verified:
         raise x.ODPEmailNotVerified
 
-    return user
+    return user.id
 
 
 def validate_auto_login(user_id):
@@ -63,7 +65,6 @@ def validate_auto_login(user_id):
     permitted for any reason.
 
     :param user_id: the user id
-    :return: a User object
 
     :raises ODPUserNotFound: if the user account associated with this id has been deleted
     :raises ODPAccountLocked: if the user account has been temporarily locked
@@ -75,7 +76,7 @@ def validate_auto_login(user_id):
     if not user:
         raise x.ODPUserNotFound
 
-    if is_account_locked(user):
+    if is_account_locked(user_id):
         raise x.ODPAccountLocked
 
     if not user.active:
@@ -84,15 +85,13 @@ def validate_auto_login(user_id):
     if not user.verified:
         raise x.ODPEmailNotVerified
 
-    return user
 
-
-def is_account_locked(user):
+def is_account_locked(user_id):
     # todo...
     return False
 
 
-def lock_account(user):
+def lock_account(user_id):
     # todo...
     return False
 
@@ -121,7 +120,7 @@ def validate_forgot_password(email):
     Validate that a forgotten password request is for a valid email address.
 
     :param email: the input email address
-    :return: a User object
+    :return: the user id
 
     :raises ODPUserNotFound: if there is no user account for the given email address
     :raises ODPAccountLocked: if the user account has been temporarily locked
@@ -131,13 +130,13 @@ def validate_forgot_password(email):
     if not user:
         raise x.ODPUserNotFound
 
-    if is_account_locked(user):
+    if is_account_locked(user.id):
         raise x.ODPAccountLocked
 
     if not user.active:
         raise x.ODPAccountDisabled
 
-    return user
+    return user.id
 
 
 def validate_password_reset(email, password):
@@ -146,7 +145,7 @@ def validate_password_reset(email, password):
 
     :param email: the user's email address
     :param password: the new password
-    :return: a User object
+    :return: the user id
 
     :raises ODPUserNotFound: if the email address is not associated with any user account
     :raises ODPPasswordComplexityError: if the password does not meet the minimum complexity requirements
@@ -158,7 +157,7 @@ def validate_password_reset(email, password):
     if not check_password_complexity(email, password):
         raise x.ODPPasswordComplexityError
 
-    return user
+    return user.id
 
 
 def validate_email_verification(email):
@@ -166,7 +165,7 @@ def validate_email_verification(email):
     Validate an email verification.
 
     :param email: the user's email address
-    :return: a User object
+    :return: the user id
 
     :raises ODPUserNotFound: if the email address is not associated with any user account
     """
@@ -174,7 +173,7 @@ def validate_email_verification(email):
     if not user:
         raise x.ODPUserNotFound
 
-    return user
+    return user.id
 
 
 def create_user_account(email, password):
@@ -184,39 +183,44 @@ def create_user_account(email, password):
 
     :param email: the input email address
     :param password: the input plain-text password
-    :return: a User object
+    :return: the new user id
     """
-    user = User(
-        email=email,
-        password=ph.hash(password),
-        superuser=False,
-        active=True,
-        verified=False,
-    )
-    user.save()
-    return user
+    with transaction():
+        user = User(
+            email=email,
+            password=ph.hash(password),
+            superuser=False,
+            active=True,
+            verified=False,
+        )
+        user.save()
+        return user.id
 
 
-def update_user_verified(user, verified):
+def update_user_verified(user_id, verified):
     """
     Update the verified status of a user.
 
-    :param user: a User instance
+    :param user_id: the user id
     :param verified: True/False
     """
-    user.verified = verified
-    user.save()
+    with transaction():
+        user = User.query.get(user_id)
+        user.verified = verified
+        user.save()
 
 
-def update_user_password(user, password):
+def update_user_password(user_id, password):
     """
     Update a user's password.
 
-    :param user: a User instance
+    :param user_id: the user id
     :param password: the input plain-text password
     """
-    user.password = ph.hash(password)
-    user.save()
+    with transaction():
+        user = User.query.get(user_id)
+        user.password = ph.hash(password)
+        user.save()
 
 
 def check_password_complexity(email, password):

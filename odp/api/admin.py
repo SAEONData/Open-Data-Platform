@@ -1,6 +1,7 @@
 import pkg_resources
 from fastapi import FastAPI
 
+from odp.api import db
 from odp.api.routers import (
     authorization,
     institution,
@@ -55,3 +56,5 @@ app.include_router(
     prefix='/datacite',
     tags=['DataCite'],
 )
+
+db.init_app(app)

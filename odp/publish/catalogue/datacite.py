@@ -78,6 +78,7 @@ class DataciteCatalogue(Catalogue):
         except Exception as e:
             logger.critical(str(e))
         finally:
+            session.remove()
             logger.info(f"Published {published} records to DataCite; "
                         f"un-published {unpublished} records from DataCite; "
                         f"{errors} errors")

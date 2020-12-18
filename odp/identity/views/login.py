@@ -1,14 +1,13 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_wtf import FlaskForm
 
+from odp.identity import hydra_admin
+from odp.identity.forms.forgot_password import ForgotPasswordForm
+from odp.identity.forms.login import LoginForm
+from odp.identity.views import encode_token, decode_token, hydra_error_page
+from odp.identity.views.account import send_verification_email, send_password_reset_email
 from odp.lib import exceptions as x
 from odp.lib.users import validate_auto_login, validate_user_login, validate_forgot_password
-
-from . import encode_token, decode_token, hydra_error_page
-from .. import hydra_admin
-from ..forms.login import LoginForm
-from ..forms.forgot_password import ForgotPasswordForm
-from .account import send_verification_email, send_password_reset_email
 
 bp = Blueprint('login', __name__)
 
@@ -46,8 +45,7 @@ def login():
                 email = form.email.data
                 password = form.password.data
                 try:
-                    user = validate_user_login(email, password)
-                    user_id = user.id
+                    user_id = validate_user_login(email, password)
 
                 except x.ODPUserNotFound:
                     form.email.errors.append("The email address is not associated with any user account.")
@@ -116,7 +114,7 @@ def forgot_password():
             if form.validate():
                 email = form.email.data
                 try:
-                    user = validate_forgot_password(email)
+                    user_id = validate_forgot_password(email)
                     send_password_reset_email(email, challenge)
                     sent = True
 

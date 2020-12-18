@@ -2,6 +2,7 @@ import pkg_resources
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from odp.api import db
 from odp.api.routers import metadata, catalogue, collection
 from odp.config import config
 
@@ -38,3 +39,5 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+db.init_app(app)

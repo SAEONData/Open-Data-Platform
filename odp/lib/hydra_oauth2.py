@@ -8,6 +8,7 @@ from flask import Blueprint, url_for, redirect, flash, request
 from flask_login import login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 
+from odp.db import transaction
 from odp.db.models import User, OAuth2Token
 
 
@@ -50,7 +51,12 @@ class HydraOAuth2Blueprint(Blueprint):
             after login/logout has completed
         """
         super().__init__(name, import_name)
-        self.cache = redis.Redis(host=redis_host, port=redis_port, db=redis_db, decode_responses=True)
+        self.cache = redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            db=redis_db,
+            decode_responses=True,
+        )
         self.oauth = OAuth(
             cache=self.cache,
             fetch_token=self.fetch_token,
@@ -94,23 +100,24 @@ class HydraOAuth2Blueprint(Blueprint):
         try:
             token = self.oauth.hydra.authorize_access_token(verify=self.verify_tls)
             userinfo = self.oauth.hydra.userinfo(verify=self.verify_tls)
-            user_id = userinfo['sub']
-            user = User.query.get(user_id)
-
             client_id = self.oauth.hydra.client_id
-            try:
-                token_model = OAuth2Token.query.filter_by(client_id=client_id, user_id=user_id).one()
-            except NoResultFound:
-                token_model = OAuth2Token(client_id=client_id, user_id=user_id)
+            user_id = userinfo['sub']
 
-            token_model.token_type = token.get('token_type')
-            token_model.access_token = token.get('access_token')
-            token_model.refresh_token = token.get('refresh_token')
-            token_model.id_token = token.get('id_token')
-            token_model.expires_at = token.get('expires_at')
-            token_model.save()
+            with transaction():
+                try:
+                    token_model = OAuth2Token.query.filter_by(client_id=client_id, user_id=user_id).one()
+                except NoResultFound:
+                    token_model = OAuth2Token(client_id=client_id, user_id=user_id)
 
-            login_user(user)
+                token_model.token_type = token.get('token_type')
+                token_model.access_token = token.get('access_token')
+                token_model.refresh_token = token.get('refresh_token')
+                token_model.id_token = token.get('id_token')
+                token_model.expires_at = token.get('expires_at')
+                token_model.save()
+
+                user = User.query.get(user_id)
+                login_user(user)
 
         except OAuthError as e:
             flash(str(e), category='error')
@@ -143,14 +150,15 @@ class HydraOAuth2Blueprint(Blueprint):
 
     @staticmethod
     def update_token(client_id, token, refresh_token=None, access_token=None):
-        if refresh_token:
-            token_model = OAuth2Token.query.filter_by(client_id=client_id, refresh_token=refresh_token).one()
-        elif access_token:
-            token_model = OAuth2Token.query.filter_by(client_id=client_id, access_token=access_token).one()
-        else:
-            return
+        with transaction():
+            if refresh_token:
+                token_model = OAuth2Token.query.filter_by(client_id=client_id, refresh_token=refresh_token).one()
+            elif access_token:
+                token_model = OAuth2Token.query.filter_by(client_id=client_id, access_token=access_token).one()
+            else:
+                return
 
-        token_model.access_token = token.get('access_token')
-        token_model.refresh_token = token.get('refresh_token')
-        token_model.expires_at = token.get('expires_at')
-        token_model.save()
+            token_model.access_token = token.get('access_token')
+            token_model.refresh_token = token.get('refresh_token')
+            token_model.expires_at = token.get('expires_at')
+            token_model.save()

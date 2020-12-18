@@ -2,12 +2,17 @@ from flask import Blueprint, redirect, request, url_for, current_app, flash, ren
 from flask_mail import Message
 from flask_wtf import FlaskForm
 
+from odp.identity import hydra_admin, mail
+from odp.identity.forms.reset_password import ResetPasswordForm
+from odp.identity.views import hydra_error_page, encode_token, decode_token
 from odp.lib import exceptions as x
-from odp.lib.users import validate_password_reset, update_user_password, update_user_verified, validate_auto_login, validate_email_verification
-
-from . import hydra_error_page, encode_token, decode_token
-from .. import hydra_admin, mail
-from ..forms.reset_password import ResetPasswordForm
+from odp.lib.users import (
+    validate_password_reset,
+    update_user_password,
+    update_user_verified,
+    validate_auto_login,
+    validate_email_verification,
+)
 
 bp = Blueprint('account', __name__)
 
@@ -24,11 +29,11 @@ def verify_email():
 
         email = params.get('email')
         try:
-            user = validate_email_verification(email)
-            update_user_verified(user, True)
+            user_id = validate_email_verification(email)
+            update_user_verified(user_id, True)
             flash("Your email address has been verified.")
 
-            complete_token = encode_token(challenge, 'account.verify_email_complete', user_id=user.id)
+            complete_token = encode_token(challenge, 'account.verify_email_complete', user_id=user_id)
             redirect_to = url_for('.verify_email_complete', token=complete_token)
 
         except x.ODPIdentityError as e:
@@ -89,11 +94,11 @@ def reset_password():
                 password = form.password.data
                 redirect_to = None
                 try:
-                    user = validate_password_reset(email, password)
-                    update_user_password(user, password)
+                    user_id = validate_password_reset(email, password)
+                    update_user_password(user_id, password)
                     flash("Your password has been changed.")
 
-                    complete_token = encode_token(challenge, 'account.reset_password_complete', user_id=user.id)
+                    complete_token = encode_token(challenge, 'account.reset_password_complete', user_id=user_id)
                     redirect_to = url_for('.reset_password_complete', token=complete_token)
 
                 except x.ODPPasswordComplexityError:

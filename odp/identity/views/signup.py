@@ -1,13 +1,12 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_wtf import FlaskForm
 
+from odp.identity import hydra_admin
+from odp.identity.forms.signup import SignupForm
+from odp.identity.views import hydra_error_page, encode_token, decode_token
+from odp.identity.views.account import send_verification_email
 from odp.lib import exceptions as x
 from odp.lib.users import create_user_account, validate_user_signup
-
-from . import hydra_error_page, encode_token, decode_token
-from .. import hydra_admin
-from ..forms.signup import SignupForm
-from .account import send_verification_email
 
 bp = Blueprint('signup', __name__)
 
@@ -39,7 +38,7 @@ def signup():
                     password = form.password.data
                     try:
                         validate_user_signup(email, password)
-                        user = create_user_account(email, password)
+                        create_user_account(email, password)
 
                         # the signup (and login) is completed via email verification
                         send_verification_email(email, challenge)

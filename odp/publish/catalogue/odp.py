@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timezone
 
-from odp.db import transaction
+from odp.db import transaction, session
 from odp.db.models import CatalogueRecord
 from odp.publish.catalogue import Catalogue
 from odp.publish.harvester import Harvester
@@ -44,5 +44,6 @@ class ODPCatalogue(Catalogue):
         except Exception as e:
             logger.critical(str(e))
         finally:
+            session.remove()
             logger.info(f"Harvested {harvested} records from {self.harvester.name}; "
                         f"{updated} catalogue records were added/updated")

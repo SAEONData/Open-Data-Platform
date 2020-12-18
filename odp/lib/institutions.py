@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
 from odp.api.models.institution import Institution
-from odp.db import session as db_session
+from odp.db import transaction
 from odp.db.models import Institution as InstitutionORM
 from odp.lib import exceptions as x
 
@@ -16,28 +16,27 @@ def create_or_update_institution(institution: Institution) -> Institution:
     :raise ODPParentInstitutionNotFound: if the given parent key does not exist
     :raise ODPInstitutionNameConflict: if the given name is already in use
     """
-    try:
-        institution_orm = InstitutionORM.query.filter_by(key=institution.key).one()
-        institution_orm.name = institution.name
-    except NoResultFound:
-        institution_orm = InstitutionORM(
-            key=institution.key,
-            name=institution.name,
-        )
+    with transaction():
+        try:
+            institution_orm = InstitutionORM.query.filter_by(key=institution.key).one()
+            institution_orm.name = institution.name
+        except NoResultFound:
+            institution_orm = InstitutionORM(
+                key=institution.key,
+                name=institution.name,
+            )
 
-    try:
-        institution_orm.parent = InstitutionORM.query.filter_by(
-            key=institution.parent_key).one() if institution.parent_key else None
-    except NoResultFound as e:
-        raise x.ODPParentInstitutionNotFound from e
+        try:
+            institution_orm.parent = InstitutionORM.query.filter_by(
+                key=institution.parent_key).one() if institution.parent_key else None
+        except NoResultFound as e:
+            raise x.ODPParentInstitutionNotFound from e
 
-    db_session.add(institution_orm)
-    try:
-        db_session.commit()
-    except IntegrityError as e:
-        # unique key violation; must be on 'name', since we're handling 'key' with an update
-        db_session.rollback()
-        raise x.ODPInstitutionNameConflict from e
+        try:
+            institution_orm.save()
+        except IntegrityError as e:
+            # unique key violation; must be on 'name', since we're handling 'key' with an update
+            raise x.ODPInstitutionNameConflict from e
 
     return institution
 

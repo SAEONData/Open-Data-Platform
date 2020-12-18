@@ -8,12 +8,12 @@ from odp.config import config
 
 engine = create_engine(config.ODP.DB.URL, echo=config.ODP.DB.ECHO)
 
-session = scoped_session(sessionmaker(bind=engine))
+session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 
 
 @contextmanager
 def transaction():
-    """Provides an ad-hoc transaction scope around the session."""
+    """Provide a transactional scope around a series of operations."""
     try:
         yield
         session.commit()
@@ -21,7 +21,7 @@ def transaction():
         session.rollback()
         raise
     finally:
-        session.remove()
+        session.close()
 
 
 class _Base:
