@@ -2,7 +2,7 @@ import pkg_resources
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from odp.api import db
+from odp.api import init_db_middleware
 from odp.api.routers import metadata, catalogue, collection
 from odp.config import config
 
@@ -14,6 +14,8 @@ app = FastAPI(
     docs_url='/interactive',
     redoc_url='/docs',
 )
+
+init_db_middleware(app)
 
 app.include_router(
     catalogue.router,
@@ -39,5 +41,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-db.init_app(app)
