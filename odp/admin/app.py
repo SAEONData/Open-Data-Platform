@@ -1,7 +1,6 @@
 from flask import Flask
 
-from odp.admin import views
-from odp.app import db
+from odp.admin import db, views
 from odp.config import config
 
 

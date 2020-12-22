@@ -1,9 +1,8 @@
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from odp.app import db
 from odp.config import config
-from odp.identity import mail, views
+from odp.identity import db, mail, views
 
 
 def create_app():
