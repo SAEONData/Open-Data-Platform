@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from odp.api import init_db_middleware
-from odp.api.routers import metadata, catalogue, collection
+from odp.api.routers import metadata, catalogue, collection, media
 from odp.config import config
 
 app = FastAPI(
@@ -33,6 +33,12 @@ app.include_router(
     metadata.router,
     prefix='/{institution_key}/metadata',
     tags=['Metadata'],
+)
+
+app.include_router(
+    media.router,
+    prefix='/media',
+    tags=['Media'],
 )
 
 app.add_middleware(

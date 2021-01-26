@@ -5,6 +5,7 @@ from odp.config.datacite import DataciteConfig
 from odp.config.hydra import HydraConfig
 from odp.config.odp import ODPConfig
 from odp.config.redis import RedisConfig
+from odp.config.media import MediaConfig
 
 
 class Config(BaseConfig):
@@ -17,6 +18,7 @@ class Config(BaseConfig):
         'CATALOGUE': CatalogueConfig,
         'DATACITE': DataciteConfig,
         'REDIS': RedisConfig,
+        'MEDIA':MediaConfig,
     }
 
 
