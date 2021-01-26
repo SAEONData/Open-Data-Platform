@@ -83,6 +83,7 @@ class DataciteError(ODPException):
         self.status_code = kwargs.pop('status_code')
         self.error_detail = kwargs.pop('error_detail', str(args))
 
+
 class MediaRepositoryError(ODPException):
     """ Exception raised when a request to the Media repository fails """
 

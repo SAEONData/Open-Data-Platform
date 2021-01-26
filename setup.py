@@ -29,6 +29,7 @@ setup(
             'uvicorn',
             'python-multipart',
             'ckanapi',
+            'xmltodict'
         ],
         'ui': [
             'flask',
