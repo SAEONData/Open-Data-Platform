@@ -129,6 +129,9 @@ services:
       - CATALOGUE_METADATA_LANDING_PAGE_BASE_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - TZ
+      - MEDIA_REPOSITORY_BASE_URL
+      - MEDIA_USERNAME
+      - MEDIA_PASSWORD
     restart: always
 
   odp-publisher:
