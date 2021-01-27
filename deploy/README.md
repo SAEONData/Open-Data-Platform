@@ -41,6 +41,9 @@ containing the following environment variables:
 - **`DATACITE_DOI_PREFIX`**: DOI prefix
 - **`DATACITE_PUBLISH_JOB_INTERVAL`**: interval in minutes between publishing job runs
 - **`DATACITE_PUBLISH_BATCH_SIZE`**: maximum number of records to sync in a given publishing run
+- **`MEDIA_REPOSITORY_BASE_URL`**: URL of the NextCloud Media Repository
+- **`MEDIA_USERNAME`**: Media Repository username
+- **`MEDIA_PASSWORD`**: Media Repository password
 - **`TZ`**: sets the timezone of containers; e.g. `Africa/Johannesburg`
 
 ## ODP database
