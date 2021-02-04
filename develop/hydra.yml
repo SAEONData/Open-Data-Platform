@@ -27,6 +27,7 @@ services:
       - URLS_CONSENT=${ODP_IDENTITY_URL}/hydra/consent
       - URLS_LOGOUT=${ODP_IDENTITY_URL}/hydra/logout
       - TTL_ACCESS_TOKEN=168h
+      - LOG_LEAK_SENSITIVE_VALUES=true
     depends_on:
       - hydra-db
     restart: always

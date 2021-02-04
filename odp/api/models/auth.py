@@ -22,7 +22,7 @@ class Scope(str, Enum):
     CATALOGUE = 'ODP.Catalogue'
 
 
-class TokenType(str, Enum):
+class TokenUse(str, Enum):
     ACCESS_TOKEN = 'access_token'
     REFRESH_TOKEN = 'refresh_token'
 
@@ -45,7 +45,8 @@ class AccessTokenData(BaseModel):
 class ValidToken(BaseModel):
     """ Token introspection response for a valid token """
     active: bool = Field(default=True, const=True)
-    token_type: TokenType
+    token_type: str = Field(default='Bearer', const=True)
+    token_use: TokenUse
     client_id: str
     scope: str
     sub: str

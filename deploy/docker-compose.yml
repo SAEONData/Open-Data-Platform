@@ -200,6 +200,7 @@ services:
       # TODO remove; the following makes access token lifetime 1 week (the default is 1 hour),
       # as a workaround until such time as we've implemented token refresh on the client side
       - TTL_ACCESS_TOKEN=168h
+      - LOG_LEAK_SENSITIVE_VALUES=true
     restart: always
 
   ckan-metadata:

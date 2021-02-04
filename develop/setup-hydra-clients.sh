@@ -3,6 +3,12 @@
 echo "Loading environment variables..."
 source .env
 
+echo "Deleting existing clients..."
+docker run -it --rm --network odp-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${HYDRA_IMAGE} \
+  clients delete --skip-tls-verify ${ODP_ADMIN_UI_CLIENT_ID}
+docker run -it --rm --network odp-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${HYDRA_IMAGE} \
+  clients delete --skip-tls-verify ${CKAN_CLIENT_ID}
+
 echo "Creating OAuth2 client for the admin service..."
 docker run -it --rm --network odp-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${HYDRA_IMAGE} \
   clients create --skip-tls-verify \
@@ -10,8 +16,8 @@ docker run -it --rm --network odp-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${HY
     --secret ${ODP_ADMIN_UI_CLIENT_SECRET} \
     --grant-types authorization_code \
     --response-types code \
-    --scope openid,ODP.Admin \
-    --callbacks ${ODP_ADMIN_UI_URL}/oauth2/authorized \
+    --scope openid,offline,ODP.Admin \
+    --callbacks ${ODP_ADMIN_UI_URL}/oauth2/logged_in \
     --post-logout-callbacks ${ODP_ADMIN_UI_URL}/oauth2/logged_out
 
 echo "Creating OAuth2 client for the metadata manager..."
@@ -21,7 +27,7 @@ docker run -it --rm --network odp-net -e HYDRA_ADMIN_URL=https://hydra:4445 ${HY
     --secret ${CKAN_CLIENT_SECRET} \
     --grant-types authorization_code \
     --response-types code \
-    --scope openid,ODP.Metadata \
+    --scope openid,offline,ODP.Metadata \
     --callbacks ${CKAN_URL}/oidc/callback \
     --post-logout-callbacks ${CKAN_URL}/oidc/logged_out
 

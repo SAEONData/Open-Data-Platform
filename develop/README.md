@@ -47,11 +47,17 @@ Also, make sure the static data is up-to-date:
 
     python -m initdata
 
-## ORY Hydra setup
-Switch to the `develop` subdirectory and run the following commands:
+## ORY Hydra
+To install or upgrade Hydra, first check the `HYDRA_IMAGE` environment variable
+in your local `develop/.env` config file, and update as necessary.
+Then, switch to the `develop` subdirectory and run the following commands:
 
     ./setup-hydra-db.sh
     docker-compose -f hydra.yml up -d
+
+To create or update the Hydra client configurations required for logging in
+to your local web applications, run:
+
     ./setup-hydra-clients.sh
 
 ## Metadata services setup
@@ -63,7 +69,7 @@ Switch to the `develop` subdirectory and run the following commands:
 
 ## Running the services
 Activate the ODP Python virtual environment and switch to the `develop` subdirectory
-so as to use the `.env` file located there.
+to use the `.env` file located there.
 
 ### ODP Public API
     uvicorn odp.api.public:app --port 8888
@@ -80,8 +86,8 @@ so as to use the `.env` file located there.
     flask run --host=odpidentity.localhost --port=9024
 
 ## Upgrading Python dependencies
-To upgrade dependencies and re-generate the `requirements.txt` file for the ODP,
-carry out the following steps:
+To upgrade required Python libraries and re-generate the `requirements.txt`
+file for the ODP, carry out the following steps:
 
 - Delete your local ODP virtual environment: `rm -rf .venv`
 - Create a new virtual environment, and install the ODP project, as described under

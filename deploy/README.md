@@ -64,12 +64,12 @@ To upgrade an existing instance, run:
 
 ## Hydra database
 _N.B._
-- Make sure the `HYDRA_IMAGE` configuration value has been updated to the desired version of Hydra.
-- Make sure the Hydra container is stopped before running the Hydra SQL migrations.
+Make sure the `HYDRA_IMAGE` configuration value has been updated to the required version of Hydra.
 
 Run the following commands in the `deploy` subdirectory:
 
     source .env
+    docker rm -f hydra
     docker run -it --rm "${HYDRA_IMAGE}" migrate sql --yes "postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASS}@${HYDRA_DB_HOST}:5432/${HYDRA_DB_NAME}?sslmode=disable"
 
 ## ODP services
