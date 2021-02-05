@@ -255,3 +255,42 @@ def check_password_complexity(email, password):
             return False
 
     return True
+
+
+def validate_google_login(email, verified):
+    """
+    Validate a login completed via Google, returning the user id on success.
+    A user account is created if it does not already exist. An ``ODPIdentityError``
+    is raised if the login cannot be permitted for any reason.
+
+    :param email: the Google email address
+    :param verified: flag from Google indicating whether the email address is verified
+    :return: the user id
+
+    :raises ODPAccountLocked: if the user account has been temporarily locked
+    :raises ODPAccountDisabled: if the user account has been deactivated
+    :raises ODPEmailNotVerified: if the email address has not been verified
+    """
+    with transaction():
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            user = User(
+                email=email,
+                superuser=False,
+                active=True,
+            )
+
+        user.verified = verified
+        user.save()
+        user_id = user.id
+
+    if is_account_locked(user_id):
+        raise x.ODPAccountLocked
+
+    user = User.query.get(user_id)
+    if not user.active:
+        raise x.ODPAccountDisabled
+    if not user.verified:
+        raise x.ODPEmailNotVerified
+
+    return user_id

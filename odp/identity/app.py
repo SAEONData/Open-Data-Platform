@@ -2,7 +2,7 @@ from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from odp.config import config
-from odp.identity import db, mail, views
+from odp.identity import db, mail, views, google_oauth2
 
 
 def create_app():
@@ -19,6 +19,7 @@ def create_app():
     db.init_app(app)
     views.init_app(app)
     mail.init_app(app)
+    google_oauth2.init_app(app)
 
     # trust the X-Forwarded-* headers set by the proxy server
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_prefix=1)

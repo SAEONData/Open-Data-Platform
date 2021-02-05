@@ -83,7 +83,7 @@ to use the `.env` file located there.
 
 ### ODP Identity Service
     export FLASK_APP=odp.identity.app
-    flask run --host=odpidentity.localhost --port=9024
+    flask run --host=localhost --port=9024
 
 ## Upgrading Python dependencies
 To upgrade required Python libraries and re-generate the `requirements.txt`

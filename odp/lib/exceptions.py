@@ -17,7 +17,7 @@ class ODPUserNotFound(ODPIdentityError):
 
 class ODPEmailNotVerified(ODPIdentityError):
     error_code = 'email_not_verified'
-    error_description = "The user's email address has not yet been verified."
+    error_description = "The user's email address has not been verified."
 
 
 class ODPIncorrectPassword(ODPIdentityError):
@@ -48,6 +48,11 @@ class ODPPasswordComplexityError(ODPIdentityError):
 class ODPSignupAuthenticatedUser(ODPIdentityError):
     error_code = 'signup_authenticated_user'
     error_description = "An authenticated user cannot sign up."
+
+
+class ODPGoogleAuthError(ODPIdentityError):
+    error_code = 'google_auth_error'
+    error_description = "A Google authentication error occurred."
 
 
 class HydraAdminError(ODPException):
