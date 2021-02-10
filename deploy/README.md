@@ -72,6 +72,16 @@ Run the following commands in the `deploy` subdirectory:
     docker rm -f hydra
     docker run -it --rm "${HYDRA_IMAGE}" migrate sql --yes "postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASS}@${HYDRA_DB_HOST}:5432/${HYDRA_DB_NAME}?sslmode=disable"
 
+## Redis
+To prevent a memory issue with Redis, run the following command:
+
+    sudo sysctl vm.overcommit_memory=1
+
+Then make the change permanent by editing `/etc/sysctl.conf` and appending
+the following line:
+
+    vm.overcommit_memory=1
+
 ## ODP services
 To (re)build and install all ODP services, run the following commands in the `deploy` subdirectory:
 

@@ -47,27 +47,32 @@ Also, make sure the static data is up-to-date:
 
     python -m initdata
 
-## ORY Hydra
-To install or upgrade Hydra, first check the `HYDRA_IMAGE` environment variable
-in your local `develop/.env` config file, and update as necessary.
+## Required services
+ODP services depend on ORY Hydra and Redis, while the CKAN-based metadata management
+system requires Redis and Solr. We will run these in Docker containers.
+
+To prevent a memory issue with Redis, run the following command on your local system:
+
+    sudo sysctl vm.overcommit_memory=1
+
+To make the change permanent, edit the file `/etc/sysctl.conf` and add the line:
+
+    vm.overcommit_memory=1
+
+Check that the `HYDRA_IMAGE` environment variable in your local `develop/.env`
+config file matches the required version of ORY Hydra, and update as necessary.
+
 Then, switch to the `develop` subdirectory and run the following commands:
 
     ./setup-hydra-db.sh
-    docker-compose -f hydra.yml up -d
+    docker-compose up -d
 
 To create or update the Hydra client configurations required for logging in
 to your local web applications, run:
 
     ./setup-hydra-clients.sh
 
-## Metadata services setup
-_work in progress_
-
-Switch to the `develop` subdirectory and run the following commands:
-
-    docker-compose -f metadata.yml up -d
-
-## Running the services
+## Running the ODP services
 Activate the ODP Python virtual environment and switch to the `develop` subdirectory
 to use the `.env` file located there.
 
