@@ -26,7 +26,10 @@ def validate_user_login(email, password):
     :raises ODPEmailNotVerified: if the email address has not yet been verified
     """
     user = User.query.filter_by(email=email).first()
-    if not user:
+
+    # no password => either it's a non-human user (e.g. harvester),
+    # or the user must be externally authenticated (e.g. via Google)
+    if not user or not user.password:
         raise x.ODPUserNotFound
 
     # first check whether the account is currently locked and should still be locked, unlocking it if necessary
