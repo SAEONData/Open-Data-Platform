@@ -40,6 +40,7 @@ setup(
             'wtforms',
             'gunicorn',
             'authlib',
+            'bootstrap-flask',
         ],
         'test': [
             'pytest',

@@ -11,9 +11,10 @@ bp = Blueprint('google', __name__)
 
 @bp.route('/login', methods=('POST',))
 def login():
-    """
-    View for authenticating via Google. The token ensures that we can only
-    access this view in the context of the Hydra login workflow.
+    """View for authenticating via Google.
+
+    The token ensures that we can only access this view in the context
+    of the Hydra login workflow.
     """
     token = request.args.get('token')
     try:
@@ -28,9 +29,10 @@ def login():
 
 @bp.route('/logged_in')
 def logged_in():
-    """
-    Callback from Google. The token in the 'state' param ensures that this view
-    can only be accessed in the context of the Google OAuth2 flow, initiated from
+    """Callback from Google.
+
+    The token in the 'state' param ensures that this view can only be
+    accessed in the context of the Google OAuth2 flow, initiated from
     our Google login view.
     """
     token = request.args.get('state')

@@ -1,12 +1,13 @@
-{% extends 'login_base.html' %}
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_field %}
 
-{% block page_heading %}
-    {% block title %}Account verified{% endblock %}
+{% block heading %}
+    Account verified
 {% endblock %}
 
 {% block content %}
     <form action="{{ url_for('account.verify_email_complete', token=token) }}" method="POST">
         {{ form.csrf_token }}
-        <input type="submit" value="Log in">
+        {{ render_field(form.submit) }}
     </form>
 {% endblock %}

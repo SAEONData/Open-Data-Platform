@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, request
-from flask_wtf import FlaskForm
 
 from odp.identity import hydra_admin
 from odp.identity.forms.forgot_password import ForgotPasswordForm
+from odp.identity.forms.google import GoogleForm
 from odp.identity.forms.login import LoginForm
+from odp.identity.forms.verify_email import VerifyEmailForm
 from odp.identity.views import encode_token, decode_token, hydra_error_page
 from odp.identity.views.account import send_verification_email, send_password_reset_email
 from odp.lib import exceptions as x
@@ -14,8 +15,10 @@ bp = Blueprint('login', __name__)
 
 @bp.route('/', methods=('GET', 'POST'))
 def login():
-    """
-    User login view. The token ensures that we can only access this view in the context of the Hydra login workflow.
+    """User login view.
+
+    The token ensures that we can only access this view in the context
+    of the Hydra login workflow.
     """
     token = request.args.get('token')
     try:
@@ -24,6 +27,7 @@ def login():
         user_id = None
         error = None
         form = LoginForm()
+        gform = GoogleForm()
 
         if request.method == 'GET':
             authenticated = login_request['skip']  # indicates whether the user is already authenticated with Hydra
@@ -68,7 +72,7 @@ def login():
         elif error:
             redirect_to = hydra_admin.reject_login_request(challenge, error.error_code, error.error_description)
         else:
-            return render_template('login.html', form=form, token=token)
+            return render_template('login.html', form=form, gform=gform, token=token)
 
         return redirect(redirect_to)
 
@@ -78,14 +82,15 @@ def login():
 
 @bp.route('/verify', methods=('GET', 'POST'))
 def verify():
-    """
-    View for sending a verification email. The token ensures that we can only get here from the user login view.
+    """View for sending a verification email.
+
+    The token ensures that we can only get here from the user login view.
     """
     token = request.args.get('token')
     try:
         login_request, challenge, params = decode_token(token, 'login.verify')
 
-        form = FlaskForm()
+        form = VerifyEmailForm()
         email = params.get('email')
 
         if request.method == 'POST':
@@ -99,16 +104,16 @@ def verify():
 
 @bp.route('/forgot-password', methods=('GET', 'POST'))
 def forgot_password():
-    """
-    View for sending a password reset email. The token ensures that we can only access this view in the
-    context of the Hydra login workflow.
+    """View for sending a password reset email.
+
+    The token ensures that we can only access this view in the context
+    of the Hydra login workflow.
     """
     token = request.args.get('token')
     try:
         login_request, challenge, params = decode_token(token, 'login')
 
         form = ForgotPasswordForm()
-        sent = False
 
         if request.method == 'POST':
             if form.validate():
@@ -116,7 +121,6 @@ def forgot_password():
                 try:
                     user_id = validate_forgot_password(email)
                     send_password_reset_email(email, challenge)
-                    sent = True
 
                 except x.ODPUserNotFound:
                     form.email.errors.append("The email address is not associated with any user account.")
@@ -126,7 +130,7 @@ def forgot_password():
                     redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
                     return redirect(redirect_to)
 
-        return render_template('forgot_password.html', form=form, token=token, sent=sent)
+        return render_template('forgot_password.html', form=form, token=token)
 
     except x.HydraAdminError as e:
         return hydra_error_page(e)

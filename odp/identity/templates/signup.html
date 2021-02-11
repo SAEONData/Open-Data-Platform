@@ -1,25 +1,30 @@
-{% extends 'login_base.html' %}
-{% from 'macros.html' import field_errors, form_errors %}
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_field %}
 
-{% block page_heading %}
-    {% block title %}Create account{% endblock %}
+{% block heading %}
+    Create an account
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('signup.signup', token=token) }}" method="POST">
-        {{ form_errors(form) }}
-        {{ form.csrf_token }}
-        {{ form.email.label }} {{ field_errors(form.email) }}
-        {{ form.password.label }} {{ field_errors(form.password) }}
-        {{ form.confirm_password.label }} {{ field_errors(form.confirm_password) }}
-        <input type="submit" value="Sign up">
-    </form>
     <form action="{{ url_for('google.login', token=token) }}" method="POST">
+        {{ gform.csrf_token }}
+        {{ render_field(gform.submit) }}
+    </form>
+    <p class="text-right mt-1">(SAEON staff @saeon.ac.za)</p>
+    <hr/>
+    <form action="{{ url_for('signup.signup', token=token) }}" method="POST">
         {{ form.csrf_token }}
-        <input type="submit" value="Log in with Google">
+        {{ render_field(form.email) }}
+        {{ render_field(form.password) }}
+        {{ render_field(form.confirm_password) }}
+        {{ render_field(form.submit) }}
     </form>
 {% endblock %}
 
-{% block login_footer %}
-    Already have an account? <a href="{{ url_for('login.login', token=token) }}">Log in</a>
+{% block footer %}
+    <hr/>
+    <small>
+        Already have an account?
+        <a href="{{ url_for('login.login', token=token) }}">Log in</a>
+    </small>
 {% endblock %}

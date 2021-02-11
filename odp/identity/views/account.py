@@ -1,8 +1,8 @@
 from flask import Blueprint, redirect, request, url_for, current_app, flash, render_template
 from flask_mail import Message
-from flask_wtf import FlaskForm
 
 from odp.identity import hydra_admin, mail
+from odp.identity.forms.auto_login import AutoLoginForm
 from odp.identity.forms.reset_password import ResetPasswordForm
 from odp.identity.views import hydra_error_page, encode_token, decode_token
 from odp.lib import exceptions as x
@@ -19,9 +19,9 @@ bp = Blueprint('account', __name__)
 
 @bp.route('/verify-email')
 def verify_email():
-    """
-    This route is the target for email verification links. The token ensures that it is only accessible
-    from a verification email.
+    """Target for email verification links.
+
+    The token ensures that this view is only accessible from a verification email.
     """
     token = request.args.get('token')
     try:
@@ -48,15 +48,15 @@ def verify_email():
 
 @bp.route('/verify-email-complete', methods=('GET', 'POST'))
 def verify_email_complete():
-    """
-    View for concluding the login with Hydra after verifying an email address. The token ensures that
-    we can only get here from the verify email view.
+    """View for concluding the login with Hydra after verifying an email address.
+
+    The token ensures that we can only get here from the verify email view.
     """
     token = request.args.get('token')
     try:
         login_request, challenge, params = decode_token(token, 'account.verify_email_complete')
 
-        form = FlaskForm()
+        form = AutoLoginForm()
         user_id = params.get('user_id')
 
         if request.method == 'POST':
@@ -78,9 +78,9 @@ def verify_email_complete():
 
 @bp.route('/reset-password', methods=('GET', 'POST'))
 def reset_password():
-    """
-    This route is the target for password reset links. The token ensures that it is only accessible
-    from a password reset email.
+    """Target for password reset links.
+
+    The token ensures that this view is only accessible from a password reset email.
     """
     token = request.args.get('token')
     try:
@@ -119,15 +119,15 @@ def reset_password():
 
 @bp.route('/reset-password-complete', methods=('GET', 'POST'))
 def reset_password_complete():
-    """
-    View for concluding the login with Hydra after changing a password. The token ensures that
-    we can only get here from the reset password view.
+    """View for concluding the login with Hydra after changing a password.
+
+    The token ensures that we can only get here from the reset password view.
     """
     token = request.args.get('token')
     try:
         login_request, challenge, params = decode_token(token, 'account.reset_password_complete')
 
-        form = FlaskForm()
+        form = AutoLoginForm()
         user_id = params.get('user_id')
 
         if request.method == 'POST':
@@ -148,8 +148,7 @@ def reset_password_complete():
 
 
 def send_verification_email(email, challenge):
-    """
-    Send an email address verification email.
+    """Send an email address verification email.
 
     :param email: the email address to be verified
     :param challenge: the Hydra login challenge
@@ -171,8 +170,7 @@ def send_verification_email(email, challenge):
 
 
 def send_password_reset_email(email, challenge):
-    """
-    Send a password reset email.
+    """Send a password reset email.
 
     :param email: the email address
     :param challenge: the Hydra login challenge

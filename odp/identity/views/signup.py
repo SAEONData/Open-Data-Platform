@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, request
-from flask_wtf import FlaskForm
 
 from odp.identity import hydra_admin
+from odp.identity.forms.google import GoogleForm
 from odp.identity.forms.signup import SignupForm
+from odp.identity.forms.verify_email import VerifyEmailForm
 from odp.identity.views import hydra_error_page, encode_token, decode_token
 from odp.identity.views.account import send_verification_email
 from odp.lib import exceptions as x
@@ -13,8 +14,10 @@ bp = Blueprint('signup', __name__)
 
 @bp.route('/', methods=('GET', 'POST'))
 def signup():
-    """
-    User signup view. The token ensures that we can only access this view in the context of the Hydra login workflow.
+    """User signup view.
+
+    The token ensures that we can only access this view in the context
+    of the Hydra login workflow.
     """
     token = request.args.get('token')
     try:
@@ -23,6 +26,7 @@ def signup():
         login_request, challenge, params = decode_token(token, 'login')
 
         form = SignupForm()
+        gform = GoogleForm()
         try:
             if request.method == 'GET':
                 # if the user is already authenticated with Hydra, their user id is
@@ -51,7 +55,7 @@ def signup():
                     except x.ODPPasswordComplexityError:
                         form.password.errors.append("The password does not meet the minimum complexity requirements.")
 
-            return render_template('signup.html', form=form, token=token)
+            return render_template('signup.html', form=form, gform=gform, token=token)
 
         except x.ODPIdentityError as e:
             # any other validation error (e.g. user already authenticated) => reject login
@@ -64,14 +68,15 @@ def signup():
 
 @bp.route('/verify', methods=('GET', 'POST'))
 def verify():
-    """
-    View for sending a verification email. The token ensures that we can only get here from the user signup view.
+    """View for sending a verification email.
+
+    The token ensures that we can only get here from the user signup view.
     """
     token = request.args.get('token')
     try:
         login_request, challenge, params = decode_token(token, 'signup.verify')
 
-        form = FlaskForm()
+        form = VerifyEmailForm()
         email = params.get('email')
 
         if request.method == 'POST':
