@@ -2,8 +2,7 @@ from flask import Blueprint, redirect, request, url_for, current_app, flash, ren
 from flask_mail import Message
 
 from odp.identity import hydra_admin, mail
-from odp.identity.forms.auto_login import AutoLoginForm
-from odp.identity.forms.reset_password import ResetPasswordForm
+from odp.identity.forms import ResetPasswordForm, AutoLoginForm
 from odp.identity.views import hydra_error_page, encode_token, decode_token
 from odp.lib import exceptions as x
 from odp.lib.users import (

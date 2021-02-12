@@ -1,10 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 
 from odp.identity import hydra_admin
-from odp.identity.forms.forgot_password import ForgotPasswordForm
-from odp.identity.forms.google import GoogleForm
-from odp.identity.forms.login import LoginForm
-from odp.identity.forms.verify_email import VerifyEmailForm
+from odp.identity.forms import LoginForm, VerifyEmailForm, ForgotPasswordForm, GoogleForm
 from odp.identity.views import encode_token, decode_token, hydra_error_page
 from odp.identity.views.account import send_verification_email, send_password_reset_email
 from odp.lib import exceptions as x
