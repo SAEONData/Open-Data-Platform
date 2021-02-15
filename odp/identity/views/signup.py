@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 
 from odp.identity import hydra_admin
-from odp.identity.forms import SignupForm, VerifyEmailForm, GoogleForm
+from odp.identity.forms import SignupForm, VerifyEmailForm
 from odp.identity.views import hydra_error_page, encode_token, decode_token
 from odp.identity.views.account import send_verification_email
 from odp.lib import exceptions as x
@@ -24,7 +24,6 @@ def signup():
         login_request, challenge, params = decode_token(token, 'login')
 
         form = SignupForm()
-        gform = GoogleForm()
         try:
             if request.method == 'GET':
                 # if the user is already authenticated with Hydra, their user id is
@@ -53,7 +52,7 @@ def signup():
                     except x.ODPPasswordComplexityError:
                         form.password.errors.append("The password does not meet the minimum complexity requirements.")
 
-            return render_template('signup.html', form=form, gform=gform, token=token)
+            return render_template('signup.html', form=form, token=token)
 
         except x.ODPIdentityError as e:
             # any other validation error (e.g. user already authenticated) => reject login

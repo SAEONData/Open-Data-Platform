@@ -6,26 +6,25 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('google.login', token=token) }}" method="POST">
-        {{ gform.csrf_token }}
-        {{ render_field(gform.submit) }}
-    </form>
-    <p class="text-right mt-1">(SAEON staff @saeon.ac.za)</p>
-    <hr/>
     <form action="{{ url_for('login.login', token=token) }}" method="POST">
         {{ form.csrf_token }}
         {{ render_field(form.email) }}
         {{ render_field(form.password) }}
         {{ render_field(form.submit) }}
     </form>
-{% endblock %}
-
-{% block footer %}
-    <hr/>
-    <small>
+    <hr class="my-4"/>
+    <p class="text-center">
         Don't have an account yet?
         <a href="{{ url_for('signup.signup', token=token) }}">Sign up</a>
         <br/>
         <a href="{{ url_for('login.forgot_password', token=token) }}">Forgot your password?</a>
-    </small>
+    </p>
+    <hr class="my-4"/>
+    <h6>SAEON staff</h6>
+    <p>
+        Log in with your @saeon.ac.za account
+    </p>
+    <form action="{{ url_for('google.login', token=token) }}" method="POST">
+        <input class="btn btn-outline-primary btn-block" id="submit" name="submit" type="submit" value="Log in with Google">
+    </form>
 {% endblock %}

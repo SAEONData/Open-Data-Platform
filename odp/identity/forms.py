@@ -72,9 +72,3 @@ class AutoLoginForm(FlaskForm):
     submit = SubmitField(
         label='Log in',
     )
-
-
-class GoogleForm(FlaskForm):
-    submit = SubmitField(
-        label='Log in with Google',
-    )
