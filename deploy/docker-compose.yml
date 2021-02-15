@@ -35,6 +35,12 @@ services:
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
       - TZ
+      - GOOGLE_CLIENT_ID
+      - GOOGLE_CLIENT_SECRET
+      - GOOGLE_SCOPE=["openid","email","profile"]
+      - GOOGLE_AUTH_URI=https://accounts.google.com/o/oauth2/auth
+      - GOOGLE_TOKEN_URI=https://oauth2.googleapis.com/token
+      - GOOGLE_OPENID_URI=https://accounts.google.com/.well-known/openid-configuration
     restart: always
 
   odp-admin:

@@ -44,6 +44,8 @@ containing the following environment variables:
 - **`MEDIA_REPOSITORY_BASE_URL`**: URL of the NextCloud Media Repository
 - **`MEDIA_USERNAME`**: Media Repository username
 - **`MEDIA_PASSWORD`**: Media Repository password
+- **`GOOGLE_CLIENT_ID`**: OAuth2 client ID for Google login integration
+- **`GOOGLE_CLIENT_SECRET`**: OAuth2 client secret for Google login integration
 - **`TZ`**: sets the timezone of containers; e.g. `Africa/Johannesburg`
 
 ## ODP database
