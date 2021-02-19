@@ -48,7 +48,7 @@ async def select_catalogue_records(
     return catalogue.select_catalogue_records(ids, pagination)
 
 
-@router.get('/go/{record_id}')
+@router.get('/go/{record_id_or_doi:path}')
 async def go_to_catalogue_record(
         redirect_url: str = Depends(get_metadata_landing_page_url),
 ):
