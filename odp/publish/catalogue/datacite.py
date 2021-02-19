@@ -102,7 +102,7 @@ class DataciteCatalogue(Catalogue):
                 try:
                     datacite_record = DataciteRecordIn(
                         doi=doi,
-                        url=f'{self.doi_landing_page_base_url}/{record_id}',
+                        url=f'{self.doi_landing_page_base_url}/{doi}',
                         metadata=catrec.catalogue_record['metadata'],
                     )
                     datacite_record_dict = datacite_record.dict()
