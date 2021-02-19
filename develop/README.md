@@ -90,6 +90,12 @@ to use the `.env` file located there.
     export FLASK_APP=odp.identity.app
     flask run --host=localhost --port=9024
 
+### ODP Publisher
+    python -m odp.publish.main
+
+### DataCite Publisher
+    python -m odp.publish.datacite
+
 ## Upgrading Python dependencies
 To upgrade required Python libraries and re-generate the `requirements.txt`
 file for the ODP, carry out the following steps:
