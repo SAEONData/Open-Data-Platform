@@ -3,6 +3,7 @@ argon2-cffi==20.1.0
 attrs==20.3.0
 Authlib==0.15.3
 blinker==1.4
+Bootstrap-Flask==1.5.1
 certifi==2020.12.5
 cffi==1.14.4
 chardet==4.0.0
