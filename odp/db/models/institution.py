@@ -17,7 +17,7 @@ class Institution(Base):
     name = Column(String, unique=True, nullable=False)
 
     # institutions can be hierarchically related
-    parent_id = Column(Integer, ForeignKey('institution.id', ondelete='CASCADE'))
+    parent_id = Column(Integer, ForeignKey('institution.id', ondelete='SET NULL'))
     parent = relationship('Institution',
                           backref='children',
                           remote_side=[id],
