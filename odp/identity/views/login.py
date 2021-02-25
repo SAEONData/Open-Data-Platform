@@ -110,6 +110,7 @@ def forgot_password():
         login_request, challenge, params = decode_token(token, 'login')
 
         form = ForgotPasswordForm()
+        sent = False
 
         if request.method == 'POST':
             if form.validate():
@@ -117,6 +118,7 @@ def forgot_password():
                 try:
                     user_id = validate_forgot_password(email)
                     send_password_reset_email(email, challenge)
+                    sent = True
 
                 except x.ODPUserNotFound:
                     form.email.errors.append("The email address is not associated with any user account.")
@@ -126,7 +128,7 @@ def forgot_password():
                     redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
                     return redirect(redirect_to)
 
-        return render_template('forgot_password.html', form=form, token=token)
+        return render_template('forgot_password.html', form=form, token=token, sent=sent)
 
     except x.HydraAdminError as e:
         return hydra_error_page(e)
