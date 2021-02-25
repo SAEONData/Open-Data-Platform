@@ -16,18 +16,23 @@ services:
   hydra:
     container_name: hydra
     image: ${HYDRA_IMAGE}
+    command: serve all --dangerous-force-http #--dangerous-allow-insecure-redirect-urls http://192.168.0.102:5000/oidc/callback
     networks:
       - odp-net
     ports:
       - "9000:4444"
       - "9001:4445"
     environment:
-      - URLS_SELF_ISSUER=https://localhost:9000
+      - URLS_SELF_ISSUER=http://localhost:9000
+      - URLS_LOGIN=http://localhost:9024/hydra/login
+      - URLS_CONSENT=http://localhost:9024/hydra/consent
+      - URLS_LOGOUT=http://localhost:9024/hydra/logout
+#      - URLS_SELF_ISSUER=http://192.168.0.104:9000
+#      - URLS_LOGIN=http://192.168.0.104:9024/hydra/login
+#      - URLS_CONSENT=http://192.168.0.104:9024/hydra/consent
+#      - URLS_LOGOUT=http://192.168.0.104:9024/hydra/logout
       - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
       - DSN=postgres://hydra_user:${HYDRA_DB_PASS}@hydra-db:5432/hydra_db?sslmode=disable
-      - URLS_LOGIN=${ODP_IDENTITY_URL}/hydra/login
-      - URLS_CONSENT=${ODP_IDENTITY_URL}/hydra/consent
-      - URLS_LOGOUT=${ODP_IDENTITY_URL}/hydra/logout
       - TTL_ACCESS_TOKEN=168h
       - LOG_LEAK_SENSITIVE_VALUES=true
     depends_on:
