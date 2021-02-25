@@ -5,7 +5,7 @@ from odp.identity.forms import SignupForm, VerifyEmailForm
 from odp.identity.views import hydra_error_page, encode_token, decode_token
 from odp.identity.views.account import send_verification_email
 from odp.lib import exceptions as x
-from odp.lib.users import create_user_account, validate_user_signup
+from odp.lib.users import create_user_account
 
 bp = Blueprint('signup', __name__)
 
@@ -38,13 +38,14 @@ def signup():
                     email = form.email.data
                     password = form.password.data
                     try:
-                        validate_user_signup(email, password)
                         create_user_account(email, password)
 
                         # the signup (and login) is completed via email verification
                         send_verification_email(email, challenge)
                         verify_token = encode_token(challenge, 'signup.verify', email=email)
-                        return redirect(url_for('.verify', token=verify_token))
+                        redirect_to = url_for('.verify', token=verify_token)
+
+                        return redirect(redirect_to)
 
                     except x.ODPEmailInUse:
                         form.email.errors.append("The email address is already associated with a user account.")

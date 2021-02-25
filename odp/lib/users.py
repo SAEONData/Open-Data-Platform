@@ -99,25 +99,6 @@ def lock_account(user_id):
     return False
 
 
-def validate_user_signup(email, password):
-    """
-    Validate the credentials supplied by a new user. An ``ODPIdentityError``
-    is raised if the signup cannot be permitted for any reason.
-
-    :param email: the input email address
-    :param password: the input plain-text password
-
-    :raises ODPEmailInUse: if the email address is already associated with a user account
-    :raises ODPPasswordComplexityError: if the password does not meet the minimum complexity requirements
-    """
-    user = User.query.filter_by(email=email).first()
-    if user:
-        raise x.ODPEmailInUse
-
-    if not check_password_complexity(email, password):
-        raise x.ODPPasswordComplexityError
-
-
 def validate_forgot_password(email):
     """
     Validate that a forgotten password request is for a valid email address.
@@ -179,22 +160,35 @@ def validate_email_verification(email):
     return user.id
 
 
-def create_user_account(email, password):
+def create_user_account(email, password=None):
     """
-    Create a new user account with the specified credentials. The password is hashed
-    using the Argon2id algorithm.
+    Create a new user account with the specified credentials. An
+    ``ODPIdentityError`` is raised if the account cannot be created
+    for any reason.
+    
+    Passwords are hashed using the Argon2id algorithm.
 
     :param email: the input email address
-    :param password: the input plain-text password
+    :param password: (optional) the input plain-text password
     :return: the new user id
+
+    :raises ODPEmailInUse: if the email address is already associated with a user account
+    :raises ODPPasswordComplexityError: if the password does not meet the minimum complexity requirements
     """
+    user = User.query.filter_by(email=email).first()
+    if user:
+        raise x.ODPEmailInUse
+
+    if password is not None and not check_password_complexity(email, password):
+        raise x.ODPPasswordComplexityError
+
     with transaction():
         user = User(
             email=email,
-            password=ph.hash(password),
-            superuser=False,
+            password=ph.hash(password) if password else None,
             active=True,
             verified=False,
+            superuser=False,
         )
         user.save()
         return user.id
@@ -260,40 +254,54 @@ def check_password_complexity(email, password):
     return True
 
 
-def validate_google_login(email, verified):
+def validate_google_login(email):
     """
     Validate a login completed via Google, returning the user id on success.
-    A user account is created if it does not already exist. An ``ODPIdentityError``
-    is raised if the login cannot be permitted for any reason.
+    An ``ODPIdentityError`` is raised if the login cannot be permitted for any reason.
 
     :param email: the Google email address
-    :param verified: flag from Google indicating whether the email address is verified
-    :return: the user id
 
+    :raises ODPUserNotFound: if there is no user account for the given email address
     :raises ODPAccountLocked: if the user account has been temporarily locked
     :raises ODPAccountDisabled: if the user account has been deactivated
     :raises ODPEmailNotVerified: if the email address has not been verified
     """
-    with transaction():
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            user = User(
-                email=email,
-                superuser=False,
-                active=True,
-            )
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        raise x.ODPUserNotFound
 
-        user.verified = verified
-        user.save()
-        user_id = user.id
-
-    if is_account_locked(user_id):
+    if is_account_locked(user.id):
         raise x.ODPAccountLocked
 
-    user = User.query.get(user_id)
     if not user.active:
         raise x.ODPAccountDisabled
-    if not user.verified:
-        raise x.ODPEmailNotVerified
 
-    return user_id
+    return user.id
+
+
+def update_user_profile(user_id, **userinfo):
+    """
+    Update optional user profile info.
+
+    Only update user attributes that are supplied in the dict.
+
+    :param user_id: the user id
+    :param userinfo: dict containing profile info
+    """
+    with transaction():
+        user = User.query.get(user_id)
+        for attr in 'family_name', 'given_name', 'picture':
+            if attr in userinfo:
+                setattr(user, attr, userinfo[attr])
+        user.save()
+
+
+def get_user_profile(user_id):
+    """
+    Return a dict of user profile info.
+    """
+    user = User.query.get(user_id)
+    info = {}
+    for attr in 'family_name', 'given_name', 'picture':
+        info[attr] = getattr(user, attr)
+    return info
