@@ -18,12 +18,14 @@
         Already have an account?
         <a href="{{ url_for('login.login', token=token) }}">Log in</a>
     </p>
-    <hr class="my-4"/>
-    <h6>SAEON staff</h6>
-    <p>
-        Sign up with your @saeon.ac.za account
-    </p>
-    <form action="{{ url_for('google.authorize', token=token) }}" method="POST">
-        <input class="btn btn-outline-primary btn-block" id="submit" name="submit" type="submit" value="Sign up via Google">
-    </form>
+    {% if enable_google %}
+        <hr class="my-4"/>
+        <h6>SAEON staff</h6>
+        <p>
+            Sign up with your @saeon.ac.za account
+        </p>
+        <form action="{{ url_for('google.authorize', token=token) }}" method="POST">
+            <input class="btn btn-outline-primary btn-block" id="submit" name="submit" type="submit" value="Sign up via Google">
+        </form>
+    {% endif %}
 {% endblock %}

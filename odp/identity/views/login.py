@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 
+from odp.config import config
 from odp.identity import hydra_admin
 from odp.identity.forms import LoginForm, VerifyEmailForm, ForgotPasswordForm
 from odp.identity.views import encode_token, decode_token, hydra_error_page
@@ -68,7 +69,7 @@ def login():
         elif error:
             redirect_to = hydra_admin.reject_login_request(challenge, error.error_code, error.error_description)
         else:
-            return render_template('login.html', form=form, token=token)
+            return render_template('login.html', form=form, token=token, enable_google=config.GOOGLE.ENABLE)
 
         return redirect(redirect_to)
 

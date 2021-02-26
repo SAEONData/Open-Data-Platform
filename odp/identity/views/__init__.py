@@ -1,6 +1,7 @@
 from flask import current_app, redirect, url_for, flash, abort
 from itsdangerous import JSONWebSignatureSerializer, BadData
 
+from odp.config import config
 from odp.identity import hydra_admin
 
 
@@ -11,7 +12,8 @@ def init_app(app):
     app.register_blueprint(login.bp, url_prefix='/login')
     app.register_blueprint(signup.bp, url_prefix='/signup')
     app.register_blueprint(account.bp, url_prefix='/account')
-    app.register_blueprint(google.bp, url_prefix='/google')
+    if config.GOOGLE.ENABLE:
+        app.register_blueprint(google.bp, url_prefix='/google')
 
 
 def encode_token(challenge: str, scope: str, **params):
