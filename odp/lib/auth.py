@@ -26,8 +26,12 @@ def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTo
     :return: tuple(AccessTokenData, IDTokenData)
     """
     id_token_data = IDTokenData(
-        user_id=user.id,
+        sub=user.id,
         email=user.email,
+        email_verified=user.verified,
+        family_name=user.family_name,
+        given_name=user.given_name,
+        picture=user.picture,
         role=[],
     )
 
