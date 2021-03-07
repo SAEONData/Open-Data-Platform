@@ -67,12 +67,10 @@ class DataciteClient:
         Publish a DOI and associated metadata to DataCite. This creates or updates
         the record on DataCite servers, and sets its state to ``findable``.
         """
-        record.metadata['url'] = record.url
-        record.metadata['event'] = 'publish'
         payload = {
             'data': {
                 'id': record.doi,
-                'attributes': record.metadata,
+                'attributes': dict(record.metadata, url=record.url, event='publish'),
             }
         }
         result = self._request('PUT', f'/dois/{record.doi}', json=payload)
