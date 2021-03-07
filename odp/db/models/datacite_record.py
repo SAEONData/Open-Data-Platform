@@ -11,7 +11,8 @@ class DataciteRecord(Base):
 
     metadata_id = Column(String, ForeignKey('catalogue_record.metadata_id', ondelete='RESTRICT'), primary_key=True)
     doi = Column(String, unique=True, nullable=False)
-    datacite_record = Column(JSONB)  # odp.api.models.datacite.DataciteRecord
+    url = Column(String, unique=True)
+    metadata_ = Column(JSONB)
     published = Column(Boolean, nullable=False)
     updated = Column(TIMESTAMP(timezone=True))
     checked = Column(TIMESTAMP(timezone=True), nullable=False)
