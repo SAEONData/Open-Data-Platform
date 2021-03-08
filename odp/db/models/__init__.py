@@ -3,6 +3,7 @@ from .catalogue_record import CatalogueRecord
 from .client import Client
 from .client_capability import ClientCapability
 from .datacite_record import DataciteRecord
+from .domain import Domain
 from .institution import Institution
 from .member import Member
 from .oauth2_token import OAuth2Token

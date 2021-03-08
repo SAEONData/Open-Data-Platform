@@ -32,8 +32,14 @@ class Institution(Base):
     users = association_proxy('members', 'user',
                               creator=lambda u: Member(user=u))
 
-    # one-to-many relationship with clients
+    # one-to-many relationship with client
     clients = relationship('Client',
+                           back_populates='institution',
+                           cascade='all, delete-orphan',
+                           passive_deletes=True)
+
+    # one-to-many relationship with domain
+    domains = relationship('Domain',
                            back_populates='institution',
                            cascade='all, delete-orphan',
                            passive_deletes=True)
