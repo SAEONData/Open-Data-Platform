@@ -29,6 +29,8 @@ async def create_or_update_institution(institution: Institution):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, "Parent institution not found.") from e
     except x.ODPInstitutionNameConflict as e:
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, "The institution name is already in use.") from e
+    except x.ODPDomainNameConflict as e:
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, "The domain name is already in use.") from e
 
 
 @router.get(

@@ -81,6 +81,10 @@ class ODPInstitutionNameConflict(ODPInstitutionError):
     pass
 
 
+class ODPDomainNameConflict(ODPInstitutionError):
+    pass
+
+
 class DataciteError(ODPException):
     """ Exception raised when a request to the DataCite API fails """
 
