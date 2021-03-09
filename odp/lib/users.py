@@ -4,7 +4,7 @@ import argon2
 from argon2.exceptions import VerifyMismatchError
 
 from odp.db import transaction
-from odp.db.models import User
+from odp.db.models import User, Domain
 from odp.lib import exceptions as x
 
 ph = argon2.PasswordHasher()
@@ -162,11 +162,13 @@ def validate_email_verification(email):
 
 def create_user_account(email, password=None):
     """
-    Create a new user account with the specified credentials. An
-    ``ODPIdentityError`` is raised if the account cannot be created
-    for any reason.
-    
-    Passwords are hashed using the Argon2id algorithm.
+    Create a new user account with the specified credentials.
+    Password may be omitted if the user is externally authenticated.
+    A member record is created if the email domain matches an
+    institutional domain. An ``ODPIdentityError`` is raised if
+    the account cannot be created for any reason.
+
+    The password, if supplied, is hashed using the Argon2id algorithm.
 
     :param email: the input email address
     :param password: (optional) the input plain-text password
@@ -191,6 +193,12 @@ def create_user_account(email, password=None):
             superuser=False,
         )
         user.save()
+
+        _, _, domain_name = email.partition('@')
+        domain = Domain.query.filter_by(name=domain_name).first()
+        if domain:
+            user.institutions += [domain.institution]
+
         return user.id
 
 
