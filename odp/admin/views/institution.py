@@ -1,5 +1,5 @@
 from odp.admin.views.base import AdminModelView, KeyField
-from odp.db.models import Institution, User
+from odp.db.models import Institution, User, Domain
 
 
 class InstitutionModelView(AdminModelView):
@@ -16,7 +16,7 @@ class InstitutionModelView(AdminModelView):
         'domains': lambda vw, ctx, model, prop: ', '.join(sorted([d.name for d in model.domains])),
     }
 
-    form_columns = ['parent', 'name', 'key', 'users']
+    form_columns = ['parent', 'name', 'key', 'domains', 'users']
     form_overrides = {
         'key': KeyField
     }
@@ -30,5 +30,6 @@ class InstitutionModelView(AdminModelView):
             query_factory=lambda: User.query.order_by('email'),
         ),
     }
+    inline_models = (Domain,)
     create_template = 'institution_create.html'
     edit_template = 'institution_edit.html'
