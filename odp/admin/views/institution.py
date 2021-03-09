@@ -6,13 +6,14 @@ class InstitutionModelView(AdminModelView):
     """
     Institution model view.
     """
-    column_list = ['name', 'key', 'parent']
+    column_list = ['name', 'key', 'domains', 'parent']
     column_default_sort = 'name'
     column_labels = {
         'users': 'Members',
     }
     column_formatters = {
-        'parent': lambda vw, ctx, model, prop: model.parent.name if model.parent else None
+        'parent': lambda vw, ctx, model, prop: model.parent.name if model.parent else None,
+        'domains': lambda vw, ctx, model, prop: ', '.join(sorted([d.name for d in model.domains])),
     }
 
     form_columns = ['parent', 'name', 'key', 'users']
