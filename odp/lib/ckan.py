@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import List, Dict, Any
+from typing import List
 
 import ckanapi
 from fastapi import HTTPException
@@ -423,7 +423,7 @@ class CKANClient:
             'title': institution.name,
         }
         try:
-            ckan_institution = self._call_ckan(
+            self._call_ckan(
                 'organization_create',
                 access_token,
                 **input_dict,
@@ -431,7 +431,7 @@ class CKANClient:
         except HTTPException as e:
             if e.status_code == HTTP_400_BAD_REQUEST and 'Group name already exists in database' in e.detail:
                 input_dict['id'] = input_dict['name']
-                ckan_institution = self._call_ckan(
+                self._call_ckan(
                     'organization_update',
                     access_token,
                     **input_dict,
@@ -439,11 +439,7 @@ class CKANClient:
             else:
                 raise
 
-        return Institution(
-            key=ckan_institution['name'],
-            name=ckan_institution['title'],
-            parent_key=None,
-        )
+        return institution
 
     def list_metadata_schemas(self,
                               access_token: str,
