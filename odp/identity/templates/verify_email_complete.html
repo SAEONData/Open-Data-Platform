@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_field %}
+
+{% block heading %}
+    Account verified
+{% endblock %}
+
+{% block content %}
+    <form action="{{ url_for('account.verify_email_complete', token=token) }}" method="POST">
+        {{ form.csrf_token }}
+        {{ render_field(form.submit) }}
+    </form>
+{% endblock %}

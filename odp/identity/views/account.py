@@ -34,14 +34,44 @@ def verify_email():
             update_user_verified(user_id, True)
             flash("Your email address has been verified.")
 
-            complete_token = encode_token(challenge, 'account.profile', user_id=user_id)
-            redirect_to = url_for('.profile', token=complete_token)
+            complete_token = encode_token(challenge, 'account.verify_email_complete', user_id=user_id)
+            redirect_to = url_for('.verify_email_complete', token=complete_token)
 
         except x.ODPIdentityError as e:
             # any validation error => reject login
             redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
 
         return redirect(redirect_to)
+
+    except x.HydraAdminError as e:
+        return hydra_error_page(e)
+
+
+@bp.route('/verify-email-complete', methods=('GET', 'POST'))
+def verify_email_complete():
+    """View for concluding the login with Hydra after verifying an email address.
+
+    The token ensures that we can only get here from the verify email view.
+    """
+    token = request.args.get('token')
+    try:
+        login_request, challenge, params = decode_token(token, 'account.verify_email_complete')
+
+        form = AutoLoginForm()
+        user_id = params.get('user_id')
+
+        if request.method == 'POST':
+            try:
+                validate_auto_login(user_id)
+                redirect_to = hydra_admin.accept_login_request(challenge, user_id)
+
+            except x.ODPIdentityError as e:
+                # any validation error => reject login
+                redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
+
+            return redirect(redirect_to)
+
+        return render_template('verify_email_complete.html', form=form, token=token)
 
     except x.HydraAdminError as e:
         return hydra_error_page(e)
