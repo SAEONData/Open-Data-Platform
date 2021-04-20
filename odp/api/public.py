@@ -18,6 +18,12 @@ app = FastAPI(
 init_db_middleware(app)
 
 app.include_router(
+    status.router,
+    prefix='/status',
+    tags=['Status'],
+)
+
+app.include_router(
     catalogue.router,
     prefix='/catalogue',
     tags=['Catalogue'],
@@ -46,10 +52,4 @@ app.add_middleware(
     allow_origins=config.ODP.API.ALLOW_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
-)
-
-app.include_router(
-    status.router,
-    prefix='/status',
-    tags=['Status'],
 )

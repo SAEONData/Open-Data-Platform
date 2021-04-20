@@ -25,6 +25,12 @@ app = FastAPI(
 init_db_middleware(app)
 
 app.include_router(
+    status.router,
+    prefix='/status',
+    tags=['Status'],
+)
+
+app.include_router(
     authorization.router,
     prefix='/auth',
     tags=['Authorization'],
@@ -58,10 +64,4 @@ app.include_router(
     datacite.router,
     prefix='/datacite',
     tags=['DataCite'],
-)
-
-app.include_router(
-    status.router,
-    prefix='/status',
-    tags=['Status'],
 )
