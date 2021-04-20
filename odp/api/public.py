@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from odp.api import init_db_middleware
-from odp.api.routers import metadata, catalogue, collection, media
+from odp.api.routers import metadata, catalogue, collection, media, status
 from odp.config import config
 
 app = FastAPI(
@@ -46,4 +46,10 @@ app.add_middleware(
     allow_origins=config.ODP.API.ALLOW_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+app.include_router(
+    status.router,
+    prefix='/status',
+    tags=['Status'],
 )

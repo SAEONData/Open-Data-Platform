@@ -9,6 +9,7 @@ from odp.api.routers import (
     project,
     schema,
     workflow,
+    status,
 )
 from odp.config import config
 
@@ -57,4 +58,10 @@ app.include_router(
     datacite.router,
     prefix='/datacite',
     tags=['DataCite'],
+)
+
+app.include_router(
+    status.router,
+    prefix='/status',
+    tags=['Status'],
 )
