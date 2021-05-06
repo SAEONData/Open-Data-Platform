@@ -9,7 +9,7 @@ class Role(str, Enum):
     CURATOR = 'curator'
     HARVESTER = 'harvester'
     CONTRIBUTOR = 'contributor'
-    MEMBER = 'member'
+    STAFF = 'staff'
 
     @staticmethod
     def all():
