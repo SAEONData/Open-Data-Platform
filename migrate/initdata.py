@@ -50,7 +50,7 @@ def initialize_capabilities():
         'ODP.Admin': ['admin', 'staff'],
         'ODP.Metadata': ['admin', 'curator', 'harvester', 'contributor', 'staff'],
         'ODP.Catalogue': ['harvester'],
-        'SAEON.Observations.WebAPI': ['admin', 'contributor'],
+        'SAEON.Observations.WebAPI': ['admin', 'staff'],
         'SAEON.DataPortal': ['admin', 'datascientist', 'staff'],
     }
     for scope, roles in capabilities.items():
