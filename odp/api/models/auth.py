@@ -9,6 +9,7 @@ class Role(str, Enum):
     CURATOR = 'curator'
     HARVESTER = 'harvester'
     CONTRIBUTOR = 'contributor'
+    MANAGER = 'manager'
     STAFF = 'staff'
     DATASCIENTIST = 'datascientist'
 

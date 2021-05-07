@@ -11,6 +11,7 @@ def initialize_roles():
         {'key': 'curator', 'name': 'Curator', 'admin': True},
         {'key': 'harvester', 'name': 'Harvester', 'admin': False},
         {'key': 'contributor', 'name': 'Contributor', 'admin': False},
+        {'key': 'manager', 'name': 'Manager', 'admin': False},
         {'key': 'staff', 'name': 'Staff', 'admin': False},
         {'key': 'datascientist', 'name': 'Data Scientist', 'admin': False},
     ]
@@ -47,7 +48,7 @@ def initialize_scopes():
 
 def initialize_capabilities():
     capabilities = {
-        'ODP.Admin': ['admin', 'staff'],
+        'ODP.Admin': ['admin', 'manager', 'staff'],
         'ODP.Metadata': ['admin', 'curator', 'harvester', 'contributor', 'staff'],
         'ODP.Catalogue': ['harvester'],
         'SAEON.Observations.WebAPI': ['admin', 'staff'],
