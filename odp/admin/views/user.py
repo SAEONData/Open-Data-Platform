@@ -44,20 +44,20 @@ class UserModelView(AdminModelView):
 
     @expose('/edit/', methods=('GET', 'POST'))
     def edit_view(self):
+        """Only a superuser can edit a superuser."""
         id = get_mdict_item_or_list(request.args, 'id')
         if id is not None:
             user = User.query.get(id)
             if user and user.superuser and not current_user.superuser:
-                flash("Only superusers may perform this action.")
-                return redirect(get_redirect_target())
+                return self.redirect_no_perms()
         return super().edit_view()
 
     @expose('/delete/', methods=('POST',))
     def delete_view(self):
+        """Deleting a superuser is not allowed."""
         id = request.form.get('id')
         if id is not None:
             user = User.query.get(id)
-            if user and user.superuser and not current_user.superuser:
-                flash("Only superusers may perform this action.")
-                return redirect(get_redirect_target())
+            if user and user.superuser:
+                return self.redirect_no_perms()
         return super().delete_view()

@@ -1,4 +1,5 @@
 import re
+from enum import Enum
 
 from flask import flash, redirect
 from flask_admin import expose
@@ -8,6 +9,7 @@ from flask_login import current_user
 from wtforms import StringField
 
 from odp.config import config
+from odp.db import session
 from odp.db.models import Institution, UserPrivilege, Role, Scope
 
 
@@ -31,6 +33,13 @@ class KeyField(StringField):
             self.raw_data = [key]
 
 
+class AccessLevel(int, Enum):
+    NONE = 0
+    READ = 1
+    WRITE = 2
+    SUPER = 3
+
+
 class AdminModelView(ModelView):
     """
     Base view for all data models.
@@ -40,50 +49,86 @@ class AdminModelView(ModelView):
     edit_template = 'admin_model_edit.html'
     details_template = 'admin_model_details.html'
 
+    # minimum access level required to see this view
+    read_access_level = AccessLevel.READ
+
+    # minimum access level required to make changes in this view
+    write_access_level = AccessLevel.WRITE
+
     def is_accessible(self):
+        """Whether to allow view access."""
+        return self.user_access_level() >= self.read_access_level
+
+    @expose('/new/', methods=('GET', 'POST'))
+    def create_view(self):
+        """Whether to allow create access."""
+        if self.user_access_level() < self.write_access_level:
+            return self.redirect_no_perms()
+
+        return super().create_view()
+
+    @expose('/edit/', methods=('GET', 'POST'))
+    def edit_view(self):
+        """Whether to allow edit access."""
+        if self.user_access_level() < self.write_access_level:
+            return self.redirect_no_perms()
+
+        return super().edit_view()
+
+    @expose('/delete/', methods=('POST',))
+    def delete_view(self):
+        """Whether to allow delete access."""
+        if self.user_access_level() < self.write_access_level:
+            return self.redirect_no_perms()
+
+        return super().delete_view()
+
+    @expose('/action/', methods=('POST',))
+    def action_view(self):
+        """Whether to allow any other kind of action (including bulk delete)."""
+        if self.user_access_level() < self.write_access_level:
+            return self.redirect_no_perms()
+
+        return super().action_view()
+
+    @staticmethod
+    def user_access_level() -> AccessLevel:
+        """Return the user's access level with respect to this application."""
         if not current_user.is_authenticated:
-            return False
+            return AccessLevel.NONE
 
         if current_user.superuser:
-            return True
+            return AccessLevel.SUPER
 
-        # TODO: cache the result of this query; it's called repeatedly
-        admin_privilege = UserPrivilege.query.filter_by(user_id=current_user.id) \
-            .join(Institution, UserPrivilege.institution_id == Institution.id).filter_by(key=config.ODP.ADMIN.INSTITUTION) \
-            .join(Role, UserPrivilege.role_id == Role.id).filter_by(key=config.ODP.ADMIN.ROLE) \
-            .join(Scope, UserPrivilege.scope_id == Scope.id).filter_by(key=config.ODP.ADMIN.SCOPE) \
-            .one_or_none()
-        return admin_privilege is not None
+        # A user gains read access if they have any user_privilege records
+        # referencing both the admin institution and the admin scope.
+        # If any such record references the admin role, then they also gain
+        # write access.
+        roles = [role for (role,) in
+                 (session.query(Role.key)
+                  .join(UserPrivilege, UserPrivilege.role_id == Role.id)
+                  .join(Institution, UserPrivilege.institution_id == Institution.id)
+                  .join(Scope, UserPrivilege.scope_id == Scope.id)
+                  .filter(UserPrivilege.user_id == current_user.id)
+                  .filter(Institution.key == config.ODP.ADMIN.INSTITUTION)
+                  .filter(Scope.key == config.ODP.ADMIN.SCOPE)
+                  .all())]
+
+        if config.ODP.ADMIN.ROLE in roles:
+            return AccessLevel.WRITE
+        elif roles:
+            return AccessLevel.READ
+        else:
+            return AccessLevel.NONE
+
+    @staticmethod
+    def redirect_no_perms():
+        flash("You do not have permission to perform this action.")
+        return redirect(get_redirect_target())
 
 
 class SysAdminModelView(AdminModelView):
     """
     Base view for system config models. Only modifiable by superusers.
     """
-    @expose('/new/', methods=('GET', 'POST'))
-    def create_view(self):
-        if not current_user.superuser:
-            flash("Only superusers may perform this action.")
-            return redirect(get_redirect_target())
-        return super().create_view()
-
-    @expose('/edit/', methods=('GET', 'POST'))
-    def edit_view(self):
-        if not current_user.superuser:
-            flash("Only superusers may perform this action.")
-            return redirect(get_redirect_target())
-        return super().edit_view()
-
-    @expose('/delete/', methods=('POST',))
-    def delete_view(self):
-        if not current_user.superuser:
-            flash("Only superusers may perform this action.")
-            return redirect(get_redirect_target())
-        return super().delete_view()
-
-    @expose('/action/', methods=('POST',))
-    def action_view(self):
-        if not current_user.superuser:
-            flash("Only superusers may perform this action.")
-            return redirect(get_redirect_target())
-        return super().action_view()
+    write_access_level = AccessLevel.SUPER
