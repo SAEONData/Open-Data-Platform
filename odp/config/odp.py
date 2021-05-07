@@ -54,8 +54,6 @@ class ODPAdminConfig(BaseConfig):
         env_prefix = 'ODP_ADMIN_'
 
     INSTITUTION: str  # institution key of the institution that owns the platform
-    ROLE: str         # role key of the admin role
-    SCOPE: str        # the admin scope
 
     _subconfig = {
         'UI': ODPAdminUIConfig,

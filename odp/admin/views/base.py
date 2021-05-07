@@ -8,6 +8,7 @@ from flask_admin.helpers import get_redirect_target
 from flask_login import current_user
 from wtforms import StringField
 
+from odp.api.models.auth import Role as RoleEnum, Scope as ScopeEnum
 from odp.config import config
 from odp.db import session
 from odp.db.models import Institution, UserPrivilege, Role, Scope
@@ -35,9 +36,9 @@ class KeyField(StringField):
 
 class AccessLevel(int, Enum):
     NONE = 0
-    READ = 1
-    WRITE = 2
-    SUPER = 3
+    VIEW = 1
+    MANAGE = 2
+    ADMIN = 3
 
 
 class AdminModelView(ModelView):
@@ -50,10 +51,10 @@ class AdminModelView(ModelView):
     details_template = 'admin_model_details.html'
 
     # minimum access level required to see this view
-    read_access_level = AccessLevel.READ
+    read_access_level = AccessLevel.VIEW
 
     # minimum access level required to make changes in this view
-    write_access_level = AccessLevel.WRITE
+    write_access_level = AccessLevel.MANAGE
 
     def is_accessible(self):
         """Whether to allow view access."""
@@ -97,13 +98,10 @@ class AdminModelView(ModelView):
         if not current_user.is_authenticated:
             return AccessLevel.NONE
 
-        if current_user.superuser:
-            return AccessLevel.SUPER
-
         # A user gains read access if they have any user_privilege records
         # referencing both the admin institution and the admin scope.
-        # If any such record references the admin role, then they also gain
-        # write access.
+        # The associated role(s) then determine whether - and what level of -
+        # write access is allowed.
         roles = [role for (role,) in
                  (session.query(Role.key)
                   .join(UserPrivilege, UserPrivilege.role_id == Role.id)
@@ -111,13 +109,15 @@ class AdminModelView(ModelView):
                   .join(Scope, UserPrivilege.scope_id == Scope.id)
                   .filter(UserPrivilege.user_id == current_user.id)
                   .filter(Institution.key == config.ODP.ADMIN.INSTITUTION)
-                  .filter(Scope.key == config.ODP.ADMIN.SCOPE)
+                  .filter(Scope.key == ScopeEnum.ADMIN)
                   .all())]
 
-        if config.ODP.ADMIN.ROLE in roles:
-            return AccessLevel.WRITE
+        if RoleEnum.ADMIN in roles:
+            return AccessLevel.ADMIN
+        elif RoleEnum.MANAGER in roles:
+            return AccessLevel.MANAGE
         elif roles:
-            return AccessLevel.READ
+            return AccessLevel.VIEW
         else:
             return AccessLevel.NONE
 
@@ -129,6 +129,6 @@ class AdminModelView(ModelView):
 
 class SysAdminModelView(AdminModelView):
     """
-    Base view for system config models. Only modifiable by superusers.
+    Base view for system config models. Only modifiable by admins.
     """
-    write_access_level = AccessLevel.SUPER
+    write_access_level = AccessLevel.ADMIN

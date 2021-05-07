@@ -28,8 +28,6 @@ services:
       - ODP_DB_PASS
       - ODP_MAIL_HOST
       - ODP_ADMIN_INSTITUTION=saeon
-      - ODP_ADMIN_ROLE=admin
-      - ODP_ADMIN_SCOPE=ODP.Admin
       - ODP_IDENTITY_LOGIN_EXPIRY=2592000
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
@@ -70,8 +68,6 @@ services:
       - ODP_ADMIN_UI_CLIENT_SECRET
       - ODP_ADMIN_UI_SCOPE=["openid","offline","ODP.Admin"]
       - ODP_ADMIN_INSTITUTION=saeon
-      - ODP_ADMIN_ROLE=admin
-      - ODP_ADMIN_SCOPE=ODP.Admin
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
       - TZ
@@ -100,8 +96,6 @@ services:
       - ODP_DB_PASS
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - ODP_ADMIN_INSTITUTION=saeon
-      - ODP_ADMIN_ROLE=admin
-      - ODP_ADMIN_SCOPE=ODP.Admin
       - CKAN_URL=http://ckan-metadata:5000
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - TZ
@@ -129,8 +123,6 @@ services:
       - ODP_DB_USER
       - ODP_DB_PASS
       - ODP_ADMIN_INSTITUTION=saeon
-      - ODP_ADMIN_ROLE=admin
-      - ODP_ADMIN_SCOPE=ODP.Admin
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - CKAN_URL=http://ckan-metadata:5000
       - CATALOGUE_METADATA_LANDING_PAGE_BASE_URL
