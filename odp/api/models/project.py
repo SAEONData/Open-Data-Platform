@@ -7,5 +7,5 @@ PROJECT_SUFFIX = '-project'
 
 class Project(BaseModel):
     key: str = Field(..., regex=KEY_REGEX)
+    abbr: str
     name: str
-    description: str = None

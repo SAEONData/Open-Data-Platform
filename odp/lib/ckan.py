@@ -373,8 +373,8 @@ class CKANClient:
         )
         return [Project(
             key=project['name'],
-            name=project['title'],
-            description=project['description'],
+            abbr=project['title'],
+            name=project['description'],
         ) for project in project_list]
 
     def create_or_update_project(self,
@@ -388,8 +388,8 @@ class CKANClient:
 
         input_dict = {
             'name': project.key,
-            'title': project.name,
-            'description': project.description,
+            'title': project.abbr,
+            'description': project.name,
         }
         try:
             ckan_project = self._call_ckan(
@@ -410,8 +410,8 @@ class CKANClient:
 
         return Project(
             key=ckan_project['name'],
-            name=ckan_project['title'],
-            description=ckan_project['description'],
+            abbr=ckan_project['title'],
+            name=ckan_project['description'],
         )
 
     def create_or_update_institution(self,
