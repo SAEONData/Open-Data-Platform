@@ -16,18 +16,14 @@ class AuthData(NamedTuple):
     access_token_data: AccessTokenData
 
 
-# TODO: this needs to be specialized for API functions that do / don't relate to
-#  institutional resources; for those that don't, we don't want the institution_key
-#  parameter appearing in the API signature, which happens automatically because
-#  of the __call__ signature below
 class Authorizer(HTTPBearer):
-    """ Dependency class which authorizes the current request. """
+    """Dependency class which authorizes the current request."""
 
     def __init__(self, scope: Scope, *allowed_roles: Role, institution_key: str = None):
-        """ Constructor.
+        """Initialize an Authorizer instance for an API function.
 
         :param scope: the scope required for accessing the API function
-        :param allowed_roles: the role(s) that are allowed access to the API function
+        :param allowed_roles: the role(s) that are allowed to access the API function
         :param institution_key: if specified, the API function may only be accessed by
             members of this institution (or the admin institution)
         """
@@ -36,17 +32,24 @@ class Authorizer(HTTPBearer):
         self.allowed_roles = allowed_roles
         self.institution_key = institution_key
 
-    async def __call__(self, request: Request, institution_key: str = None) -> AuthData:
-        """ Validate the access token that was supplied in the Authorization header,
+    async def __call__(self, request: Request) -> AuthData:
+        """Validate the access token that was supplied in the Authorization header,
         and return the token and associated access rights on success.
 
-        :param institution_key: the institution that owns the resource(s) being requested, if applicable
         :return: AuthData(access_token, access_token_data)
         :raise HTTPException: if the token is invalid or the user has insufficient privileges
         """
         http_auth = await super().__call__(request)
         access_token = http_auth.credentials
         development_env = config.ODP.ENV == 'development'
+
+        try:
+            # set by InstitutionalResourceAuthorizer for
+            # institution-specific resource access
+            request_institution_key = request.state.institution_key
+        except AttributeError:
+            request_institution_key = None
+
         try:
             r = requests.post(
                 config.ODP.API.ADMIN_API_URL + '/auth/introspect',
@@ -72,7 +75,7 @@ class Authorizer(HTTPBearer):
             valid_token = ValidToken(**token_data)
             allow_access = check_access(
                 access_token_data := valid_token.ext,
-                require_institution=self.institution_key or institution_key,
+                require_institution=self.institution_key or request_institution_key,
                 require_scope=self.scope,
                 require_role=self.allowed_roles,
             )
@@ -93,3 +96,22 @@ class Authorizer(HTTPBearer):
 
         except requests.RequestException as e:
             raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE, detail=str(e)) from e
+
+
+class InstitutionalResourceAuthorizer(Authorizer):
+    """A specialization of Authorizer which authorizes access to institutionally
+    owned resources."""
+
+    def __init__(self, scope: Scope, *allowed_roles: Role):
+        super().__init__(scope, *allowed_roles)
+
+    async def __call__(self, request: Request, institution_key: str) -> AuthData:
+        """Validate the access token that was supplied in the Authorization header,
+        and return the token and associated access rights on success.
+
+        :param institution_key: the institution that owns the resource(s) being requested
+        :return: AuthData(access_token, access_token_data)
+        :raise HTTPException: if the token is invalid or the user has insufficient privileges
+        """
+        request.state.institution_key = institution_key
+        return await super().__call__(request)
