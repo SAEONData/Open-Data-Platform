@@ -33,7 +33,14 @@ async def create_or_update_metadata_collection(
             Scope.METADATA,
             Role.CURATOR)),
 ):
-    # institution = get_institution(institution_key)
-    # ckan.create_or_update_institution(institution, auth_data.access_token)
+    try:
+        # this is godawful ugly, but it's necessary for us to mirror ODP
+        # institutions to CKAN; this is typically done using an init script
+        institution = get_institution(institution_key)
+        ckan.create_or_update_institution(institution, auth_data.access_token)
+    except:
+        # this will fail for members of non-admin institutions; no problem here
+        pass
+
     return ckan.create_or_update_collection(
         institution_key, collection, auth_data.access_token)
