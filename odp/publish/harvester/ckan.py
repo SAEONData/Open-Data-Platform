@@ -27,8 +27,8 @@ class CKANHarvester(Harvester):
 
         self.select_records = text(f"""
             SELECT p.id, p.private, p.state, p_doi.value doi, p_sid.value sid, p_json.value metadata,
-                   g_inst.title institution, g_coll.title collection, g_coll.id collection_id,
-                   ms.standard_name "schema"
+                   g_inst.name institution_key, g_coll.name collection_key, g_coll.id collection_id,
+                   ms.name schema_key
             FROM package p JOIN package_extra p_doi ON p.id = p_doi.package_id AND p_doi.key = 'doi'
                            JOIN package_extra p_sid ON p.id = p_sid.package_id AND p_sid.key = 'sid'
                            JOIN package_extra p_json ON p.id = p_json.package_id AND p_json.key = 'metadata_json'
@@ -43,7 +43,7 @@ class CKANHarvester(Harvester):
         """)
 
         self.select_projects = text("""
-            SELECT g.title project
+            SELECT g.name project_key
             FROM "group" g JOIN member m ON g.id = m.group_id
             WHERE g.type = 'infrastructure'
               AND g.state = 'active'
@@ -67,10 +67,10 @@ class CKANHarvester(Harvester):
                 id=record['id'],
                 doi=record['doi'] or None,
                 sid=record['sid'] or None,
-                institution=record['institution'],
-                collection=record['collection'],
-                projects=[project['project'] for project in projects],
-                schema=record['schema'],
+                institution_key=record['institution_key'],
+                collection_key=record['collection_key'],
+                project_keys=[project['project_key'] for project in projects],
+                schema_key=record['schema_key'],
                 metadata=json.loads(record['metadata']),
                 published=not record['private'] and record['state'] == 'active',
             )

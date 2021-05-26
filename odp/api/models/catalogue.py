@@ -1,6 +1,6 @@
 from typing import Dict, Any, List
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, validator
 
 
 class CatalogueRecord(BaseModel):
@@ -14,14 +14,14 @@ class CatalogueRecord(BaseModel):
     id: str
     doi: str = None
     sid: str = None
-    institution: str = None
-    collection: str = None
-    projects: List[str] = None
-    schema_: str = Field(None, alias='schema')
+    institution_key: str = None
+    collection_key: str = None
+    project_keys: List[str] = None
+    schema_key: str = None
     metadata: Dict[str, Any] = None
     published: bool
 
-    @validator('projects')
+    @validator('project_keys')
     def normalize_projects_list(cls, v):
         if v is not None:
             return sorted(set(v))
