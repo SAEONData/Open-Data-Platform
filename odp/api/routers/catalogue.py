@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, Query
 from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse
 from starlette.status import HTTP_404_NOT_FOUND
@@ -20,8 +20,15 @@ router = APIRouter()
     response_model=List[CatalogueRecord],
     dependencies=[Depends(Authorizer(Scope.CATALOGUE, Role.HARVESTER))],
 )
-async def list_catalogue_records(pagination: Pagination = Depends()):
-    return catalogue.list_catalogue_records(pagination)
+async def list_catalogue_records(
+        institution_key: str = Query(None, description='optional filter on institution key'),
+        include_unpublished: bool = Query(False, description=
+            'True to include records that are no longer publicly visible, to '
+            'facilitate local deletion by a client; if included, these records '
+            'will only contain the `id` and `published` (set to `False`) fields'),
+        pagination: Pagination = Depends(),
+):
+    return catalogue.list_catalogue_records(institution_key, include_unpublished, pagination)
 
 
 @router.get(
