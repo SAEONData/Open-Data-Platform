@@ -32,6 +32,19 @@ async def list_catalogue_records(
 
 
 @router.get(
+    '/count',
+    response_model=int,
+    dependencies=[Depends(Authorizer(Scope.CATALOGUE, Role.HARVESTER))],
+)
+async def count_catalogue_records(
+        institution_key: str = Query(None, description='optional filter on institution key'),
+        include_unpublished: bool = Query(False, description=
+            'True to count records that are no longer publicly visible'),
+):
+    return catalogue.count_catalogue_records(institution_key, include_unpublished)
+
+
+@router.get(
     '/{record_id}',
     response_model=CatalogueRecord,
     dependencies=[Depends(Authorizer(Scope.CATALOGUE, Role.HARVESTER))],

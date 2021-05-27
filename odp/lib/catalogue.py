@@ -5,6 +5,27 @@ from odp.api.models.catalogue import CatalogueRecord
 from odp.db.models import CatalogueRecord as CatalogueRecordORM
 
 
+def _catalogue_list_query(
+        institution_key: Optional[str],
+        include_unpublished: bool,
+        pagination: Optional[Pagination],
+):
+    query = CatalogueRecordORM.query.order_by(
+        CatalogueRecordORM.created, CatalogueRecordORM.metadata_id)
+
+    if institution_key:
+        query = query.filter(CatalogueRecordORM.catalogue_record.comparator.contains({
+            'institution_key': institution_key}))
+
+    if not include_unpublished:
+        query = query.filter_by(published=True)
+
+    if pagination:
+        query = query.limit(pagination.limit).offset(pagination.offset)
+
+    return query
+
+
 def list_catalogue_records(
         institution_key: Optional[str],
         include_unpublished: bool,
@@ -18,23 +39,26 @@ def list_catalogue_records(
         will have only the `id` and `published` (== `False`) fields set
     :param pagination: standard pagination params
     """
-    query = CatalogueRecordORM.query.order_by(
-        CatalogueRecordORM.created, CatalogueRecordORM.metadata_id)
-
-    if institution_key:
-        query = query.filter(CatalogueRecordORM.catalogue_record.comparator.contains({
-            'institution_key': institution_key}))
-
-    if not include_unpublished:
-        query = query.filter_by(published=True)
-
-    query = query.limit(pagination.limit).offset(pagination.offset)
+    query = _catalogue_list_query(institution_key, include_unpublished, pagination)
 
     return [
         CatalogueRecord(**catrec.catalogue_record) if catrec.published
         else CatalogueRecord(id=catrec.metadata_id, published=False)
         for catrec in query.all()
     ]
+
+
+def count_catalogue_records(
+        institution_key: Optional[str],
+        include_unpublished: bool,
+) -> int:
+    """Return a total count of catalogue records.
+
+    :param institution_key: optional filter on institution key
+    :param include_unpublished: True to include un-published records in the count
+    """
+    query = _catalogue_list_query(institution_key, include_unpublished, None)
+    return query.count()
 
 
 def get_catalogue_record(record_id: str) -> Optional[CatalogueRecord]:
