@@ -13,6 +13,7 @@ from odp.lib.users import (
     validate_email_verification,
     update_user_profile,
     get_user_profile,
+    password_complexity_description,
 )
 
 bp = Blueprint('account', __name__)
@@ -134,6 +135,7 @@ def reset_password():
 
                 except x.ODPPasswordComplexityError:
                     form.password.errors.append("The password does not meet the minimum complexity requirements.")
+                    flash(password_complexity_description(), category='info')
 
                 except x.ODPIdentityError as e:
                     # any other validation error => reject login

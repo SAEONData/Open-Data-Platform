@@ -262,6 +262,12 @@ def check_password_complexity(email, password):
     return True
 
 
+def password_complexity_description():
+    return "The password must contain at least 10 characters, including 1 uppercase, " \
+           "1 lowercase, 1 numeric, 1 symbol, and a maximum of 3 consecutive characters " \
+           "from your email address."
+
+
 def validate_google_login(email):
     """
     Validate a login completed via Google, returning the user id on success.
