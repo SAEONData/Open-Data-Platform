@@ -34,6 +34,7 @@ def initialize_scopes():
         {'key': 'ODP.Catalogue', 'description': 'The ODP Metadata Catalogue'},
         {'key': 'SAEON.Observations.WebAPI', 'description': 'The SAEON Observations Database'},
         {'key': 'SAEON.DataPortal', 'description': 'The SAEON Data Portal'},
+        {'key': 'SAEIS.WebSite', 'description': 'The South African Estuary Information System'},
     ]
     for row in rows:
         key = row['key']
@@ -53,6 +54,7 @@ def initialize_capabilities():
         'ODP.Catalogue': ['harvester'],
         'SAEON.Observations.WebAPI': ['admin', 'staff'],
         'SAEON.DataPortal': ['admin', 'datascientist', 'curator', 'staff'],
+        'SAEIS.WebSite': ['admin', 'contributor', 'staff'],
     }
     for scope, roles in capabilities.items():
         for role in roles:
