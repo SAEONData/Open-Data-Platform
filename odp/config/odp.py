@@ -72,8 +72,11 @@ class ODPMailConfig(BaseConfig):
     class Config:
         env_prefix = 'ODP_MAIL_'
 
-    HOST: str       # mail server IP
-    PORT: int = 25  # mail server port
+    HOST: str             # mail server IP / hostname
+    PORT: int = 25        # mail server port
+    TLS: bool = False     # use TLS
+    USERNAME: str = None  # sender email address
+    PASSWORD: str = None  # sender password
 
 
 class ODPPublishConfig(BaseConfig):

@@ -27,6 +27,10 @@ services:
       - ODP_DB_USER
       - ODP_DB_PASS
       - ODP_MAIL_HOST
+      - ODP_MAIL_PORT
+      - ODP_MAIL_TLS
+      - ODP_MAIL_USERNAME
+      - ODP_MAIL_PASSWORD
       - ODP_ADMIN_INSTITUTION=saeon
       - ODP_IDENTITY_LOGIN_EXPIRY=2592000
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra

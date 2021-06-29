@@ -13,7 +13,11 @@ containing the following environment variables:
 - **`ODP_DB_NAME`**: ODP DB name
 - **`ODP_DB_USER`**: ODP DB user
 - **`ODP_DB_PASS`**: ODP DB password
-- **`ODP_MAIL_HOST`**: IP address of the SAEON mail server
+- **`ODP_MAIL_HOST`**: SMTP server IP / hostname
+- **`ODP_MAIL_PORT`**: SMTP server port
+- **`ODP_MAIL_TLS`**: `True`|`False`: use TLS for SMTP connections
+- **`ODP_MAIL_USERNAME`**: SMTP account email
+- **`ODP_MAIL_PASSWORD`**: SMTP account password
 - **`ODP_IDENTITY_FLASK_KEY`**: Flask secret key for the ODP identity service
 - **`ODP_ADMIN_UI_FLASK_KEY`**: Flask secret key for the ODP admin service
 - **`ODP_ADMIN_UI_CLIENT_ID`**: OAuth2 client ID for the ODP admin service
