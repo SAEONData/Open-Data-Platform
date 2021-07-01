@@ -67,6 +67,24 @@ def get_catalogue_record(record_id: str) -> Optional[CatalogueRecord]:
         return CatalogueRecord(**catrec.catalogue_record)
 
 
+def get_catalogue_record_by_doi(doi: str) -> Optional[CatalogueRecord]:
+    catrec = CatalogueRecordORM.query.filter(
+        CatalogueRecordORM.catalogue_record.comparator.contains({
+            'doi': doi
+        })).first()
+    if catrec and catrec.published:
+        return CatalogueRecord(**catrec.catalogue_record)
+
+
+def get_catalogue_record_by_sid(sid: str) -> Optional[CatalogueRecord]:
+    catrec = CatalogueRecordORM.query.filter(
+        CatalogueRecordORM.catalogue_record.comparator.contains({
+            'sid': sid
+        })).first()
+    if catrec and catrec.published:
+        return CatalogueRecord(**catrec.catalogue_record)
+
+
 def select_catalogue_records(ids: List[str], pagination: Pagination) -> List[CatalogueRecord]:
     return [
         CatalogueRecord(**catrec.catalogue_record)

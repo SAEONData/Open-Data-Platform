@@ -56,6 +56,30 @@ async def get_catalogue_record(record_id: str):
     raise HTTPException(HTTP_404_NOT_FOUND)
 
 
+@router.get(
+    '/doi/{doi:path}',
+    response_model=CatalogueRecord,
+    dependencies=[Depends(Authorizer(Scope.CATALOGUE, Role.HARVESTER))],
+)
+async def get_catalogue_record_by_doi(doi: str):
+    if record := catalogue.get_catalogue_record_by_doi(doi):
+        return record
+
+    raise HTTPException(HTTP_404_NOT_FOUND)
+
+
+@router.get(
+    '/sid/{sid:path}',
+    response_model=CatalogueRecord,
+    dependencies=[Depends(Authorizer(Scope.CATALOGUE, Role.HARVESTER))],
+)
+async def get_catalogue_record_by_sid(sid: str):
+    if record := catalogue.get_catalogue_record_by_sid(sid):
+        return record
+
+    raise HTTPException(HTTP_404_NOT_FOUND)
+
+
 @router.post(
     '/',
     response_model=List[CatalogueRecord],
