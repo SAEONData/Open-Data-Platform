@@ -20,8 +20,7 @@ class User(Base):
     superuser = Column(Boolean, nullable=False)
     active = Column(Boolean, nullable=False)
     verified = Column(Boolean, nullable=False)
-    family_name = Column(String)
-    given_name = Column(String)
+    name = Column(String)
     picture = Column(String)
 
     # many-to-many relationship between institution and user represented by member

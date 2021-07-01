@@ -75,7 +75,6 @@ class AutoLoginForm(FlaskForm):
 
 
 class ProfileForm(FlaskForm):
-    given_name = StringField(label='First name')
-    family_name = StringField(label='Last name')
+    name = StringField(label='Full name')
     picture = StringField(label='Photo URL')
     submit = SubmitField(label='Log in')

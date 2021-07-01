@@ -304,7 +304,7 @@ def update_user_profile(user_id, **userinfo):
     """
     with transaction():
         user = User.query.get(user_id)
-        for attr in 'family_name', 'given_name', 'picture':
+        for attr in 'name', 'picture':
             if attr in userinfo:
                 setattr(user, attr, userinfo[attr])
         user.save()
@@ -316,6 +316,6 @@ def get_user_profile(user_id):
     """
     user = User.query.get(user_id)
     info = {}
-    for attr in 'family_name', 'given_name', 'picture':
+    for attr in 'name', 'picture':
         info[attr] = getattr(user, attr)
     return info

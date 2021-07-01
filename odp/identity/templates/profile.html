@@ -8,8 +8,7 @@
 {% block content %}
     <form action="{{ url_for('account.profile', token=token) }}" method="POST">
         {{ form.csrf_token }}
-        {{ render_field(form.given_name) }}
-        {{ render_field(form.family_name) }}
+        {{ render_field(form.name) }}
         {{ render_field(form.submit) }}
     </form>
 {% endblock %}

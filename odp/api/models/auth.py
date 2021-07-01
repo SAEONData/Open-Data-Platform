@@ -72,8 +72,7 @@ class IDTokenData(BaseModel):
     sub: str
     email: EmailStr
     email_verified: bool
-    family_name: Optional[str]
-    given_name: Optional[str]
+    name: Optional[str]
     picture: Optional[str]
 
     # The `role` field is used strictly for the special case of indicating a user's

@@ -29,8 +29,7 @@ def get_token_data(user: User, scopes: List[str]) -> Tuple[AccessTokenData, IDTo
         sub=user.id,
         email=user.email,
         email_verified=user.verified,
-        family_name=user.family_name,
-        given_name=user.given_name,
+        name=user.name,
         picture=user.picture,
         role=[],
     )
