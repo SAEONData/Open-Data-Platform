@@ -8,6 +8,7 @@
 {% block content %}
     <form action="{{ url_for('signup.signup', token=token) }}" method="POST">
         {{ form.csrf_token }}
+        {{ render_field(form.name) }}
         {{ render_field(form.email) }}
         {{ render_field(form.password) }}
         {{ render_field(form.confirm_password) }}

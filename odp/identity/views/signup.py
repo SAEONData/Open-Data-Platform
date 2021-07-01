@@ -38,8 +38,9 @@ def signup():
                 if form.validate():
                     email = form.email.data
                     password = form.password.data
+                    name = form.name.data
                     try:
-                        create_user_account(email, password)
+                        create_user_account(email, password, name)
 
                         # the signup (and login) is completed via email verification
                         send_verification_email(email, challenge)

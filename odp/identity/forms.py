@@ -4,6 +4,10 @@ from wtforms.validators import input_required, email, equal_to
 
 
 class SignupForm(FlaskForm):
+    name = StringField(
+        label='Full name',
+        validators=[input_required()],
+    )
     email = StringField(
         label='Email address',
         filters=[lambda s: s.lower() if s else s],

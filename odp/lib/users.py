@@ -160,7 +160,7 @@ def validate_email_verification(email):
     return user.id
 
 
-def create_user_account(email, password=None):
+def create_user_account(email, password=None, name=None):
     """
     Create a new user account with the specified credentials.
     Password may be omitted if the user is externally authenticated.
@@ -172,6 +172,7 @@ def create_user_account(email, password=None):
 
     :param email: the input email address
     :param password: (optional) the input plain-text password
+    :param name: (optional) the user's personal name
     :return: the new user id
 
     :raises ODPEmailInUse: if the email address is already associated with a user account
@@ -191,6 +192,7 @@ def create_user_account(email, password=None):
             active=True,
             verified=False,
             superuser=False,
+            name=name,
         )
         user.save()
 
