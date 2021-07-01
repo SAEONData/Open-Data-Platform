@@ -27,10 +27,13 @@ def validate_user_login(email, password):
     """
     user = User.query.filter_by(email=email).first()
 
+    if not user:
+        raise x.ODPUserNotFound
+
     # no password => either it's a non-human user (e.g. harvester),
     # or the user must be externally authenticated (e.g. via Google)
-    if not user or not user.password:
-        raise x.ODPUserNotFound
+    if not user.password:
+        raise x.ODPNoPassword
 
     # first check whether the account is currently locked and should still be locked, unlocking it if necessary
     if is_account_locked(user.id):

@@ -25,6 +25,11 @@ class ODPIncorrectPassword(ODPIdentityError):
     error_description = "The user has entered an incorrect password."
 
 
+class ODPNoPassword(ODPIdentityError):
+    error_code = 'no_password'
+    error_description = "The account has no password and must be externally authenticated."
+
+
 class ODPAccountDisabled(ODPIdentityError):
     error_code = 'account_disabled'
     error_description = "The user's account has been deactivated."

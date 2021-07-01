@@ -51,6 +51,9 @@ def login():
                 except x.ODPUserNotFound:
                     form.email.errors.append("The email address is not associated with any user account.")
 
+                except x.ODPNoPassword:
+                    form.email.errors.append("Please click the 'Log in via Google' button.")
+
                 except x.ODPIncorrectPassword:
                     form.email.errors.append("The email address and password do not match.")
 
