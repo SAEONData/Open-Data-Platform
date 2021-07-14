@@ -6,7 +6,7 @@ from odp.identity.forms import LoginForm, VerifyEmailForm, ForgotPasswordForm
 from odp.identity.views import encode_token, decode_token, hydra_error_page
 from odp.identity.views.account import send_verification_email, send_password_reset_email
 from odp.lib import exceptions as x
-from odp.lib.users import validate_auto_login, validate_user_login, validate_forgot_password
+from odp.lib.users import validate_auto_login, validate_user_login, validate_forgot_password, get_user_profile_by_email
 
 bp = Blueprint('login', __name__)
 
@@ -59,8 +59,9 @@ def login():
 
                 except x.ODPEmailNotVerified:
                     # the login is completed via email verification
-                    send_verification_email(email, challenge, brand)
-                    verify_token = encode_token('login.verify', challenge, brand, email=email)
+                    name = get_user_profile_by_email(email)['name']
+                    send_verification_email(email, name, challenge, brand)
+                    verify_token = encode_token('login.verify', challenge, brand, email=email, name=name)
                     return redirect(url_for('.verify', token=verify_token))
 
                 except x.ODPIdentityError as e:
@@ -92,9 +93,10 @@ def verify():
 
         form = VerifyEmailForm()
         email = params.get('email')
+        name = params.get('name')
 
         if request.method == 'POST':
-            send_verification_email(email, challenge, brand)
+            send_verification_email(email, name, challenge, brand)
 
         return render_template('login_verify.html', form=form, token=token, brand=brand)
 

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% if brand == 'nccrd' %}
+            National Climate Change Response Database
+        {% else %}
+            SAEON Open Data Platform
+        {% endif %}
+    </title>
+</head>
+<body>
+    <h3>
+        {% if brand == 'nccrd' %}
+            National Climate Change Response Database
+        {% else %}
+            SAEON Open Data Platform
+        {% endif %}
+    </h3>
+
+    <p>Hello {{ name }},</p>
+
+    {% block content %}{% endblock %}
+
+    <p>
+        Sincerely,<br/>
+        {% if brand == 'nccrd' %}
+            The NCCRD Team at SAEON
+        {% else %}
+            SAEON
+        {% endif %}
+    </p>
+
+    <small>
+        Copyright &copy; 2021
+        <a href="http://www.saeon.ac.za/" target="_blank">
+            South African Environmental Observation Network
+        </a>
+    </small>
+</body>
+</html>

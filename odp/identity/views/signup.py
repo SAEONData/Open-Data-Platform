@@ -43,8 +43,8 @@ def signup():
                         create_user_account(email, password, name)
 
                         # the signup (and login) is completed via email verification
-                        send_verification_email(email, challenge, brand)
-                        verify_token = encode_token('signup.verify', challenge, brand, email=email)
+                        send_verification_email(email, name, challenge, brand)
+                        verify_token = encode_token('signup.verify', challenge, brand, email=email, name=name)
                         redirect_to = url_for('.verify', token=verify_token)
 
                         return redirect(redirect_to)
@@ -79,9 +79,10 @@ def verify():
 
         form = VerifyEmailForm()
         email = params.get('email')
+        name = params.get('name')
 
         if request.method == 'POST':
-            send_verification_email(email, challenge, brand)
+            send_verification_email(email, name, challenge, brand)
 
         return render_template('signup_verify.html', form=form, token=token, brand=brand)
 

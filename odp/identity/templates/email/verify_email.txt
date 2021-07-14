@@ -1,0 +1,6 @@
+{% extends 'email/base_message.txt' %}
+
+{%- block content -%}
+To verify your email address and finish setting up your account, please go to:
+{{ url }}
+{%- endblock -%}

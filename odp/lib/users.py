@@ -324,3 +324,14 @@ def get_user_profile(user_id):
     for attr in 'name', 'picture':
         info[attr] = getattr(user, attr)
     return info
+
+
+def get_user_profile_by_email(email):
+    """
+    Return a dict of user profile info.
+    """
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        raise x.ODPUserNotFound
+
+    return get_user_profile(user.id)

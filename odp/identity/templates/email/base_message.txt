@@ -1,0 +1,18 @@
+{%- if brand == 'nccrd' -%}
+National Climate Change Response Database
+{%- else -%}
+SAEON Open Data Platform
+{%- endif %}
+
+Hello {{ name }},
+
+{% block content -%}{%- endblock %}
+
+Sincerely,
+{% if brand == 'nccrd' -%}
+The NCCRD Team at SAEON
+{%- else -%}
+SAEON
+{%- endif %}
+
+Copyright © 2021 South African Environmental Observation Network http://www.saeon.ac.za/

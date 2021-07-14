@@ -1,0 +1,6 @@
+{%- if brand == 'nccrd' -%}
+National Climate Change Response Database
+{%- else -%}
+SAEON Open Data Platform
+{%- endif -%}
+: {% block subject -%}{%- endblock -%}

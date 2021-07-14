@@ -1,0 +1,5 @@
+{% extends 'email/base_subject.txt' %}
+
+{%- block subject -%}
+Verify your email address
+{%- endblock -%}

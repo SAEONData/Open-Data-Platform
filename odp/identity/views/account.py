@@ -180,21 +180,28 @@ def reset_password_complete():
         return hydra_error_page(e)
 
 
-def send_verification_email(email, challenge, brand):
+def send_verification_email(email, name, challenge, brand):
     """Send an email address verification email.
 
     :param email: the email address to be verified
+    :param name: the user's full name
     :param challenge: the Hydra login challenge
     :param brand: branding identifier
     """
     try:
         token = encode_token('account.verify_email', challenge, brand, email=email)
-        verification_url = url_for('account.verify_email', token=token, _external=True)
+        context = {
+            'url': url_for('account.verify_email', token=token, _external=True),
+            'name': name,
+            'brand': brand,
+        }
         msg = Message(
-            subject="SAEON Open Data Platform: Please verify your email address",
-            body="Click the following link to verify your email address: " + verification_url,
-            sender=("SAEON", "noreply@saeon.ac.za"),
+            subject=render_template('email/verify_email_subject.txt', **context),
+            body=render_template('email/verify_email.txt', **context),
+            html=render_template('email/verify_email.html', **context),
             recipients=[email],
+            sender=("SAEON", "noreply@saeon.ac.za"),
+            reply_to=("SAEON", "noreply@saeon.ac.za"),
         )
         mail.send(msg)
         flash("An email verification link has been sent to your email address.")
