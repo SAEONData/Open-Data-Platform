@@ -72,7 +72,7 @@ def verify_email_complete():
 
             return redirect(redirect_to)
 
-        return render_template('verify_email_complete.html', form=form, token=token)
+        return render_template('verify_email_complete.html', form=form, token=token, brand=brand)
 
     except x.HydraAdminError as e:
         return hydra_error_page(e)
@@ -102,7 +102,7 @@ def profile():
 
             return redirect(redirect_to)
 
-        return render_template('profile.html', form=form, token=token)
+        return render_template('profile.html', form=form, token=token, brand=brand)
 
     except x.HydraAdminError as e:
         return hydra_error_page(e)
@@ -144,7 +144,7 @@ def reset_password():
                 if redirect_to:
                     return redirect(redirect_to)
 
-        return render_template('reset_password.html', form=form, token=token)
+        return render_template('reset_password.html', form=form, token=token, brand=brand)
 
     except x.HydraAdminError as e:
         return hydra_error_page(e)
@@ -174,7 +174,7 @@ def reset_password_complete():
 
             return redirect(redirect_to)
 
-        return render_template('reset_password_complete.html', form=form, token=token)
+        return render_template('reset_password_complete.html', form=form, token=token, brand=brand)
 
     except x.HydraAdminError as e:
         return hydra_error_page(e)

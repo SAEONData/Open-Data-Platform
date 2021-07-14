@@ -72,7 +72,7 @@ def login():
         elif error:
             redirect_to = hydra_admin.reject_login_request(challenge, error.error_code, error.error_description)
         else:
-            return render_template('login.html', form=form, token=token, enable_google=config.GOOGLE.ENABLE)
+            return render_template('login.html', form=form, token=token, brand=brand, enable_google=config.GOOGLE.ENABLE)
 
         return redirect(redirect_to)
 
@@ -96,7 +96,7 @@ def verify():
         if request.method == 'POST':
             send_verification_email(email, challenge, brand)
 
-        return render_template('login_verify.html', form=form, token=token)
+        return render_template('login_verify.html', form=form, token=token, brand=brand)
 
     except x.HydraAdminError as e:
         return hydra_error_page(e)
@@ -132,7 +132,7 @@ def forgot_password():
                     redirect_to = hydra_admin.reject_login_request(challenge, e.error_code, e.error_description)
                     return redirect(redirect_to)
 
-        return render_template('forgot_password.html', form=form, token=token, sent=sent)
+        return render_template('forgot_password.html', form=form, token=token, brand=brand, sent=sent)
 
     except x.HydraAdminError as e:
         return hydra_error_page(e)

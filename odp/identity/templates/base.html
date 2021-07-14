@@ -1,23 +1,50 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>SAEON | Open Data Platform</title>
+    <title>
+        {% if brand == 'dffe' %}
+            NCCRD
+        {% else %}
+            SAEON | Open Data Platform
+        {% endif %}
+    </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% if brand == 'dffe' %}
+    <link rel="icon" href="{{ url_for('static', filename='SA-favicon.ico') }}">
+{% else %}
     <link rel="icon" href="{{ url_for('static', filename='NRF-favicon.ico') }}">
+{% endif %}
     {{ bootstrap.load_css() }}
 </head>
 <body>
+{% if brand == 'dffe' %}
+    <nav class="navbar">
+        <div class="container-fluid flex-nowrap">
+            <a class="navbar-brand text-reset" href="http://www.environment.gov.za/" target="_blank" rel="noopener noreferrer">
+                <img src="{{ url_for('static', filename='dffe-logo-transparent.png') }}">
+            </a>
+            <span class="navbar-text h3">
+                National Climate Change Response Database
+            </span>
+            <a class="navbar-brand text-reset ml-5 mr-0" href="http://www.environment.gov.za/" target="_blank" rel="noopener noreferrer">
+                <img src="{{ url_for('static', filename='sa-flag.jpg') }}" height="65">
+            </a>
+    </nav>
+    <hr class="mt-0" />
+{% else %}
     <nav class="navbar navbar-dark bg-primary">
         <div class="container">
             <span class="navbar-text lead">
                 SAEON | Open Data Platform
             </span>
-            <a class="navbar-brand text-reset mb-2" href="http://www.saeon.ac.za" target="_blank" rel="noopener noreferrer">
+            <a class="navbar-brand text-reset mb-2" href="http://www.saeon.ac.za/" target="_blank" rel="noopener noreferrer">
                 <img src="{{ url_for('static', filename='SAEON-NRF-LOGO-alpha.png') }}" height="55">
             </a>
         </div>
     </nav>
+{% endif %}
+
     <main class="container p-5" style="width: 420px">
         <h4 class="mb-4">{% block heading %}{% endblock %}</h4>
 
@@ -29,8 +56,9 @@
         <footer class="text-center mt-4">
             <hr/>
             <small>
-                Copyright &copy; 2021-<script>document.write(new Date().getFullYear())</script>
+                Copyright &copy; <script>document.write(new Date().getFullYear())</script>
                 South African Environmental Observation Network
+                <a href="http://www.saeon.ac.za/" target="_blank" rel="noopener noreferrer">www.saeon.ac.za</a>
             </small>
         </footer>
     </main>

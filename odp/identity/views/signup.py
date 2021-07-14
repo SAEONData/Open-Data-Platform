@@ -56,7 +56,7 @@ def signup():
                         form.password.errors.append("The password does not meet the minimum complexity requirements.")
                         flash(password_complexity_description(), category='info')
 
-            return render_template('signup.html', form=form, token=token, enable_google=config.GOOGLE.ENABLE)
+            return render_template('signup.html', form=form, token=token, brand=brand, enable_google=config.GOOGLE.ENABLE)
 
         except x.ODPIdentityError as e:
             # any other validation error (e.g. user already authenticated) => reject login
@@ -83,7 +83,7 @@ def verify():
         if request.method == 'POST':
             send_verification_email(email, challenge, brand)
 
-        return render_template('signup_verify.html', form=form, token=token)
+        return render_template('signup_verify.html', form=form, token=token, brand=brand)
 
     except x.HydraAdminError as e:
         return hydra_error_page(e)
