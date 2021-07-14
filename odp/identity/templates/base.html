@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>
-        {% if brand == 'dffe' %}
+        {% if brand == 'nccrd' %}
             NCCRD
         {% else %}
             SAEON | Open Data Platform
@@ -10,7 +10,7 @@
     </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-{% if brand == 'dffe' %}
+{% if brand == 'nccrd' %}
     <link rel="icon" href="{{ url_for('static', filename='SA-favicon.ico') }}">
 {% else %}
     <link rel="icon" href="{{ url_for('static', filename='NRF-favicon.ico') }}">
@@ -18,7 +18,7 @@
     {{ bootstrap.load_css() }}
 </head>
 <body>
-{% if brand == 'dffe' %}
+{% if brand == 'nccrd' %}
     <nav class="navbar">
         <div class="container-fluid flex-nowrap">
             <a class="navbar-brand text-reset" href="http://www.environment.gov.za/" target="_blank" rel="noopener noreferrer">

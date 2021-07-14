@@ -28,13 +28,13 @@ class LoginMode(Enum):
 
 class Brand(Enum):
     SAEON = 'saeon'
-    DFFE = 'dffe'
+    NCCRD = 'nccrd'
 
     @classmethod
     def from_login_request(cls, login_request):
         client_id = login_request['client']['client_id']
-        if client_id == config.ODP.IDENTITY.DFFE_BRAND_CLIENT_ID:
-            return Brand.DFFE
+        if client_id == config.ODP.IDENTITY.NCCRD_BRAND_CLIENT_ID:
+            return Brand.NCCRD
 
         return Brand.SAEON
 
