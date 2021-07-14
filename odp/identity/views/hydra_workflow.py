@@ -3,6 +3,7 @@ from urllib.parse import urlparse, parse_qs
 
 from flask import Blueprint, request, redirect, url_for
 
+from odp.config import config
 from odp.db.models import User
 from odp.identity import hydra_admin
 from odp.identity.views import hydra_error_page, encode_token
@@ -17,11 +18,25 @@ class LoginMode(Enum):
     SIGNUP = 'signup'
 
     @classmethod
-    def from_request_url(cls, url):
+    def from_login_request(cls, login_request):
+        url = login_request['request_url']
         try:
             return LoginMode(parse_qs(urlparse(url).query).get('mode', [])[0])
         except (IndexError, ValueError):
             return LoginMode.LOGIN
+
+
+class Brand(Enum):
+    SAEON = 'saeon'
+    DFFE = 'dffe'
+
+    @classmethod
+    def from_login_request(cls, login_request):
+        client_id = login_request['client']['client_id']
+        if client_id == config.ODP.IDENTITY.DFFE_BRAND_CLIENT_ID:
+            return Brand.DFFE
+
+        return Brand.SAEON
 
 
 @bp.route('/login')
@@ -34,16 +49,17 @@ def login():
     try:
         challenge = request.args.get('login_challenge')
         login_request = hydra_admin.get_login_request(challenge)
-        login_mode = LoginMode.from_request_url(login_request['request_url'])
+        mode = LoginMode.from_login_request(login_request)
+        brand = Brand.from_login_request(login_request).value
 
-        if login_mode == LoginMode.LOGIN:
+        if mode == LoginMode.LOGIN:
             target_endpoint = 'login.login'
-        elif login_mode == LoginMode.SIGNUP:
+        elif mode == LoginMode.SIGNUP:
             target_endpoint = 'signup.signup'
         else:
             raise ValueError
 
-        token = encode_token(challenge, 'login')
+        token = encode_token('login', challenge, brand)
         redirect_to = url_for(target_endpoint, token=token)
         return redirect(redirect_to)
 

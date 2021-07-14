@@ -27,7 +27,7 @@ def verify_email():
     """
     token = request.args.get('token')
     try:
-        login_request, challenge, params = decode_token(token, 'account.verify_email')
+        login_request, challenge, brand, params = decode_token(token, 'account.verify_email')
 
         email = params.get('email')
         try:
@@ -35,7 +35,7 @@ def verify_email():
             update_user_verified(user_id, True)
             flash("Your email address has been verified.")
 
-            complete_token = encode_token(challenge, 'account.verify_email_complete', user_id=user_id)
+            complete_token = encode_token('account.verify_email_complete', challenge, brand, user_id=user_id)
             redirect_to = url_for('.verify_email_complete', token=complete_token)
 
         except x.ODPIdentityError as e:
@@ -56,7 +56,7 @@ def verify_email_complete():
     """
     token = request.args.get('token')
     try:
-        login_request, challenge, params = decode_token(token, 'account.verify_email_complete')
+        login_request, challenge, brand, params = decode_token(token, 'account.verify_email_complete')
 
         form = AutoLoginForm()
         user_id = params.get('user_id')
@@ -84,7 +84,7 @@ def profile():
 
     token = request.args.get('token')
     try:
-        login_request, challenge, params = decode_token(token, 'account.profile')
+        login_request, challenge, brand, params = decode_token(token, 'account.profile')
 
         user_id = params.get('user_id')
         user_info = get_user_profile(user_id)
@@ -116,7 +116,7 @@ def reset_password():
     """
     token = request.args.get('token')
     try:
-        login_request, challenge, params = decode_token(token, 'account.reset_password')
+        login_request, challenge, brand, params = decode_token(token, 'account.reset_password')
 
         form = ResetPasswordForm()
         email = params.get('email')
@@ -130,7 +130,7 @@ def reset_password():
                     update_user_password(user_id, password)
                     flash("Your password has been changed.")
 
-                    complete_token = encode_token(challenge, 'account.reset_password_complete', user_id=user_id)
+                    complete_token = encode_token('account.reset_password_complete', challenge, brand, user_id=user_id)
                     redirect_to = url_for('.reset_password_complete', token=complete_token)
 
                 except x.ODPPasswordComplexityError:
@@ -158,7 +158,7 @@ def reset_password_complete():
     """
     token = request.args.get('token')
     try:
-        login_request, challenge, params = decode_token(token, 'account.reset_password_complete')
+        login_request, challenge, brand, params = decode_token(token, 'account.reset_password_complete')
 
         form = AutoLoginForm()
         user_id = params.get('user_id')
@@ -180,14 +180,15 @@ def reset_password_complete():
         return hydra_error_page(e)
 
 
-def send_verification_email(email, challenge):
+def send_verification_email(email, challenge, brand):
     """Send an email address verification email.
 
     :param email: the email address to be verified
     :param challenge: the Hydra login challenge
+    :param brand: branding identifier
     """
     try:
-        token = encode_token(challenge, 'account.verify_email', email=email)
+        token = encode_token('account.verify_email', challenge, brand, email=email)
         verification_url = url_for('account.verify_email', token=token, _external=True)
         msg = Message(
             subject="SAEON Open Data Platform: Please verify your email address",
@@ -202,14 +203,15 @@ def send_verification_email(email, challenge):
         flash("There was a problem sending the verification email.", category='error')
 
 
-def send_password_reset_email(email, challenge):
+def send_password_reset_email(email, challenge, brand):
     """Send a password reset email.
 
     :param email: the email address
     :param challenge: the Hydra login challenge
+    :param brand: branding identifier
     """
     try:
-        token = encode_token(challenge, 'account.reset_password', email=email)
+        token = encode_token('account.reset_password', challenge, brand, email=email)
         reset_url = url_for('account.reset_password', token=token, _external=True)
         msg = Message(
             subject="SAEON Open Data Platform: Request to reset your password",

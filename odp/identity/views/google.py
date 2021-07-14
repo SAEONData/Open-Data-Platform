@@ -21,8 +21,8 @@ def authorize():
     """
     token = request.args.get('token')
     try:
-        login_request, challenge, params = decode_token(token, 'login')
-        authorized_token = encode_token(challenge, 'google.authorized')
+        login_request, challenge, brand, params = decode_token(token, 'login')
+        authorized_token = encode_token('google.authorized', challenge, brand)
         redirect_uri = url_for('.authorized', _external=True)
         return google_oauth2.google.authorize_redirect(redirect_uri, state=authorized_token.decode())
 
@@ -43,7 +43,7 @@ def authorized():
     """
     token = request.args.get('state')
     try:
-        login_request, challenge, params = decode_token(token, 'google.authorized')
+        login_request, challenge, brand, params = decode_token(token, 'google.authorized')
         try:
             try:
                 google_token = google_oauth2.google.authorize_access_token(state=token)

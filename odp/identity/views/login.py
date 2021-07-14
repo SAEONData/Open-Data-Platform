@@ -20,7 +20,7 @@ def login():
     """
     token = request.args.get('token')
     try:
-        login_request, challenge, params = decode_token(token, 'login')
+        login_request, challenge, brand, params = decode_token(token, 'login')
 
         user_id = None
         error = None
@@ -59,8 +59,8 @@ def login():
 
                 except x.ODPEmailNotVerified:
                     # the login is completed via email verification
-                    send_verification_email(email, challenge)
-                    verify_token = encode_token(challenge, 'login.verify', email=email)
+                    send_verification_email(email, challenge, brand)
+                    verify_token = encode_token('login.verify', challenge, brand, email=email)
                     return redirect(url_for('.verify', token=verify_token))
 
                 except x.ODPIdentityError as e:
@@ -88,13 +88,13 @@ def verify():
     """
     token = request.args.get('token')
     try:
-        login_request, challenge, params = decode_token(token, 'login.verify')
+        login_request, challenge, brand, params = decode_token(token, 'login.verify')
 
         form = VerifyEmailForm()
         email = params.get('email')
 
         if request.method == 'POST':
-            send_verification_email(email, challenge)
+            send_verification_email(email, challenge, brand)
 
         return render_template('login_verify.html', form=form, token=token)
 
@@ -111,7 +111,7 @@ def forgot_password():
     """
     token = request.args.get('token')
     try:
-        login_request, challenge, params = decode_token(token, 'login')
+        login_request, challenge, brand, params = decode_token(token, 'login')
 
         form = ForgotPasswordForm()
         sent = False
@@ -121,7 +121,7 @@ def forgot_password():
                 email = form.email.data
                 try:
                     user_id = validate_forgot_password(email)
-                    send_password_reset_email(email, challenge)
+                    send_password_reset_email(email, challenge, brand)
                     sent = True
 
                 except x.ODPUserNotFound:

@@ -64,8 +64,9 @@ class ODPIdentityConfig(BaseConfig):
     class Config:
         env_prefix = 'ODP_IDENTITY_'
 
-    FLASK_KEY: str     # Flask secret key
-    LOGIN_EXPIRY: int  # number of seconds to remember a successful login; 0 = remember indefinitely
+    FLASK_KEY: str                    # Flask secret key
+    LOGIN_EXPIRY: int                 # number of seconds to remember a successful login; 0 = remember indefinitely
+    DFFE_BRAND_CLIENT_ID: str = None  # OAuth2 client ID that will trigger DFFE UI branding
 
 
 class ODPMailConfig(BaseConfig):
