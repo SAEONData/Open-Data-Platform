@@ -19,6 +19,7 @@ containing the following environment variables:
 - **`ODP_MAIL_USERNAME`**: SMTP account email
 - **`ODP_MAIL_PASSWORD`**: SMTP account password
 - **`ODP_IDENTITY_FLASK_KEY`**: Flask secret key for the ODP identity service
+- **`ODP_IDENTITY_NCCRD_BRAND_CLIENT_ID`**: OAuth2 client ID for the NCCRD, for DFFE branding
 - **`ODP_ADMIN_UI_FLASK_KEY`**: Flask secret key for the ODP admin service
 - **`ODP_ADMIN_UI_CLIENT_ID`**: OAuth2 client ID for the ODP admin service
 - **`ODP_ADMIN_UI_CLIENT_SECRET`**: OAuth2 client secret for the ODP admin service

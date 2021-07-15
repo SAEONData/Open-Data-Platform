@@ -33,6 +33,7 @@ services:
       - ODP_MAIL_PASSWORD
       - ODP_ADMIN_INSTITUTION=saeon
       - ODP_IDENTITY_LOGIN_EXPIRY=2592000
+      - ODP_IDENTITY_NCCRD_BRAND_CLIENT_ID
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
