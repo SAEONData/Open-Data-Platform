@@ -192,7 +192,7 @@ def send_verification_email(email, name, challenge, brand):
         token = encode_token('account.verify_email', challenge, brand, email=email)
         context = {
             'url': url_for('account.verify_email', token=token, _external=True),
-            'name': name,
+            'name': name or '',
             'brand': brand,
         }
         msg = Message(
@@ -222,7 +222,7 @@ def send_password_reset_email(email, name, challenge, brand):
         token = encode_token('account.reset_password', challenge, brand, email=email)
         context = {
             'url': url_for('account.reset_password', token=token, _external=True),
-            'name': name,
+            'name': name or '',
             'brand': brand,
         }
         msg = Message(
