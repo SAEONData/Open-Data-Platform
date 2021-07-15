@@ -123,7 +123,8 @@ def forgot_password():
                 email = form.email.data
                 try:
                     user_id = validate_forgot_password(email)
-                    send_password_reset_email(email, challenge, brand)
+                    name = get_user_profile_by_email(email)['name']
+                    send_password_reset_email(email, name, challenge, brand)
                     sent = True
 
                 except x.ODPUserNotFound:
