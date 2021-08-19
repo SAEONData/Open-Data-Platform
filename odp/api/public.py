@@ -1,7 +1,7 @@
-import pkg_resources
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import odp
 from odp.api import init_db_middleware
 from odp.api.routers import metadata, catalogue, collection, media, status
 from odp.config import config
@@ -9,7 +9,7 @@ from odp.config import config
 app = FastAPI(
     title="ODP API",
     description="The SAEON Open Data Platform API",
-    version=pkg_resources.require('Open-Data-Platform')[0].version,
+    version=odp.__version__,
     root_path=config.ODP.API.PATH_PREFIX,
     docs_url='/interactive',
     redoc_url='/docs',

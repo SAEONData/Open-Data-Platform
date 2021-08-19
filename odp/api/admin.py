@@ -1,6 +1,6 @@
-import pkg_resources
 from fastapi import FastAPI
 
+import odp
 from odp.api import init_db_middleware
 from odp.api.routers import (
     authorization,
@@ -16,7 +16,7 @@ from odp.config import config
 app = FastAPI(
     title="ODP Admin API",
     description="The SAEON Open Data Platform Administrative API",
-    version=pkg_resources.require('Open-Data-Platform')[0].version,
+    version=odp.__version__,
     root_path=config.ODP.API.PATH_PREFIX,
     docs_url='/interactive',
     redoc_url='/docs',
