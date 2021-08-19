@@ -1,0 +1,26 @@
+sqlalchemy
+psycopg2
+alembic
+pydantic[email,dotenv]
+itsdangerous
+argon2-cffi
+requests
+redis
+
+# APIs
+fastapi
+uvicorn
+python-multipart
+ckanapi
+xmltodict
+
+# UIs
+flask
+flask-login
+flask-admin
+flask-wtf
+flask-mail
+wtforms
+gunicorn
+authlib
+bootstrap-flask

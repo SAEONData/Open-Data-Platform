@@ -8,13 +8,13 @@ Clone the development branch of the ODP repo:
 Create and activate the Python virtual environment:
 
     cd Open-Data-Platform/
-    python3.8 -m venv .venv
+    python3 -m venv .venv
     source .venv/bin/activate
-    pip install -U pip setuptools
+    pip install -U pip setuptools pip-tools
 
-Install the project and its dependencies:
+Install project dependencies:
 
-    pip install -e .[api,ui,test]
+    pip-sync
 
 ## Environment configuration
 Switch to the `develop` subdirectory and create a `.env` and a `docker-compose.yml`
@@ -97,14 +97,32 @@ to use the `.env` file located there.
 ### DataCite Publisher
     python -m odp.publish.datacite
 
-## Upgrading Python dependencies
-To upgrade required Python libraries and re-generate the `requirements.txt`
-file for the ODP, carry out the following steps:
+## Managing dependencies
+To upgrade required Python packages and re-generate the `requirements.txt`
+file for the ODP, carry out the following steps.
 
-- Delete your local ODP virtual environment: `rm -rf .venv`
-- Create a new virtual environment, and install the ODP project, as described under
-  [project installation](#project-installation).
-- Start up all ODP services as described above, and check that everything works as expected.
-- Ensure that unit tests all pass. (still to be implemented)
-- Run the following command in the project root directory:
-`pip freeze | sed -E '/^(-e\s|pkg-resources==)/d' > requirements.txt`
+Activate your Python virtual environment:
+
+    source .venv/bin/activate
+
+Upgrade the package maintenance tools:
+
+    pip install -U pip setuptools pip-tools
+
+Upgrade project dependencies (this re-generates `requirements.txt`):
+
+    pip-compile --upgrade
+
+Install the updated dependencies to your local environment:
+
+    pip-sync
+
+Start up all ODP services, as described under [Running the ODP services](#running-the-odp-services),
+and make sure that everything works as expected.
+
+### Installing new packages
+If a new Python package is required by any ODP module, it should be added to
+the `requirements.in` file.
+
+Then, following the steps above to update `requirements.txt`, and test all
+ODP services.
