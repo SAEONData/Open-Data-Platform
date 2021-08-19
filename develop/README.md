@@ -124,5 +124,5 @@ and make sure that everything works as expected.
 If a new Python package is required by any ODP module, it should be added to
 the `requirements.in` file.
 
-Then, following the steps above to update `requirements.txt`, and test all
+Then, follow the steps above to update `requirements.txt`, and test all
 ODP services.
