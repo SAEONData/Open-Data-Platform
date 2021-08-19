@@ -1,13 +1,11 @@
 FROM python:3.8
 RUN apt-get update && apt-get install -y cron
 
-WORKDIR /srv
+WORKDIR /srv/Open-Data-Platform
 
-COPY odp Open-Data-Platform/odp/
-COPY setup.py requirements.txt Open-Data-Platform/
-
-RUN cd Open-Data-Platform && pip install -r requirements.txt
-RUN cd Open-Data-Platform && pip install -e .
+COPY odp odp/
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 
 WORKDIR /etc/cron.d
 
