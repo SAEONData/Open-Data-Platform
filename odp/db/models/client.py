@@ -28,4 +28,4 @@ class Client(Base):
     scopes = association_proxy('client_scopes', 'scope', creator=lambda s: ClientScope(scope=s))
 
     def __repr__(self):
-        return '<Client %s>' % self.key
+        return self._repr('id', 'name', 'project')

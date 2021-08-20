@@ -55,5 +55,10 @@ class _Base:
             session.rollback()
             raise
 
+    def _repr(self, *attrs):
+        return f'{self.__class__.__name__}(' + \
+               ', '.join(f'{attr}={getattr(self, attr)!r}' for attr in attrs) + \
+               ')'
+
 
 Base = declarative_base(cls=_Base)

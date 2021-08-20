@@ -26,7 +26,7 @@ class User(Base):
     roles = association_proxy('user_roles', 'role', creator=lambda r: UserRole(role=r))
 
     def __repr__(self):
-        return '<User %s>' % self.email
+        return self._repr('id', 'email', 'name', 'active', 'verified')
 
     # region Flask-Login
 
@@ -43,6 +43,6 @@ class User(Base):
         return self.active and self.verified
 
     def get_id(self):
-        return str(self.id)
+        return self.id
 
     # endregion

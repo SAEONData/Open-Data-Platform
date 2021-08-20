@@ -25,4 +25,4 @@ class Project(Base):
     clients = relationship('Client', back_populates='project', cascade='all, delete-orphan', passive_deletes=True)
 
     def __repr__(self):
-        return '<Project %s>' % self.key
+        return self._repr('id', 'key', 'name')

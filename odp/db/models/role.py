@@ -38,4 +38,4 @@ class Role(Base):
     scopes = association_proxy('role_scopes', 'scope', creator=lambda s: RoleScope(scope=s))
 
     def __repr__(self):
-        return '<Role %s>' % self.key
+        return self._repr('id', 'key', 'name', 'project', 'provider')

@@ -21,4 +21,4 @@ class Provider(Base):
     roles = relationship('Role', back_populates='provider', cascade='all, delete-orphan', passive_deletes=True)
 
     def __repr__(self):
-        return '<Provider %s>' % self.key
+        return self._repr('id', 'key', 'name')
