@@ -1,29 +1,28 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import relationship
 
 from odp.db import Base
-from odp.db.models.capability import Capability
+from odp.db.models.client_scope import ClientScope
+from odp.db.models.role_scope import RoleScope
 
 
 class Scope(Base):
-    """
-    Model representing an OAuth2 / application scope.
-    """
+    """An OAuth2 scope, which represents the capability to perform
+    some kind of operation on a particular class of entity."""
+
     __tablename__ = 'scope'
 
     id = Column(Integer, primary_key=True)
-    key = Column(String, unique=True, nullable=False)
-    description = Column(String)
+    scope = Column(String, unique=True, nullable=False)
 
-    # many-to-many relationship between scope and role represented by capability
-    capabilities = relationship('Capability',
-                                back_populates='scope',
-                                cascade='all, delete-orphan',
-                                passive_deletes=True)
-    # enables working with the other side of the relationship transparently
-    roles = association_proxy('capabilities', 'role',
-                              creator=lambda r: Capability(role=r))
+    # many-to-many relationship between scope and role
+    scope_roles = relationship('RoleScope', back_populates='scope', cascade='all, delete-orphan', passive_deletes=True)
+    roles = association_proxy('scope_roles', 'role', creator=lambda r: RoleScope(role=r))
+
+    # many-to-many relationship between scope and client
+    scope_clients = relationship('ClientScope', back_populates='scope', cascade='all, delete-orphan', passive_deletes=True)
+    clients = association_proxy('scope_clients', 'client', creator=lambda c: ClientScope(client=c))
 
     def __repr__(self):
         return '<Scope %s>' % self.key
