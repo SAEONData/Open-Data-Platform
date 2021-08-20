@@ -21,15 +21,20 @@
 {% if brand == 'nccrd' %}
     <nav class="navbar">
         <div class="container-fluid flex-nowrap">
-            <a class="navbar-brand text-reset" href="http://www.environment.gov.za/" target="_blank" rel="noopener noreferrer">
-                <img src="{{ url_for('static', filename='dffe-logo-transparent.png') }}">
-            </a>
-            <span class="navbar-text h3">
+            <div style="flex-basis:0; flex-grow:1">
+                <a class="navbar-brand text-reset" href="http://www.environment.gov.za/" target="_blank" rel="noopener noreferrer">
+                    <img src="{{ url_for('static', filename='dffe-logo-transparent.png') }}">
+                </a>
+            </div>
+            <span style="flex-basis:0; flex-grow:1" class="navbar-text text-center h3">
                 National Climate Change Response Database
             </span>
-            <a class="navbar-brand text-reset ml-5 mr-0" href="http://www.environment.gov.za/" target="_blank" rel="noopener noreferrer">
-                <img src="{{ url_for('static', filename='sa-flag.jpg') }}" height="65">
-            </a>
+            <div style="flex-basis:0; flex-grow:1">
+                <a class="navbar-brand text-reset" style="display:block" href="http://www.environment.gov.za/" target="_blank" rel="noopener noreferrer">
+                    <img src="{{ url_for('static', filename='sa-flag.jpg') }}" height="65" class="ml-auto" style="display:block">
+                </a>
+            </div>
+        </div>
     </nav>
     <hr class="mt-0" />
 {% else %}
