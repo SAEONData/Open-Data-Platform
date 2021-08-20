@@ -14,4 +14,4 @@ class UserRole(Base):
     role_id = Column(Integer, ForeignKey('role.id', ondelete='CASCADE'), primary_key=True)
 
     user = relationship('User', back_populates='user_roles')
-    role = relationship('Role', back_populates='user_roles')
+    role = relationship('Role', back_populates='role_users')
