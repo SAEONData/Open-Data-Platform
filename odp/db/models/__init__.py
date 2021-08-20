@@ -10,4 +10,4 @@ from .oauth2_token import OAuth2Token
 from .role import Role
 from .scope import Scope
 from .user import User
-from .user_privilege import UserPrivilege
+from .user_role import UserRole

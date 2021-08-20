@@ -1,17 +1,16 @@
 import uuid
 
 from sqlalchemy import Column, String, Boolean
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import relationship
 
 from odp.db import Base
-from odp.db.models.member import Member
+from odp.db.models.user_role import UserRole
 
 
 class User(Base):
-    """
-    Model representing a user account.
-    """
+    """User account model."""
+
     __tablename__ = 'user'
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -23,14 +22,9 @@ class User(Base):
     name = Column(String)
     picture = Column(String)
 
-    # many-to-many relationship between institution and user represented by member
-    members = relationship('Member',
-                           back_populates='user',
-                           cascade='all, delete-orphan',
-                           passive_deletes=True)
-    # enables working with the other side of the relationship transparently
-    institutions = association_proxy('members', 'institution',
-                                     creator=lambda i: Member(institution=i))
+    # many-to-many relationship between user and role
+    user_roles = relationship('UserRole', back_populates='user', cascade='all, delete-orphan', passive_deletes=True)
+    roles = association_proxy('user_roles', 'role', creator=lambda r: UserRole(role=r))
 
     def __repr__(self):
         return '<User %s>' % self.email
