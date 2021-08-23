@@ -26,5 +26,8 @@ class DigitalObject(Base):
     digitalobject_schema_id = Column(Integer, ForeignKey('digitalobject_schema.id', ondelete='RESTRICT'), nullable=False)
     digitalobject_schema = relationship('DigitalObjectSchema')
 
+    # one-to-many relationship with digitalobject_tag
+    tags = relationship('DigitalObjectTag', back_populates='digitalobject', cascade='all, delete-orphan', passive_deletes=True)
+
     def __repr__(self):
         return self._repr('id', 'doi', 'sid', 'collection', 'digitalobject_schema')
