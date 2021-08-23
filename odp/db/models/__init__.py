@@ -5,6 +5,7 @@ from .collection import Collection
 from .datacite_record import DataciteRecord
 from .digitalobject import DigitalObject
 from .digitalobject_schema import DigitalObjectSchema
+from .digitalobject_tag import DigitalObjectTag
 from .oauth2_token import OAuth2Token
 from .project import Project
 from .project_collection import ProjectCollection
@@ -12,5 +13,6 @@ from .provider import Provider
 from .role import Role
 from .role_scope import RoleScope
 from .scope import Scope
+from .tag import Tag
 from .user import User
 from .user_role import UserRole
