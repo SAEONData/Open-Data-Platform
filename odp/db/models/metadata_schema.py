@@ -3,10 +3,10 @@ from sqlalchemy import Column, String, Integer
 from odp.db import Base
 
 
-class DigitalObjectSchema(Base):
-    """Model representing a metadata schema for digital objects."""
+class MetadataSchema(Base):
+    """Model representing a JSON schema for digital object metadata."""
 
-    __tablename__ = 'digitalobject_schema'
+    __tablename__ = 'metadata_schema'
 
     id = Column(Integer, primary_key=True)
     key = Column(String, unique=True, nullable=False)

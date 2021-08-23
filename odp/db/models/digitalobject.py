@@ -23,11 +23,11 @@ class DigitalObject(Base):
     collection_id = Column(Integer, ForeignKey('collection.id', ondelete='RESTRICT'), nullable=False)
     collection = relationship('Collection', back_populates='digitalobjects')
 
-    digitalobject_schema_id = Column(Integer, ForeignKey('digitalobject_schema.id', ondelete='RESTRICT'), nullable=False)
-    digitalobject_schema = relationship('DigitalObjectSchema')
+    metadata_schema_id = Column(Integer, ForeignKey('metadata_schema.id', ondelete='RESTRICT'), nullable=False)
+    metadata_schema = relationship('MetadataSchema')
 
     # one-to-many relationship with digitalobject_tag
     tags = relationship('DigitalObjectTag', back_populates='digitalobject', cascade='all, delete-orphan', passive_deletes=True)
 
     def __repr__(self):
-        return self._repr('id', 'doi', 'sid', 'collection', 'digitalobject_schema')
+        return self._repr('id', 'doi', 'sid', 'collection', 'metadata_schema')

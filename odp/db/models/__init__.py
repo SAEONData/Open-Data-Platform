@@ -4,8 +4,8 @@ from .client_scope import ClientScope
 from .collection import Collection
 from .datacite_record import DataciteRecord
 from .digitalobject import DigitalObject
-from .digitalobject_schema import DigitalObjectSchema
 from .digitalobject_tag import DigitalObjectTag
+from .metadata_schema import MetadataSchema
 from .oauth2_token import OAuth2Token
 from .project import Project
 from .project_collection import ProjectCollection
