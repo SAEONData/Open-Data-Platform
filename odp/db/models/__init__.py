@@ -3,6 +3,8 @@ from .client import Client
 from .client_scope import ClientScope
 from .collection import Collection
 from .datacite_record import DataciteRecord
+from .digitalobject import DigitalObject
+from .digitalobject_schema import DigitalObjectSchema
 from .oauth2_token import OAuth2Token
 from .project import Project
 from .project_collection import ProjectCollection
