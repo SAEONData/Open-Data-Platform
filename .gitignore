@@ -7,3 +7,4 @@ __pycache__/
 .venv/
 .env
 develop/docker-compose.yml
+node_modules/
