@@ -12,12 +12,12 @@ class DigitalObject(Base):
 
     __tablename__ = 'digitalobject'
 
-    __table_args__ = (CheckConstraint('doi IS NOT NULL OR sid IS NOT NULL'))
+    __table_args__ = (CheckConstraint('doi IS NOT NULL OR sid IS NOT NULL'),)
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     doi = Column(String, unique=True)
     sid = Column(String, unique=True)
-    metadata = Column(JSONB, nullable=False)
+    metadata_ = Column(JSONB, nullable=False)
     validity = Column(JSONB)
 
     collection_id = Column(Integer, ForeignKey('collection.id', ondelete='RESTRICT'), nullable=False)
