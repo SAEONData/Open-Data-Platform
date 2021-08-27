@@ -1,1 +1,1 @@
-*/ODP_PUBLISH_JOB_INTERVAL * * * * /usr/local/bin/python -m odp.publish.main >/tmp/stdout 2>&1
+*/ODP_PUBLISH_JOB_INTERVAL * * * * cd /srv/Open-Data-Platform && /usr/local/bin/python -m odp.publish.main >/tmp/stdout 2>&1
