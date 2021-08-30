@@ -8,13 +8,21 @@ from odp.db.models.user_role import UserRole
 
 
 class Role(Base):
-    """Model representing a person's role within SAEON, or
-    the role of a person (SAEON or external) with respect to
-    a particular project and/or provider.
+    """A role is a configuration object that grants a user
+    permissions to access ODP entities. If multiple roles are
+    assigned to a user, the effective set of permissions is
+    taken to be the union of those conferred by the individual
+    assigned roles.
 
-    If a role is linked with a project and/or provider, then
-    any assigned scopes grant access only to resources linked
-    with that project and/or provider.
+    The linked scopes determine what types of operations a user
+    may perform on what classes of entity. The applicability of
+    those scopes may be constrained by pinning a role to a project
+    and/or provider, in which case the scopes grant access only
+    to resources linked with the specified project and/or provider.
+
+    A client-specific role confers scope access only for logins to
+    that client, and would typically be defined to permit developer
+    or admin access to a particular application.
     """
 
     __tablename__ = 'role'
@@ -29,6 +37,9 @@ class Role(Base):
     provider_id = Column(Integer, ForeignKey('provider.id', ondelete='CASCADE'))
     provider = relationship('Provider', back_populates='roles')
 
+    client_id = Column(String, ForeignKey('client.id', ondelete='CASCADE'))
+    client = relationship('Client', back_populates='roles')
+
     # many-to-many relationship between role and user
     role_users = relationship('UserRole', back_populates='role', cascade='all, delete-orphan', passive_deletes=True)
     users = association_proxy('role_users', 'user', creator=lambda u: UserRole(user=u))
@@ -38,4 +49,4 @@ class Role(Base):
     scopes = association_proxy('role_scopes', 'scope', creator=lambda s: RoleScope(scope=s))
 
     def __repr__(self):
-        return self._repr('id', 'key', 'name', 'project', 'provider')
+        return self._repr('id', 'key', 'name', 'project', 'provider', 'client')

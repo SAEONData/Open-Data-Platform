@@ -9,7 +9,11 @@ from odp.db.models.client_scope import ClientScope
 
 
 class Client(Base):
-    """Model representing a client application."""
+    """Model representing a client application.
+
+    The many-to-many client-scope relation represents the
+    set of OAuth2 scopes that a client may request.
+    """
 
     __tablename__ = 'client'
 
@@ -19,6 +23,9 @@ class Client(Base):
     # many-to-many relationship between client and scope
     client_scopes = relationship('ClientScope', back_populates='client', cascade='all, delete-orphan', passive_deletes=True)
     scopes = association_proxy('client_scopes', 'scope', creator=lambda s: ClientScope(scope=s))
+
+    # one-to-many relationship with role
+    roles = relationship('Role', back_populates='client', cascade='all, delete-orphan', passive_deletes=True)
 
     def __repr__(self):
         return self._repr('id', 'name')
