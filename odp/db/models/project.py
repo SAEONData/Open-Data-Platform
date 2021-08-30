@@ -10,8 +10,8 @@ class Project(Base):
     """An organizational entity representing an aggregation of collections
     relevant to a particular SAEON project.
 
-    Project-specific roles and clients permit scope access to only those
-    collections that are linked with the specified project.
+    Project-specific roles permit scope access to only those collections
+    that are linked with the specified project.
     """
 
     __tablename__ = 'project'
@@ -22,9 +22,6 @@ class Project(Base):
 
     # one-to-many relationship with role
     roles = relationship('Role', back_populates='project', cascade='all, delete-orphan', passive_deletes=True)
-
-    # one-to-many relationship with client
-    clients = relationship('Client', back_populates='project', cascade='all, delete-orphan', passive_deletes=True)
 
     # many-to-many relationship between project and collection
     project_collections = relationship('ProjectCollection', back_populates='project', cascade='all, delete-orphan', passive_deletes=True)
