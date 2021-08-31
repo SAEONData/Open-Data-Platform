@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Set, Dict, Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -29,19 +29,23 @@ class TokenUse(str, Enum):
     REFRESH_TOKEN = 'refresh_token'
 
 
-class AccessRight(BaseModel):
-    institution_key: str
-    institution_name: str
-    role_key: str
-    role_name: str
-    scope_key: str
+class ScopeContext(BaseModel):
+    projects: Set[str] | Literal['*']
+    providers: Set[str] | Literal['*']
+    collections: Set[str]
 
 
-class AccessTokenData(BaseModel):
-    user_id: str
+class UserAccess(BaseModel):
+    scopes: Dict[str, ScopeContext | Literal['*']]
+
+
+class UserInfo(BaseModel):
+    sub: str
     email: EmailStr
-    superuser: bool
-    access_rights: List[AccessRight]
+    email_verified: bool
+    name: Optional[str]
+    picture: Optional[str]
+    roles: List[str]
 
 
 class ValidToken(BaseModel):
@@ -59,25 +63,10 @@ class ValidToken(BaseModel):
     aud: Optional[List[str]]
     username: Optional[str]
     obfuscated_subject: Optional[str]
-    ext: Optional[AccessTokenData]
+    ext: Optional[UserAccess]
 
 
 class InvalidToken(BaseModel):
     """ Token introspection response for an invalid token """
     active: bool = Field(default=False, const=False)
     error: str
-
-
-class IDTokenData(BaseModel):
-    sub: str
-    email: EmailStr
-    email_verified: bool
-    name: Optional[str]
-    picture: Optional[str]
-
-    # The `role` field is used strictly for the special case of indicating a user's
-    # role(s) within the admin institution, for the requested scope.
-    # If the user is not a member of the admin institution, or multiple applicable
-    # capabilities were found (unlikely: an access token will typically be issued
-    # for one application scope) then `role` will be left empty.
-    role: List[str]
