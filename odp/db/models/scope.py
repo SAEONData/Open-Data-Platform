@@ -14,7 +14,7 @@ class Scope(Base):
     __tablename__ = 'scope'
 
     id = Column(Integer, primary_key=True)
-    scope = Column(String, unique=True, nullable=False)
+    key = Column(String, unique=True, nullable=False)
 
     # many-to-many relationship between scope and role
     scope_roles = relationship('RoleScope', back_populates='scope', cascade='all, delete-orphan', passive_deletes=True)
@@ -25,4 +25,4 @@ class Scope(Base):
     clients = association_proxy('scope_clients', 'client', creator=lambda c: ClientScope(client=c))
 
     def __repr__(self):
-        return self._repr('id', 'scope')
+        return self._repr('id', 'key')
