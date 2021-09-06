@@ -24,3 +24,7 @@ wtforms
 gunicorn
 authlib
 bootstrap-flask
+
+# Testing
+pytest
+docker
