@@ -18,12 +18,7 @@ class ClientFactory(SQLAlchemyModelFactory):
         sqlalchemy_session = session
 
     id = factory.LazyFunction(uuid.uuid4)
-    name = factory.Faker('sentence', nb_words=3)
-
-    @classmethod
-    def _adjust_kwargs(cls, **kwargs):
-        kwargs['name'] = kwargs['name'].title().rstrip('.')
-        return kwargs
+    name = factory.Faker('catch_phrase')
 
 
 class RoleFactory(SQLAlchemyModelFactory):
