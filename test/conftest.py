@@ -2,7 +2,9 @@ import time
 
 import docker
 import pytest
+from sqlalchemy import text
 
+import odp.db.models
 from odp.config import config
 
 
@@ -22,8 +24,19 @@ def database():
     )
     time.sleep(10)  # it takes 3-6 seconds for the DB to be ready
     try:
-        import odp.db.models
         odp.db.Base.metadata.create_all(odp.db.engine)
         yield
     finally:
         container.remove(force=True)
+
+
+@pytest.fixture(autouse=True)
+def delete_all_data():
+    try:
+        yield
+    finally:
+        with odp.db.engine.begin() as conn:
+            for table in odp.db.Base.metadata.tables:
+                conn.execute(text(f'ALTER TABLE "{table}" DISABLE TRIGGER ALL'))
+                conn.execute(text(f'DELETE FROM "{table}"'))
+                conn.execute(text(f'ALTER TABLE "{table}" ENABLE TRIGGER ALL'))
