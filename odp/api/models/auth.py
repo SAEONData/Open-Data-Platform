@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Set, Dict, Literal
+from typing import List, Optional, Set, Dict, Literal, Union
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -30,13 +30,13 @@ class TokenUse(str, Enum):
 
 
 class ScopeContext(BaseModel):
-    projects: Set[str] | Literal['*']
-    providers: Set[str] | Literal['*']
+    projects: Union[Set[str], Literal['*']]
+    providers: Union[Set[str], Literal['*']]
     collections: Set[str]
 
 
 class UserAccess(BaseModel):
-    scopes: Dict[str, ScopeContext | Literal['*']]
+    scopes: Dict[str, Union[ScopeContext, Literal['*']]]
 
 
 class UserInfo(BaseModel):
