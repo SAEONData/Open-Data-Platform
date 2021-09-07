@@ -28,3 +28,4 @@ bootstrap-flask
 # Testing
 pytest
 docker
+factory-boy
