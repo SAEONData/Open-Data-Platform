@@ -15,19 +15,19 @@ def database():
         'postgres:11',
         ports={5432: config.ODP.DB.PORT},
         environment=dict(
-            PGDATA='/var/lib/postgresql/data',
+            PGDATA='/pgdata',
             POSTGRES_DB=config.ODP.DB.NAME,
             POSTGRES_USER=config.ODP.DB.USER,
             POSTGRES_PASSWORD=config.ODP.DB.PASS,
         ),
         detach=True,
     )
-    time.sleep(10)  # it takes 3-6 seconds for the DB to be ready
+    time.sleep(8)  # it takes 3-6 seconds for the DB to be ready
     try:
         odp.db.Base.metadata.create_all(odp.db.engine)
         yield
     finally:
-        container.remove(force=True)
+        container.remove(v=True, force=True)  # v => remove volumes
 
 
 @pytest.fixture(autouse=True)
