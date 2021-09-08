@@ -1,5 +1,4 @@
 import warnings
-from contextlib import contextmanager
 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import RemovedIn20Warning
@@ -15,7 +14,7 @@ engine = create_engine(
     future=True,
 )
 
-session = scoped_session(sessionmaker(
+Session = scoped_session(sessionmaker(
     bind=engine,
     autocommit=False,
     autoflush=False,
@@ -23,36 +22,21 @@ session = scoped_session(sessionmaker(
 ))
 
 
-@contextmanager
-def transaction():
-    """Provide a transactional scope around a series of operations."""
-    try:
-        yield
-        session.commit()
-    except Exception:
-        session.rollback()
-        raise
-    finally:
-        session.close()
-
-
 class _Base:
-    query = session.query_property()
-
     def save(self):
-        session.add(self)
+        Session.add(self)
         self._flush()
 
     def delete(self):
-        session.delete(self)
+        Session.delete(self)
         self._flush()
 
     @staticmethod
     def _flush():
         try:
-            session.flush()
+            Session.flush()
         except Exception:
-            session.rollback()
+            Session.rollback()
             raise
 
     def _repr(self, *attrs):
