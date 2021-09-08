@@ -4,24 +4,25 @@ from typing import List, Optional, Set, Dict, Literal, Union
 from pydantic import BaseModel, EmailStr, Field
 
 
-class Role(str, Enum):
-    ADMIN = 'admin'
-    CURATOR = 'curator'
-    HARVESTER = 'harvester'
-    CONTRIBUTOR = 'contributor'
-    MANAGER = 'manager'
-    STAFF = 'staff'
-    DATASCIENTIST = 'datascientist'
-
-    @staticmethod
-    def all():
-        return (role for role in Role)
-
-
 class Scope(str, Enum):
-    ADMIN = 'ODP.Admin'
-    METADATA = 'ODP.Metadata'
-    CATALOGUE = 'ODP.Catalogue'
+    CATALOGUE_MANAGE = 'ODP.catalogue:manage'
+    CATALOGUE_VIEW = 'ODP.catalogue:view'
+    CLIENT_MANAGE = 'ODP.client:manage'
+    CLIENT_VIEW = 'ODP.client:view'
+    COLLECTION_MANAGE = 'ODP.collection:manage'
+    COLLECTION_VIEW = 'ODP.collection:view'
+    DIGITALOBJECT_MANAGE = 'ODP.digitalobject:manage'
+    DIGITALOBJECT_VIEW = 'ODP.digitalobject:view'
+    PROJECT_MANAGE = 'ODP.project:manage'
+    PROJECT_VIEW = 'ODP.project:view'
+    PROVIDER_MANAGE = 'ODP.provider:manage'
+    PROVIDER_VIEW = 'ODP.provider:view'
+    ROLE_MANAGE = 'ODP.role:manage'
+    ROLE_VIEW = 'ODP.role:view'
+    SCOPE_MANAGE = 'ODP.scope:manage'
+    SCOPE_VIEW = 'ODP.scope:view'
+    USER_MANAGE = 'ODP.user:manage'
+    USER_VIEW = 'ODP.user:view'
 
 
 class TokenUse(str, Enum):
