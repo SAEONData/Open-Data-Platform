@@ -4,7 +4,7 @@ import docker
 import pytest
 from sqlalchemy import text
 
-import odp.db.models
+import odp.db.setup
 from odp.config import config
 
 
@@ -24,7 +24,7 @@ def database():
     )
     time.sleep(8)  # it takes 3-6 seconds for the DB to be ready
     try:
-        odp.db.Base.metadata.create_all(odp.db.engine)
+        odp.db.setup.create_schema()
         yield
     finally:
         container.remove(v=True, force=True)  # v => remove volumes
