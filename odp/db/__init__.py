@@ -40,9 +40,8 @@ class _Base:
             raise
 
     def _repr(self, *attrs):
-        return f'{self.__class__.__name__}(' + \
-               ', '.join(f'{attr}={getattr(self, attr)!r}' for attr in attrs) + \
-               ')'
+        params = ', '.join(f'{attr}={getattr(self, attr)!r}' for attr in attrs)
+        return f'{self.__class__.__name__}({params})'
 
 
 Base = declarative_base(cls=_Base)
