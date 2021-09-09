@@ -10,6 +10,8 @@ from odp.config import config
 
 @pytest.fixture(scope='session', autouse=True)
 def database():
+    """An auto-use, run-once fixture that provides a clean,
+    containerized database with an up-to-date ODP schema."""
     client = docker.from_env()
     container = client.containers.run(
         'postgres:11',
@@ -32,6 +34,8 @@ def database():
 
 @pytest.fixture(autouse=True)
 def session():
+    """An auto-use, per-test fixture that disposes of the current
+    session after every test."""
     try:
         yield
     finally:
@@ -40,6 +44,8 @@ def session():
 
 @pytest.fixture(autouse=True)
 def delete_all_data():
+    """An auto-use, per-test fixture that deletes all table data
+    after every test."""
     try:
         yield
     finally:
