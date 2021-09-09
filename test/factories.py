@@ -6,6 +6,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from odp.db import Session
 from odp.db.models import (
     Client,
+    Collection,
     Project,
     Provider,
     Role,
@@ -13,8 +14,8 @@ from odp.db.models import (
 )
 
 
-def keyify(name: str):
-    return re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
+def key_from_name(obj):
+    return re.sub(r'[^a-z0-9]+', '-', obj.name.lower()).strip('-')
 
 
 class ODPModelFactory(SQLAlchemyModelFactory):
@@ -36,7 +37,7 @@ class ProjectFactory(ODPModelFactory):
         model = Project
 
     id = factory.Sequence(int)
-    key = factory.LazyAttribute(lambda r: keyify(r.name))
+    key = factory.LazyAttribute(key_from_name)
     name = factory.Faker('catch_phrase')
 
 
@@ -45,8 +46,18 @@ class ProviderFactory(ODPModelFactory):
         model = Provider
 
     id = factory.Sequence(int)
-    key = factory.LazyAttribute(lambda r: keyify(r.name))
+    key = factory.LazyAttribute(key_from_name)
     name = factory.Faker('company')
+
+
+class CollectionFactory(ODPModelFactory):
+    class Meta:
+        model = Collection
+
+    id = factory.Sequence(int)
+    key = factory.LazyAttribute(key_from_name)
+    name = factory.Faker('catch_phrase')
+    provider = factory.SubFactory(ProviderFactory)
 
 
 class RoleFactory(ODPModelFactory):
@@ -54,7 +65,7 @@ class RoleFactory(ODPModelFactory):
         model = Role
 
     id = factory.Sequence(int)
-    key = factory.LazyAttribute(lambda r: keyify(r.name))
+    key = factory.LazyAttribute(key_from_name)
     name = factory.Faker('job')
 
 

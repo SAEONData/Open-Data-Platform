@@ -3,6 +3,7 @@ from sqlalchemy import select
 from odp.db import Session
 from odp.db.models import (
     Client,
+    Collection,
     Project,
     Provider,
     Role,
@@ -10,6 +11,7 @@ from odp.db.models import (
 )
 from test.factories import (
     ClientFactory,
+    CollectionFactory,
     ProjectFactory,
     ProviderFactory,
     RoleFactory,
@@ -21,6 +23,12 @@ def test_create_client():
     client = ClientFactory()
     result = Session.execute(select(Client))
     assert result.scalar_one().name == client.name
+
+
+def test_create_collection():
+    collection = CollectionFactory()
+    result = Session.execute(select(Collection))
+    assert result.scalar_one().key == collection.key
 
 
 def test_create_project():
