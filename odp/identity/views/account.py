@@ -200,8 +200,8 @@ def send_verification_email(email, name, challenge, brand):
             body=render_template('email/verify_email.txt', **context),
             html=render_template('email/verify_email.html', **context),
             recipients=[email],
-            sender=("SAEON", "noreply@saeon.ac.za"),
-            reply_to=("SAEON", "noreply@saeon.ac.za"),
+            sender=("SAEON", "noreply@saeon.nrf.ac.za"),
+            reply_to=("SAEON", "noreply@saeon.nrf.ac.za"),
         )
         mail.send(msg)
         flash("An email verification link has been sent to your email address.")
@@ -230,8 +230,8 @@ def send_password_reset_email(email, name, challenge, brand):
             body=render_template('email/reset_password.txt', **context),
             html=render_template('email/reset_password.html', **context),
             recipients=[email],
-            sender=("SAEON", "noreply@saeon.ac.za"),
-            reply_to=("SAEON", "noreply@saeon.ac.za"),
+            sender=("SAEON", "noreply@saeon.nrf.ac.za"),
+            reply_to=("SAEON", "noreply@saeon.nrf.ac.za"),
         )
         mail.send(msg)
         flash("A password reset link has been sent to your email address.")
