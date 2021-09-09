@@ -31,6 +31,14 @@ def database():
 
 
 @pytest.fixture(autouse=True)
+def session():
+    try:
+        yield
+    finally:
+        odp.db.Session.remove()
+
+
+@pytest.fixture(autouse=True)
 def delete_all_data():
     try:
         yield
