@@ -54,3 +54,10 @@ def delete_all_data():
                 conn.execute(text(f'ALTER TABLE "{table}" DISABLE TRIGGER ALL'))
                 conn.execute(text(f'DELETE FROM "{table}"'))
                 conn.execute(text(f'ALTER TABLE "{table}" ENABLE TRIGGER ALL'))
+
+
+@pytest.fixture
+def static_data():
+    """An on-demand fixture that creates static system data."""
+    odp.db.setup.create_scopes()
+    odp.db.setup.create_sysadmin()
