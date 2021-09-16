@@ -5,7 +5,9 @@ import pytest
 from sqlalchemy import text
 
 import odp.db.setup
+from odp.api.models.auth import SystemScope
 from odp.config import config
+from test.factories import ScopeFactory, RoleFactory
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -59,5 +61,5 @@ def delete_all_data():
 @pytest.fixture
 def static_data():
     """An on-demand fixture that creates static system data."""
-    odp.db.setup.create_scopes()
-    odp.db.setup.create_sysadmin()
+    scopes = [ScopeFactory(key=s.value) for s in SystemScope]
+    RoleFactory(key='sysadmin', name='System Administrator', scopes=scopes)

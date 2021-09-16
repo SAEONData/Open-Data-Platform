@@ -34,23 +34,23 @@ class ClientFactory(ODPModelFactory):
     name = factory.Faker('catch_phrase')
 
     @factory.post_generation
-    def scopes(self, create, extracted, **kwargs):
+    def scopes(obj, create, scopes):
         if not create:
             return
-        if extracted:
-            for scope in extracted:
-                self.scopes.append(scope)
+        if scopes:
+            for scope in scopes:
+                obj.scopes.append(scope)
             Session.commit()
 
     @factory.post_generation
-    def system_scopes(self, create, extracted, **kwargs):
+    def system_scopes(obj, create, system_scopes):
         if not create:
             return
-        if extracted:
-            for system_scope in extracted:
+        if system_scopes:
+            for system_scope in system_scopes:
                 result = Session.execute(select(Scope).where(Scope.key == system_scope.value))
                 scope = result.scalar_one()
-                self.scopes.append(scope)
+                obj.scopes.append(scope)
             Session.commit()
 
 
@@ -91,23 +91,23 @@ class RoleFactory(ODPModelFactory):
     name = factory.Faker('job')
 
     @factory.post_generation
-    def scopes(self, create, extracted, **kwargs):
+    def scopes(obj, create, scopes):
         if not create:
             return
-        if extracted:
-            for scope in extracted:
-                self.scopes.append(scope)
+        if scopes:
+            for scope in scopes:
+                obj.scopes.append(scope)
             Session.commit()
 
     @factory.post_generation
-    def system_scopes(self, create, extracted, **kwargs):
+    def system_scopes(obj, create, system_scopes):
         if not create:
             return
-        if extracted:
-            for system_scope in extracted:
+        if system_scopes:
+            for system_scope in system_scopes:
                 result = Session.execute(select(Scope).where(Scope.key == system_scope.value))
                 scope = result.scalar_one()
-                self.scopes.append(scope)
+                obj.scopes.append(scope)
             Session.commit()
 
 
@@ -129,10 +129,10 @@ class UserFactory(ODPModelFactory):
     verified = True
 
     @factory.post_generation
-    def roles(self, create, extracted, **kwargs):
+    def roles(obj, create, roles):
         if not create:
             return
-        if extracted:
-            for role in extracted:
-                self.roles.append(role)
+        if roles:
+            for role in roles:
+                obj.roles.append(role)
             Session.commit()
