@@ -85,10 +85,25 @@ class CollectionFactory(ODPModelFactory):
 class RoleFactory(ODPModelFactory):
     class Meta:
         model = Role
+        exclude = ('is_project_role', 'is_provider_role')
 
     id = factory.Sequence(int)
     key = factory.LazyAttribute(key_from_name)
     name = factory.Faker('job')
+
+    is_project_role = False
+    is_provider_role = False
+
+    project = factory.Maybe(
+        'is_project_role',
+        yes_declaration=factory.SubFactory(ProjectFactory),
+        no_declaration=None,
+    )
+    provider = factory.Maybe(
+        'is_provider_role',
+        yes_declaration=factory.SubFactory(ProviderFactory),
+        no_declaration=None,
+    )
 
     @factory.post_generation
     def scopes(obj, create, scopes):

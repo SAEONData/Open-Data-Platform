@@ -24,7 +24,7 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
     for role in user.roles:
         if role.client_id not in (None, client_id):
             continue
-        if not role.project_id and not role.provider_id:
+        if not role.project and not role.provider:
             unpinned_scopes |= {
                 scope.key for scope in role.scopes
                 if scope in client.scopes
@@ -34,7 +34,7 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
     for role in user.roles:
         if role.client_id not in (None, client_id):
             continue
-        if role.project_id or role.provider_id:
+        if role.project or role.provider:
             for scope in role.scopes:
                 if scope.key in unpinned_scopes:
                     continue
@@ -43,13 +43,13 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
                 pinned_scopes.setdefault(scope.key, dict(
                     projects=set(), providers=set(), collections=set()
                 ))
-                if role.project_id:
-                    pinned_scopes[scope.key]['projects'] |= role.project.key
+                if role.project:
+                    pinned_scopes[scope.key]['projects'] |= {role.project.key}
                     pinned_scopes[scope.key]['collections'] |= {
                         collection.key for collection in role.project.collections
                     }
-                if role.provider_id:
-                    pinned_scopes[scope.key]['providers'] |= role.provider.key
+                if role.provider:
+                    pinned_scopes[scope.key]['providers'] |= {role.provider.key}
                     pinned_scopes[scope.key]['collections'] |= {
                         collection.key for collection in role.provider.collections
                     }
