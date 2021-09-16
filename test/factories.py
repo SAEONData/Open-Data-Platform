@@ -10,6 +10,7 @@ from odp.db.models import (
     Project,
     Provider,
     Role,
+    Scope,
     User,
 )
 
@@ -67,6 +68,23 @@ class RoleFactory(ODPModelFactory):
     id = factory.Sequence(int)
     key = factory.LazyAttribute(key_from_name)
     name = factory.Faker('job')
+
+    @factory.post_generation
+    def scopes(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for scope in extracted:
+                self.scopes.append(scope)
+            Session.commit()
+
+
+class ScopeFactory(ODPModelFactory):
+    class Meta:
+        model = Scope
+
+    id = factory.Sequence(int)
+    key = factory.Faker('word')
 
 
 class UserFactory(ODPModelFactory):

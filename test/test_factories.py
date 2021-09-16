@@ -7,6 +7,8 @@ from odp.db.models import (
     Project,
     Provider,
     Role,
+    RoleScope,
+    Scope,
     User,
     UserRole,
 )
@@ -16,6 +18,7 @@ from test.factories import (
     ProjectFactory,
     ProviderFactory,
     RoleFactory,
+    ScopeFactory,
     UserFactory,
 )
 
@@ -50,6 +53,19 @@ def test_create_role():
     assert result.scalar_one().key == role.key
 
 
+def test_create_role_with_scopes():
+    scopes = ScopeFactory.create_batch(2)
+    role = RoleFactory(scopes=scopes)
+    result = Session.execute(select(RoleScope.role_id, RoleScope.scope_id))
+    assert result.all() == [(role.id, scope.id) for scope in scopes]
+
+
+def test_create_scope():
+    scope = ScopeFactory()
+    result = Session.execute(select(Scope))
+    assert result.scalar_one().key == scope.key
+
+
 def test_create_user():
     user = UserFactory()
     result = Session.execute(select(User))
@@ -58,6 +74,6 @@ def test_create_user():
 
 def test_create_user_with_roles():
     roles = RoleFactory.create_batch(2)
-    user = UserFactory(roles=roles, active=False)
+    user = UserFactory(roles=roles)
     result = Session.execute(select(UserRole.user_id, UserRole.role_id))
     assert result.all() == [(user.id, role.id) for role in roles]
