@@ -1,5 +1,5 @@
 from odp.api.models.auth import UserAccess, UserInfo, ScopeContext
-from odp.db import session
+from odp.db import Session
 from odp.db.models import User, Client
 
 
@@ -17,8 +17,8 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
       which the scope's usage is limited; in this case 'projects' or 'providers'
       may also take the value '*' if unrestricted.
     """
-    user = session.get(User, user_id)
-    client = session.get(Client, client_id)
+    user = Session.get(User, user_id)
+    client = Session.get(Client, client_id)
 
     unpinned_scopes = set()
     for role in user.roles:
@@ -70,7 +70,7 @@ def get_user_info(user_id: str, client_id: str) -> UserInfo:
     TODO: we should limit the returned info based on the claims
      allowed for the client
     """
-    user = session.get(User, user_id)
+    user = Session.get(User, user_id)
     return UserInfo(
         sub=user_id,
         email=user.email,
