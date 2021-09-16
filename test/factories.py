@@ -33,6 +33,26 @@ class ClientFactory(ODPModelFactory):
     id = factory.Faker('uuid4')
     name = factory.Faker('catch_phrase')
 
+    @factory.post_generation
+    def scopes(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for scope in extracted:
+                self.scopes.append(scope)
+            Session.commit()
+
+    @factory.post_generation
+    def system_scopes(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for system_scope in extracted:
+                result = Session.execute(select(Scope).where(Scope.key == system_scope.value))
+                scope = result.scalar_one()
+                self.scopes.append(scope)
+            Session.commit()
+
 
 class ProjectFactory(ODPModelFactory):
     class Meta:
@@ -80,12 +100,12 @@ class RoleFactory(ODPModelFactory):
             Session.commit()
 
     @factory.post_generation
-    def system_scope_keys(self, create, extracted, **kwargs):
+    def system_scopes(self, create, extracted, **kwargs):
         if not create:
             return
         if extracted:
-            for scope_key in extracted:
-                result = Session.execute(select(Scope).where(Scope.key == scope_key))
+            for system_scope in extracted:
+                result = Session.execute(select(Scope).where(Scope.key == system_scope.value))
                 scope = result.scalar_one()
                 self.scopes.append(scope)
             Session.commit()
