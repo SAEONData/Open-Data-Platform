@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from odp.api.models.auth import Scope as APIScope
+from odp.api.models.auth import SystemScope
 from odp.db import Session
 from odp.db.models import (
     Client,
@@ -62,7 +62,7 @@ def test_create_role_with_scopes():
 
 
 def test_create_role_with_system_scopes(static_data):
-    system_scope_keys = [s.value for s in APIScope]
+    system_scope_keys = [s.value for s in SystemScope]
     role = RoleFactory(system_scope_keys=system_scope_keys)
     result = Session.execute(select(Scope.key).join(RoleScope).where(RoleScope.role_id == role.id))
     assert result.scalars().all() == system_scope_keys

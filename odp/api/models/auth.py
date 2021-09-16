@@ -4,7 +4,7 @@ from typing import List, Optional, Set, Dict, Literal, Union
 from pydantic import BaseModel, EmailStr, Field
 
 
-class Scope(str, Enum):
+class SystemScope(str, Enum):
     CATALOGUE_MANAGE = 'ODP.catalogue:manage'
     CATALOGUE_VIEW = 'ODP.catalogue:view'
     CLIENT_MANAGE = 'ODP.client:manage'
