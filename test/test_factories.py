@@ -8,6 +8,7 @@ from odp.db.models import (
     Provider,
     Role,
     User,
+    UserRole,
 )
 from test.factories import (
     ClientFactory,
@@ -53,3 +54,10 @@ def test_create_user():
     user = UserFactory()
     result = Session.execute(select(User))
     assert result.scalar_one().email == user.email
+
+
+def test_create_user_with_roles():
+    roles = RoleFactory.create_batch(2)
+    user = UserFactory(roles=roles, active=False)
+    result = Session.execute(select(UserRole.user_id, UserRole.role_id))
+    assert result.all() == [(user.id, role.id) for role in roles]

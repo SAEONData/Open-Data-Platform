@@ -77,3 +77,12 @@ class UserFactory(ODPModelFactory):
     email = factory.Faker('email')
     active = True
     verified = True
+
+    @factory.post_generation
+    def roles(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for role in extracted:
+                self.roles.append(role)
+            Session.commit()
