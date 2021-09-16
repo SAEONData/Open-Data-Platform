@@ -2,6 +2,7 @@ import re
 
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
+from sqlalchemy import select
 
 from odp.db import Session
 from odp.db.models import (
@@ -75,6 +76,17 @@ class RoleFactory(ODPModelFactory):
             return
         if extracted:
             for scope in extracted:
+                self.scopes.append(scope)
+            Session.commit()
+
+    @factory.post_generation
+    def system_scope_keys(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for scope_key in extracted:
+                result = Session.execute(select(Scope).where(Scope.key == scope_key))
+                scope = result.scalar_one()
                 self.scopes.append(scope)
             Session.commit()
 
