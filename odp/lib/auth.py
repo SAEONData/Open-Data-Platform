@@ -13,9 +13,9 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
     key is either:
 
     - '*' if the scope is applicable across all relevant platform entities; or
-    - a ScopeContext object indicating the projects, providers and collections to
-      which the scope's usage is limited; in this case 'projects' or 'providers'
-      may also take the value '*' if unrestricted.
+    - a ScopeContext object indicating the projects and/or providers to which the
+      scope's usage is limited; in this case 'projects' or 'providers' may also
+      take the value '*' if unrestricted.
     """
     user = Session.get(User, user_id)
     client = Session.get(Client, client_id)
@@ -41,24 +41,17 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
                 if scope not in client.scopes:
                     continue
                 pinned_scopes.setdefault(scope.key, dict(
-                    projects=set(), providers=set(), collections=set()
+                    projects=set(), providers=set()
                 ))
                 if role.project:
                     pinned_scopes[scope.key]['projects'] |= {role.project.key}
-                    pinned_scopes[scope.key]['collections'] |= {
-                        collection.key for collection in role.project.collections
-                    }
                 if role.provider:
                     pinned_scopes[scope.key]['providers'] |= {role.provider.key}
-                    pinned_scopes[scope.key]['collections'] |= {
-                        collection.key for collection in role.provider.collections
-                    }
 
     return UserAccess(
         scopes={scope: '*' for scope in unpinned_scopes} | {scope: ScopeContext(
             projects=projects if (projects := pinned_scopes[scope]['projects']) else '*',
             providers=providers if (providers := pinned_scopes[scope]['providers']) else '*',
-            collections=pinned_scopes[scope]['collections'],
         ) for scope in pinned_scopes}
     )
 

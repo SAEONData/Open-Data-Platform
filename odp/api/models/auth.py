@@ -33,7 +33,6 @@ class TokenUse(str, Enum):
 class ScopeContext(BaseModel):
     projects: Union[Set[str], Literal['*']]
     providers: Union[Set[str], Literal['*']]
-    collections: Set[str]
 
 
 class UserAccess(BaseModel):
