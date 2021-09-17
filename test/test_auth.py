@@ -1,43 +1,24 @@
-from odp.api.models.auth import SystemScope, UserAccess, ScopeContext
+from odp.api.models.auth import UserAccess, ScopeContext
 from odp.lib.auth import get_user_access
-from test.factories import ClientFactory, RoleFactory, UserFactory
+from test.factories import ScopeFactory, ClientFactory, RoleFactory, UserFactory
 
 
-def test_unpinned_role(static_data):
-    client = ClientFactory(system_scopes=(
-        SystemScope.COLLECTION_VIEW,
-        SystemScope.COLLECTION_MANAGE,
-        SystemScope.DIGITALOBJECT_VIEW,
-        SystemScope.DIGITALOBJECT_MANAGE,
-    ))
-    role = RoleFactory(system_scopes=(
-        SystemScope.CATALOGUE_VIEW,
-        SystemScope.COLLECTION_VIEW,
-        SystemScope.DIGITALOBJECT_VIEW,
-        SystemScope.PROJECT_VIEW,
-    ))
+def test_unpinned_role():
+    scopes = ScopeFactory.create_batch(4)
+    client = ClientFactory(scopes=scopes[:3])
+    role = RoleFactory(scopes=scopes[1:])
     user = UserFactory(roles=(role,))
     calculated_user_access = get_user_access(user.id, client.id)
     required_user_access = UserAccess(scopes={
-        SystemScope.COLLECTION_VIEW: '*',
-        SystemScope.DIGITALOBJECT_VIEW: '*',
+        scope.key: '*' for scope in scopes[1:3]
     })
     assert calculated_user_access == required_user_access
 
 
-def test_provider_role(static_data):
-    client = ClientFactory(system_scopes=(
-        SystemScope.COLLECTION_VIEW,
-        SystemScope.COLLECTION_MANAGE,
-        SystemScope.DIGITALOBJECT_VIEW,
-        SystemScope.DIGITALOBJECT_MANAGE,
-    ))
-    role = RoleFactory(is_provider_role=True, system_scopes=(
-        SystemScope.CATALOGUE_VIEW,
-        SystemScope.COLLECTION_VIEW,
-        SystemScope.DIGITALOBJECT_VIEW,
-        SystemScope.PROJECT_VIEW,
-    ))
+def test_provider_role():
+    scopes = ScopeFactory.create_batch(4)
+    client = ClientFactory(scopes=scopes[:3])
+    role = RoleFactory(scopes=scopes[1:], is_provider_role=True)
     user = UserFactory(roles=(role,))
     calculated_user_access = get_user_access(user.id, client.id)
     required_scope_context = ScopeContext(
@@ -46,25 +27,15 @@ def test_provider_role(static_data):
         collections=set(),
     )
     required_user_access = UserAccess(scopes={
-        SystemScope.COLLECTION_VIEW: required_scope_context,
-        SystemScope.DIGITALOBJECT_VIEW: required_scope_context,
+        scope.key: required_scope_context for scope in scopes[1:3]
     })
     assert calculated_user_access == required_user_access
 
 
-def test_project_role(static_data):
-    client = ClientFactory(system_scopes=(
-        SystemScope.COLLECTION_VIEW,
-        SystemScope.COLLECTION_MANAGE,
-        SystemScope.DIGITALOBJECT_VIEW,
-        SystemScope.DIGITALOBJECT_MANAGE,
-    ))
-    role = RoleFactory(is_project_role=True, system_scopes=(
-        SystemScope.CATALOGUE_VIEW,
-        SystemScope.COLLECTION_VIEW,
-        SystemScope.DIGITALOBJECT_VIEW,
-        SystemScope.PROJECT_VIEW,
-    ))
+def test_project_role():
+    scopes = ScopeFactory.create_batch(4)
+    client = ClientFactory(scopes=scopes[:3])
+    role = RoleFactory(scopes=scopes[1:], is_project_role=True)
     user = UserFactory(roles=(role,))
     calculated_user_access = get_user_access(user.id, client.id)
     required_scope_context = ScopeContext(
@@ -73,7 +44,6 @@ def test_project_role(static_data):
         collections=set(),
     )
     required_user_access = UserAccess(scopes={
-        SystemScope.COLLECTION_VIEW: required_scope_context,
-        SystemScope.DIGITALOBJECT_VIEW: required_scope_context,
+        scope.key: required_scope_context for scope in scopes[1:3]
     })
     assert calculated_user_access == required_user_access

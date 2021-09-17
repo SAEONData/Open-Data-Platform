@@ -53,12 +53,6 @@ def test_create_client_with_scopes():
     assert result.all() == [(client.id, scope.id) for scope in scopes]
 
 
-def test_create_client_with_system_scopes(static_data):
-    client = ClientFactory(system_scopes=(s for s in SystemScope))
-    result = Session.execute(select(Scope.key).join(ClientScope).where(ClientScope.client_id == client.id))
-    assert result.scalars().all() == [s.value for s in SystemScope]
-
-
 def test_create_collection():
     collection = CollectionFactory()
     result = Session.execute(select(Collection))
@@ -88,12 +82,6 @@ def test_create_role_with_scopes():
     role = RoleFactory(scopes=scopes)
     result = Session.execute(select(RoleScope.role_id, RoleScope.scope_id))
     assert result.all() == [(role.id, scope.id) for scope in scopes]
-
-
-def test_create_role_with_system_scopes(static_data):
-    role = RoleFactory(system_scopes=(s for s in SystemScope))
-    result = Session.execute(select(Scope.key).join(RoleScope).where(RoleScope.role_id == role.id))
-    assert result.scalars().all() == [s.value for s in SystemScope]
 
 
 def test_create_scope():

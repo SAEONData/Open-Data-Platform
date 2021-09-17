@@ -2,7 +2,6 @@ import re
 
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
-from sqlalchemy import select
 
 from odp.db import Session
 from odp.db.models import (
@@ -39,17 +38,6 @@ class ClientFactory(ODPModelFactory):
             return
         if scopes:
             for scope in scopes:
-                obj.scopes.append(scope)
-            Session.commit()
-
-    @factory.post_generation
-    def system_scopes(obj, create, system_scopes):
-        if not create:
-            return
-        if system_scopes:
-            for system_scope in system_scopes:
-                result = Session.execute(select(Scope).where(Scope.key == system_scope.value))
-                scope = result.scalar_one()
                 obj.scopes.append(scope)
             Session.commit()
 
@@ -111,17 +99,6 @@ class RoleFactory(ODPModelFactory):
             return
         if scopes:
             for scope in scopes:
-                obj.scopes.append(scope)
-            Session.commit()
-
-    @factory.post_generation
-    def system_scopes(obj, create, system_scopes):
-        if not create:
-            return
-        if system_scopes:
-            for system_scope in system_scopes:
-                result = Session.execute(select(Scope).where(Scope.key == system_scope.value))
-                scope = result.scalar_one()
                 obj.scopes.append(scope)
             Session.commit()
 

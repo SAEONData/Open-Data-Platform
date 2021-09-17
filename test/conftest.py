@@ -5,9 +5,7 @@ import pytest
 from sqlalchemy import text
 
 import odp.db.setup
-from odp.api.models.auth import SystemScope
 from odp.config import config
-from test.factories import ScopeFactory, RoleFactory
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -56,10 +54,3 @@ def delete_all_data():
                 conn.execute(text(f'ALTER TABLE "{table}" DISABLE TRIGGER ALL'))
                 conn.execute(text(f'DELETE FROM "{table}"'))
                 conn.execute(text(f'ALTER TABLE "{table}" ENABLE TRIGGER ALL'))
-
-
-@pytest.fixture
-def static_data():
-    """An on-demand fixture that creates static system data."""
-    scopes = [ScopeFactory(key=s.value) for s in SystemScope]
-    RoleFactory(key='sysadmin', name='System Administrator', scopes=scopes)
