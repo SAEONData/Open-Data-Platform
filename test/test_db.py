@@ -30,6 +30,8 @@ def test_db_setup():
     result = Session.execute(select(Scope.key))
     assert result.scalars().all() == [s.value for s in ODPScope]
 
+    ScopeFactory()  # create an arbitrary (external) scope, not for the sysadmin
+
     setup.create_sysadmin()
     result = Session.execute(select(Role))
     assert result.scalar_one().key == 'sysadmin'

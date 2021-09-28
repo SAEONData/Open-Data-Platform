@@ -27,6 +27,7 @@ def create_scopes():
 
 
 def create_sysadmin():
+    scopes = ','.join(f"'{s.value}'" for s in odp.ODPScope)
     with odp.db.engine.begin() as conn:
         conn.execute(text("INSERT INTO role (key, name) VALUES "
                           "('sysadmin', 'System Administrator') "
@@ -34,6 +35,7 @@ def create_sysadmin():
         conn.execute(text("INSERT INTO role_scope (role_id, scope_id) "
                           "SELECT r.id, s.id FROM role r, scope s "
                           "WHERE r.key = 'sysadmin' "
+                          f"AND s.key IN ({scopes}) "
                           "ON CONFLICT DO NOTHING"))
 
 
