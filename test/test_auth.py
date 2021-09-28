@@ -1,5 +1,4 @@
-from odp.api.models.auth import UserAccess, ScopeContext
-from odp.lib.auth import get_user_access
+from odp.lib.auth import get_user_access, ScopeContext, UserAccess
 from test.factories import ScopeFactory, ClientFactory, RoleFactory, UserFactory
 
 

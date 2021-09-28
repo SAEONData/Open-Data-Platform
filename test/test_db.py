@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from odp.api.models.auth import SystemScope
+from odp import ODPScope
 from odp.db import Session, setup
 from odp.db.models import (
     Client,
@@ -28,7 +28,7 @@ from test.factories import (
 def test_db_setup():
     setup.create_scopes()
     result = Session.execute(select(Scope.key))
-    assert result.scalars().all() == [s.value for s in SystemScope]
+    assert result.scalars().all() == [s.value for s in ODPScope]
 
     setup.create_sysadmin()
     result = Session.execute(select(Role))
@@ -37,7 +37,7 @@ def test_db_setup():
     result = Session.execute(select(
         RoleScope, Role.key.label('role_key'), Scope.key.label('scope_key')
     ).join(Role).join(Scope))
-    assert [(row.role_key, row.scope_key) for row in result] == [('sysadmin', s.value) for s in SystemScope]
+    assert [(row.role_key, row.scope_key) for row in result] == [('sysadmin', s.value) for s in ODPScope]
 
 
 def test_create_client():

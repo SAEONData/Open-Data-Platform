@@ -1,6 +1,27 @@
-from odp.api.models.auth import UserAccess, UserInfo, ScopeContext
+from typing import Union, Set, Literal, Dict, Optional, List
+
+from pydantic import BaseModel, EmailStr
+
 from odp.db import Session
 from odp.db.models import User, Client
+
+
+class ScopeContext(BaseModel):
+    projects: Union[Set[str], Literal['*']]
+    providers: Union[Set[str], Literal['*']]
+
+
+class UserAccess(BaseModel):
+    scopes: Dict[str, Union[ScopeContext, Literal['*']]]
+
+
+class UserInfo(BaseModel):
+    sub: str
+    email: EmailStr
+    email_verified: bool
+    name: Optional[str]
+    picture: Optional[str]
+    roles: List[str]
 
 
 def get_user_access(user_id: str, client_id: str) -> UserAccess:

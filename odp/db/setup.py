@@ -13,7 +13,6 @@ rootdir = pathlib.Path(__file__).parent.parent.parent
 sys.path.append(str(rootdir))
 
 import odp.db.models
-from odp.api.models.auth import SystemScope
 
 
 def create_schema():
@@ -21,7 +20,7 @@ def create_schema():
 
 
 def create_scopes():
-    scopes = ','.join(f"('{s.value}')" for s in SystemScope)
+    scopes = ','.join(f"('{s.value}')" for s in odp.ODPScope)
     with odp.db.engine.begin() as conn:
         conn.execute(text(f"INSERT INTO scope (key) VALUES {scopes} "
                           "ON CONFLICT DO NOTHING"))
