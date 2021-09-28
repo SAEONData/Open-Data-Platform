@@ -4,7 +4,7 @@ def init_app(app):
     @app.after_request
     def commit_transaction(response):
         """Commit any open transaction if the request was successful."""
-        if 200 <= response.status_code < 300:
+        if 200 <= response.status_code < 400:
             Session.commit()
         else:
             Session.rollback()
