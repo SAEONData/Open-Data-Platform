@@ -15,6 +15,11 @@ class ODPUserNotFound(ODPIdentityError):
     error_description = "The user id or email address is not associated with any user account."
 
 
+class ODPClientNotFound(ODPIdentityError):
+    error_code = 'client_not_found'
+    error_description = "Unknown client id."
+
+
 class ODPEmailNotVerified(ODPIdentityError):
     error_code = 'email_not_verified'
     error_description = "The user's email address has not been verified."

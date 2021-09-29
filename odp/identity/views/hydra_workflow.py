@@ -4,11 +4,10 @@ from urllib.parse import urlparse, parse_qs
 from flask import Blueprint, request, redirect, url_for
 
 from odp.config import config
-from odp.db.models import User
 from odp.identity import hydra_admin
 from odp.identity.views import hydra_error_page, encode_token
 from odp.lib import exceptions as x
-from odp.lib.auth import get_token_data
+from odp.lib.auth import get_user_access, get_user_info
 
 bp = Blueprint('hydra', __name__)
 
@@ -74,22 +73,27 @@ def consent():
     Hydra redirects to this endpoint based on the ``URLS_CONSENT`` environment
     variable configured on the Hydra server.
     """
+    challenge = request.args.get('consent_challenge')
     try:
-        challenge = request.args.get('consent_challenge')
         consent_request = hydra_admin.get_consent_request(challenge)
         user_id = consent_request['subject']
-        user = User.query.get(user_id)
-        access_token_data, id_token_data = get_token_data(user, consent_request['requested_scope'])
+        client_id = consent_request['client']['client_id']
+        try:
+            user_access = get_user_access(user_id, client_id)
+            user_info = get_user_info(user_id, client_id)
 
-        consent_params = {
-            'grant_scope': consent_request['requested_scope'],
-            'grant_audience': consent_request['requested_access_token_audience'],
-            'access_token_data': access_token_data.dict(),
-            'id_token_data': id_token_data.dict(),
-        }
-        redirect_to = hydra_admin.accept_consent_request(challenge, **consent_params)
+            consent_params = {
+                'grant_scope': consent_request['requested_scope'],
+                'grant_audience': consent_request['requested_access_token_audience'],
+                'access_token_data': user_access.dict(),
+                'id_token_data': user_info.dict(),
+            }
+            redirect_to = hydra_admin.accept_consent_request(challenge, **consent_params)
+            return redirect(redirect_to)
 
-        return redirect(redirect_to)
+        except x.ODPIdentityError as e:
+            redirect_to = hydra_admin.reject_consent_request(challenge, e.error_code, e.error_description)
+            return redirect(redirect_to)
 
     except x.HydraAdminError as e:
         return hydra_error_page(e)

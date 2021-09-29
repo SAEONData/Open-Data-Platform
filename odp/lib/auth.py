@@ -4,6 +4,7 @@ from pydantic import BaseModel, EmailStr
 
 from odp.db import Session
 from odp.db.models import User, Client
+from odp.lib import exceptions as x
 
 
 class ScopeContext(BaseModel):
@@ -39,7 +40,12 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
       take the value '*' if unrestricted.
     """
     user = Session.get(User, user_id)
+    if not user:
+        raise x.ODPUserNotFound
+
     client = Session.get(Client, client_id)
+    if not client:
+        raise x.ODPClientNotFound
 
     unpinned_scopes = set()
     for role in user.roles:
@@ -85,6 +91,9 @@ def get_user_info(user_id: str, client_id: str) -> UserInfo:
      allowed for the client
     """
     user = Session.get(User, user_id)
+    if not user:
+        raise x.ODPUserNotFound
+
     return UserInfo(
         sub=user_id,
         email=user.email,

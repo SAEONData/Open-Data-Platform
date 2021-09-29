@@ -3,8 +3,7 @@ import re
 import argon2
 from argon2.exceptions import VerifyMismatchError
 
-from odp.db import transaction
-from odp.db.models import User, Domain
+from odp.db.models import User
 from odp.lib import exceptions as x
 
 ph = argon2.PasswordHasher()
@@ -46,9 +45,8 @@ def validate_user_login(email, password):
 
         # if argon2_cffi's password hashing defaults have changed, we rehash the user's password
         if ph.check_needs_rehash(user.password):
-            with transaction():
-                user.password = ph.hash(password)
-                user.save()
+            user.password = ph.hash(password)
+            user.save()
 
     except VerifyMismatchError:
         if lock_account(user.id):
@@ -188,23 +186,16 @@ def create_user_account(email, password=None, name=None):
     if password is not None and not check_password_complexity(email, password):
         raise x.ODPPasswordComplexityError
 
-    with transaction():
-        user = User(
-            email=email,
-            password=ph.hash(password) if password else None,
-            active=True,
-            verified=False,
-            superuser=False,
-            name=name,
-        )
-        user.save()
+    user = User(
+        email=email,
+        password=ph.hash(password) if password else None,
+        active=True,
+        verified=False,
+        name=name,
+    )
+    user.save()
 
-        _, _, domain_name = email.partition('@')
-        domain = Domain.query.filter_by(name=domain_name).first()
-        if domain:
-            user.institutions += [domain.institution]
-
-        return user.id
+    return user.id
 
 
 def update_user_verified(user_id, verified):
@@ -214,10 +205,9 @@ def update_user_verified(user_id, verified):
     :param user_id: the user id
     :param verified: True/False
     """
-    with transaction():
-        user = User.query.get(user_id)
-        user.verified = verified
-        user.save()
+    user = User.query.get(user_id)
+    user.verified = verified
+    user.save()
 
 
 def update_user_password(user_id, password):
@@ -227,10 +217,9 @@ def update_user_password(user_id, password):
     :param user_id: the user id
     :param password: the input plain-text password
     """
-    with transaction():
-        user = User.query.get(user_id)
-        user.password = ph.hash(password)
-        user.save()
+    user = User.query.get(user_id)
+    user.password = ph.hash(password)
+    user.save()
 
 
 def check_password_complexity(email, password):
@@ -307,12 +296,11 @@ def update_user_profile(user_id, **userinfo):
     :param user_id: the user id
     :param userinfo: dict containing profile info
     """
-    with transaction():
-        user = User.query.get(user_id)
-        for attr in 'name', 'picture':
-            if attr in userinfo:
-                setattr(user, attr, userinfo[attr])
-        user.save()
+    user = User.query.get(user_id)
+    for attr in 'name', 'picture':
+        if attr in userinfo:
+            setattr(user, attr, userinfo[attr])
+    user.save()
 
 
 def get_user_profile(user_id):
