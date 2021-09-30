@@ -5,8 +5,7 @@ from odp.db import Base
 
 
 class ProjectCollection(Base):
-    """Model of a project-collection many-to-many relationship, representing
-    a collection associated with a project."""
+    """Model of a many-to-many project-collection association."""
 
     __tablename__ = 'project_collection'
 

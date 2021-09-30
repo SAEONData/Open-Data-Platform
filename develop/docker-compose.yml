@@ -16,7 +16,7 @@ services:
   hydra:
     container_name: hydra
     image: ${HYDRA_IMAGE}
-    command: serve all --dangerous-force-http #--dangerous-allow-insecure-redirect-urls http://192.168.0.102:5000/oidc/callback
+    command: serve all --dangerous-force-http
     networks:
       - odp-net
     ports:
@@ -27,10 +27,6 @@ services:
       - URLS_LOGIN=http://localhost:9024/hydra/login
       - URLS_CONSENT=http://localhost:9024/hydra/consent
       - URLS_LOGOUT=http://localhost:9024/hydra/logout
-#      - URLS_SELF_ISSUER=http://192.168.0.104:9000
-#      - URLS_LOGIN=http://192.168.0.104:9024/hydra/login
-#      - URLS_CONSENT=http://192.168.0.104:9024/hydra/consent
-#      - URLS_LOGOUT=http://192.168.0.104:9024/hydra/logout
       - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
       - DSN=postgres://hydra_user:${HYDRA_DB_PASS}@hydra-db:5432/hydra_db?sslmode=disable
       - TTL_ACCESS_TOKEN=168h
@@ -60,15 +56,4 @@ services:
       - ckan-net
     ports:
       - "6379:6379"
-    restart: always
-
-  # only needed by CKAN (metadata management system)
-  solr:
-    container_name: solr
-    build:
-      context: ../deploy/solr
-    networks:
-      - ckan-net
-    ports:
-      - "8983:8983"
     restart: always

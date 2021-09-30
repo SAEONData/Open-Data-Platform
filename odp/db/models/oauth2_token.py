@@ -1,19 +1,16 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
 
 
 class OAuth2Token(Base):
-    """
-    Represents the OAuth2 token for a logged in user.
-    """
-    __tablename__ = 'oauth2_token'
-    __table_args__ = (UniqueConstraint('client_id', 'user_id'),)
+    """An OAuth2 token obtained by a user logging in to a client."""
 
-    id = Column(Integer, primary_key=True)
-    client_id = Column(String, nullable=False)  # todo: foreign key ref to client
-    user_id = Column(String, ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    __tablename__ = 'oauth2_token'
+
+    client_id = Column(String, ForeignKey('client.id', ondelete='CASCADE'), primary_key=True)
+    user_id = Column(String, ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
     user = relationship('User')
 
     token_type = Column(String)

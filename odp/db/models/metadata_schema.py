@@ -4,7 +4,7 @@ from odp.db import Base
 
 
 class MetadataSchema(Base):
-    """Model representing a JSON schema for digital object metadata."""
+    """A JSON schema for validating ODP records."""
 
     __tablename__ = 'metadata_schema'
 

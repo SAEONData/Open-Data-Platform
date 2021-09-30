@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String
+import uuid
+
+from sqlalchemy import Column, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
@@ -8,13 +10,11 @@ from odp.db.models.role_scope import RoleScope
 
 
 class Scope(Base):
-    """An OAuth2 scope, which represents the capability to perform
-    some kind of operation on a particular class of entity."""
+    """An OAuth2 scope."""
 
     __tablename__ = 'scope'
 
-    id = Column(Integer, primary_key=True)
-    key = Column(String, unique=True, nullable=False)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
 
     # many-to-many relationship between scope and role
     scope_roles = relationship('RoleScope', back_populates='scope', cascade='all, delete-orphan', passive_deletes=True)
@@ -25,4 +25,4 @@ class Scope(Base):
     clients = association_proxy('scope_clients', 'client', creator=lambda c: ClientScope(client=c))
 
     def __repr__(self):
-        return self._repr('id', 'key')
+        return self._repr('id')

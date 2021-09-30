@@ -31,8 +31,7 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
 
     The resultant UserAccess object represents the effective set of permissions
     for the given user working within the given client. It consists of a dictionary
-    of scope keys (which are OAuth2 scope identifiers), where the value of each
-    key is either:
+    of scope ids (OAuth2 scope identifiers), where the value for each id is either:
 
     - '*' if the scope is applicable across all relevant platform entities; or
     - a ScopeContext object indicating the projects and/or providers to which the
@@ -53,7 +52,7 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
             continue
         if not role.project and not role.provider:
             unpinned_scopes |= {
-                scope.key for scope in role.scopes
+                scope.id for scope in role.scopes
                 if scope in client.scopes
             }
 
@@ -63,17 +62,17 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
             continue
         if role.project or role.provider:
             for scope in role.scopes:
-                if scope.key in unpinned_scopes:
+                if scope.id in unpinned_scopes:
                     continue
                 if scope not in client.scopes:
                     continue
-                pinned_scopes.setdefault(scope.key, dict(
+                pinned_scopes.setdefault(scope.id, dict(
                     projects=set(), providers=set()
                 ))
                 if role.project:
-                    pinned_scopes[scope.key]['projects'] |= {role.project.key}
+                    pinned_scopes[scope.id]['projects'] |= {role.project.key}
                 if role.provider:
-                    pinned_scopes[scope.key]['providers'] |= {role.provider.key}
+                    pinned_scopes[scope.id]['providers'] |= {role.provider.key}
 
     return UserAccess(
         scopes={scope: '*' for scope in unpinned_scopes} | {scope: ScopeContext(
@@ -101,7 +100,7 @@ def get_user_info(user_id: str, client_id: str) -> UserInfo:
         name=user.name,
         picture=user.picture,
         roles=[
-            role.key for role in user.roles
+            role.id for role in user.roles
             if role.client_id in (None, client_id)
         ],
     )

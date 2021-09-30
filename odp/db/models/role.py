@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
@@ -20,15 +22,14 @@ class Role(Base):
     and/or provider, in which case the scopes grant access only
     to resources linked with the specified project and/or provider.
 
-    A client-specific role confers scope access only for logins to
-    that client, and would typically be defined to permit developer
-    or admin access to a particular application.
+    A client-specific role confers scope access only for configuring
+    or logging in to that client, and would typically be defined to
+    permit developer or admin access to a particular application.
     """
 
     __tablename__ = 'role'
 
-    id = Column(Integer, primary_key=True)
-    key = Column(String, unique=True, nullable=False)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, unique=True, nullable=False)
 
     project_id = Column(Integer, ForeignKey('project.id', ondelete='CASCADE'))
@@ -49,4 +50,4 @@ class Role(Base):
     scopes = association_proxy('role_scopes', 'scope', creator=lambda s: RoleScope(scope=s))
 
     def __repr__(self):
-        return self._repr('id', 'key', 'name', 'project', 'provider', 'client')
+        return self._repr('id', 'name', 'project', 'provider', 'client')

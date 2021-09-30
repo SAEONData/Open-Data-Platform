@@ -17,9 +17,8 @@ Install project dependencies:
     pip-sync
 
 ## Environment configuration
-Switch to the `develop` subdirectory and create a `.env` and a `docker-compose.yml`
-by copying the adjacent `*.example` files, and customizing as needed to suit your
-environment.
+Switch to the `develop` subdirectory and create a `.env` file by copying the adjacent
+`.env.example`, and customizing as needed to suit your environment.
 
 ## ODP database
 

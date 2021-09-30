@@ -9,7 +9,7 @@ from odp.db.models.client_scope import ClientScope
 
 
 class Client(Base):
-    """Model representing a client application.
+    """A client application.
 
     The many-to-many client-scope relation represents the
     set of OAuth2 scopes that a client may request.

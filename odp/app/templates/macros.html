@@ -1,0 +1,35 @@
+{% macro nav_menu(active_view, views_row1, views_row2) %}
+    <div class="navbar-nav nav-pills nav-justified flex-row">
+        {% for view in views_row1 %}
+            {{ nav_link(view, view == active_view) }}
+        {% endfor %}
+    </div>
+    <div class="navbar-nav nav-pills nav-justified flex-row">
+        {% for view in views_row2 %}
+            {{ nav_link(view, view == active_view) }}
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro nav_link(view, is_active) %}
+    <a class="nav-link {% if is_active %} active {% endif %}"
+       href="{{ url_for(view + '.index') }}">{{ view|title }}</a>
+{% endmacro %}
+
+{% macro flash_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == 'message' %}
+                    {% set category = 'info' %}
+                {% elif category == 'error' %}
+                    {% set category = 'danger' %}
+                {% endif %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+{% endmacro %}

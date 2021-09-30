@@ -5,7 +5,11 @@ from odp.db import Base
 
 
 class Provider(Base):
-    """Model representing an originating party / owner of a digital object.
+    """A data provider.
+
+    This model represents the person, group or organization considered
+    to be the originating party of a digital object identified by an
+    ODP record.
 
     Provider-specific roles permit scope access to only the specified
     provider's collections.

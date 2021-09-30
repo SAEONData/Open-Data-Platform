@@ -9,7 +9,7 @@ from odp.db.models.user_role import UserRole
 
 
 class User(Base):
-    """User account model."""
+    """A user account."""
 
     __tablename__ = 'user'
 

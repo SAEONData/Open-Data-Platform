@@ -3,13 +3,13 @@ from .client import Client
 from .client_scope import ClientScope
 from .collection import Collection
 from .datacite_record import DataciteRecord
-from .digitalobject import DigitalObject
-from .digitalobject_tag import DigitalObjectTag
 from .metadata_schema import MetadataSchema
 from .oauth2_token import OAuth2Token
 from .project import Project
 from .project_collection import ProjectCollection
 from .provider import Provider
+from .record import Record
+from .record_tag import RecordTag
 from .role import Role
 from .role_scope import RoleScope
 from .scope import Scope

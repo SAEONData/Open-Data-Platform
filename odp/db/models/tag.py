@@ -5,7 +5,7 @@ from odp.db import Base
 
 
 class Tag(Base):
-    """Model representing a tag definition."""
+    """A tag definition."""
 
     __tablename__ = 'tag'
 
@@ -14,7 +14,7 @@ class Tag(Base):
     public = Column(Boolean, nullable=False)
     schema_uri = Column(String, nullable=False)
 
-    scope_id = Column(Integer, ForeignKey('scope.id', ondelete='RESTRICT'), nullable=False)
+    scope_id = Column(String, ForeignKey('scope.id', ondelete='RESTRICT'), nullable=False)
     scope = relationship('Scope')
 
     def __repr__(self):

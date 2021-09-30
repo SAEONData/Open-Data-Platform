@@ -41,23 +41,11 @@ class ODPAPIConfig(BaseConfig):
     ADMIN_API_URL: AnyHttpUrl
 
 
-class ODPAdminUIConfig(BaseConfig, OAuth2ClientConfigMixin):
+class ODPAppConfig(BaseConfig, OAuth2ClientConfigMixin):
     class Config:
-        env_prefix = 'ODP_ADMIN_UI_'
+        env_prefix = 'ODP_APP_'
 
     FLASK_KEY: str  # Flask secret key
-    THEME: str      # Flask-Admin theme; see https://bootswatch.com/ for options
-
-
-class ODPAdminConfig(BaseConfig):
-    class Config:
-        env_prefix = 'ODP_ADMIN_'
-
-    INSTITUTION: str  # institution key of the institution that owns the platform
-
-    _subconfig = {
-        'UI': ODPAdminUIConfig,
-    }
 
 
 class ODPIdentityConfig(BaseConfig):
@@ -101,7 +89,7 @@ class ODPConfig(BaseConfig):
     _subconfig = {
         'API': ODPAPIConfig,
         'DB': ODPDBConfig,
-        'ADMIN': ODPAdminConfig,
+        'APP': ODPAppConfig,
         'IDENTITY': ODPIdentityConfig,
         'MAIL': ODPMailConfig,
         'PUBLISH': ODPPublishConfig,
