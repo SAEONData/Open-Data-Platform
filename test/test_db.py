@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
-from odp import ODPScope
-from odp.db import Session, setup
+import odp
+from odp.db import Session
 from odp.db.models import (
     Client,
     ClientScope,
@@ -26,20 +26,20 @@ from test.factories import (
 
 
 def test_db_setup():
-    setup.create_scopes()
-    result = Session.execute(select(Scope.key))
-    assert result.scalars().all() == [s.value for s in ODPScope]
+    odp.create_odp_scopes()
+    result = Session.execute(select(Scope.id))
+    assert result.scalars().all() == [s.value for s in odp.ODPScope]
 
     ScopeFactory()  # create an arbitrary (external) scope, not for the sysadmin
 
-    setup.create_sysadmin()
+    odp.create_odp_admin_role()
     result = Session.execute(select(Role))
-    assert result.scalar_one().key == 'sysadmin'
+    assert result.scalar_one().id == odp.ODP_ADMIN_ROLE == 'odp.admin'
 
     result = Session.execute(select(
-        RoleScope, Role.key.label('role_key'), Scope.key.label('scope_key')
+        RoleScope, Role.id.label('role_id'), Scope.id.label('scope_id')
     ).join(Role).join(Scope))
-    assert [(row.role_key, row.scope_key) for row in result] == [('sysadmin', s.value) for s in ODPScope]
+    assert [(row.role_id, row.scope_id) for row in result] == [('odp.admin', s.value) for s in odp.ODPScope]
 
 
 def test_create_client():
@@ -76,7 +76,7 @@ def test_create_provider():
 def test_create_role():
     role = RoleFactory()
     result = Session.execute(select(Role))
-    assert result.scalar_one().key == role.key
+    assert result.scalar_one().id == role.id
 
 
 def test_create_role_with_scopes():
@@ -89,7 +89,7 @@ def test_create_role_with_scopes():
 def test_create_scope():
     scope = ScopeFactory()
     result = Session.execute(select(Scope))
-    assert result.scalar_one().key == scope.key
+    assert result.scalar_one().id == scope.id
 
 
 def test_create_user():

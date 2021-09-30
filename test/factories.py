@@ -29,7 +29,7 @@ class ClientFactory(ODPModelFactory):
     class Meta:
         model = Client
 
-    id = factory.Faker('uuid4')
+    id = factory.LazyAttribute(key_from_name)
     name = factory.Faker('catch_phrase')
 
     @factory.post_generation
@@ -75,8 +75,7 @@ class RoleFactory(ODPModelFactory):
         model = Role
         exclude = ('is_project_role', 'is_provider_role')
 
-    id = factory.Sequence(int)
-    key = factory.LazyAttribute(key_from_name)
+    id = factory.LazyAttribute(key_from_name)
     name = factory.Faker('job')
 
     is_project_role = False
@@ -107,8 +106,7 @@ class ScopeFactory(ODPModelFactory):
     class Meta:
         model = Scope
 
-    id = factory.Sequence(int)
-    key = factory.Faker('word')
+    id = factory.Faker('word')
 
 
 class UserFactory(ODPModelFactory):
