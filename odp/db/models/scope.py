@@ -1,5 +1,3 @@
-import uuid
-
 from sqlalchemy import Column, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
@@ -14,7 +12,7 @@ class Scope(Base):
 
     __tablename__ = 'scope'
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True)
 
     # many-to-many relationship between scope and role
     scope_roles = relationship('RoleScope', back_populates='scope', cascade='all, delete-orphan', passive_deletes=True)

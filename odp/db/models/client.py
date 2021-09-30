@@ -1,5 +1,3 @@
-import uuid
-
 from sqlalchemy import Column, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
@@ -17,7 +15,7 @@ class Client(Base):
 
     __tablename__ = 'client'
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True)
     name = Column(String, unique=True, nullable=False)
 
     # many-to-many relationship between client and scope

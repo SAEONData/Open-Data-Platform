@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
@@ -9,8 +9,7 @@ class Tag(Base):
 
     __tablename__ = 'tag'
 
-    id = Column(Integer, primary_key=True)
-    key = Column(String, unique=True, nullable=False)
+    id = Column(String, primary_key=True)
     public = Column(Boolean, nullable=False)
     schema_uri = Column(String, nullable=False)
 
@@ -18,4 +17,4 @@ class Tag(Base):
     scope = relationship('Scope')
 
     def __repr__(self):
-        return self._repr('id', 'key', 'public', 'schema_uri', 'scope')
+        return self._repr('id', 'public', 'schema_uri', 'scope')

@@ -1,5 +1,3 @@
-import uuid
-
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
@@ -29,7 +27,7 @@ class Role(Base):
 
     __tablename__ = 'role'
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String, primary_key=True)
     name = Column(String, unique=True, nullable=False)
 
     project_id = Column(Integer, ForeignKey('project.id', ondelete='CASCADE'))

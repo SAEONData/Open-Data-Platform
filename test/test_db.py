@@ -13,6 +13,7 @@ from odp.db.models import (
     Scope,
     User,
     UserRole,
+    Tag,
 )
 from test.factories import (
     ClientFactory,
@@ -22,6 +23,7 @@ from test.factories import (
     RoleFactory,
     ScopeFactory,
     UserFactory,
+    TagFactory,
 )
 
 
@@ -103,3 +105,9 @@ def test_create_user_with_roles():
     user = UserFactory(roles=roles)
     result = Session.execute(select(UserRole.user_id, UserRole.role_id))
     assert result.all() == [(user.id, role.id) for role in roles]
+
+
+def test_create_tag():
+    tag = TagFactory()
+    result = Session.execute(select(Tag))
+    assert result.scalar_one().id == tag.id

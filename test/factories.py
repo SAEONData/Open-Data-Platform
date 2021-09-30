@@ -12,6 +12,7 @@ from odp.db.models import (
     Role,
     Scope,
     User,
+    Tag,
 )
 
 
@@ -126,3 +127,13 @@ class UserFactory(ODPModelFactory):
             for role in roles:
                 obj.roles.append(role)
             Session.commit()
+
+
+class TagFactory(ODPModelFactory):
+    class Meta:
+        model = Tag
+
+    id = factory.SelfAttribute('scope.id')
+    public = True
+    schema_uri = factory.Faker('uri')
+    scope = factory.SubFactory(ScopeFactory)
