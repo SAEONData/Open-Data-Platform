@@ -45,7 +45,8 @@ class ODPAppConfig(BaseConfig, OAuth2ClientConfigMixin):
     class Config:
         env_prefix = 'ODP_APP_'
 
-    FLASK_KEY: str  # Flask secret key
+    FLASK_KEY: str       # Flask secret key
+    API_URL: AnyHttpUrl  # URL of the ODP API
 
 
 class ODPIdentityConfig(BaseConfig):

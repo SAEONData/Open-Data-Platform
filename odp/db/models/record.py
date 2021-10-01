@@ -25,7 +25,7 @@ class Record(Base):
     validity = Column(JSONB)
 
     collection_id = Column(Integer, ForeignKey('collection.id', ondelete='RESTRICT'), nullable=False)
-    collection = relationship('Collection', back_populates='records')
+    collection = relationship('Collection')
 
     metadata_schema_id = Column(Integer, ForeignKey('metadata_schema.id', ondelete='RESTRICT'), nullable=False)
     metadata_schema = relationship('MetadataSchema')

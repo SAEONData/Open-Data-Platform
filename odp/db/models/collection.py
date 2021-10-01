@@ -22,8 +22,5 @@ class Collection(Base):
     collection_projects = relationship('ProjectCollection', back_populates='collection', cascade='all, delete-orphan', passive_deletes=True)
     projects = association_proxy('collection_projects', 'project', creator=lambda p: ProjectCollection(project=p))
 
-    # one-to-many relationship with record
-    records = relationship('Record', back_populates='collection', cascade='all, delete-orphan', passive_deletes=True)
-
     def __repr__(self):
         return self._repr('id', 'key', 'name', 'provider')

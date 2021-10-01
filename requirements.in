@@ -6,6 +6,7 @@ itsdangerous
 argon2-cffi
 requests
 redis
+httpx
 
 # APIs
 fastapi
