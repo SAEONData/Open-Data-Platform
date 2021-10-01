@@ -14,8 +14,8 @@ router = APIRouter()
 @router.get('/', response_model=List[CollectionOut])
 async def list_collections(pager: Pager = Depends(Paging('key', 'name'))):
     stmt = (
-        select(Collection, func.count()).
-        join(Record).
+        select(Collection, func.count(Record.id)).
+        outerjoin(Record).
         group_by(Collection).
         order_by(getattr(Collection, pager.sort)).
         offset(pager.skip).
