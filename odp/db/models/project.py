@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
@@ -16,8 +16,7 @@ class Project(Base):
 
     __tablename__ = 'project'
 
-    id = Column(Integer, primary_key=True)
-    key = Column(String, unique=True, nullable=False)
+    id = Column(String, primary_key=True)
     name = Column(String, unique=True, nullable=False)
 
     # one-to-many relationship with role
@@ -28,4 +27,4 @@ class Project(Base):
     collections = association_proxy('project_collections', 'collection', creator=lambda c: ProjectCollection(collection=c))
 
     def __repr__(self):
-        return self._repr('id', 'key', 'name')
+        return self._repr('id', 'name')

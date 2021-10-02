@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
@@ -30,10 +30,10 @@ class Role(Base):
     id = Column(String, primary_key=True)
     name = Column(String, unique=True, nullable=False)
 
-    project_id = Column(Integer, ForeignKey('project.id', ondelete='CASCADE'))
+    project_id = Column(String, ForeignKey('project.id', ondelete='CASCADE'))
     project = relationship('Project', back_populates='roles')
 
-    provider_id = Column(Integer, ForeignKey('provider.id', ondelete='CASCADE'))
+    provider_id = Column(String, ForeignKey('provider.id', ondelete='CASCADE'))
     provider = relationship('Provider', back_populates='roles')
 
     client_id = Column(String, ForeignKey('client.id', ondelete='CASCADE'))

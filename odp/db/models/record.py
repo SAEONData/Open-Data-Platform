@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, String, Integer, ForeignKey, CheckConstraint
+from sqlalchemy import Column, String, ForeignKey, CheckConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -24,10 +24,10 @@ class Record(Base):
     metadata_ = Column(JSONB, nullable=False)
     validity = Column(JSONB)
 
-    collection_id = Column(Integer, ForeignKey('collection.id', ondelete='RESTRICT'), nullable=False)
+    collection_id = Column(String, ForeignKey('collection.id', ondelete='RESTRICT'), nullable=False)
     collection = relationship('Collection')
 
-    metadata_schema_id = Column(Integer, ForeignKey('metadata_schema.id', ondelete='RESTRICT'), nullable=False)
+    metadata_schema_id = Column(String, ForeignKey('metadata_schema.id', ondelete='RESTRICT'), nullable=False)
     metadata_schema = relationship('MetadataSchema')
 
     # one-to-many relationship with record_tag

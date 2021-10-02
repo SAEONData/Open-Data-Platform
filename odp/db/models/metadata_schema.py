@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String
 
 from odp.db import Base
 
@@ -8,9 +8,8 @@ class MetadataSchema(Base):
 
     __tablename__ = 'metadata_schema'
 
-    id = Column(Integer, primary_key=True)
-    key = Column(String, unique=True, nullable=False)
+    id = Column(String, primary_key=True)
     schema_uri = Column(String, nullable=False)
 
     def __repr__(self):
-        return self._repr('id', 'key', 'schema_uri')
+        return self._repr('id', 'schema_uri')

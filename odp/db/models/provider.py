@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
@@ -17,8 +17,7 @@ class Provider(Base):
 
     __tablename__ = 'provider'
 
-    id = Column(Integer, primary_key=True)
-    key = Column(String, unique=True, nullable=False)
+    id = Column(String, primary_key=True)
     name = Column(String, unique=True, nullable=False)
 
     # one-to-many relationship with role
@@ -28,4 +27,4 @@ class Provider(Base):
     collections = relationship('Collection', back_populates='provider', cascade='all, delete-orphan', passive_deletes=True)
 
     def __repr__(self):
-        return self._repr('id', 'key', 'name')
+        return self._repr('id', 'name')

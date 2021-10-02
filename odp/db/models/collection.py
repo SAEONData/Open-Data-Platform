@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
@@ -11,11 +11,10 @@ class Collection(Base):
 
     __tablename__ = 'collection'
 
-    id = Column(Integer, primary_key=True)
-    key = Column(String, unique=True, nullable=False)
+    id = Column(String, primary_key=True)
     name = Column(String, unique=True, nullable=False)
 
-    provider_id = Column(Integer, ForeignKey('provider.id', ondelete='CASCADE'), nullable=False)
+    provider_id = Column(String, ForeignKey('provider.id', ondelete='CASCADE'), nullable=False)
     provider = relationship('Provider', back_populates='collections')
 
     # many-to-many relationship between collection and project
@@ -23,4 +22,4 @@ class Collection(Base):
     projects = association_proxy('collection_projects', 'project', creator=lambda p: ProjectCollection(project=p))
 
     def __repr__(self):
-        return self._repr('id', 'key', 'name', 'provider')
+        return self._repr('id', 'name', 'provider')
