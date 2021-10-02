@@ -1,2 +1,2 @@
-from .collection import CollectionIn, CollectionOut
-from .project import ProjectIn, ProjectOut
+from .collection import CollectionIn, CollectionOut, CollectionSort
+from .project import ProjectIn, ProjectOut, ProjectSort

@@ -5,22 +5,9 @@
 {% endblock %}
 
 {% block content %}
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Key</th>
-                <th scope="col">Collections</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for project in projects %}
-                <tr>
-                    <td>{{ project.name }}</td>
-                    <td>{{ project.key }}</td>
-                    <td>{{ project.collection_keys }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% from 'macros.html' import table %}
+    {% call(project) table(projects, 'Name', 'Collections') %}
+        <td>{{ project.name }}</td>
+        <td>{{ project.collection_ids|join(', ') }}</td>
+    {% endcall %}
 {% endblock %}

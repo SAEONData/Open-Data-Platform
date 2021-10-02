@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy import select, func
 
-from odp.api2.models import CollectionOut
+from odp.api2.models import CollectionOut, CollectionSort
 from odp.api2.routers import Pager, Paging
 from odp.db import Session
 from odp.db.models import Collection, Record
@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get('/', response_model=List[CollectionOut])
-async def list_collections(pager: Pager = Depends(Paging('key', 'name'))):
+async def list_collections(pager: Pager = Depends(Paging(CollectionSort))):
     stmt = (
         select(Collection, func.count(Record.id)).
         outerjoin(Record).
@@ -24,10 +24,10 @@ async def list_collections(pager: Pager = Depends(Paging('key', 'name'))):
 
     collections = [
         CollectionOut(
-            key=row.Collection.key,
+            id=row.Collection.id,
             name=row.Collection.name,
-            provider_key=row.Collection.provider.key,
-            project_keys=[project.key for project in row.Collection.projects],
+            provider_id=row.Collection.provider.id,
+            project_ids=[project.id for project in row.Collection.projects],
             record_count=row.count,
         )
         for row in Session.execute(stmt)
