@@ -12,6 +12,10 @@ def put(url, data, **params):
     return _request('PUT', url, data, params)
 
 
+def delete(url, **params):
+    return _request('DELETE', url, None, params)
+
+
 def _request(method, url, data, params):
     try:
         r = _client.request(method, url, json=data, params=params)
@@ -23,4 +27,7 @@ def _request(method, url, data, params):
         abort(e.response.status_code, e.response.json())
 
 
-_client = httpx.Client(base_url=config.ODP.APP.API_URL)
+_client = httpx.Client(
+    base_url=config.ODP.APP.API_URL,
+    timeout=None if config.ODP.ENV == 'development' else 5.0,
+)

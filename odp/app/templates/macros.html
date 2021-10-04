@@ -67,8 +67,45 @@
     </table>
 {% endmacro %}
 
-{% macro render_form(form, target) %}
-    <form action="{{ url_for('.view', id=form.id.data) }}" method="POST">
+{% macro render_info(obj) %}
+{# Render object info in a table. Example usage:
+    {% call(prop) render_info(project, 'Name', 'Collections') %}
+        {% if prop == 'Name' %}
+            {{ project.name }}
+        {% elif prop == 'Collections' %}
+            {{ project.collection_ids|join(', ') }}
+        {% endif %}
+    {% endcall %}
+#}
+    <table class="table">
+        <tbody>
+            <tr>
+                <th scope="row">Id</th>
+                <td>{{ obj.id }}</td>
+            </tr>
+            {% for prop in varargs %}
+                <tr>
+                    <th scope="row">{{ prop }}</th>
+                    <td>{{ caller(prop) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="btn-toolbar justify-content-between mt-4">
+        <a href="{{ url_for('.edit', id=obj.id) }}" class="btn btn-primary btn-action">
+            Edit
+        </a>
+        <form action="{{ url_for('.delete', id=obj.id) }}" method="post">
+            <button type="submit" class="btn btn-danger btn-action"
+                    onclick="return confirm('Are you sure you want to delete {{ obj.id }}? This cannot be undone!')">
+                Delete
+            </button>
+        </form>
+    </div>
+{% endmacro %}
+
+{% macro render_form(form, obj) %}
+    <form action="{{ url_for('.edit', id=obj.id) }}" method="post">
         {{ form.csrf_token }}
         <div class="form-group mt-4">
             {{ form.id.label(class='form-label') }}
@@ -79,23 +116,19 @@
                 <div class="form-group mt-4">
                     {{ field.label(class='form-label') }}
                     {% if not field.errors %}
-                        {{ field(class='form-control', oninput='enable_actions();') }}
+                        {{ field(class='form-control') }}
                     {% else %}
                         {{ field(class='form-control is-invalid') }}
                         {% for error in field.errors %}
-                              <div class="invalid-feedback">{{ error }}</div>
+                            <div class="invalid-feedback">{{ error }}</div>
                         {% endfor %}
                     {% endif %}
                 </div>
             {% endif %}
         {% endfor %}
-        <div id="actions" class="form-group mt-4 {% if not form.errors %} d-none {% endif %}">
-            <button type="submit" class="btn btn-primary">Save</button>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary btn-action">Save</button>
+            <a href="{{ url_for('.view', id=obj.id) }}" class="btn btn-outline-primary btn-action">Cancel</a>
         </div>
     </form>
-    <script type="text/javascript" charset="utf-8">
-        function enable_actions() {
-            $("#actions").removeClass("d-none");
-        }
-    </script>
 {% endmacro %}

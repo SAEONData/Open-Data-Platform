@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    Collection: {{ collection.name }}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_info %}
+    {% call(prop) render_info(collection, 'Name', 'Provider', 'Projects', 'Records') %}
+        {% if prop == 'Name' %}
+            {{ collection.name }}
+        {% elif prop == 'Provider' %}
+            {{ collection.provider_id }}
+        {% elif prop == 'Projects' %}
+            {{ collection.project_ids|join(', ') }}
+        {% elif prop == 'Records' %}
+            {{ collection.record_count }}
+        {% endif %}
+    {% endcall %}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    Provider: {{ provider.name }}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_info %}
+    {% call(prop) render_info(provider, 'Name', 'Collections') %}
+        {% if prop == 'Name' %}
+            {{ provider.name }}
+        {% elif prop == 'Collections' %}
+            {{ provider.collection_ids|join(', ') }}
+        {% endif %}
+    {% endcall %}
+{% endblock %}

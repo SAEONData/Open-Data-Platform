@@ -50,7 +50,7 @@ async def get_project(
     )
 
 
-@router.put('/', response_model=ProjectOut)
+@router.put('/')
 async def update_project(
         project_in: ProjectIn,
 ):
@@ -60,12 +60,15 @@ async def update_project(
     project.name = project_in.name
     project.save()
 
-    return ProjectOut(
-        id=project.id,
-        name=project.name,
-        role_ids=[role.id for role in project.roles],
-        collection_ids=[collection.id for collection in project.collections],
-    )
+
+@router.delete('/{project_id}')
+async def delete_project(
+        project_id: str,
+):
+    if not (project := Session.get(Project, project_id)):
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    project.delete()
 
 
 @router.post('/', response_model=ProjectOut)

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    Providers
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_table %}
+    {% call(provider) render_table(providers, 'Name', 'Collections') %}
+        <td>{{ provider.name }}</td>
+        <td>{{ provider.collection_ids|join(', ') }}</td>
+    {% endcall %}
+{% endblock %}

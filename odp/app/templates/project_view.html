@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    Project: {{ project.name }}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_info %}
+    {% call(prop) render_info(project, 'Name', 'Collections') %}
+        {% if prop == 'Name' %}
+            {{ project.name }}
+        {% elif prop == 'Collections' %}
+            {{ project.collection_ids|join(', ') }}
+        {% endif %}
+    {% endcall %}
+{% endblock %}

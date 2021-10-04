@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
 {% block header %}
-    Project: {{ project.name }}
+    Collection: {{ collection.name }}
 {% endblock %}
 
 {% block content %}
     {% from 'macros.html' import render_form %}
-    {{ render_form(form, project) }}
+    {{ render_form(form, collection) }}
 {% endblock %}

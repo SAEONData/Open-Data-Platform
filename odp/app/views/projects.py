@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from odp.app import api
 from odp.app.forms import ProjectForm
@@ -12,18 +12,30 @@ def index():
     return render_template('project_list.html', projects=projects)
 
 
-@bp.route('/<id>', methods=('GET', 'POST'))
+@bp.route('/<id>')
 def view(id):
-    if request.method == 'GET':
-        project = api.get(f'/project/{id}')
-        form = ProjectForm(data=project)
-    else:
-        form = ProjectForm(request.form)
-        if form.validate():
-            project = api.put('/project/', dict(id=id, name=form.name.data))
-            form = ProjectForm(data=project)
-            flash('The project details have been updated.', category='success')
-        else:
-            flash('There are errors in the form.', category='error')
+    project = api.get(f'/project/{id}')
+    return render_template('project_view.html', project=project)
 
-    return render_template('project_edit.html', form=form)
+
+@bp.route('/<id>/edit', methods=('GET', 'POST'))
+def edit(id):
+    project = api.get(f'/project/{id}')
+    form = ProjectForm(request.form, data=project)
+
+    if request.method == 'POST' and form.validate():
+        api.put('/project/', dict(
+            id=id,
+            name=form.name.data,
+        ))
+        flash(f'Project {id} has been updated.', category='success')
+        return redirect(url_for('.view', id=id))
+
+    return render_template('project_edit.html', project=project, form=form)
+
+
+@bp.route('/<id>/delete', methods=('POST',))
+def delete(id):
+    api.delete(f'/project/{id}')
+    flash(f'Project {id} has been deleted.', category='success')
+    return redirect(url_for('.index'))
