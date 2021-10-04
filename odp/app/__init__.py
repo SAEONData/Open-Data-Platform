@@ -1,6 +1,6 @@
 from flask import Flask
 
-from odp.app import db, views
+from odp.app import db, views, forms
 from odp.config import config
 
 
@@ -15,5 +15,6 @@ def create_app():
 
     db.init_app(app)
     views.init_app(app)
+    forms.init_app(app)
 
     return app

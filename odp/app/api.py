@@ -5,12 +5,16 @@ from odp.config import config
 
 
 def get(url, **params):
-    return _request('GET', url, params)
+    return _request('GET', url, None, params)
 
 
-def _request(method, url, params):
+def put(url, data, **params):
+    return _request('PUT', url, data, params)
+
+
+def _request(method, url, data, params):
     try:
-        r = _client.request(method, url, params=params)
+        r = _client.request(method, url, json=data, params=params)
         r.raise_for_status()
         return r.json()
     except httpx.RequestError as e:

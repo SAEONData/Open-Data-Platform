@@ -1,27 +1,10 @@
 {% extends 'base.html' %}
 
 {% block header %}
-    Project: {{ project.name }}
+    Project: {{ form.name.data }}
 {% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col">
-            <form>
-                <fieldset>
-                    <div class="form-group mt-4">
-                        <label for="projectId" class="form-label">Project id</label>
-                        <input id="projectId" type="text" readonly class="form-control" value="{{ project.id }}">
-                    </div>
-                    <div class="form-group mt-4">
-                        <label for="projectName" class="form-label">Project name</label>
-                        <input id="projectName" type="text" class="form-control" value="{{ project.name }}">
-                    </div>
-                </fieldset>
-            </form>
-        </div>
-        <div class="col">
-
-        </div>
-    </div>
+    {% from 'macros.html' import render_form %}
+    {{ render_form(form) }}
 {% endblock %}

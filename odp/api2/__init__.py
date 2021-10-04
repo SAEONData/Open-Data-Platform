@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 import odp
@@ -28,8 +28,14 @@ app.add_middleware(
 
 
 @app.middleware('http')
-async def release_db_resources(request, call_next):
-    """Release DB transaction/connection resources at the end of a request."""
-    response = await call_next(request)
-    Session.remove()
+async def db_middleware(request: Request, call_next):
+    try:
+        response: Response = await call_next(request)
+        if 200 <= response.status_code < 400:
+            Session.commit()
+        else:
+            Session.rollback()
+    finally:
+        Session.remove()
+
     return response

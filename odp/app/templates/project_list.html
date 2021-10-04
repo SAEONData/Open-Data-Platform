@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import table %}
-    {% call(project) table(projects, 'Name', 'Collections') %}
+    {% from 'macros.html' import render_table %}
+    {% call(project) render_table(projects, 'Name', 'Collections') %}
         <td>{{ project.name }}</td>
         <td>{{ project.collection_ids|join(', ') }}</td>
     {% endcall %}
