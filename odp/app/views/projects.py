@@ -18,6 +18,21 @@ def view(id):
     return render_template('project_view.html', project=project)
 
 
+@bp.route('/new', methods=('GET', 'POST'))
+def create():
+    form = ProjectForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        api.post('/project/', dict(
+            id=(id := form.id.data),
+            name=form.name.data,
+        ))
+        flash(f'Project {id} has been created.', category='success')
+        return redirect(url_for('.view', id=id))
+
+    return render_template('project_create.html', form=form)
+
+
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
 def edit(id):
     project = api.get(f'/project/{id}')

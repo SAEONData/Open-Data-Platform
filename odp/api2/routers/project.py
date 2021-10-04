@@ -50,6 +50,20 @@ async def get_project(
     )
 
 
+@router.post('/')
+async def create_project(
+        project_in: ProjectIn,
+):
+    if Session.get(Project, project_in.id):
+        raise HTTPException(status.HTTP_409_CONFLICT)
+
+    project = Project(
+        id=project_in.id,
+        name=project_in.name,
+    )
+    project.save()
+
+
 @router.put('/')
 async def update_project(
         project_in: ProjectIn,
@@ -69,10 +83,3 @@ async def delete_project(
         raise HTTPException(status.HTTP_404_NOT_FOUND)
 
     project.delete()
-
-
-@router.post('/', response_model=ProjectOut)
-async def create_project(
-        project: ProjectIn,
-):
-    pass

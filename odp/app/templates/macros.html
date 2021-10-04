@@ -41,7 +41,12 @@
         <td>{{ project.collection_ids|join(', ') }}</td>
     {% endcall %}
 #}
-    <table class="table table-hover">
+    <div>
+        <a href="{{ url_for('.create') }}" class="btn btn-success btn-action">
+            Create
+        </a>
+    </div>
+    <table class="table table-hover mt-2">
         <thead>
             <tr>
                 <th scope="col">Id</th>
@@ -105,30 +110,33 @@
 {% endmacro %}
 
 {% macro render_form(form, obj) %}
-    <form action="{{ url_for('.edit', id=obj.id) }}" method="post">
+    {% if obj %}
+        {% set submit_target = url_for('.edit', id=obj.id) %}
+        {% set cancel_target = url_for('.view', id=obj.id) %}
+    {% else %}
+        {% set submit_target = url_for('.create') %}
+        {% set cancel_target = url_for('.index') %}
+    {% endif %}
+    <form action="{{ submit_target }}" method="post">
         {{ form.csrf_token }}
-        <div class="form-group mt-4">
-            {{ form.id.label(class='form-label') }}
-            {{ form.id(class='form-control', readonly='') }}
-        </div>
-        {% for field in form %}
-            {% if field.id not in ('id', 'csrf_token') %}
-                <div class="form-group mt-4">
-                    {{ field.label(class='form-label') }}
-                    {% if not field.errors %}
-                        {{ field(class='form-control') }}
-                    {% else %}
-                        {{ field(class='form-control is-invalid') }}
-                        {% for error in field.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            {% endif %}
+        {% for field in form if field.id != 'csrf_token' %}
+            <div class="form-group mt-4">
+                {{ field.label(class='form-label') }}
+                {% if obj and field.id == 'id' %}
+                    {{ field(class='form-control', readonly='') }}
+                {% elif not field.errors %}
+                    {{ field(class='form-control') }}
+                {% else %}
+                    {{ field(class='form-control is-invalid') }}
+                    {% for error in field.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
         {% endfor %}
         <div class="mt-4">
             <button type="submit" class="btn btn-primary btn-action">Save</button>
-            <a href="{{ url_for('.view', id=obj.id) }}" class="btn btn-outline-primary btn-action">Cancel</a>
+            <a href="{{ cancel_target }}" class="btn btn-outline-primary btn-action">Cancel</a>
         </div>
     </form>
 {% endmacro %}

@@ -17,18 +17,18 @@
                     SAEON | Open Data Platform
                 </a>
                 {% if current_user.is_authenticated %}
-                    <span class="navbar-text">Welcome, {{ current_user.name }}</span>
+                    <span class="navbar-text mt-1">Welcome, {{ current_user.name }}</span>
                 {% endif %}
             </div>
             {% if current_user.is_authenticated %}
-                <div class="flex-grow-1 mx-5">
+                <div class="flex-grow-1 mx-5 mt-1">
                     {% from 'macros.html' import nav_menu %}
                     {{ nav_menu(request.blueprint,
                         ('projects', 'collections', 'tags', 'users', 'clients', 'catalogues'),
                         ('providers', 'records', 'schemas', 'roles', 'scopes', 'datastores'),
                     ) }}
                 </div>
-                <div class="navbar-nav text-end mx-5">
+                <div class="navbar-nav text-end mx-5 mt-1">
                     <span class="navbar-text">{{ current_user.email }}</span>
                     <a class="nav-link" href="{{ url_for('hydra.logout') }}">Log out</a>
                 </div>
@@ -42,13 +42,15 @@
         {% from 'macros.html' import flash_messages %}
         {{ flash_messages() }}
     </section>
-    <header class="h1 mx-4">
-        {% block header %}
-        {% endblock %}
-    </header>
-    <main class="flex-grow-1 mx-4 my-3">
-        {% block content %}
-        {% endblock %}
+    <main class="flex-grow-1 mx-4">
+        <p class="h1">
+            {% block heading %}
+            {% endblock %}
+        </p>
+        <div class="mt-4">
+            {% block content %}
+            {% endblock %}
+        </div>
     </main>
     <footer class="text-center mb-3">
         <hr/>

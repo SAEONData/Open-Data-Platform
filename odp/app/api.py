@@ -8,6 +8,10 @@ def get(url, **params):
     return _request('GET', url, None, params)
 
 
+def post(url, data, **params):
+    return _request('POST', url, data, params)
+
+
 def put(url, data, **params):
     return _request('PUT', url, data, params)
 

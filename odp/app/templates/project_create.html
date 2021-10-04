@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
 {% block heading %}
-    Provider: {{ provider.name }}
+    Create Project
 {% endblock %}
 
 {% block content %}
     {% from 'macros.html' import render_form %}
-    {{ render_form(form, provider) }}
+    {{ render_form(form) }}
 {% endblock %}
