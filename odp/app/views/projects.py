@@ -30,7 +30,7 @@ def create():
         flash(f'Project {id} has been created.', category='success')
         return redirect(url_for('.view', id=id))
 
-    return render_template('project_create.html', form=form)
+    return render_template('project_edit.html', form=form)
 
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))

@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block heading %}
-    Project: {{ project.name }}
+    {% if project %}
+        Project: {{ project.name }}
+    {% else %}
+        Create Project
+    {% endif %}
 {% endblock %}
 
 {% block content %}
