@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block heading %}
-    Provider: {{ provider.name }}
+    {% if provider %}
+        Provider: {{ provider.name }}
+    {% else %}
+        Create Provider
+    {% endif %}
 {% endblock %}
 
 {% block content %}

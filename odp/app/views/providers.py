@@ -18,6 +18,21 @@ def view(id):
     return render_template('provider_view.html', provider=provider)
 
 
+@bp.route('/new', methods=('GET', 'POST'))
+def create():
+    form = ProviderForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        api.post('/provider/', dict(
+            id=(id := form.id.data),
+            name=form.name.data,
+        ))
+        flash(f'Provider {id} has been created.', category='success')
+        return redirect(url_for('.view', id=id))
+
+    return render_template('provider_edit.html', form=form)
+
+
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
 def edit(id):
     provider = api.get(f'/provider/{id}')

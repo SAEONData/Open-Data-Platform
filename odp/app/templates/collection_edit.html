@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block heading %}
-    Collection: {{ collection.name }}
+    {% if collection %}
+        Collection: {{ collection.name }}
+    {% else %}
+        Create Collection
+    {% endif %}
 {% endblock %}
 
 {% block content %}

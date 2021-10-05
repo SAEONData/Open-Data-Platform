@@ -50,6 +50,20 @@ async def get_provider(
     )
 
 
+@router.post('/')
+async def create_provider(
+        provider_in: ProviderIn,
+):
+    if Session.get(Provider, provider_in.id):
+        raise HTTPException(status.HTTP_409_CONFLICT)
+
+    provider = Provider(
+        id=provider_in.id,
+        name=provider_in.name,
+    )
+    provider.save()
+
+
 @router.put('/')
 async def update_provider(
         provider_in: ProviderIn,
@@ -69,10 +83,3 @@ async def delete_provider(
         raise HTTPException(status.HTTP_404_NOT_FOUND)
 
     provider.delete()
-
-
-@router.post('/', response_model=ProviderOut)
-async def create_provider(
-        provider: ProviderIn,
-):
-    pass

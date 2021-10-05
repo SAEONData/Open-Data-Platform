@@ -42,7 +42,7 @@
     {% endcall %}
 #}
     <div>
-        <a href="{{ url_for('.create') }}" class="btn btn-success btn-action">
+        <a href="{{ url_for('.create') }}" class="btn btn-outline-success btn-action">
             Create
         </a>
     </div>
@@ -97,11 +97,11 @@
         </tbody>
     </table>
     <div class="btn-toolbar justify-content-between mt-4">
-        <a href="{{ url_for('.edit', id=obj.id) }}" class="btn btn-primary btn-action">
+        <a href="{{ url_for('.edit', id=obj.id) }}" class="btn btn-outline-primary btn-action">
             Edit
         </a>
         <form action="{{ url_for('.delete', id=obj.id) }}" method="post">
-            <button type="submit" class="btn btn-danger btn-action"
+            <button type="submit" class="btn btn-outline-danger btn-action"
                     onclick="return confirm('Are you sure you want to delete {{ obj.id }}? This cannot be undone!')">
                 Delete
             </button>
@@ -135,8 +135,8 @@
             </div>
         {% endfor %}
         <div class="mt-4">
-            <button type="submit" class="btn btn-primary btn-action">Save</button>
-            <a href="{{ cancel_target }}" class="btn btn-outline-primary btn-action">Cancel</a>
+            <button type="submit" class="btn btn-outline-primary btn-action">Save</button>
+            <a href="{{ cancel_target }}" class="btn btn-outline-secondary btn-action">Cancel</a>
         </div>
     </form>
 {% endmacro %}

@@ -59,6 +59,21 @@ async def get_collection(
     )
 
 
+@router.post('/')
+async def create_collection(
+        collection_in: CollectionIn,
+):
+    if Session.get(Collection, collection_in.id):
+        raise HTTPException(status.HTTP_409_CONFLICT)
+
+    collection = Collection(
+        id=collection_in.id,
+        name=collection_in.name,
+        provider_id=collection_in.provider_id,
+    )
+    collection.save()
+
+
 @router.put('/')
 async def update_collection(
         collection_in: CollectionIn,
