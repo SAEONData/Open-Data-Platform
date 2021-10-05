@@ -13,7 +13,7 @@
 
 {% macro nav_link(view, is_active) %}
     <a class="nav-link {% if is_active %} active {% endif %}"
-       href="{{ url_for(view + '.index') }}">{{ view|title }}</a>
+       href="{{ url_for(view ~ '.index') }}">{{ view|title }}</a>
 {% endmacro %}
 
 {% macro flash_messages() %}
@@ -139,4 +139,15 @@
             <a href="{{ cancel_target }}" class="btn btn-outline-secondary btn-action">Cancel</a>
         </div>
     </form>
+{% endmacro %}
+
+{% macro obj_link(view, obj_id) %}
+    {% set target = url_for(view ~ '.view', id=obj_id) %}
+    <a href="{{ target }}" class="text-decoration-none">{{ obj_id }}</a>
+{%- endmacro %}
+
+{% macro obj_links(view, obj_ids) %}
+    {% for obj_id in obj_ids %}
+        {{ obj_link(view, obj_id) }}{% if not loop.last %}, {% endif %}
+    {% endfor %}
 {% endmacro %}

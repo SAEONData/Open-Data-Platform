@@ -5,12 +5,12 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_info %}
+    {% from 'macros.html' import render_info, obj_links %}
     {% call(prop) render_info(provider, 'Name', 'Collections') %}
         {% if prop == 'Name' %}
             {{ provider.name }}
         {% elif prop == 'Collections' %}
-            {{ provider.collection_ids|join(', ') }}
+            {{ obj_links('collections', provider.collection_ids) }}
         {% endif %}
     {% endcall %}
 {% endblock %}
