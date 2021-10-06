@@ -1,5 +1,5 @@
 from flask import session
-from wtforms import Form, StringField, SelectField
+from wtforms import Form, StringField, SelectField, BooleanField
 from wtforms.csrf.session import SessionCSRF
 from wtforms.validators import input_required, length
 
@@ -16,6 +16,43 @@ class BaseForm(Form):
         @property
         def csrf_context(self):
             return session
+
+
+class ClientForm(BaseForm):
+    id = StringField(
+        label='Client id',
+        validators=[
+            input_required(),
+            length(min=2),
+        ],
+    )
+    name = StringField(
+        label='Client name',
+        validators=[
+            input_required(),
+            length(min=2),
+        ],
+    )
+
+
+class CollectionForm(BaseForm):
+    id = StringField(
+        label='Collection id',
+        validators=[
+            input_required(),
+            length(min=2),
+        ],
+    )
+    name = StringField(
+        label='Collection name',
+        validators=[
+            input_required(),
+            length(min=2),
+        ],
+    )
+    provider_id = SelectField(
+        label='Provider',
+    )
 
 
 class ProjectForm(BaseForm):
@@ -52,21 +89,46 @@ class ProviderForm(BaseForm):
     )
 
 
-class CollectionForm(BaseForm):
+class RoleForm(BaseForm):
     id = StringField(
-        label='Collection id',
+        label='Role id',
         validators=[
             input_required(),
             length(min=2),
         ],
     )
     name = StringField(
-        label='Collection name',
+        label='Role name',
         validators=[
             input_required(),
             length(min=2),
         ],
     )
-    provider_id = SelectField(
-        label='Provider',
+
+
+class ScopeForm(BaseForm):
+    id = StringField(
+        label='Scope id',
+        validators=[
+            input_required(),
+            length(min=2),
+        ],
+    )
+
+
+class UserForm(BaseForm):
+    id = StringField(
+        label='User id',
+        render_kw=dict(readonly=''),
+    )
+    email = StringField(
+        label='Email',
+        render_kw=dict(readonly=''),
+    )
+    name = StringField(
+        label='Name',
+        render_kw=dict(readonly=''),
+    )
+    active = BooleanField(
+        label='Active',
     )

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Roles
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_table %}
+    {% call(role) render_table(roles, 'Name') %}
+        <td>{{ role.name }}</td>
+    {% endcall %}
+{% endblock %}

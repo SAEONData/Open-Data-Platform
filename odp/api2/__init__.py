@@ -2,7 +2,16 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 import odp
-from odp.api2.routers import project, provider, collection, status
+from odp.api2.routers import (
+    client,
+    collection,
+    project,
+    provider,
+    role,
+    scope,
+    status,
+    user,
+)
 from odp.config import config
 from odp.db import Session
 
@@ -15,10 +24,14 @@ app = FastAPI(
     redoc_url='/docs',
 )
 
+app.include_router(client.router, prefix='/client', tags=['Client'])
+app.include_router(collection.router, prefix='/collection', tags=['Collection'])
 app.include_router(project.router, prefix='/project', tags=['Project'])
 app.include_router(provider.router, prefix='/provider', tags=['Provider'])
-app.include_router(collection.router, prefix='/collection', tags=['Collection'])
+app.include_router(role.router, prefix='/role', tags=['Role'])
+app.include_router(scope.router, prefix='/scope', tags=['Scope'])
 app.include_router(status.router, prefix='/status', tags=['Status'])
+app.include_router(user.router, prefix='/user', tags=['User'])
 
 app.add_middleware(
     CORSMiddleware,

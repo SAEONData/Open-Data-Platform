@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Clients
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_table %}
+    {% call(client) render_table(clients, 'Name') %}
+        <td>{{ client.name }}</td>
+    {% endcall %}
+{% endblock %}
