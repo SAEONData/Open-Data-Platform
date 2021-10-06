@@ -3,10 +3,10 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash
 from odp.config import config
 from odp.identity import hydra_admin
 from odp.identity.forms import SignupForm, VerifyEmailForm
+from odp.identity.lib import create_user_account, password_complexity_description
 from odp.identity.views import hydra_error_page, encode_token, decode_token
 from odp.identity.views.account import send_verification_email
 from odp.lib import exceptions as x
-from odp.lib.users import create_user_account, password_complexity_description
 
 bp = Blueprint('signup', __name__)
 

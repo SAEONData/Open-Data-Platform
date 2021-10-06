@@ -3,9 +3,7 @@ from flask_mail import Message
 
 from odp.identity import hydra_admin, mail
 from odp.identity.forms import ResetPasswordForm, AutoLoginForm, ProfileForm
-from odp.identity.views import hydra_error_page, encode_token, decode_token
-from odp.lib import exceptions as x
-from odp.lib.users import (
+from odp.identity.lib import (
     validate_password_reset,
     update_user_password,
     update_user_verified,
@@ -15,6 +13,8 @@ from odp.lib.users import (
     get_user_profile,
     password_complexity_description,
 )
+from odp.identity.views import hydra_error_page, encode_token, decode_token
+from odp.lib import exceptions as x
 
 bp = Blueprint('account', __name__)
 
