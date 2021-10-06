@@ -70,9 +70,9 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
                     projects=set(), providers=set()
                 ))
                 if role.project:
-                    pinned_scopes[scope.id]['projects'] |= {role.project.key}
+                    pinned_scopes[scope.id]['projects'] |= {role.project.id}
                 if role.provider:
-                    pinned_scopes[scope.id]['providers'] |= {role.provider.key}
+                    pinned_scopes[scope.id]['providers'] |= {role.provider.id}
 
     return UserAccess(
         scopes={scope: '*' for scope in unpinned_scopes} | {scope: ScopeContext(

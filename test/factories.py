@@ -16,7 +16,7 @@ from odp.db.models import (
 )
 
 
-def key_from_name(obj):
+def id_from_name(obj):
     return re.sub(r'[^a-z0-9]+', '-', obj.name.lower()).strip('-')
 
 
@@ -30,7 +30,7 @@ class ClientFactory(ODPModelFactory):
     class Meta:
         model = Client
 
-    id = factory.LazyAttribute(key_from_name)
+    id = factory.LazyAttribute(id_from_name)
     name = factory.Faker('catch_phrase')
 
     @factory.post_generation
@@ -47,8 +47,7 @@ class ProjectFactory(ODPModelFactory):
     class Meta:
         model = Project
 
-    id = factory.Sequence(int)
-    key = factory.LazyAttribute(key_from_name)
+    id = factory.LazyAttribute(id_from_name)
     name = factory.Faker('catch_phrase')
 
 
@@ -56,8 +55,7 @@ class ProviderFactory(ODPModelFactory):
     class Meta:
         model = Provider
 
-    id = factory.Sequence(int)
-    key = factory.LazyAttribute(key_from_name)
+    id = factory.LazyAttribute(id_from_name)
     name = factory.Faker('company')
 
 
@@ -65,8 +63,7 @@ class CollectionFactory(ODPModelFactory):
     class Meta:
         model = Collection
 
-    id = factory.Sequence(int)
-    key = factory.LazyAttribute(key_from_name)
+    id = factory.LazyAttribute(id_from_name)
     name = factory.Faker('catch_phrase')
     provider = factory.SubFactory(ProviderFactory)
 
@@ -76,7 +73,7 @@ class RoleFactory(ODPModelFactory):
         model = Role
         exclude = ('is_project_role', 'is_provider_role')
 
-    id = factory.LazyAttribute(key_from_name)
+    id = factory.LazyAttribute(id_from_name)
     name = factory.Faker('job')
 
     is_project_role = False
@@ -115,6 +112,7 @@ class UserFactory(ODPModelFactory):
         model = User
 
     id = factory.Faker('uuid4')
+    name = factory.Faker('name')
     email = factory.Faker('email')
     active = True
     verified = True

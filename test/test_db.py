@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-import odp
+import odp.initdb
 from odp.db import Session
 from odp.db.models import (
     Client,
@@ -28,13 +28,13 @@ from test.factories import (
 
 
 def test_db_setup():
-    odp.create_odp_scopes()
+    odp.initdb.create_odp_scopes()
     result = Session.execute(select(Scope.id))
     assert result.scalars().all() == [s.value for s in odp.ODPScope]
 
     ScopeFactory()  # create an arbitrary (external) scope, not for the sysadmin
 
-    odp.create_odp_admin_role()
+    odp.initdb.create_odp_admin_role()
     result = Session.execute(select(Role))
     assert result.scalar_one().id == odp.ODP_ADMIN_ROLE == 'odp.admin'
 
@@ -60,19 +60,19 @@ def test_create_client_with_scopes():
 def test_create_collection():
     collection = CollectionFactory()
     result = Session.execute(select(Collection))
-    assert result.scalar_one().key == collection.key
+    assert result.scalar_one().id == collection.id
 
 
 def test_create_project():
     project = ProjectFactory()
     result = Session.execute(select(Project))
-    assert result.scalar_one().key == project.key
+    assert result.scalar_one().id == project.id
 
 
 def test_create_provider():
     provider = ProviderFactory()
     result = Session.execute(select(Provider))
-    assert result.scalar_one().key == provider.key
+    assert result.scalar_one().id == provider.id
 
 
 def test_create_role():

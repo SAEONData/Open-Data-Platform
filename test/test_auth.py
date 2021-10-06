@@ -21,7 +21,7 @@ def test_provider_role():
     user = UserFactory(roles=(role,))
     actual_user_access = get_user_access(user.id, client.id)
     expected_user_access = UserAccess(scopes={
-        scope.id: (ScopeContext(projects='*', providers={role.provider.key}))
+        scope.id: (ScopeContext(projects='*', providers={role.provider.id}))
         for scope in scopes[1:3]
     })
     assert actual_user_access == expected_user_access
@@ -34,7 +34,7 @@ def test_project_role():
     user = UserFactory(roles=(role,))
     actual_user_access = get_user_access(user.id, client.id)
     expected_user_access = UserAccess(scopes={
-        scope.id: (ScopeContext(projects={role.project.key}, providers='*'))
+        scope.id: (ScopeContext(projects={role.project.id}, providers='*'))
         for scope in scopes[1:3]
     })
     assert actual_user_access == expected_user_access
@@ -75,11 +75,11 @@ def test_mixed_roles():
     user = UserFactory(roles=(role1, role2, role3, role4, role5))
     actual_user_access = get_user_access(user.id, client.id)
     expected_user_access = UserAccess(scopes={
-        scopes[1].id: ScopeContext(projects={role1.project.key}, providers='*'),
-        scopes[2].id: ScopeContext(projects={role1.project.key, role3.project.key}, providers={role3.provider.key}),
-        scopes[3].id: ScopeContext(projects={role1.project.key, role3.project.key}, providers={role2.provider.key, role3.provider.key}),
+        scopes[1].id: ScopeContext(projects={role1.project.id}, providers='*'),
+        scopes[2].id: ScopeContext(projects={role1.project.id, role3.project.id}, providers={role3.provider.id}),
+        scopes[3].id: ScopeContext(projects={role1.project.id, role3.project.id}, providers={role2.provider.id, role3.provider.id}),
         scopes[4].id: '*',
         scopes[5].id: '*',
-        scopes[6].id: ScopeContext(projects='*', providers={role2.provider.key, role4.provider.key}),
+        scopes[6].id: ScopeContext(projects='*', providers={role2.provider.id, role4.provider.id}),
     })
     assert actual_user_access == expected_user_access
