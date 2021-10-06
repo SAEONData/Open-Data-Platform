@@ -20,19 +20,11 @@ Session = scoped_session(sessionmaker(
 class _Base:
     def save(self):
         Session.add(self)
-        self._flush()
+        Session.flush()
 
     def delete(self):
         Session.delete(self)
-        self._flush()
-
-    @staticmethod
-    def _flush():
-        try:
-            Session.flush()
-        except Exception:
-            Session.rollback()
-            raise
+        Session.flush()
 
     def _repr(self, *attrs):
         params = ', '.join(f'{attr}={getattr(self, attr)!r}' for attr in attrs)
