@@ -1,17 +1,26 @@
 import re
+from typing import Optional
 
 import argon2
 from argon2.exceptions import VerifyMismatchError
+from sqlalchemy import select
 
+from odp.db import Session
 from odp.db.models import User
 from odp.lib import exceptions as x
 
 ph = argon2.PasswordHasher()
 
 
+def get_user_by_email(email: str) -> Optional[User]:
+    return Session.execute(
+        select(User).where(User.email == email)
+    ).scalar_one_or_none()
+
+
 def validate_user_login(email, password):
     """
-    Validate the credentials supplied by a user via the login form, returning the user object
+    Validate the credentials supplied by a user via the login form, returning the user id
     on success. An ``ODPIdentityError`` is raised if the login cannot be permitted for any reason.
 
     :param email: the input email address
@@ -24,8 +33,7 @@ def validate_user_login(email, password):
     :raises ODPAccountDisabled: if the user account has been deactivated
     :raises ODPEmailNotVerified: if the email address has not yet been verified
     """
-    user = User.query.filter_by(email=email).first()
-
+    user = get_user_by_email(email)
     if not user:
         raise x.ODPUserNotFound
 
@@ -76,7 +84,7 @@ def validate_auto_login(user_id):
     :raises ODPEmailNotVerified: if the user changed their email address since their last login,
         but have not yet verified it
     """
-    user = User.query.get(user_id)
+    user = Session.get(User, user_id)
     if not user:
         raise x.ODPUserNotFound
 
@@ -111,7 +119,7 @@ def validate_forgot_password(email):
     :raises ODPAccountLocked: if the user account has been temporarily locked
     :raises ODPAccountDisabled: if the user account has been deactivated
     """
-    user = User.query.filter_by(email=email).first()
+    user = get_user_by_email(email)
     if not user:
         raise x.ODPUserNotFound
 
@@ -135,7 +143,7 @@ def validate_password_reset(email, password):
     :raises ODPUserNotFound: if the email address is not associated with any user account
     :raises ODPPasswordComplexityError: if the password does not meet the minimum complexity requirements
     """
-    user = User.query.filter_by(email=email).first()
+    user = get_user_by_email(email)
     if not user:
         raise x.ODPUserNotFound
 
@@ -154,7 +162,7 @@ def validate_email_verification(email):
 
     :raises ODPUserNotFound: if the email address is not associated with any user account
     """
-    user = User.query.filter_by(email=email).first()
+    user = get_user_by_email(email)
     if not user:
         raise x.ODPUserNotFound
 
@@ -179,7 +187,7 @@ def create_user_account(email, password=None, name=None):
     :raises ODPEmailInUse: if the email address is already associated with a user account
     :raises ODPPasswordComplexityError: if the password does not meet the minimum complexity requirements
     """
-    user = User.query.filter_by(email=email).first()
+    user = get_user_by_email(email)
     if user:
         raise x.ODPEmailInUse
 
@@ -205,7 +213,7 @@ def update_user_verified(user_id, verified):
     :param user_id: the user id
     :param verified: True/False
     """
-    user = User.query.get(user_id)
+    user = Session.get(User, user_id)
     user.verified = verified
     user.save()
 
@@ -217,7 +225,7 @@ def update_user_password(user_id, password):
     :param user_id: the user id
     :param password: the input plain-text password
     """
-    user = User.query.get(user_id)
+    user = Session.get(User, user_id)
     user.password = ph.hash(password)
     user.save()
 
@@ -274,7 +282,7 @@ def validate_google_login(email):
     :raises ODPAccountDisabled: if the user account has been deactivated
     :raises ODPEmailNotVerified: if the email address has not been verified
     """
-    user = User.query.filter_by(email=email).first()
+    user = get_user_by_email(email)
     if not user:
         raise x.ODPUserNotFound
 
@@ -296,7 +304,7 @@ def update_user_profile(user_id, **userinfo):
     :param user_id: the user id
     :param userinfo: dict containing profile info
     """
-    user = User.query.get(user_id)
+    user = Session.get(User, user_id)
     for attr in 'name', 'picture':
         if attr in userinfo:
             setattr(user, attr, userinfo[attr])
@@ -307,7 +315,7 @@ def get_user_profile(user_id):
     """
     Return a dict of user profile info.
     """
-    user = User.query.get(user_id)
+    user = Session.get(User, user_id)
     info = {}
     for attr in 'name', 'picture':
         info[attr] = getattr(user, attr)
@@ -318,7 +326,7 @@ def get_user_profile_by_email(email):
     """
     Return a dict of user profile info.
     """
-    user = User.query.filter_by(email=email).first()
+    user = get_user_by_email(email)
     if not user:
         raise x.ODPUserNotFound
 
