@@ -18,7 +18,7 @@ class User(Base):
     password = Column(String)
     active = Column(Boolean, nullable=False)
     verified = Column(Boolean, nullable=False)
-    name = Column(String)
+    name = Column(String, nullable=False)
     picture = Column(String)
 
     # many-to-many relationship between user and role
