@@ -6,8 +6,9 @@ from authlib.integrations.base_client.errors import OAuthError
 from authlib.integrations.flask_client import OAuth
 from flask import Blueprint, url_for, redirect, flash, request
 from flask_login import login_user, logout_user, current_user
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy import select
 
+from odp.db import Session
 from odp.db.models import User, OAuth2Token
 
 
@@ -102,9 +103,7 @@ class HydraOAuth2Blueprint(Blueprint):
             client_id = self.oauth.hydra.client_id
             user_id = userinfo['sub']
 
-            try:
-                token_model = OAuth2Token.query.filter_by(client_id=client_id, user_id=user_id).one()
-            except NoResultFound:
+            if not (token_model := Session.get(OAuth2Token, (client_id, user_id))):
                 token_model = OAuth2Token(client_id=client_id, user_id=user_id)
 
             token_model.token_type = token.get('token_type')
@@ -114,7 +113,7 @@ class HydraOAuth2Blueprint(Blueprint):
             token_model.expires_at = token.get('expires_at')
             token_model.save()
 
-            user = User.query.get(user_id)
+            user = Session.get(User, user_id)
             login_user(user)
 
         except OAuthError as e:
@@ -144,14 +143,22 @@ class HydraOAuth2Blueprint(Blueprint):
 
     @staticmethod
     def fetch_token(client_id):
-        return OAuth2Token.query.filter_by(client_id=client_id, user_id=current_user.id).one().dict()
+        return Session.get(OAuth2Token, (client_id, current_user.id)).dict()
 
     @staticmethod
     def update_token(client_id, token, refresh_token=None, access_token=None):
         if refresh_token:
-            token_model = OAuth2Token.query.filter_by(client_id=client_id, refresh_token=refresh_token).one()
+            token_model = Session.execute(
+                select(OAuth2Token).
+                where(OAuth2Token.client_id == client_id).
+                where(OAuth2Token.refresh_token == refresh_token)
+            ).one()
         elif access_token:
-            token_model = OAuth2Token.query.filter_by(client_id=client_id, access_token=access_token).one()
+            token_model = Session.execute(
+                select(OAuth2Token).
+                where(OAuth2Token.client_id == client_id).
+                where(OAuth2Token.access_token == access_token)
+            ).one()
         else:
             return
 
