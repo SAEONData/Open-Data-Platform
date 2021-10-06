@@ -16,6 +16,7 @@ from odp.app.views import (
     catalogues,
     datastores,
 )
+from odp.db import Session
 from odp.db.models import User
 
 login_manager = LoginManager()
@@ -24,7 +25,7 @@ login_manager.login_view = 'hydra.login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(user_id)
+    return Session.get(User, user_id)
 
 
 def init_app(app):
