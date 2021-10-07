@@ -1,9 +1,13 @@
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, Enum
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
+from odp.db.models.client_role import ClientRole
+from odp.db.models.project_role import ProjectRole
+from odp.db.models.provider_role import ProviderRole
 from odp.db.models.role_scope import RoleScope
+from odp.db.models.types import RoleType
 from odp.db.models.user_role import UserRole
 
 
@@ -16,28 +20,17 @@ class Role(Base):
 
     The linked scopes determine what types of operations a user
     may perform on what classes of entity. The applicability of
-    those scopes may be constrained by pinning a role to a project
-    and/or provider, in which case the scopes grant access only
-    to resources linked with the specified project and/or provider.
-
-    A client-specific role confers scope access only for configuring
-    or logging in to that client, and would typically be defined to
-    permit developer or admin access to a particular application.
+    those scopes may be constrained by pinning a role to a set of
+    clients, projects or providers, in which case the scopes grant
+    access only to resources linked with the specified clients,
+    projects or providers.
     """
 
     __tablename__ = 'role'
 
-    id = Column(String, primary_key=True)
+    id = Column(String, unique=True, primary_key=True)
+    type = Column(Enum(RoleType), primary_key=True)
     name = Column(String, unique=True, nullable=False)
-
-    project_id = Column(String, ForeignKey('project.id', ondelete='CASCADE'))
-    project = relationship('Project', back_populates='roles')
-
-    provider_id = Column(String, ForeignKey('provider.id', ondelete='CASCADE'))
-    provider = relationship('Provider', back_populates='roles')
-
-    client_id = Column(String, ForeignKey('client.id', ondelete='CASCADE'))
-    client = relationship('Client', back_populates='roles')
 
     # many-to-many relationship between role and user
     role_users = relationship('UserRole', back_populates='role', cascade='all, delete-orphan', passive_deletes=True)
@@ -47,5 +40,17 @@ class Role(Base):
     role_scopes = relationship('RoleScope', back_populates='role', cascade='all, delete-orphan', passive_deletes=True)
     scopes = association_proxy('role_scopes', 'scope', creator=lambda s: RoleScope(scope=s))
 
+    # many-to-many relationship between role and client
+    role_clients = relationship('ClientRole', back_populates='role', cascade='all, delete-orphan', passive_deletes=True)
+    clients = association_proxy('role_clients', 'client', creator=lambda c: ClientRole(client=c))
+
+    # many-to-many relationship between role and project
+    role_projects = relationship('ProjectRole', back_populates='role', cascade='all, delete-orphan', passive_deletes=True)
+    projects = association_proxy('role_projects', 'project', creator=lambda p: ProjectRole(project=p))
+
+    # many-to-many relationship between role and provider
+    role_providers = relationship('ProviderRole', back_populates='role', cascade='all, delete-orphan', passive_deletes=True)
+    providers = association_proxy('role_providers', 'provider', creator=lambda p: ProviderRole(provider=p))
+
     def __repr__(self):
-        return self._repr('id', 'name', 'project', 'provider', 'client')
+        return self._repr('id', 'type', 'name')

@@ -1,5 +1,6 @@
 from .catalogue_record import CatalogueRecord
 from .client import Client
+from .client_role import ClientRole
 from .client_scope import ClientScope
 from .collection import Collection
 from .datacite_record import DataciteRecord
@@ -7,7 +8,9 @@ from .metadata_schema import MetadataSchema
 from .oauth2_token import OAuth2Token
 from .project import Project
 from .project_collection import ProjectCollection
+from .project_role import ProjectRole
 from .provider import Provider
+from .provider_role import ProviderRole
 from .record import Record
 from .record_tag import RecordTag
 from .role import Role

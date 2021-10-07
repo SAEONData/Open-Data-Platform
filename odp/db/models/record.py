@@ -16,7 +16,12 @@ class Record(Base):
 
     __tablename__ = 'record'
 
-    __table_args__ = (CheckConstraint('doi IS NOT NULL OR sid IS NOT NULL', 'record_doi_sid_check'),)
+    __table_args__ = (
+        CheckConstraint(
+            'doi IS NOT NULL OR sid IS NOT NULL',
+            name='record_doi_sid_check',
+        ),
+    )
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     doi = Column(String, unique=True)
