@@ -12,10 +12,8 @@ class RoleScope(Base):
 
     __table_args__ = (
         ForeignKeyConstraint(
-            ('role_id', 'role_type'),
-            ('role.id', 'role.type'),
-            name='role_scope_role_fkey',
-            ondelete='CASCADE',
+            ('role_id', 'role_type'), ('role.id', 'role.type'),
+            name='role_scope_role_fkey', ondelete='CASCADE',
         ),
     )
 
