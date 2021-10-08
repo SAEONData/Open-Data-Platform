@@ -16,7 +16,7 @@ class ProviderUser(Base):
             name='provider_user_role_fkey', ondelete='CASCADE',
         ),
         CheckConstraint(
-            f"role_type = '{RoleType.PROVIDER}'",
+            f"role_type = '{RoleType.provider}'",
             name='provider_user_role_type_check',
         ),
     )

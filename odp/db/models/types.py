@@ -2,7 +2,13 @@ from enum import Enum
 
 
 class RoleType(str, Enum):
-    PLATFORM = 'PLATFORM'
-    CLIENT = 'CLIENT'
-    PROJECT = 'PROJECT'
-    PROVIDER = 'PROVIDER'
+    platform = 'platform'
+    client = 'client'
+    project = 'project'
+    provider = 'provider'
+
+
+class SchemaType(str, Enum):
+    catalogue = 'catalogue'
+    metadata = 'metadata'
+    tag = 'tag'

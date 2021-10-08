@@ -16,7 +16,7 @@ class PlatformUser(Base):
             name='platform_user_role_fkey', ondelete='CASCADE',
         ),
         CheckConstraint(
-            f"role_type = '{RoleType.PLATFORM}'",
+            f"role_type = '{RoleType.platform}'",
             name='platform_user_role_type_check',
         ),
     )

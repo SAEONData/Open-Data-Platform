@@ -1,10 +1,11 @@
 import uuid
 
-from sqlalchemy import Column, String, ForeignKey, CheckConstraint
+from sqlalchemy import Column, String, ForeignKey, CheckConstraint, Enum, ForeignKeyConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
+from odp.db.models.types import SchemaType
 
 
 class Record(Base):
@@ -17,6 +18,14 @@ class Record(Base):
     __tablename__ = 'record'
 
     __table_args__ = (
+        ForeignKeyConstraint(
+            ('schema_id', 'schema_type'), ('schema.id', 'schema.type'),
+            name='record_schema_fkey', ondelete='RESTRICT',
+        ),
+        CheckConstraint(
+            f"schema_type = '{SchemaType.metadata}'",
+            name='record_schema_type_check',
+        ),
         CheckConstraint(
             'doi IS NOT NULL OR sid IS NOT NULL',
             name='record_doi_sid_check',
@@ -32,11 +41,12 @@ class Record(Base):
     collection_id = Column(String, ForeignKey('collection.id', ondelete='RESTRICT'), nullable=False)
     collection = relationship('Collection')
 
-    metadata_schema_id = Column(String, ForeignKey('metadata_schema.id', ondelete='RESTRICT'), nullable=False)
-    metadata_schema = relationship('MetadataSchema')
+    schema_id = Column(String, nullable=False)
+    schema_type = Column(Enum(SchemaType), nullable=False)
+    schema = relationship('Schema')
 
     # one-to-many relationship with record_tag
     tags = relationship('RecordTag', back_populates='record', cascade='all, delete-orphan', passive_deletes=True)
 
     def __repr__(self):
-        return self._repr('id', 'doi', 'sid', 'collection', 'metadata_schema')
+        return self._repr('id', 'doi', 'sid', 'collection', 'schema')

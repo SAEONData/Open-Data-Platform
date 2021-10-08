@@ -4,7 +4,6 @@ from .client_scope import ClientScope
 from .client_user import ClientUser
 from .collection import Collection
 from .datacite_record import DataciteRecord
-from .metadata_schema import MetadataSchema
 from .oauth2_token import OAuth2Token
 from .platform_user import PlatformUser
 from .project import Project
@@ -16,7 +15,8 @@ from .record import Record
 from .record_tag import RecordTag
 from .role import Role
 from .role_scope import RoleScope
+from .schema import Schema
 from .scope import Scope
 from .tag import Tag
-from .types import RoleType
+from .types import RoleType, SchemaType
 from .user import User

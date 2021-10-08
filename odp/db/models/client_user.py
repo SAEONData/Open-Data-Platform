@@ -16,7 +16,7 @@ class ClientUser(Base):
             name='client_user_role_fkey', ondelete='CASCADE',
         ),
         CheckConstraint(
-            f"role_type = '{RoleType.CLIENT}'",
+            f"role_type = '{RoleType.client}'",
             name='client_user_role_type_check',
         ),
     )
