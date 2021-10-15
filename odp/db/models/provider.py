@@ -20,5 +20,11 @@ class Provider(Base):
     # one-to-many relationship with collection
     collections = relationship('Collection', back_populates='provider', cascade='all, delete-orphan', passive_deletes=True)
 
+    # zero-or-one-to-many relationship with role
+    roles = relationship('Role', cascade='all, delete-orphan', passive_deletes=True)
+
+    # zero-or-one-to-many relationship with client
+    clients = relationship('Client', cascade='all, delete-orphan', passive_deletes=True)
+
     def __repr__(self):
         return self._repr('id', 'name')

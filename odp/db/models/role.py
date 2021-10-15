@@ -1,30 +1,36 @@
-from sqlalchemy import Column, String, Enum
+from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
 from odp.db.models.role_scope import RoleScope
-from odp.db.models.types import RoleType
+from odp.db.models.user_role import UserRole
 
 
 class Role(Base):
     """A role is a configuration object that defines a set of
-    permissions, represented by the associated scopes.
+    permissions - represented by the associated scopes - that
+    may be granted to a user.
 
-    The role type determines whether those scopes may be applied
-    platform-wide, or only within the context of a client, project
-    or provider.
+    If a role is linked to a provider, then any 'provider',
+    'collection' and 'record' scopes apply only to those
+    entities that are associated with that provider.
     """
 
     __tablename__ = 'role'
 
-    id = Column(String, unique=True, primary_key=True)
-    type = Column(Enum(RoleType), primary_key=True)
-    name = Column(String, unique=True, nullable=False)
+    id = Column(String, primary_key=True)
+
+    provider_id = Column(String, ForeignKey('provider.id', ondelete='CASCADE'))
+    provider = relationship('Provider')
 
     # many-to-many relationship between role and scope
     role_scopes = relationship('RoleScope', back_populates='role', cascade='all, delete-orphan', passive_deletes=True)
     scopes = association_proxy('role_scopes', 'scope', creator=lambda s: RoleScope(scope=s))
 
+    # many-to-many relationship between role and user
+    role_users = relationship('UserRole', back_populates='role', cascade='all, delete-orphan', passive_deletes=True)
+    users = association_proxy('role_users', 'user', creator=lambda u: UserRole(user=u))
+
     def __repr__(self):
-        return self._repr('id', 'type', 'name')
+        return self._repr('id', 'provider')

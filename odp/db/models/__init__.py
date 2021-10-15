@@ -1,16 +1,12 @@
 from .catalogue_record import CatalogueRecord
 from .client import Client
 from .client_scope import ClientScope
-from .client_user import ClientUser
 from .collection import Collection
 from .datacite_record import DataciteRecord
 from .oauth2_token import OAuth2Token
-from .platform_user import PlatformUser
 from .project import Project
 from .project_collection import ProjectCollection
-from .project_user import ProjectUser
 from .provider import Provider
-from .provider_user import ProviderUser
 from .record import Record
 from .record_tag import RecordTag
 from .role import Role
@@ -18,5 +14,6 @@ from .role_scope import RoleScope
 from .schema import Schema
 from .scope import Scope
 from .tag import Tag
-from .types import RoleType, SchemaType
+from .types import SchemaType
 from .user import User
+from .user_role import UserRole
