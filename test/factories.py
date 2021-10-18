@@ -67,6 +67,15 @@ class CollectionFactory(ODPModelFactory):
     name = factory.Faker('catch_phrase')
     provider = factory.SubFactory(ProviderFactory)
 
+    @factory.post_generation
+    def projects(obj, create, projects):
+        if not create:
+            return
+        if projects:
+            for project in projects:
+                obj.projects.append(project)
+            Session.commit()
+
 
 class ProjectFactory(ODPModelFactory):
     class Meta:
@@ -74,6 +83,15 @@ class ProjectFactory(ODPModelFactory):
 
     id = factory.LazyAttribute(id_from_name)
     name = factory.Faker('catch_phrase')
+
+    @factory.post_generation
+    def collections(obj, create, collections):
+        if not create:
+            return
+        if collections:
+            for collection in collections:
+                obj.collections.append(collection)
+            Session.commit()
 
 
 class RoleFactory(ODPModelFactory):
