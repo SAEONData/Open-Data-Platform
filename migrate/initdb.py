@@ -20,12 +20,9 @@ sys.path.append(str(rootdir))
 
 from odp import ODPScope
 from odp.db import engine, Session, Base
-from odp.db.models import Scope, Role, RoleType, RoleScope, PlatformUser, User, Client, ClientScope
+from odp.db.models import Scope, Role, RoleScope, UserRole, User, Client, ClientScope
 
-ODP_ADMIN_ROLE = 'ODP:admin'
-CLIENT_ADMIN_ROLE = 'ODP.client:admin'
-PROJECT_ADMIN_ROLE = 'ODP.project:admin'
-PROVIDER_ADMIN_ROLE = 'ODP.provider:admin'
+ODP_ADMIN_ROLE = 'ODP:Admin'
 ODP_APP_CLIENT_ID = 'odp.saeon.ac.za'
 
 
@@ -38,7 +35,7 @@ def create_schema():
     Base.metadata.create_all(engine)
 
 
-def create_scopes():
+def create_scopes(session):
     """Create any ODP system scopes that do not exist."""
     for odp_scope in ODPScope:
         if not session.get(Scope, odp_scope.value):
@@ -46,30 +43,25 @@ def create_scopes():
             session.add(scope)
 
 
-def create_admin_role():
+def create_admin_role(session):
     """Create the ODP admin role if it does not exist."""
-    if not session.get(Role, (ODP_ADMIN_ROLE, RoleType.platform)):
-        role = Role(
-            id=ODP_ADMIN_ROLE,
-            type=RoleType.platform,
-            name='ODP Platform Administrator',
-        )
+    if not session.get(Role, ODP_ADMIN_ROLE):
+        role = Role(id=ODP_ADMIN_ROLE)
         session.add(role)
 
     for odp_scope in ODPScope:
-        if not session.get(RoleScope, (ODP_ADMIN_ROLE, RoleType.platform, odp_scope.value)):
+        if not session.get(RoleScope, (ODP_ADMIN_ROLE, odp_scope.value)):
             role_scope = RoleScope(
                 role_id=ODP_ADMIN_ROLE,
-                role_type=RoleType.platform,
                 scope_id=odp_scope.value,
             )
             session.add(role_scope)
 
 
-def create_admin_user():
+def create_admin_user(session):
     """Create an admin user if one is not found."""
     if not session.execute(
-            select(PlatformUser).where(PlatformUser.role_id == ODP_ADMIN_ROLE)
+            select(UserRole).where(UserRole.role_id == ODP_ADMIN_ROLE)
     ).first():
         print('Creating an admin user...')
         while not (name := input('Full name: ')):
@@ -92,20 +84,19 @@ def create_admin_user():
         )
         session.add(user)
 
-        platform_user = PlatformUser(
+        user_role = UserRole(
             user_id=user_id,
             role_id=ODP_ADMIN_ROLE,
-            role_type=RoleType.platform,
         )
-        session.add(platform_user)
+        session.add(user_role)
 
 
-def create_app_client():
+def create_app_client(session):
     """Create client config for the ODP app."""
     if not session.get(Client, ODP_APP_CLIENT_ID):
         client = Client(
             id=ODP_APP_CLIENT_ID,
-            name='SAEON Open Data Platform UI',
+            name='The Open Data Platform Web UI',
         )
         session.add(client)
 
@@ -120,8 +111,8 @@ def create_app_client():
 
 if __name__ == '__main__':
     create_schema()
-    with Session() as session, session.begin():
-        create_scopes()
-        create_admin_role()
-        create_admin_user()
-        create_app_client()
+    with Session() as sess, sess.begin():
+        create_scopes(sess)
+        create_admin_role(sess)
+        create_admin_user(sess)
+        create_app_client(sess)

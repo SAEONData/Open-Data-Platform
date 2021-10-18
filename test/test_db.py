@@ -1,6 +1,7 @@
 from sqlalchemy import select
 
-import odp.initdb
+import migrate.initdb
+from odp import ODPScope
 from odp.db import Session
 from odp.db.models import (
     Client,
@@ -28,20 +29,21 @@ from test.factories import (
 
 
 def test_db_setup():
-    odp.initdb.create_odp_scopes()
+    migrate.initdb.create_scopes(Session)
+    Session.commit()
     result = Session.execute(select(Scope.id))
-    assert result.scalars().all() == [s.value for s in odp.ODPScope]
+    assert result.scalars().all() == [s.value for s in ODPScope]
 
     ScopeFactory()  # create an arbitrary (external) scope, not for the sysadmin
 
-    odp.initdb.create_odp_admin_role()
+    migrate.initdb.create_admin_role(Session)
+    Session.commit()
     result = Session.execute(select(Role))
-    assert result.scalar_one().id == odp.ODP_ADMIN_ROLE == 'odp.admin'
+    assert result.scalar_one().id == migrate.initdb.ODP_ADMIN_ROLE
 
-    result = Session.execute(select(
-        RoleScope, Role.id.label('role_id'), Scope.id.label('scope_id')
-    ).join(Role).join(Scope))
-    assert [(row.role_id, row.scope_id) for row in result] == [('odp.admin', s.value) for s in odp.ODPScope]
+    result = Session.execute(select(RoleScope))
+    assert [(row.role_id, row.scope_id) for row in result.scalars()] \
+           == [(migrate.initdb.ODP_ADMIN_ROLE, s.value) for s in ODPScope]
 
 
 def test_create_client():
