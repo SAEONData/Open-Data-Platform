@@ -10,9 +10,8 @@ class Client(Base):
     """Client application config. The associated scopes
     represent the set of permissions granted to the client.
 
-    If a client is linked to a provider, then any 'provider',
-    'collection' and 'record' scopes apply only to those
-    entities that are associated with that provider.
+    If a client is linked to a provider, then its scopes apply
+    only to entities that are associated with that provider.
     """
 
     __tablename__ = 'client'

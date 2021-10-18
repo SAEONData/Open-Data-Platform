@@ -12,9 +12,8 @@ class Role(Base):
     permissions - represented by the associated scopes - that
     may be granted to a user.
 
-    If a role is linked to a provider, then any 'provider',
-    'collection' and 'record' scopes apply only to those
-    entities that are associated with that provider.
+    If a role is linked to a provider, then its scopes apply
+    only to entities that are associated with that provider.
     """
 
     __tablename__ = 'role'

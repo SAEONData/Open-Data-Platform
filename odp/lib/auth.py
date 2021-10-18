@@ -7,13 +7,8 @@ from odp.db.models import User, Client
 from odp.lib import exceptions as x
 
 
-class ScopeContext(BaseModel):
-    projects: Union[Set[str], Literal['*']]
-    providers: Union[Set[str], Literal['*']]
-
-
 class UserAccess(BaseModel):
-    scopes: Dict[str, Union[ScopeContext, Literal['*']]]
+    scopes: Dict[str, Union[Literal['*'], Set[str]]]
 
 
 class UserInfo(BaseModel):
@@ -34,9 +29,7 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
     of scope ids (OAuth2 scope identifiers), where the value for each id is either:
 
     - '*' if the scope is applicable across all relevant platform entities; or
-    - a ScopeContext object indicating the projects and/or providers to which the
-      scope's usage is limited; in this case 'projects' or 'providers' may also
-      take the value '*' if unrestricted.
+    - a set of provider ids to which the scope's usage is limited
     """
     user = Session.get(User, user_id)
     if not user:
@@ -46,39 +39,30 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
     if not client:
         raise x.ODPClientNotFound
 
-    unpinned_scopes = set()
-    for role in user.roles:
-        if role.client_id not in (None, client_id):
-            continue
-        if not role.project and not role.provider:
-            unpinned_scopes |= {
-                scope.id for scope in role.scopes
-                if scope in client.scopes
-            }
+    platform_scopes = set()
+    if not client.provider:
+        for role in user.roles:
+            if not role.provider:
+                platform_scopes |= {
+                    scope.id for scope in role.scopes
+                    if scope in client.scopes
+                }
 
-    pinned_scopes = {}
+    provider_scopes = {}
     for role in user.roles:
-        if role.client_id not in (None, client_id):
-            continue
-        if role.project or role.provider:
+        if role.provider or client.provider:
+            if role.provider and client.provider and role.provider_id != client.provider_id:
+                continue
             for scope in role.scopes:
-                if scope.id in unpinned_scopes:
+                if scope.id in platform_scopes:
                     continue
                 if scope not in client.scopes:
                     continue
-                pinned_scopes.setdefault(scope.id, dict(
-                    projects=set(), providers=set()
-                ))
-                if role.project:
-                    pinned_scopes[scope.id]['projects'] |= {role.project.id}
-                if role.provider:
-                    pinned_scopes[scope.id]['providers'] |= {role.provider.id}
+                provider_scopes.setdefault(scope.id, set())
+                provider_scopes[scope.id] |= {role.provider_id if role.provider else client.provider_id}
 
     return UserAccess(
-        scopes={scope: '*' for scope in unpinned_scopes} | {scope: ScopeContext(
-            projects=projects if (projects := pinned_scopes[scope]['projects']) else '*',
-            providers=providers if (providers := pinned_scopes[scope]['providers']) else '*',
-        ) for scope in pinned_scopes}
+        scopes={scope: '*' for scope in platform_scopes} | provider_scopes
     )
 
 

@@ -11,8 +11,8 @@ from odp.db.models import (
     Provider,
     Role,
     Scope,
-    User,
     Tag,
+    User,
 )
 
 
@@ -26,12 +26,28 @@ class ODPModelFactory(SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = 'commit'
 
 
+class ProviderFactory(ODPModelFactory):
+    class Meta:
+        model = Provider
+
+    id = factory.LazyAttribute(id_from_name)
+    name = factory.Faker('company')
+
+
 class ClientFactory(ODPModelFactory):
     class Meta:
         model = Client
+        exclude = ('is_provider_client',)
 
     id = factory.LazyAttribute(id_from_name)
     name = factory.Faker('catch_phrase')
+
+    is_provider_client = False
+    provider = factory.Maybe(
+        'is_provider_client',
+        yes_declaration=factory.SubFactory(ProviderFactory),
+        no_declaration=None,
+    )
 
     @factory.post_generation
     def scopes(obj, create, scopes):
@@ -43,22 +59,6 @@ class ClientFactory(ODPModelFactory):
             Session.commit()
 
 
-class ProjectFactory(ODPModelFactory):
-    class Meta:
-        model = Project
-
-    id = factory.LazyAttribute(id_from_name)
-    name = factory.Faker('catch_phrase')
-
-
-class ProviderFactory(ODPModelFactory):
-    class Meta:
-        model = Provider
-
-    id = factory.LazyAttribute(id_from_name)
-    name = factory.Faker('company')
-
-
 class CollectionFactory(ODPModelFactory):
     class Meta:
         model = Collection
@@ -68,22 +68,22 @@ class CollectionFactory(ODPModelFactory):
     provider = factory.SubFactory(ProviderFactory)
 
 
+class ProjectFactory(ODPModelFactory):
+    class Meta:
+        model = Project
+
+    id = factory.LazyAttribute(id_from_name)
+    name = factory.Faker('catch_phrase')
+
+
 class RoleFactory(ODPModelFactory):
     class Meta:
         model = Role
-        exclude = ('is_project_role', 'is_provider_role')
+        exclude = ('is_provider_role',)
 
-    id = factory.LazyAttribute(id_from_name)
-    name = factory.Faker('job')
+    id = factory.Faker('job')
 
-    is_project_role = False
     is_provider_role = False
-
-    project = factory.Maybe(
-        'is_project_role',
-        yes_declaration=factory.SubFactory(ProjectFactory),
-        no_declaration=None,
-    )
     provider = factory.Maybe(
         'is_provider_role',
         yes_declaration=factory.SubFactory(ProviderFactory),
@@ -107,6 +107,16 @@ class ScopeFactory(ODPModelFactory):
     id = factory.Faker('word')
 
 
+class TagFactory(ODPModelFactory):
+    class Meta:
+        model = Tag
+
+    id = factory.SelfAttribute('scope.id')
+    public = True
+    schema_uri = factory.Faker('uri')
+    scope = factory.SubFactory(ScopeFactory)
+
+
 class UserFactory(ODPModelFactory):
     class Meta:
         model = User
@@ -125,13 +135,3 @@ class UserFactory(ODPModelFactory):
             for role in roles:
                 obj.roles.append(role)
             Session.commit()
-
-
-class TagFactory(ODPModelFactory):
-    class Meta:
-        model = Tag
-
-    id = factory.SelfAttribute('scope.id')
-    public = True
-    schema_uri = factory.Faker('uri')
-    scope = factory.SubFactory(ScopeFactory)
