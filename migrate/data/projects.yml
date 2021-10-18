@@ -1,0 +1,20 @@
+GCDC:
+  name: Global Change Data Centre
+
+SASDI:
+  name: South African Spatial Data Infrastructure
+
+SAEON-ODP:
+  name: SAEON Open Data Platform
+
+SANEIM:
+  name: South African National Environmental Information Metadata System
+
+MIMS:
+  name: Marine Information Management System
+
+SAEON-ObsDB:
+  name: SAEON Observations Database
+
+SADCO:
+  name: Southern African Data Centre for Oceanography

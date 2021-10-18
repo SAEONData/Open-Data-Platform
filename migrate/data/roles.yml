@@ -1,0 +1,27 @@
+ODP:User:
+  scopes:
+    - odp.catalogue:read
+    - odp.collection:read
+    - odp.project:read
+    - odp.schema:read
+    - odp.tag:read
+
+SAEON:Staff:
+  scopes:
+    - odp.catalogue:read
+    - odp.client:read
+    - odp.collection:read
+    - odp.project:read
+    - odp.provider:read
+    - odp.record:read
+    - odp.role:read
+    - odp.schema:read
+    - odp.tag:read
+    - odp.user:read
+
+SAEON:Curator:
+  scopes:
+    - odp.collection:admin
+    - odp.project:admin
+    - odp.provider:admin
+    - odp.record:admin

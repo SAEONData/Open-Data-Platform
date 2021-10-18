@@ -13,6 +13,7 @@ class Collection(Base):
 
     id = Column(String, primary_key=True)
     name = Column(String, unique=True, nullable=False)
+    doi_key = Column(String)
 
     provider_id = Column(String, ForeignKey('provider.id', ondelete='CASCADE'), nullable=False)
     provider = relationship('Provider', back_populates='collections')
