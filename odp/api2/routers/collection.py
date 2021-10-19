@@ -1,7 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from odp.api2.models import CollectionIn, CollectionOut, CollectionSort
 from odp.api2.routers import Pager, Paging
@@ -48,7 +49,7 @@ async def get_collection(
     )
 
     if not (result := Session.execute(stmt).one_or_none()):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     return CollectionOut(
         id=result.Collection.id,
@@ -64,7 +65,7 @@ async def create_collection(
         collection_in: CollectionIn,
 ):
     if Session.get(Collection, collection_in.id):
-        raise HTTPException(status.HTTP_409_CONFLICT)
+        raise HTTPException(HTTP_409_CONFLICT)
 
     collection = Collection(
         id=collection_in.id,
@@ -79,7 +80,7 @@ async def update_collection(
         collection_in: CollectionIn,
 ):
     if not (collection := Session.get(Collection, collection_in.id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     collection.name = collection_in.name
     collection.provider_id = collection_in.provider_id
@@ -91,6 +92,6 @@ async def delete_collection(
         collection_id: str,
 ):
     if not (collection := Session.get(Collection, collection_id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     collection.delete()

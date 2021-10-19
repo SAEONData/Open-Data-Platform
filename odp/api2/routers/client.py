@@ -1,7 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from odp.api2.models import ClientIn, ClientOut, ClientSort
 from odp.api2.routers import Pager, Paging
@@ -38,7 +39,7 @@ async def get_client(
         client_id: str,
 ):
     if not (client := Session.get(Client, client_id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     return ClientOut(
         id=client.id,
@@ -51,7 +52,7 @@ async def create_client(
         client_in: ClientIn,
 ):
     if Session.get(Client, client_in.id):
-        raise HTTPException(status.HTTP_409_CONFLICT)
+        raise HTTPException(HTTP_409_CONFLICT)
 
     client = Client(
         id=client_in.id,
@@ -65,7 +66,7 @@ async def update_client(
         client_in: ClientIn,
 ):
     if not (client := Session.get(Client, client_in.id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     client.name = client_in.name
     client.save()
@@ -76,6 +77,6 @@ async def delete_client(
         client_id: str,
 ):
     if not (client := Session.get(Client, client_id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     client.delete()

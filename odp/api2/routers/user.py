@@ -1,7 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
+from starlette.status import HTTP_404_NOT_FOUND
 
 from odp.api2.models import UserIn, UserOut, UserSort
 from odp.api2.routers import Pager, Paging
@@ -43,7 +44,7 @@ async def get_user(
         user_id: str,
 ):
     if not (user := Session.get(User, user_id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     return UserOut(
         id=user.id,
@@ -61,7 +62,7 @@ async def update_user(
         user_in: UserIn,
 ):
     if not (user := Session.get(User, user_in.id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     user.active = user_in.active
     user.save()
@@ -72,6 +73,6 @@ async def delete_user(
         user_id: str,
 ):
     if not (user := Session.get(User, user_id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     user.delete()

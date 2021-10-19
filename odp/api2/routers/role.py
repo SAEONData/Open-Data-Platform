@@ -1,7 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from odp.api2.models import RoleIn, RoleOut, RoleSort
 from odp.api2.routers import Pager, Paging
@@ -38,7 +39,7 @@ async def get_role(
         role_id: str,
 ):
     if not (role := Session.get(Role, role_id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     return RoleOut(
         id=role.id,
@@ -51,7 +52,7 @@ async def create_role(
         role_in: RoleIn,
 ):
     if Session.get(Role, role_in.id):
-        raise HTTPException(status.HTTP_409_CONFLICT)
+        raise HTTPException(HTTP_409_CONFLICT)
 
     role = Role(
         id=role_in.id,
@@ -65,7 +66,7 @@ async def update_role(
         role_in: RoleIn,
 ):
     if not (role := Session.get(Role, role_in.id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     role.name = role_in.name
     role.save()
@@ -76,6 +77,6 @@ async def delete_role(
         role_id: str,
 ):
     if not (role := Session.get(Role, role_id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     role.delete()

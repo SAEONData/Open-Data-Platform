@@ -1,7 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from odp.api2.models import ProviderIn, ProviderOut, ProviderSort
 from odp.api2.routers import Pager, Paging
@@ -40,7 +41,7 @@ async def get_provider(
         provider_id: str,
 ):
     if not (provider := Session.get(Provider, provider_id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     return ProviderOut(
         id=provider.id,
@@ -55,7 +56,7 @@ async def create_provider(
         provider_in: ProviderIn,
 ):
     if Session.get(Provider, provider_in.id):
-        raise HTTPException(status.HTTP_409_CONFLICT)
+        raise HTTPException(HTTP_409_CONFLICT)
 
     provider = Provider(
         id=provider_in.id,
@@ -69,7 +70,7 @@ async def update_provider(
         provider_in: ProviderIn,
 ):
     if not (provider := Session.get(Provider, provider_in.id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     provider.name = provider_in.name
     provider.save()
@@ -80,6 +81,6 @@ async def delete_provider(
         provider_id: str,
 ):
     if not (provider := Session.get(Provider, provider_id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     provider.delete()

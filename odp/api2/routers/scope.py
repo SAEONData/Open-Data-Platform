@@ -1,7 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from odp.api2.models import ScopeIn, ScopeOut, ScopeSort
 from odp.api2.routers import Pager, Paging
@@ -37,7 +38,7 @@ async def get_scope(
         scope_id: str,
 ):
     if not (scope := Session.get(Scope, scope_id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     return ScopeOut(
         id=scope.id,
@@ -49,7 +50,7 @@ async def create_scope(
         scope_in: ScopeIn,
 ):
     if Session.get(Scope, scope_in.id):
-        raise HTTPException(status.HTTP_409_CONFLICT)
+        raise HTTPException(HTTP_409_CONFLICT)
 
     scope = Scope(
         id=scope_in.id,
@@ -62,6 +63,6 @@ async def delete_scope(
         scope_id: str,
 ):
     if not (scope := Session.get(Scope, scope_id)):
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     scope.delete()
