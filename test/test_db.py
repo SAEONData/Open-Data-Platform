@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-import migrate.initdb
+import migrate.systemdata
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import (
@@ -30,21 +30,21 @@ from test.factories import (
 
 
 def test_db_setup():
-    migrate.initdb.create_scopes(Session)
+    migrate.systemdata.sync_system_scopes(Session)
     Session.commit()
     result = Session.execute(select(Scope)).scalars()
     assert [row.id for row in result] == [s.value for s in ODPScope]
 
     ScopeFactory()  # create an arbitrary (external) scope, not for the sysadmin
 
-    migrate.initdb.create_admin_role(Session)
+    migrate.systemdata.sync_admin_role(Session)
     Session.commit()
     result = Session.execute(select(Role)).scalar_one()
-    assert (result.id, result.provider_id) == (migrate.initdb.ODP_ADMIN_ROLE, None)
+    assert (result.id, result.provider_id) == (migrate.systemdata.ODP_ADMIN_ROLE, None)
 
     result = Session.execute(select(RoleScope)).scalars()
     assert [(row.role_id, row.scope_id) for row in result] \
-           == [(migrate.initdb.ODP_ADMIN_ROLE, s.value) for s in ODPScope]
+           == [(migrate.systemdata.ODP_ADMIN_ROLE, s.value) for s in ODPScope]
 
 
 def test_create_client():

@@ -1,11 +1,3 @@
-ODP:User:
-  scopes:
-    - odp.catalogue:read
-    - odp.collection:read
-    - odp.project:read
-    - odp.schema:read
-    - odp.tag:read
-
 SAEON:Staff:
   scopes:
     - odp.catalogue:read

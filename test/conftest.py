@@ -4,7 +4,7 @@ import docker
 import pytest
 from sqlalchemy import text
 
-import migrate.initdb
+import migrate.systemdata
 import odp.db
 from odp.config import config
 
@@ -27,7 +27,7 @@ def database():
     )
     time.sleep(8)  # it takes 3-6 seconds for the DB to be ready
     try:
-        migrate.initdb.create_schema()
+        migrate.systemdata.create_schema()
         yield
     finally:
         container.remove(v=True, force=True)  # v => remove volumes
