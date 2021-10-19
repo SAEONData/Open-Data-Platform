@@ -2,6 +2,7 @@ import re
 
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
+from faker import Faker
 
 from odp.db import Session
 from odp.db.models import (
@@ -14,6 +15,8 @@ from odp.db.models import (
     Tag,
     User,
 )
+
+fake = Faker()
 
 
 def id_from_name(obj):
@@ -31,7 +34,7 @@ class ProviderFactory(ODPModelFactory):
         model = Provider
 
     id = factory.LazyAttribute(id_from_name)
-    name = factory.Faker('company')
+    name = factory.Sequence(lambda n: f'{fake.company()}.{n}')
 
 
 class ClientFactory(ODPModelFactory):
@@ -40,7 +43,7 @@ class ClientFactory(ODPModelFactory):
         exclude = ('is_provider_client',)
 
     id = factory.LazyAttribute(id_from_name)
-    name = factory.Faker('catch_phrase')
+    name = factory.Sequence(lambda n: f'{fake.catch_phrase()}.{n}')
 
     is_provider_client = False
     provider = factory.Maybe(
@@ -64,7 +67,7 @@ class CollectionFactory(ODPModelFactory):
         model = Collection
 
     id = factory.LazyAttribute(id_from_name)
-    name = factory.Faker('catch_phrase')
+    name = factory.Sequence(lambda n: f'{fake.catch_phrase()}.{n}')
     provider = factory.SubFactory(ProviderFactory)
 
     @factory.post_generation
@@ -82,7 +85,7 @@ class ProjectFactory(ODPModelFactory):
         model = Project
 
     id = factory.LazyAttribute(id_from_name)
-    name = factory.Faker('catch_phrase')
+    name = factory.Sequence(lambda n: f'{fake.catch_phrase()}.{n}')
 
     @factory.post_generation
     def collections(obj, create, collections):
@@ -99,7 +102,7 @@ class RoleFactory(ODPModelFactory):
         model = Role
         exclude = ('is_provider_role',)
 
-    id = factory.Faker('job')
+    id = factory.Sequence(lambda n: f'{fake.job()}.{n}')
 
     is_provider_role = False
     provider = factory.Maybe(
@@ -122,14 +125,14 @@ class ScopeFactory(ODPModelFactory):
     class Meta:
         model = Scope
 
-    id = factory.Faker('word')
+    id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
 
 
 class TagFactory(ODPModelFactory):
     class Meta:
         model = Tag
 
-    id = factory.SelfAttribute('scope.id')
+    id = factory.LazyAttribute(lambda tag: f'tag-{tag.scope.id}')
     public = True
     schema_uri = factory.Faker('uri')
     scope = factory.SubFactory(ScopeFactory)
@@ -141,7 +144,7 @@ class UserFactory(ODPModelFactory):
 
     id = factory.Faker('uuid4')
     name = factory.Faker('name')
-    email = factory.Faker('email')
+    email = factory.Sequence(lambda n: f'{fake.email()}.{n}')
     active = True
     verified = True
 
