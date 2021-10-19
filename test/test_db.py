@@ -30,14 +30,14 @@ from test.factories import (
 
 
 def test_db_setup():
-    migrate.systemdata.sync_system_scopes(Session)
+    migrate.systemdata.sync_system_scopes()
     Session.commit()
     result = Session.execute(select(Scope)).scalars()
     assert [row.id for row in result] == [s.value for s in ODPScope]
 
     ScopeFactory()  # create an arbitrary (external) scope, not for the sysadmin
 
-    migrate.systemdata.sync_admin_role(Session)
+    migrate.systemdata.sync_admin_role()
     Session.commit()
     result = Session.execute(select(Role)).scalar_one()
     assert (result.id, result.provider_id) == (migrate.systemdata.ODP_ADMIN_ROLE, None)
