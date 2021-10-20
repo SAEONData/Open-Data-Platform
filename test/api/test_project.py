@@ -18,7 +18,7 @@ def collection_ids(project):
     return tuple(collection.id for collection in project.collections)
 
 
-def assert_db_result(projects):
+def assert_db_state(projects):
     Session.expire_all()
     result = Session.execute(select(Project)).scalars().all()
     assert set((row.id, row.name, collection_ids(row)) for row in result) \
@@ -31,11 +31,23 @@ def assert_json_result(json, project):
     assert tuple(json['collection_ids']) == collection_ids(project)
 
 
+def assert_json_results(json, projects):
+    for n, project in enumerate(sorted(projects, key=lambda p: p.id)):
+        assert_json_result(json[n], project)
+
+
+def test_list_projects(api, project_batch):
+    r = api.get('/project/')
+    assert r.status_code == 200
+    assert_json_results(r.json(), project_batch)
+    assert_db_state(project_batch)
+
+
 def test_get_project(api, project_batch):
     r = api.get(f'/project/{project_batch[2].id}')
     assert r.status_code == 200
     assert_json_result(r.json(), project_batch[2])
-    assert_db_result(project_batch)
+    assert_db_state(project_batch)
 
 
 def test_create_project(api, project_batch):
@@ -47,7 +59,7 @@ def test_create_project(api, project_batch):
     ))
     assert r.status_code == 200
     assert r.json() is None
-    assert_db_result(project_batch)
+    assert_db_state(project_batch)
 
 
 def test_update_project(api, project_batch):
@@ -62,7 +74,7 @@ def test_update_project(api, project_batch):
     ))
     assert r.status_code == 200
     assert r.json() is None
-    assert_db_result(project_batch)
+    assert_db_state(project_batch)
 
 
 def test_delete_project(api, project_batch):
@@ -70,4 +82,4 @@ def test_delete_project(api, project_batch):
     del project_batch[2]
     assert r.status_code == 200
     assert r.json() is None
-    assert_db_result(project_batch)
+    assert_db_state(project_batch)
