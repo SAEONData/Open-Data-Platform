@@ -54,12 +54,11 @@ class ClientFactory(ODPModelFactory):
 
     @factory.post_generation
     def scopes(obj, create, scopes):
-        if not create:
-            return
         if scopes:
             for scope in scopes:
                 obj.scopes.append(scope)
-            Session.commit()
+            if create:
+                Session.commit()
 
 
 class CollectionFactory(ODPModelFactory):
@@ -72,12 +71,11 @@ class CollectionFactory(ODPModelFactory):
 
     @factory.post_generation
     def projects(obj, create, projects):
-        if not create:
-            return
         if projects:
             for project in projects:
                 obj.projects.append(project)
-            Session.commit()
+            if create:
+                Session.commit()
 
 
 class ProjectFactory(ODPModelFactory):
@@ -112,12 +110,11 @@ class RoleFactory(ODPModelFactory):
 
     @factory.post_generation
     def scopes(obj, create, scopes):
-        if not create:
-            return
         if scopes:
             for scope in scopes:
                 obj.scopes.append(scope)
-            Session.commit()
+            if create:
+                Session.commit()
 
 
 class ScopeFactory(ODPModelFactory):
@@ -149,9 +146,8 @@ class UserFactory(ODPModelFactory):
 
     @factory.post_generation
     def roles(obj, create, roles):
-        if not create:
-            return
         if roles:
             for role in roles:
                 obj.roles.append(role)
-            Session.commit()
+            if create:
+                Session.commit()
