@@ -4,15 +4,9 @@ from typing import List
 from pydantic import BaseModel
 
 
-class ProjectIn(BaseModel):
+class ProjectModel(BaseModel):
     id: str
     name: str
-
-
-class ProjectOut(BaseModel):
-    id: str
-    name: str
-    role_ids: List[str]
     collection_ids: List[str]
 
 

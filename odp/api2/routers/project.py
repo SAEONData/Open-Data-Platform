@@ -4,15 +4,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
-from odp.api2.models import ProjectIn, ProjectOut, ProjectSort
-from odp.api2.routers import Pager, Paging
+from odp import ODPScope
+from odp.api2.models import ProjectModel, ProjectSort
+from odp.api2.routers import Pager, Paging, Authorized, Authorize
 from odp.db import Session
-from odp.db.models import Project
+from odp.db.models import Project, Collection
 
 router = APIRouter()
 
 
-@router.get('/', response_model=List[ProjectOut])
+@router.get('/', response_model=List[ProjectModel])
 async def list_projects(
         pager: Pager = Depends(Paging(ProjectSort)),
 ):
@@ -24,10 +25,9 @@ async def list_projects(
     )
 
     projects = [
-        ProjectOut(
+        ProjectModel(
             id=row.Project.id,
             name=row.Project.name,
-            role_ids=[role.id for role in row.Project.roles],
             collection_ids=[collection.id for collection in row.Project.collections],
         )
         for row in Session.execute(stmt)
@@ -36,24 +36,23 @@ async def list_projects(
     return projects
 
 
-@router.get('/{project_id}', response_model=ProjectOut)
+@router.get('/{project_id}', response_model=ProjectModel)
 async def get_project(
         project_id: str,
 ):
     if not (project := Session.get(Project, project_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    return ProjectOut(
+    return ProjectModel(
         id=project.id,
         name=project.name,
-        role_ids=[role.id for role in project.roles],
         collection_ids=[collection.id for collection in project.collections],
     )
 
 
 @router.post('/')
 async def create_project(
-        project_in: ProjectIn,
+        project_in: ProjectModel,
 ):
     if Session.get(Project, project_in.id):
         raise HTTPException(HTTP_409_CONFLICT)
@@ -61,18 +60,26 @@ async def create_project(
     project = Project(
         id=project_in.id,
         name=project_in.name,
+        collections=[
+            Session.get(Collection, collection_id)
+            for collection_id in project_in.collection_ids
+        ],
     )
     project.save()
 
 
 @router.put('/')
 async def update_project(
-        project_in: ProjectIn,
+        project_in: ProjectModel,
 ):
     if not (project := Session.get(Project, project_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     project.name = project_in.name
+    project.collections = [
+        Session.get(Collection, collection_id)
+        for collection_id in project_in.collection_ids
+    ]
     project.save()
 
 

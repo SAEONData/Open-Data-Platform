@@ -3,10 +3,8 @@ import time
 import docker
 import pytest
 from sqlalchemy import text
-from starlette.testclient import TestClient
 
 import migrate.systemdata
-import odp.api2
 import odp.db
 from odp.config import config
 
@@ -57,10 +55,3 @@ def delete_all_data():
                 conn.execute(text(f'ALTER TABLE "{table}" DISABLE TRIGGER ALL'))
                 conn.execute(text(f'DELETE FROM "{table}"'))
                 conn.execute(text(f'ALTER TABLE "{table}" ENABLE TRIGGER ALL'))
-
-
-@pytest.fixture(scope='session')
-def api():
-    """An on-demand, session-scoped fixture that enables tests
-    to call directly into the ODP API."""
-    return TestClient(app=odp.api2.app)

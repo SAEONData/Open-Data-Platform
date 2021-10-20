@@ -89,12 +89,11 @@ class ProjectFactory(ODPModelFactory):
 
     @factory.post_generation
     def collections(obj, create, collections):
-        if not create:
-            return
         if collections:
             for collection in collections:
                 obj.collections.append(collection)
-            Session.commit()
+            if create:
+                Session.commit()
 
 
 class RoleFactory(ODPModelFactory):
