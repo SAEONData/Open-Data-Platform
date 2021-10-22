@@ -1,8 +1,6 @@
-import time
-
-import docker
 import pytest
 from sqlalchemy import text
+from sqlalchemy_utils import create_database, drop_database
 
 import migrate.systemdata
 import odp.db
@@ -11,26 +9,14 @@ from odp.config import config
 
 @pytest.fixture(scope='session', autouse=True)
 def database():
-    """An auto-use, run-once fixture that provides a clean,
-    containerized database with an up-to-date ODP schema."""
-    client = docker.from_env()
-    container = client.containers.run(
-        'postgres:11',
-        ports={5432: config.ODP.DB.PORT},
-        environment=dict(
-            PGDATA='/pgdata',
-            POSTGRES_DB=config.ODP.DB.NAME,
-            POSTGRES_USER=config.ODP.DB.USER,
-            POSTGRES_PASSWORD=config.ODP.DB.PASS,
-        ),
-        detach=True,
-    )
-    time.sleep(8)  # it takes 3-6 seconds for the DB to be ready
+    """An auto-use, run-once fixture that provides a clean
+    database with an up-to-date ODP schema."""
+    create_database(url := config.ODP.DB.URL)
     try:
         migrate.systemdata.create_schema()
         yield
     finally:
-        container.remove(v=True, force=True)  # v => remove volumes
+        drop_database(url)
 
 
 @pytest.fixture(autouse=True)

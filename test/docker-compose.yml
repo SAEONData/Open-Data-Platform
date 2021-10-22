@@ -1,0 +1,12 @@
+version: "3.5"
+
+services:
+  odp-test-db:
+    container_name: odp-test-db
+    image: postgres:11
+    ports:
+      - "7357:5432"
+    environment:
+      - POSTGRES_USER=${ODP_DB_USER}
+      - POSTGRES_PASSWORD=${ODP_DB_PASS}
+    restart: always
