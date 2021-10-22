@@ -5,7 +5,7 @@ from starlette.testclient import TestClient
 import odp.api2
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def api():
     token = OAuth2Session(
         client_id='odp.test',
