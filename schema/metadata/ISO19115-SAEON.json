@@ -1,0 +1,1215 @@
+{
+    "$id":"https://odp.saeon.ac.za/schema/metadata/ISO19115-SAEON",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+
+    "type": "object",
+    "required": [
+        "title",
+        "date",
+        "responsibleParties",
+        "extent",
+        "languages",
+        "characterSet",
+        "topicCategories",
+        "spatialResolution",
+        "abstract",
+        "distributionFormats",
+        "spatialRepresentationTypes",
+        "referenceSystemName",
+        "lineageStatement",
+        "onlineResources",
+        "fileIdentifier",
+        "metadataStandardName",
+        "metadataStandardVersion",
+        "metadataLanguage",
+        "metadataCharacterSet",
+        "metadataTimestamp",
+        "purpose",
+        "scope",
+        "status",
+        "constraints"
+    ],
+    "propertyNames": {
+        "enum": [
+            "doi",
+            "title",
+            "date",
+            "responsibleParties",
+            "extent",
+            "languages",
+            "characterSet",
+            "topicCategories",
+            "spatialResolution",
+            "abstract",
+            "distributionFormats",
+            "spatialRepresentationTypes",
+            "referenceSystemName",
+            "lineageStatement",
+            "onlineResources",
+            "fileIdentifier",
+            "metadataStandardName",
+            "metadataStandardVersion",
+            "metadataLanguage",
+            "metadataCharacterSet",
+            "metadataTimestamp",
+            "purpose",
+            "scope",
+            "status",
+            "descriptiveKeywords",
+            "constraints",
+            "relatedIdentifiers",
+            "titles",
+            "publicationYear",
+            "publisher",
+            "creators",
+            "contributors",
+            "geoLocations",
+            "subjects",
+            "descriptions",
+            "formats",
+            "immutableResource",
+            "linkedResources",
+            "identifiers",
+            "dates",
+            "types",
+            "rightsList",
+            "schemaVersion"
+        ]
+    },
+
+    "$defs": {
+        "responsiblePartyRole": {
+            "type": "string",
+            "enum": [
+                "resourceProvider",
+                "custodian",
+                "owner",
+                "user",
+                "distributor",
+                "originator",
+                "pointOfContact",
+                "principalInvestigator",
+                "processor",
+                "publisher"
+            ]
+        },
+        "onlineResource": {
+            "type": "object",
+            "properties": {
+                "linkage": {"type": "string", "format": "uri"},
+                "applicationProfile": {"type": "string"},
+                "name": {"type": "string"},
+                "description": {
+                    "type": "string",
+                    "enum": [
+                        "download",
+                        "information",
+                        "offlineAccess",
+                        "order",
+                        "search"
+                    ]
+                }
+            },
+            "required": ["linkage"],
+            "additionalProperties": false
+        },
+        "characterSetCode": {
+            "type": "string",
+            "enum": [
+                "ucs2",
+                "ucs4",
+                "utf7",
+                "utf8",
+                "utf16",
+                "UsASCII"
+            ]
+        },
+        "topicCategoryCode": {
+            "type": "string",
+            "enum": [
+                "farming",
+                "biota",
+                "boundaries",
+                "climatologyMeteorologyAtmosphere",
+                "economy",
+                "elevation",
+                "environment",
+                "geoscientificInformation",
+                "health",
+                "imageryBaseMapsEarth-Cover",
+                "intelligenceMilitary",
+                "inlandWaters",
+                "location",
+                "oceans",
+                "planningCadastre",
+                "society",
+                "structure",
+                "transportation",
+                "utilitiesCommunication"
+            ]
+        },
+        "spatialRepresentationTypeCode": {
+            "type": "string",
+            "enum": [
+                "vector",
+                "grid",
+                "textTable",
+                "tin",
+                "stereoModel",
+                "video",
+                "image"
+            ]
+        },
+        "scopeCode": {
+            "type": "string",
+            "enum": [
+                "attribute",
+                "attributeType",
+                "collectionHardware",
+                "collectionSession",
+                "dataset",
+                "series",
+                "nonGeographicDataset",
+                "dimensionGroup",
+                "feature",
+                "featureType",
+                "propertyType",
+                "fieldSession",
+                "software",
+                "service",
+                "model"
+            ]
+        },
+        "progressCode": {
+            "type": "string",
+            "enum": [
+                "completed",
+                "historicalArchive",
+                "obsolete",
+                "onGoing",
+                "planned",
+                "required",
+                "underDevelopment"
+            ]
+        },
+        "keywordType": {
+            "type": "string",
+            "enum": [
+                "discipline",
+                "place",
+                "stratum",
+                "temporal",
+                "theme",
+                "general"
+            ]
+        },
+        "restrictionCode": {
+            "type": "string",
+            "enum": [
+                "copyright",
+                "patent",
+                "patentPending",
+                "trademark",
+                "license",
+                "intellectualPropertyRights",
+                "restricted",
+                "otherRestrictions"
+            ]
+        },
+        "classificationCode": {
+            "type": "string",
+            "enum": [
+                "unclassified",
+                "restricted",
+                "confidential",
+                "secret",
+                "topSecret"
+            ]
+        },
+        "relatedIdentifierType": {
+            "type": "string",
+            "enum": [
+                "ARK",
+                "arXiv",
+                "bibcode",
+                "DOI",
+                "EAN13",
+                "EISSN",
+                "Handle",
+                "IGSN",
+                "ISBN",
+                "ISSN",
+                "ISTC",
+                "LISSN",
+                "LSID",
+                "PMID",
+                "PURL",
+                "UPC",
+                "URL",
+                "URN",
+                "w3id"
+            ]
+        },
+        "relationType": {
+            "type": "string",
+            "enum": [
+                "IsCitedBy",
+                "Cites",
+                "IsSupplementTo",
+                "IsSupplementedBy",
+                "IsContinuedBy",
+                "Continues",
+                "IsDescribedBy",
+                "Describes",
+                "HasMetadata",
+                "IsMetadataFor",
+                "HasVersion",
+                "IsVersionOf",
+                "IsNewVersionOf",
+                "IsPreviousVersionOf",
+                "IsPartOf",
+                "HasPart",
+                "IsReferencedBy",
+                "References",
+                "IsDocumentedBy",
+                "Documents",
+                "IsCompiledBy",
+                "Compiles",
+                "IsVariantFormOf",
+                "IsOriginalFormOf",
+                "IsIdenticalTo",
+                "IsReviewedBy",
+                "Reviews",
+                "IsDerivedFrom",
+                "IsSourceOf",
+                "IsRequiredBy",
+                "Requires",
+                "IsObsoletedBy",
+                "Obsoletes"
+            ]
+        }
+    },
+
+    "mapInit": {
+        "titles": [],
+        "publicationYear": null,
+        "publisher": null,
+        "creators": [],
+        "contributors": [],
+        "geoLocations": [],
+        "subjects": [],
+        "descriptions": [],
+        "formats": [],
+        "immutableResource": {},
+        "linkedResources": [],
+        "identifiers": [],
+        "dates": [],
+        "types": {},
+        "rightsList": [],
+        "schemaVersion": "http://datacite.org/schema/kernel-4"
+    },
+
+    "properties": {
+        "doi": {
+            "type": "string",
+            "pattern": "^10\\.\\d{4,}(\\.\\d+)*/[-._;()/:a-zA-Z0-9]+$"
+        },
+        "title": {
+            "type": "string",
+            "mapTo": {
+                "target": "/titles/-",
+                "value": {
+                    "type": "object",
+                    "properties": {
+                        "title": {"type": "string"}
+                    }
+                }
+            }
+        },
+        "date": {
+            "type": "string",
+            "format": "date",
+            "mapTo": {
+                "target": "/publicationYear",
+                "value": {
+                    "type": "integer",
+                    "converter": "date-to-year"
+                }
+            }
+        },
+        "responsibleParties": {
+            "type": "array",
+            "allOf": [
+                {"contains": {"properties": {"role": {"anyOf": [{"const": "originator"}, {"const": "principalInvestigator"}]}}}},
+                {"contains": {"properties": {"role": {"const": "publisher"}}}},
+                {"contains": {"properties": {"role": {"const": "pointOfContact"}}, "required": ["contactInfo"]}}
+            ],
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "individualName": {"type": "string"},
+                    "organizationName": {"type": "string"},
+                    "positionName": {"type": "string"},
+                    "contactInfo": {"type": "string"},
+                    "role": {"$ref": "#/$defs/responsiblePartyRole"},
+                    "onlineResource": {"$ref": "#/$defs/onlineResource"}
+                },
+                "additionalProperties": false,
+                "required": ["organizationName", "role"],
+                "if": {
+                    "properties": {
+                        "role": {"const": "publisher"}
+                    }
+                },
+                "else": {
+                    "$comment": "individualName is required only for a non-publisher role",
+                    "required": ["individualName"]
+                },
+                "oneOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "role": {"const": "publisher"}
+                            }
+                        },
+                        "then": {
+                            "mapTo": {
+                                "target": "/publisher",
+                                "value": {
+                                    "type": "string",
+                                    "source": "organizationName"
+                                }
+                            }
+                        },
+                        "else": false
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "role": {
+                                    "oneOf": [
+                                        {"const": "originator"},
+                                        {"const": "principalInvestigator"}
+                                    ]
+                                }
+                            }
+                        },
+                        "then": {
+                            "mapTo": {
+                                "target": "/creators/-",
+                                "value": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "source": "individualName"
+                                        },
+                                        "nameIdentifiers": {
+                                            "type": "array",
+                                            "source": "onlineResource",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "nameIdentifier": {"type": "string", "source": "linkage"},
+                                                    "nameIdentifierScheme": {"type": "string", "source": "linkage", "converter": "link-to-base-url"},
+                                                    "schemeURI": {"type": "string", "source": "linkage", "converter": "link-to-base-url"}
+                                                }
+                                            }
+                                        },
+                                        "affiliation": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "affiliation": {
+                                                        "type": "string",
+                                                        "source": ["organizationName", "positionName", "contactInfo"],
+                                                        "separator": "\n"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "else": false
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "role": {
+                                    "oneOf": [
+                                        {"const": "resourceProvider"},
+                                        {"const": "custodian"},
+                                        {"const": "owner"},
+                                        {"const": "distributor"},
+                                        {"const": "pointOfContact"},
+                                        {"const": "processor"}
+                                    ]
+                                }
+                            }
+                        },
+                        "then": {
+                            "mapTo": {
+                                "target": "/contributors/-",
+                                "value": {
+                                    "type": "object",
+                                    "properties": {
+                                        "contributorType": {
+                                            "type": "string",
+                                            "source": "role",
+                                            "converter": {
+                                                "resourceProvider": "HostingInstitution",
+                                                "custodian": "DataManager",
+                                                "owner": "RightsHolder",
+                                                "distributor": "Distributor",
+                                                "pointOfContact": "ContactPerson",
+                                                "processor": "ProjectMember"
+                                            }
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "source": "individualName"
+                                        },
+                                        "nameIdentifiers": {
+                                            "type": "array",
+                                            "source": "onlineResource",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "nameIdentifier": {"type": "string", "source": "linkage"},
+                                                    "nameIdentifierScheme": {"type": "string", "source": "linkage", "converter": "link-to-base-url"},
+                                                    "schemeURI": {"type": "string", "source": "linkage", "converter": "link-to-base-url"}
+                                                }
+                                            }
+                                        },
+                                        "affiliation": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "affiliation": {
+                                                        "type": "string",
+                                                        "source": ["organizationName", "positionName", "contactInfo"],
+                                                        "separator": "\n"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "else": false
+                    }
+                ]
+            }
+        },
+        "extent": {
+            "type": "object",
+            "required": ["geographicElements", "temporalElement"],
+            "properties": {
+                "geographicElements": {
+                    "$comment": "Array of geographic elements",
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                        "$comment": "A geographic element",
+                        "type": "object",
+                        "anyOf": [
+                            {"required": ["geographicIdentifier"]},
+                            {"required": ["boundingBox"]}
+                        ],
+                        "properties": {
+                            "extentTypeCode": {
+                                "$comment": "Indicates whether bounding polygon includes or excludes data: true = inclusion (the default if not specified); false = exclusion",
+                                "type": "boolean"
+                            },
+                            "boundingPolygon": {
+                                "$comment": "Bounding polygon: an array of one or more polygons",
+                                "type": "array",
+                                "minItems": 1,
+                                "uniqueItems": true,
+                                "items": {
+                                    "$comment": "A polygon",
+                                    "type": "object",
+                                    "required": ["polygon"],
+                                    "properties": {
+                                        "polygon": {
+                                            "$comment": "An array of at least 4 non-aligned points, with the first and last point coinciding",
+                                            "type": "array",
+                                            "minItems": 4,
+                                            "items": {
+                                                "$comment": "A geographic point",
+                                                "type": "object",
+                                                "required": ["longitude", "latitude"],
+                                                "properties": {
+                                                    "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+                                                    "latitude": {"type": "number", "minimum": -90, "maximum": 90}
+                                                },
+                                                "additionalProperties": false
+                                            }
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                }
+                            },
+                            "boundingBox": {
+                                "$comment": "Bounding box: approximate geographic position of dataset",
+                                "type": "object",
+                                "required": ["westBoundLongitude", "eastBoundLongitude", "southBoundLatitude", "northBoundLatitude"],
+                                "properties": {
+                                    "westBoundLongitude": {"type": "number", "minimum": -180, "maximum": 180},
+                                    "eastBoundLongitude": {"type": "number", "minimum": -180, "maximum": 180},
+                                    "southBoundLatitude": {"type": "number", "minimum": -90, "maximum": 90},
+                                    "northBoundLatitude": {"type": "number", "minimum": -90, "maximum": 90}
+                                },
+                                "additionalProperties": false
+                            },
+                            "geographicIdentifier": {"type": "string"}
+                        },
+                        "additionalProperties": false
+                    },
+                    "mapTo": {
+                        "target": "/geoLocations/-",
+                        "value": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "geoLocationPlace": {"type": "string", "source": "geographicIdentifier"},
+                                    "geoLocationBox": {
+                                        "type": "object",
+                                        "source": "boundingBox",
+                                        "properties": {
+                                            "westBoundLongitude": {"type": "number", "source": "westBoundLongitude"},
+                                            "eastBoundLongitude": {"type": "number", "source": "eastBoundLongitude"},
+                                            "southBoundLatitude": {"type": "number", "source": "southBoundLatitude"},
+                                            "northBoundLatitude": {"type": "number", "source": "northBoundLatitude"}
+                                        }
+                                    },
+                                    "geoLocationPolygons": {
+                                        "type": "array",
+                                        "source": "boundingPolygon",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "polygonPoints": {
+                                                    "type": "array",
+                                                    "source": "polygon",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "pointLongitude": {"type": "number", "source": "longitude"},
+                                                            "pointLatitude": {"type": "number", "source": "latitude"}
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "verticalElement": {
+                    "type": "object",
+                    "required": ["minimumValue", "maximumValue", "unitOfMeasure", "verticalDatum"],
+                    "properties": {
+                        "minimumValue": {
+                            "type": "number",
+                            "mapTo": {
+                                "target": "/subjects/-",
+                                "value": {
+                                    "type": "object",
+                                    "properties": {
+                                        "subject": {"type": "string"},
+                                        "subjectScheme": {"type": "string", "const": "SANS1878 Vertical Extent: minimumValue"}
+                                    }
+                                }
+                            }
+                        },
+                        "maximumValue": {
+                            "type": "number",
+                            "mapTo": {
+                                "target": "/subjects/-",
+                                "value": {
+                                    "type": "object",
+                                    "properties": {
+                                        "subject": {"type": "string"},
+                                        "subjectScheme": {"type": "string", "const": "SANS1878 Vertical Extent: maximumValue"}
+                                    }
+                                }
+                            }
+                        },
+                        "unitOfMeasure": {
+                            "type": "string",
+                            "mapTo": {
+                                "target": "/subjects/-",
+                                "value": {
+                                    "type": "object",
+                                    "properties": {
+                                        "subject": {"type": "string"},
+                                        "subjectScheme": {"type": "string", "const": "SANS1878 Vertical Extent: unitOfMeasure"}
+                                    }
+                                }
+                            }
+                        },
+                        "verticalDatum": {
+                            "type": "string",
+                            "mapTo": {
+                                "target": "/subjects/-",
+                                "value": {
+                                    "type": "object",
+                                    "properties": {
+                                        "subject": {"type": "string"},
+                                        "subjectScheme": {"type": "string", "const": "SANS1878 Vertical Extent: verticalDatum"}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "temporalElement": {
+                    "type": "object",
+                    "required": ["startTime", "endTime"],
+                    "properties": {
+                        "startTime": {"type": "string", "format": "datetime"},
+                        "endTime": {"type": "string", "format": "datetime"}
+                    },
+                    "additionalProperties": false,
+                    "mapTo": {
+                        "target": "/dates/-",
+                        "value": {
+                            "type": "object",
+                            "properties": {
+                                "date": {"type": "string", "source": ["startTime", "endTime"], "separator": "/"},
+                                "dateType": {"type": "string", "const": "Valid"}
+                            }
+                        }
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "languages": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "characterSet": {
+            "$ref": "#/$defs/characterSetCode"
+        },
+        "topicCategories": {
+            "type": "array",
+            "items": {"$ref": "#/$defs/topicCategoryCode"},
+            "minItems": 1,
+            "uniqueItems": true,
+            "mapTo": {
+                "target": "/subjects/-",
+                "value": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "subject": {"type": "string"},
+                            "subjectScheme": {"type": "string", "const": "SANS1878 Dataset Topic Category"}
+                        }
+                    }
+                }
+            }
+        },
+        "spatialResolution": {
+            "type": "string"
+        },
+        "abstract": {
+            "type": "string",
+            "mapTo": {
+                "target": "/descriptions/-",
+                "value": {
+                    "type": "object",
+                    "properties": {
+                        "description": {"type": "string"},
+                        "descriptionType": {"type": "string", "const": "Abstract"}
+                    }
+                }
+            }
+        },
+        "distributionFormats": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "formatName": {"type": "string"},
+                    "formatVersion": {"type": "string"}
+                },
+                "required": ["formatName"],
+                "additionalProperties": false
+            },
+            "minItems": 1,
+            "uniqueItems": true,
+            "mapTo": {
+                "target": "/formats/-",
+                "value": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "source": ["formatName", "formatVersion"],
+                        "separator": " "
+                    }
+                }
+            }
+        },
+        "spatialRepresentationTypes": {
+            "type": "array",
+            "items": {"$ref": "#/$defs/spatialRepresentationTypeCode"},
+            "minItems": 1,
+            "uniqueItems": true,
+            "mapTo": {
+                "target": "/subjects/-",
+                "value": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "subject": {"type": "string"},
+                            "subjectScheme": {"type": "string", "const": "SANS1878 Spatial Representation Type"}
+                        }
+                    }
+                }
+            }
+        },
+        "referenceSystemName": {
+            "type": "object",
+            "properties": {
+                "codeSpace": {"type": "string"},
+                "version": {"type": "string"}
+            },
+            "required": ["codeSpace"],
+            "additionalProperties": false,
+            "mapTo": {
+                "target": "/subjects/-",
+                "value": {
+                    "type": "object",
+                    "properties": {
+                        "subject": {"type": "string", "source": ["codeSpace", "version"], "separator": " "},
+                        "subjectScheme": {"type": "string", "const": "SANS1878 Reference System"}
+                    }
+                }
+            }
+        },
+        "lineageStatement": {
+            "type": "string",
+            "mapTo": {
+                "target": "/descriptions/-",
+                "value": {
+                    "type": "object",
+                    "properties": {
+                        "description": {"type": "string"},
+                        "descriptionType": {"type": "string", "const": "Methods"}
+                    }
+                }
+            }
+        },
+        "onlineResources": {
+            "type": "array",
+            "items": {
+                "allOf": [
+                    {"$ref": "#/$defs/onlineResource"},
+                    {
+                        "required": ["description"],
+                        "oneOf": [
+                            {
+                                "$comment": "case 1: Download link with an (optional) application profile specifying a single file type",
+                                "if": {
+                                    "properties": {
+                                        "description": {"const": "download"},
+                                        "applicationProfile": {"pattern": "^\\w+$"}
+                                    }
+                                },
+                                "then": {
+                                    "mapTo": {
+                                        "target": "/immutableResource",
+                                        "value": {
+                                            "type": "object",
+                                            "properties": {
+                                                "resourceName": {"type": "string", "source": "name"},
+                                                "resourceDownload": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "downloadURL": {"type": "string", "source": "linkage"},
+                                                        "fileFormat": {"type": "string", "source": "applicationProfile"}
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "else": false
+                            },
+                            {
+                                "$comment": "case 2: Download link with an application profile that specifies a list of file types, implying an archive",
+                                "if": {
+                                    "properties": {
+                                        "description": {"const": "download"},
+                                        "applicationProfile": {"pattern": "^\\[\\s*\\w+\\s*(,\\s*\\w+\\s*)*]$"}
+                                    },
+                                    "required": ["applicationProfile"]
+                                },
+                                "then": {
+                                    "mapTo": {
+                                        "target": "/immutableResource",
+                                        "value": {
+                                            "type": "object",
+                                            "properties": {
+                                                "resourceName": {"type": "string", "source": "name"},
+                                                "resourceDownload": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "downloadURL": {"type": "string", "source": "linkage"},
+                                                        "archive": {"type": "boolean", "const": true},
+                                                        "archiveFormats": {
+                                                            "type": "array",
+                                                            "source": "applicationProfile",
+                                                            "converter": "string-to-array"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "else": false
+                            },
+                            {
+                                "$comment": "case 3: Query link with an (optional) application profile constrained to the serverType vocabulary",
+                                "if": {
+                                    "properties": {
+                                        "description": {"const": "search"},
+                                        "applicationProfile": {"enum": ["GeoServer", "Esri", "THREDDS"]}
+                                    }
+                                },
+                                "then": {
+                                    "mapTo": {
+                                        "target": "/linkedResources/-",
+                                        "value": {
+                                            "type": "object",
+                                            "properties": {
+                                                "resourceURL": {"type": "string", "source": "linkage"},
+                                                "resourceName": {"type": "string", "source": "name"},
+                                                "linkedResourceType": {"type": "string", "const": "Query"},
+                                                "serverType": {
+                                                    "type": "string",
+                                                    "source": "applicationProfile"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "else": false
+                            },
+                            {
+                                "$comment": "case 4: Other supported types of linked resource",
+                                "if": {
+                                    "properties": {
+                                        "description": {"enum": ["information", "offlineAccess", "order"]}
+                                    }
+                                },
+                                "then": {
+                                    "mapTo": {
+                                        "target": "/linkedResources/-",
+                                        "value": {
+                                            "type": "object",
+                                            "properties": {
+                                                "resourceURL": {"type": "string", "source": "linkage"},
+                                                "resourceName": {"type": "string", "source": "name"},
+                                                "linkedResourceType": {
+                                                    "type": "string",
+                                                    "source": "description",
+                                                    "converter": {
+                                                        "information": "Information",
+                                                        "offlineAccess": "OfflineAccess",
+                                                        "order": "ConditionalAccess"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "else": false
+                            }
+                        ]
+                    }
+                ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "fileIdentifier": {
+            "type": "string",
+            "mapTo": {
+                "target": "/identifiers/-",
+                "value": {
+                    "type": "object",
+                    "properties": {
+                        "identifier": {"type": "string"},
+                        "identifierType": {"type": "string", "const": "AccessionID"}
+                    }
+                }
+            }
+        },
+        "metadataStandardName": {
+            "type": "string",
+            "const": "ISO19115"
+        },
+        "metadataStandardVersion": {
+            "type": "string",
+            "const": "ISO19115 - SAEON Profile"
+        },
+        "metadataLanguage": {
+            "type": "string"
+        },
+        "metadataCharacterSet": {
+            "$ref": "#/$defs/characterSetCode"
+        },
+        "metadataTimestamp": {
+            "type": "string",
+            "format": "datetime",
+            "mapTo": {
+                "target": "/dates/-",
+                "value": {
+                    "type": "object",
+                    "properties": {
+                        "date": {"type": "string"},
+                        "dateType": {"type": "string", "const": "Issued"}
+                    }
+                }
+            }
+        },
+        "purpose": {
+            "type": "string",
+            "mapTo": {
+                "target": "/descriptions/-",
+                "value": {
+                    "type": "object",
+                    "properties": {
+                        "description": {"type": "string"},
+                        "descriptionType": {"type": "string", "const": "Other"}
+                    }
+                }
+            }
+        },
+        "scope": {
+            "allOf": [
+                {"$ref": "#/$defs/scopeCode"},
+                {"mapTo": {
+                        "target": "/types",
+                        "value": {
+                            "type": "object",
+                            "properties": {
+                                "resourceType": {
+                                    "type": "string"
+                                },
+                                "resourceTypeGeneral": {
+                                    "type": "string",
+                                    "converter": {
+                                        "attribute": "Other",
+                                        "attributeType": "Other",
+                                        "collectionHardware": "Other",
+                                        "collectionSession": "Other",
+                                        "dataset": "Dataset",
+                                        "series": "Other",
+                                        "nonGeographicDataset": "Other",
+                                        "dimensionGroup": "Other",
+                                        "feature": "Other",
+                                        "featureType": "Other",
+                                        "propertyType": "Other",
+                                        "fieldSession": "Other",
+                                        "software": "Software",
+                                        "service": "Service",
+                                        "model": "Model"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "status": {
+            "type": "array",
+            "items": {"$ref": "#/$defs/progressCode"},
+            "minItems": 1,
+            "uniqueItems": true,
+            "mapTo": {
+                "target": "/subjects/-",
+                "value": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "subject": {"type": "string"},
+                            "subjectScheme": {"type": "string", "const": "SANS1878 Status"}
+                        }
+                    }
+                }
+            }
+        },
+        "descriptiveKeywords": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "keyword": {"type": "string"},
+                    "keywordType": {"$ref": "#/$defs/keywordType"}
+                },
+                "required": ["keyword", "keywordType"],
+                "additionalProperties": false
+            },
+            "uniqueItems": true,
+            "mapTo": {
+                "target": "/subjects/-",
+                "value": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "subject": {"type": "string", "source": "keyword"},
+                            "subjectScheme": {
+                                "type": "string",
+                                "source": "keywordType",
+                                "converter": {
+                                    "discipline": "SANS1878 keywordType discipline",
+                                    "place": "SANS1878 keywordType place",
+                                    "stratum": "SANS1878 keywordType stratum",
+                                    "temporal": "SANS1878 keywordType temporal",
+                                    "theme": "SANS1878 keywordType theme",
+                                    "general": "SANS1878 keywordType general"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "constraints": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "useLimitations": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "uniqueItems": true,
+                        "mapTo": {
+                            "target": "/subjects/-",
+                            "value": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "subject": {"type": "string"},
+                                        "subjectScheme": {"type": "string", "const": "SANS1878 Use Limitation"}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "accessConstraints": {
+                        "type": "array",
+                        "items": {"$ref": "#/$defs/restrictionCode"},
+                        "uniqueItems": true,
+                        "mapTo": {
+                            "target": "/subjects/-",
+                            "value": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "subject": {"type": "string"},
+                                        "subjectScheme": {"type": "string", "const": "SANS1878 Constraint"}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "useConstraints": {
+                        "type": "array",
+                        "items": {"$ref": "#/$defs/restrictionCode"},
+                        "uniqueItems": true,
+                        "mapTo": {
+                            "target": "/subjects/-",
+                            "value": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "subject": {"type": "string"},
+                                        "subjectScheme": {"type": "string", "const": "SANS1878 Constraint"}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "classification": {
+                        "allOf": [
+                            {"$ref": "#/$defs/classificationCode"},
+                            {"mapTo": {
+                                "target": "/subjects/-",
+                                "value": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "subject": {"type": "string"},
+                                            "subjectScheme": {"type": "string", "const": "SANS1878 Security Classification"}
+                                        }
+                                    }
+                                }
+                            }}
+                        ]
+                    },
+                    "rightsURI": {"type": "string"},
+                    "rights": {"type": "string"}
+                },
+                "required": ["rightsURI", "rights"],
+                "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 1,
+            "mapTo": {
+                "target": "/rightsList/-",
+                "value": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "rights": {"type": "string", "source": "rights"},
+                            "rightsURI": {"type": "string", "source": "rightsURI"}
+                        }
+                    }
+                }
+            }
+        },
+        "relatedIdentifiers": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "relatedIdentifier": {"type": "string"},
+                    "relatedIdentifierType": {"$ref": "#/$defs/relatedIdentifierType"},
+                    "relationType": {"$ref": "#/$defs/relationType"}
+                },
+                "additionalProperties": false,
+                "required": ["relatedIdentifier", "relatedIdentifierType", "relationType"]
+            },
+            "uniqueItems": true
+        }
+    }
+}

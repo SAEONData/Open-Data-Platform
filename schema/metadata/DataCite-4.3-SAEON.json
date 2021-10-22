@@ -1,0 +1,599 @@
+{
+    "$id":"https://odp.saeon.ac.za/schema/metadata/DataCite-4.3-SAEON",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+
+    "type": "object",
+    "required": [
+        "creators",
+        "titles",
+        "publisher",
+        "publicationYear",
+        "subjects",
+        "dates",
+        "types",
+        "rightsList",
+        "descriptions",
+        "schemaVersion"
+    ],
+    "additionalProperties": false,
+
+    "$defs": {
+        "nameType": {
+            "type": "string",
+            "enum": [
+                "Organizational",
+                "Personal"
+            ]
+        },
+        "nameIdentifiers": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "nameIdentifier": {"type": "string"},
+                    "nameIdentifierScheme": {"type": "string"},
+                    "schemeURI": {"type": "string", "format": "uri"}
+                },
+                "additionalProperties": false,
+                "required": ["nameIdentifier", "nameIdentifierScheme"]
+            },
+            "uniqueItems": true
+        },
+        "affiliation": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "affiliation": {"type": "string"},
+                    "affiliationIdentifier": {"type": "string"},
+                    "affiliationIdentifierScheme": {"type": "string"},
+                    "schemeURI": {"type": "string", "format": "uri"}
+                },
+                "additionalProperties": false,
+                "required": ["affiliation"],
+                "dependencies": {
+                    "affiliationIdentifier": ["affiliationIdentifierScheme"]
+                }
+            },
+            "uniqueItems": true
+        },
+        "titleType": {
+            "type": "string",
+            "enum": [
+                "AlternativeTitle",
+                "Subtitle",
+                "TranslatedTitle",
+                "Other"
+            ]
+        },
+        "contributorType": {
+            "type": "string",
+            "enum": [
+                "ContactPerson",
+                "DataCollector",
+                "DataCurator",
+                "DataManager",
+                "Distributor",
+                "Editor",
+                "HostingInstitution",
+                "Producer",
+                "ProjectLeader",
+                "ProjectManager",
+                "ProjectMember",
+                "RegistrationAgency",
+                "RegistrationAuthority",
+                "RelatedPerson",
+                "Researcher",
+                "ResearchGroup",
+                "RightsHolder",
+                "Sponsor",
+                "Supervisor",
+                "WorkPackageLeader",
+                "Other"
+            ]
+        },
+        "date": {
+            "type": "string",
+            "anyOf": [
+                {"format": "year"},
+                {"format": "yearmonth"},
+                {"format": "date"},
+                {"format": "datetime"},
+                {"format": "year-range"},
+                {"format": "yearmonth-range"},
+                {"format": "date-range"},
+                {"format": "datetime-range"}
+            ]
+        },
+        "dateType": {
+            "type": "string",
+            "enum": [
+                "Accepted",
+                "Available",
+                "Copyrighted",
+                "Collected",
+                "Created",
+                "Issued",
+                "Submitted",
+                "Updated",
+                "Valid",
+                "Withdrawn",
+                "Other"
+            ]
+        },
+        "resourceTypeGeneral": {
+            "type": "string",
+            "enum": [
+                "Audiovisual",
+                "Collection",
+                "DataPaper",
+                "Dataset",
+                "Event",
+                "Image",
+                "InteractiveResource",
+                "Model",
+                "PhysicalObject",
+                "Service",
+                "Software",
+                "Sound",
+                "Text",
+                "Workflow",
+                "Other"
+            ]
+        },
+        "relatedIdentifierType": {
+            "type": "string",
+            "enum": [
+                "ARK",
+                "arXiv",
+                "bibcode",
+                "DOI",
+                "EAN13",
+                "EISSN",
+                "Handle",
+                "IGSN",
+                "ISBN",
+                "ISSN",
+                "ISTC",
+                "LISSN",
+                "LSID",
+                "PMID",
+                "PURL",
+                "UPC",
+                "URL",
+                "URN",
+                "w3id"
+            ]
+        },
+        "relationType": {
+            "type": "string",
+            "enum": [
+                "IsCitedBy",
+                "Cites",
+                "IsSupplementTo",
+                "IsSupplementedBy",
+                "IsContinuedBy",
+                "Continues",
+                "IsDescribedBy",
+                "Describes",
+                "HasMetadata",
+                "IsMetadataFor",
+                "HasVersion",
+                "IsVersionOf",
+                "IsNewVersionOf",
+                "IsPreviousVersionOf",
+                "IsPartOf",
+                "HasPart",
+                "IsReferencedBy",
+                "References",
+                "IsDocumentedBy",
+                "Documents",
+                "IsCompiledBy",
+                "Compiles",
+                "IsVariantFormOf",
+                "IsOriginalFormOf",
+                "IsIdenticalTo",
+                "IsReviewedBy",
+                "Reviews",
+                "IsDerivedFrom",
+                "IsSourceOf",
+                "IsRequiredBy",
+                "Requires",
+                "IsObsoletedBy",
+                "Obsoletes"
+            ]
+        },
+        "descriptionType": {
+            "type": "string",
+            "enum": [
+                "Abstract",
+                "Methods",
+                "SeriesInformation",
+                "TableOfContents",
+                "TechnicalInfo",
+                "Other"
+            ]
+        },
+        "geoLocationPoint": {
+            "type": "object",
+            "properties": {
+                "pointLongitude": {"$ref": "#/$defs/longitude"},
+                "pointLatitude": {"$ref": "#/$defs/latitude"}
+            },
+            "additionalProperties": false,
+            "required": ["pointLongitude", "pointLatitude"]
+        },
+        "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+        },
+        "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+        },
+        "funderIdentifierType": {
+            "type": "string",
+            "enum": [
+                "ISNI",
+                "GRID",
+                "Crossref Funder ID",
+                "ROR",
+                "Other"
+            ]
+        },
+        "linkedResourceType": {
+            "type": "string",
+            "enum": [
+                "Information",
+                "OfflineAccess",
+                "ConditionalAccess",
+                "Query",
+                "Metadata",
+                "Ethics",
+                "QualityAssessment"
+            ]
+        },
+        "serverType": {
+            "type": "string",
+            "enum": [
+                "GeoServer",
+                "Esri",
+                "THREDDS"
+            ]
+        },
+        "fileDownload": {
+            "type": "object",
+            "properties": {
+                "downloadURL": {"type": "string", "format": "uri"},
+                "fileFormat": {"type": "string"},
+                "fileName": {"type": "string"},
+                "fileSize": {"type": "integer"},
+                "fileChecksum": {"type": "string"},
+                "checksumAlgorithm": {"type": "string"},
+                "archive": {"type": "boolean"},
+                "archivedFormats": {"type": "array", "items": {"type": "string"}}
+            },
+            "required": ["downloadURL"],
+            "dependencies": {
+                "fileChecksum": ["checksumAlgorithm"]
+            },
+            "additionalProperties": false
+        }
+    },
+
+    "properties": {
+        "doi": {
+            "type": "string",
+            "pattern": "^10\\.\\d{4,}(\\.\\d+)*/[-._;()/:a-zA-Z0-9]+$"
+        },
+        "creators": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "nameType": {"$ref": "#/$defs/nameType"},
+                    "givenName": {"type": "string"},
+                    "familyName": {"type": "string"},
+                    "nameIdentifiers": {"$ref": "#/$defs/nameIdentifiers"},
+                    "affiliation": {"$ref": "#/$defs/affiliation"},
+                    "lang": {"type": "string"}
+                },
+                "additionalProperties": false,
+                "required": ["name"]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "titles": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "titleType": {"$ref": "#/$defs/titleType"},
+                    "lang": {"type": "string"}
+                },
+                "additionalProperties": false,
+                "required": ["title"]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "publisher": {
+            "type": "string"
+        },
+        "publicationYear": {
+            "type": "integer"
+        },
+        "subjects": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "subject": {"type": "string"},
+                    "subjectScheme": {"type": "string"},
+                    "schemeURI": {"type": "string", "format": "uri"},
+                    "valueURI": {"type": "string", "format": "uri"},
+                    "lang": {"type": "string"}
+                },
+                "additionalProperties": false,
+                "required": ["subject"]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "contributors": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "contributorType": {"$ref": "#/$defs/contributorType"},
+                    "name": {"type": "string"},
+                    "nameType": {"$ref": "#/$defs/nameType"},
+                    "givenName": {"type": "string"},
+                    "familyName": {"type": "string"},
+                    "nameIdentifiers": {"$ref": "#/$defs/nameIdentifiers"},
+                    "affiliation": {"$ref": "#/$defs/affiliation"},
+                    "lang": {"type": "string"}
+                },
+                "additionalProperties": false,
+                "required": ["contributorType", "name"]
+            },
+            "uniqueItems": true
+        },
+        "dates": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "date": {"$ref": "#/$defs/date"},
+                    "dateType": {"$ref": "#/$defs/dateType"},
+                    "dateInformation": {"type": "string"}
+                },
+                "additionalProperties": false,
+                "required": ["date", "dateType"]
+            },
+            "uniqueItems": true,
+            "contains": {
+                "properties": {
+                    "dateType": {"const": "Valid"}
+                }
+            }
+        },
+        "language": {
+            "type": "string",
+            "$comment": "Primary language of the resource. Allowed values are taken from  IETF BCP 47, ISO 639-1 language codes."
+        },
+        "types": {
+            "type": "object",
+            "properties": {
+                "resourceType": {"type": "string"},
+                "resourceTypeGeneral": {"$ref": "#/$defs/resourceTypeGeneral"}
+            },
+            "required": ["resourceType", "resourceTypeGeneral"]
+        },
+        "identifiers": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "identifier": {"type": "string"},
+                    "identifierType": {"type": "string"}
+                },
+                "additionalProperties": false,
+                "required": ["identifier", "identifierType"]
+            },
+            "uniqueItems": true
+        },
+        "relatedIdentifiers": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "relatedIdentifier": {"type": "string"},
+                    "relatedIdentifierType": {"$ref": "#/$defs/relatedIdentifierType"},
+                    "relationType": {"$ref": "#/$defs/relationType"},
+                    "relatedMetadataScheme": {"type": "string"},
+                    "schemeURI": {"type": "string", "format": "uri"},
+                    "schemeType": {"type": "string"},
+                    "resourceTypeGeneral": {"$ref": "#/$defs/resourceTypeGeneral"}
+                },
+                "additionalProperties": false,
+                "required": ["relatedIdentifier", "relatedIdentifierType", "relationType"],
+                "if": {
+                    "properties": {
+                        "relationType": {"enum": ["HasMetadata", "IsMetadataFor"]}
+                    }
+                },
+                "else": {
+                    "$comment": "these properties may only be used with relation types HasMetadata/IsMetadataFor",
+                    "properties": {
+                        "relatedMetadataScheme": false,
+                        "schemeURI": false,
+                        "schemeType": false
+                    }
+                }
+            },
+            "uniqueItems": true
+        },
+        "sizes": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "uniqueItems": true
+        },
+        "formats": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "uniqueItems": true
+        },
+        "version": {
+            "type": "string"
+        },
+        "rightsList": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "rights": {"type": "string"},
+                    "rightsURI": {"type": "string", "format": "uri"},
+                    "rightsIdentifier": {"type": "string"},
+                    "rightsIdentifierScheme": {"type": "string"},
+                    "schemeURI": {"type": "string", "format": "uri"},
+                    "lang": {"type": "string"}
+                },
+                "additionalProperties": false,
+                "required": ["rights", "rightsURI"]
+            },
+            "minItems": 1,
+            "maxItems": 1
+        },
+        "descriptions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "description": {"type": "string"},
+                    "descriptionType": {"$ref": "#/$defs/descriptionType"},
+                    "lang": {"type": "string"}
+                },
+                "additionalProperties": false,
+                "required": ["description", "descriptionType"]
+            },
+            "uniqueItems": true,
+            "contains": {
+                "properties": {
+                    "descriptionType": {"const": "Abstract"}
+                }
+            }
+        },
+        "geoLocations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "geoLocationPlace": {"type": "string"},
+                    "geoLocationPoint": {"$ref": "#/$defs/geoLocationPoint"},
+                    "geoLocationBox": {
+                        "type": "object",
+                        "properties": {
+                            "westBoundLongitude": {"$ref": "#/$defs/longitude"},
+                            "eastBoundLongitude": {"$ref": "#/$defs/longitude"},
+                            "southBoundLatitude": {"$ref": "#/$defs/latitude"},
+                            "northBoundLatitude": {"$ref": "#/$defs/latitude"}
+                        },
+                        "additionalProperties": false,
+                        "required": ["westBoundLongitude", "eastBoundLongitude", "southBoundLatitude", "northBoundLatitude"]
+                    },
+                    "geoLocationPolygons": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "polygonPoints": {
+                                    "type": "array",
+                                    "items": {"$ref": "#/$defs/geoLocationPoint"},
+                                    "minItems": 4
+                                },
+                                "inPolygonPoint": {"$ref": "#/$defs/geoLocationPoint"}
+                            },
+                            "required": ["polygonPoints"],
+                            "additionalProperties": false
+                        },
+                        "uniqueItems": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "uniqueItems": true
+        },
+        "fundingReferences": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "funderName": {"type": "string"},
+                    "funderIdentifier": {"type": "string"},
+                    "funderIdentifierType": {"$ref": "#/$defs/funderIdentifierType"},
+                    "schemeURI": {"type": "string", "format": "uri"},
+                    "awardNumber": {"type": "string"},
+                    "awardURI": {"type": "string", "format": "uri"},
+                    "awardTitle": {"type": "string"}
+                },
+                "additionalProperties": false,
+                "required": ["funderName"]
+            },
+            "uniqueItems": true
+        },
+        "immutableResource": {
+            "type": "object",
+            "properties": {
+                "resourceName": {"type": "string"},
+                "resourceDescription": {"type": "string"},
+                "resourceDownload": {"$ref": "#/$defs/fileDownload"},
+                "resourceData": {}
+            },
+            "oneOf": [
+                {"required": ["resourceDownload"]},
+                {"required": ["resourceData"]}
+            ],
+            "additionalProperties": false
+        },
+        "linkedResources": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "resourceName": {"type": "string"},
+                    "resourceDescription": {"type": "string"},
+                    "resourceURL": {"type": "string", "format": "url"},
+                    "resourceFormat": {"type": "string"},
+                    "linkedResourceType": {"$ref": "#/$defs/linkedResourceType"},
+                    "serverType": {"$ref": "#/$defs/serverType"}
+                },
+                "required": ["linkedResourceType", "resourceURL"],
+                "additionalProperties": false
+            },
+            "uniqueItems": true
+        },
+        "originalMetadata": {
+            "type": "string"
+        },
+        "additionalFields": {
+            "type": "object"
+        },
+        "schemaVersion": {
+            "type": "string",
+            "const": "http://datacite.org/schema/kernel-4"
+        },
+        "fileIdentifier": {
+            "type": "string"
+        }
+    }
+}
