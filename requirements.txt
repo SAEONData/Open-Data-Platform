@@ -104,6 +104,8 @@ markupsafe==2.0.1
     #   jinja2
     #   mako
     #   wtforms
+ory-hydra-client==1.10.6
+    # via -r requirements.in
 packaging==21.0
     # via pytest
 pluggy==1.0.0
@@ -123,7 +125,9 @@ pyparsing==2.4.7
 pytest==6.2.5
     # via -r requirements.in
 python-dateutil==2.8.2
-    # via faker
+    # via
+    #   faker
+    #   ory-hydra-client
 python-dotenv==0.19.1
     # via pydantic
 python-multipart==0.0.5
@@ -169,7 +173,9 @@ toml==0.10.2
 typing-extensions==3.10.0.2
     # via pydantic
 urllib3==1.26.7
-    # via requests
+    # via
+    #   ory-hydra-client
+    #   requests
 uvicorn==0.15.0
     # via -r requirements.in
 werkzeug==2.0.2

@@ -10,3 +10,51 @@ services:
       - POSTGRES_USER=${ODP_DB_USER}
       - POSTGRES_PASSWORD=${ODP_DB_PASS}
     restart: always
+
+  odp-hydra-client:
+    image: oryd/hydra:v1.10.2
+    command: >
+      clients create --id odp.test --secret secret --grant-types client_credentials
+      --scope odp.catalogue:read,odp.client:admin,odp.client:read,odp.collection:admin,odp.collection:read,odp.project:admin,odp.project:read,odp.provider:admin,odp.provider:read,odp.record:admin,odp.record:create,odp.record:read,odp.role:admin,odp.role:read,odp.schema:read,odp.tag:read,odp.user:admin,odp.user:read
+    environment:
+      - HYDRA_ADMIN_URL=http://hydra-test:4445
+      - DSN=postgres://hydra_user:pass@hydra-test-db:5432/hydra_db?sslmode=disable
+      - SECRETS_SYSTEM=5de88ee200321468
+    depends_on:
+      - hydra-test
+    restart: on-failure
+
+  hydra-migrate:
+    image: oryd/hydra:v1.10.2
+    command: migrate sql -e --yes
+    environment:
+      - DSN=postgres://hydra_user:pass@hydra-test-db:5432/hydra_db?sslmode=disable
+      - SECRETS_SYSTEM=5de88ee200321468
+    depends_on:
+      - hydra-test-db
+    restart: on-failure
+
+  hydra-test:
+    container_name: hydra-test
+    image: oryd/hydra:v1.10.2
+    command: serve all --dangerous-force-http
+    ports:
+      - "7444:4444"
+      - "7445:4445"
+    environment:
+      - DSN=postgres://hydra_user:pass@hydra-test-db:5432/hydra_db?sslmode=disable
+      - SECRETS_SYSTEM=5de88ee200321468
+      - URLS_SELF_ISSUER=http://localhost:7444
+    depends_on:
+      - hydra-test-db
+      - hydra-migrate
+    restart: always
+
+  hydra-test-db:
+    container_name: hydra-test-db
+    image: postgres:11
+    environment:
+      - POSTGRES_DB=hydra_db
+      - POSTGRES_USER=hydra_user
+      - POSTGRES_PASSWORD=pass
+    restart: always

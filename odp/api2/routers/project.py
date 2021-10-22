@@ -16,6 +16,7 @@ router = APIRouter()
 @router.get('/', response_model=List[ProjectModel])
 async def list_projects(
         pager: Pager = Depends(Paging(ProjectSort)),
+        auth: Authorized = Depends(Authorize(ODPScope.PROJECT_READ)),
 ):
     stmt = (
         select(Project).
@@ -23,6 +24,9 @@ async def list_projects(
         offset(pager.skip).
         limit(pager.limit)
     )
+
+    if auth.provider_ids != '*':
+        stmt = stmt.where(Project.id.in_(auth.provider_ids))
 
     projects = [
         ProjectModel(

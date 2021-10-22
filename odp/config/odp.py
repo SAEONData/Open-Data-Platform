@@ -37,9 +37,6 @@ class ODPAPIConfig(BaseConfig):
     # (optional) JSON-encoded list of allowed CORS origins; `["*"]` to allow any origin
     ALLOW_ORIGINS: List[Union[Literal['*'], AnyHttpUrl]] = []
 
-    # URL of the ODP admin API, for token introspection
-    ADMIN_API_URL: AnyHttpUrl
-
 
 class ODPAppConfig(BaseConfig, OAuth2ClientConfigMixin):
     class Config:
