@@ -3,7 +3,7 @@ version: "3.5"
 services:
   odp-test-db:
     container_name: odp-test-db
-    image: postgres:11
+    image: postgres:14
     ports:
       - "7357:5432"
     environment:
@@ -12,7 +12,7 @@ services:
     restart: always
 
   odp-hydra-client:
-    image: oryd/hydra:v1.10.2
+    image: oryd/hydra:v1.10.6
     command: >
       clients create --id odp.test --secret secret --grant-types client_credentials
       --scope odp.catalogue:read,odp.client:admin,odp.client:read,odp.collection:admin,odp.collection:read,odp.project:admin,odp.project:read,odp.provider:admin,odp.provider:read,odp.record:admin,odp.record:create,odp.record:read,odp.role:admin,odp.role:read,odp.schema:read,odp.tag:read,odp.user:admin,odp.user:read
@@ -25,7 +25,7 @@ services:
     restart: on-failure
 
   hydra-migrate:
-    image: oryd/hydra:v1.10.2
+    image: oryd/hydra:v1.10.6
     command: migrate sql -e --yes
     environment:
       - DSN=postgres://hydra_user:pass@hydra-test-db:5432/hydra_db?sslmode=disable
@@ -36,7 +36,7 @@ services:
 
   hydra-test:
     container_name: hydra-test
-    image: oryd/hydra:v1.10.2
+    image: oryd/hydra:v1.10.6
     command: serve all --dangerous-force-http
     ports:
       - "7444:4444"
@@ -52,7 +52,7 @@ services:
 
   hydra-test-db:
     container_name: hydra-test-db
-    image: postgres:11
+    image: postgres:14
     environment:
       - POSTGRES_DB=hydra_db
       - POSTGRES_USER=hydra_user
