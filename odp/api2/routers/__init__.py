@@ -9,7 +9,7 @@ from starlette.status import HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
 from odp.config import config
-from odp.lib.auth import get_user_access
+from odp.lib.auth import get_client_auth, get_user_auth
 
 
 @dataclass
@@ -58,15 +58,19 @@ class Authorize(HTTPBearer):
         # if sub == client_id it's an API call from a client,
         # using a client credentials grant
         if token.sub == token.client_id:
-            return Authorized(
-                provider_ids='*'
-            )
+            client_auth = get_client_auth(token.client_id)
+            try:
+                return Authorized(
+                    provider_ids=client_auth.scopes[self.scope_id]
+                )
+            except KeyError:
+                raise HTTPException(HTTP_403_FORBIDDEN)
 
         # user-initiated API call
-        user_access = get_user_access(token.sub, token.client_id)
+        user_auth = get_user_auth(token.sub, token.client_id)
         try:
             return Authorized(
-                provider_ids=user_access.scopes[self.scope_id]
+                provider_ids=user_auth.scopes[self.scope_id]
             )
         except KeyError:
             raise HTTPException(HTTP_403_FORBIDDEN)

@@ -7,7 +7,14 @@ from odp.db.models import User, Client
 from odp.lib import exceptions as x
 
 
-class UserAccess(BaseModel):
+class Authorization(BaseModel):
+    """An Authorization object represents the effective set of permissions
+    for a user or a client. It consists of a dictionary of scope ids (OAuth2
+    scope identifiers), where the value for each id is either:
+
+    - '*' if the scope is applicable across all relevant platform entities; or
+    - a set of provider ids to which the scope's usage is limited
+    """
     scopes: Dict[str, Union[Literal['*'], Set[str]]]
 
 
@@ -20,17 +27,21 @@ class UserInfo(BaseModel):
     roles: List[str]
 
 
-def get_user_access(user_id: str, client_id: str) -> UserAccess:
-    """Return user access information, which may be linked with a user's access
-    token for a given client application.
+def get_client_auth(client_id: str) -> Authorization:
+    """Return client authorization info."""
+    client = Session.get(Client, client_id)
+    if not client:
+        raise x.ODPClientNotFound
 
-    The resultant UserAccess object represents the effective set of permissions
-    for the given user working within the given client. It consists of a dictionary
-    of scope ids (OAuth2 scope identifiers), where the value for each id is either:
+    return Authorization(
+        scopes={scope.id: '*' if not client.provider else {client.provider_id}
+                for scope in client.scopes}
+    )
 
-    - '*' if the scope is applicable across all relevant platform entities; or
-    - a set of provider ids to which the scope's usage is limited
-    """
+
+def get_user_auth(user_id: str, client_id: str) -> Authorization:
+    """Return user authorization info, which may be linked with
+    a user's access token for a given client application."""
     user = Session.get(User, user_id)
     if not user:
         raise x.ODPUserNotFound
@@ -61,7 +72,7 @@ def get_user_access(user_id: str, client_id: str) -> UserAccess:
                 provider_scopes.setdefault(scope.id, set())
                 provider_scopes[scope.id] |= {role.provider_id if role.provider else client.provider_id}
 
-    return UserAccess(
+    return Authorization(
         scopes={scope: '*' for scope in platform_scopes} | provider_scopes
     )
 
