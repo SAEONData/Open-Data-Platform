@@ -11,7 +11,7 @@ services:
       - POSTGRES_PASSWORD=${ODP_DB_PASS}
     restart: always
 
-  odp-hydra-client:
+  odp-test-client:
     image: oryd/hydra:v1.10.6
     command: >
       clients create --id odp.test --secret secret --grant-types client_credentials
@@ -24,7 +24,7 @@ services:
       - hydra-test
     restart: on-failure
 
-  hydra-migrate:
+  hydra-test-migrate:
     image: oryd/hydra:v1.10.6
     command: migrate sql -e --yes
     environment:
@@ -47,7 +47,7 @@ services:
       - URLS_SELF_ISSUER=http://localhost:7444
     depends_on:
       - hydra-test-db
-      - hydra-migrate
+      - hydra-test-migrate
     restart: always
 
   hydra-test-db:
