@@ -1,5 +1,5 @@
 {
-    "$id":"https://odp.saeon.ac.za/schema/metadata/ISO19115-SAEON",
+    "$id":"https://odp.saeon.ac.za/schema/metadata/iso19115-saeon",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
 
     "type": "object",

@@ -1,5 +1,5 @@
 {
-    "$id":"https://odp.saeon.ac.za/schema/metadata/DataCite-4.3-SAEON",
+    "$id":"https://odp.saeon.ac.za/schema/metadata/datacite4-saeon",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
 
     "type": "object",
