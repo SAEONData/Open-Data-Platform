@@ -6,17 +6,20 @@ from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from odp import ODPScope
 from odp.api2.models import ProjectModel, ProjectSort
-from odp.api2.routers import Pager, Paging, Authorized, Authorize
+from odp.api2.routers import Pager, Paging, Authorize
 from odp.db import Session
 from odp.db.models import Project, Collection
 
 router = APIRouter()
 
 
-@router.get('/', response_model=List[ProjectModel])
+@router.get(
+    '/',
+    response_model=List[ProjectModel],
+    dependencies=[Depends(Authorize(ODPScope.PROJECT_READ))],
+)
 async def list_projects(
         pager: Pager = Depends(Paging(ProjectSort)),
-        auth: Authorized = Depends(Authorize(ODPScope.PROJECT_READ)),
 ):
     stmt = (
         select(Project).
@@ -24,9 +27,6 @@ async def list_projects(
         offset(pager.skip).
         limit(pager.limit)
     )
-
-    if auth.provider_ids != '*':
-        stmt = stmt.where(Project.id.in_(auth.provider_ids))
 
     projects = [
         ProjectModel(
@@ -40,7 +40,11 @@ async def list_projects(
     return projects
 
 
-@router.get('/{project_id}', response_model=ProjectModel)
+@router.get(
+    '/{project_id}',
+    response_model=ProjectModel,
+    dependencies=[Depends(Authorize(ODPScope.PROJECT_READ))],
+)
 async def get_project(
         project_id: str,
 ):
@@ -54,7 +58,10 @@ async def get_project(
     )
 
 
-@router.post('/')
+@router.post(
+    '/',
+    dependencies=[Depends(Authorize(ODPScope.PROJECT_ADMIN))],
+)
 async def create_project(
         project_in: ProjectModel,
 ):
@@ -72,7 +79,10 @@ async def create_project(
     project.save()
 
 
-@router.put('/')
+@router.put(
+    '/',
+    dependencies=[Depends(Authorize(ODPScope.PROJECT_ADMIN))],
+)
 async def update_project(
         project_in: ProjectModel,
 ):
@@ -87,7 +97,10 @@ async def update_project(
     project.save()
 
 
-@router.delete('/{project_id}')
+@router.delete(
+    '/{project_id}',
+    dependencies=[Depends(Authorize(ODPScope.PROJECT_ADMIN))],
+)
 async def delete_project(
         project_id: str,
 ):
