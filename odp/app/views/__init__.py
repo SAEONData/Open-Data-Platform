@@ -1,8 +1,6 @@
-from flask_login import LoginManager
-
 from odp.app.views import (
-    hydra,
     home,
+    hydra,
     projects,
     providers,
     collections,
@@ -16,20 +14,9 @@ from odp.app.views import (
     catalogues,
     datastores,
 )
-from odp.db import Session
-from odp.db.models import User
-
-login_manager = LoginManager()
-login_manager.login_view = 'hydra.login'
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return Session.get(User, user_id)
 
 
 def init_app(app):
-    login_manager.init_app(app)
     app.register_blueprint(home.bp)
     app.register_blueprint(hydra.bp, url_prefix='/oauth2')
     app.register_blueprint(projects.bp, url_prefix='/projects')

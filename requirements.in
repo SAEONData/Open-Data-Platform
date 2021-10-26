@@ -6,7 +6,6 @@ itsdangerous
 argon2-cffi
 requests
 redis
-httpx
 pyyaml
 ory-hydra-client
 

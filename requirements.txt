@@ -7,9 +7,7 @@
 alembic==1.7.4
     # via -r requirements.in
 anyio==3.3.4
-    # via
-    #   httpcore
-    #   starlette
+    # via starlette
 argon2-cffi==21.1.0
     # via -r requirements.in
 asgiref==3.4.1
@@ -23,17 +21,13 @@ blinker==1.4
 bootstrap-flask==1.8.0
     # via -r requirements.in
 certifi==2021.10.8
-    # via
-    #   httpx
-    #   requests
+    # via requests
 cffi==1.15.0
     # via
     #   argon2-cffi
     #   cryptography
 charset-normalizer==2.0.7
-    # via
-    #   httpx
-    #   requests
+    # via requests
 ckanapi==4.6
     # via -r requirements.in
 click==8.0.3
@@ -75,19 +69,12 @@ greenlet==1.1.2
 gunicorn==20.1.0
     # via -r requirements.in
 h11==0.12.0
-    # via
-    #   httpcore
-    #   uvicorn
-httpcore==0.13.7
-    # via httpx
-httpx==0.20.0
-    # via -r requirements.in
+    # via uvicorn
 idna==3.3
     # via
     #   anyio
     #   email-validator
     #   requests
-    #   rfc3986
 iniconfig==1.1.1
     # via pytest
 itsdangerous==2.0.1
@@ -142,8 +129,6 @@ requests==2.26.0
     # via
     #   -r requirements.in
     #   ckanapi
-rfc3986[idna2008]==1.5.0
-    # via httpx
 six==1.16.0
     # via
     #   ckanapi
@@ -151,10 +136,7 @@ six==1.16.0
     #   python-multipart
     #   sqlalchemy-utils
 sniffio==1.2.0
-    # via
-    #   anyio
-    #   httpcore
-    #   httpx
+    # via anyio
 sqlalchemy==1.4.26
     # via
     #   -r requirements.in

@@ -5,11 +5,10 @@ from odp.db import Base
 
 
 class OAuth2Token(Base):
-    """An OAuth2 token obtained by a user logging in to a client."""
+    """OAuth2 token storage for the ODP app."""
 
     __tablename__ = 'oauth2_token'
 
-    client_id = Column(String, ForeignKey('client.id', ondelete='CASCADE'), primary_key=True)
     user_id = Column(String, ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
     user = relationship('User')
 
