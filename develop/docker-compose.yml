@@ -1,59 +1,71 @@
 version: "3.5"
 
-networks:
-  odp-net:
-    name: odp-net
-    external: true
-  ckan-net:
-    name: ckan-net
-
 volumes:
+  odp-data:
+    name: odp-data
   hydra-data:
     name: hydra-data
-    external: true
 
 services:
+  odp-db:
+    container_name: odp-db
+    image: postgres:14
+    ports:
+      - "1337:5432"
+    volumes:
+      - odp-data:/var/lib/postgresql/data
+    environment:
+      - PGDATA=/var/lib/postgresql/data
+      - POSTGRES_DB=${ODP_DB_NAME}
+      - POSTGRES_USER=${ODP_DB_USER}
+      - POSTGRES_PASSWORD=${ODP_DB_PASS}
+    restart: always
+
   hydra:
     container_name: hydra
     image: ${HYDRA_IMAGE}
     command: serve all --dangerous-force-http
-    networks:
-      - odp-net
     ports:
       - "9000:4444"
       - "9001:4445"
     environment:
+      - DSN=postgres://hydra_user:pass@hydra-db:5432/hydra_db?sslmode=disable
+      - SECRETS_SYSTEM=8a9c0d27e04e7ba1
       - URLS_SELF_ISSUER=http://localhost:9000
       - URLS_LOGIN=http://localhost:9024/hydra/login
       - URLS_CONSENT=http://localhost:9024/hydra/consent
       - URLS_LOGOUT=http://localhost:9024/hydra/logout
-      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
-      - DSN=postgres://hydra_user:${HYDRA_DB_PASS}@hydra-db:5432/hydra_db?sslmode=disable
-      - TTL_ACCESS_TOKEN=168h
       - LOG_LEAK_SENSITIVE_VALUES=true
     depends_on:
       - hydra-db
+      - hydra-migrate
     restart: always
 
   hydra-db:
     container_name: hydra-db
-    image: postgres:11
-    networks:
-      - odp-net
+    image: postgres:14
     volumes:
       - hydra-data:/var/lib/postgresql/data
     environment:
       - PGDATA=/var/lib/postgresql/data
       - POSTGRES_DB=hydra_db
       - POSTGRES_USER=hydra_user
-      - POSTGRES_PASSWORD=${HYDRA_DB_PASS}
+      - POSTGRES_PASSWORD=pass
     restart: always
+
+  hydra-migrate:
+    container_name: hydra-migrate
+    image: ${HYDRA_IMAGE}
+    command: migrate sql -e --yes
+    environment:
+      - DSN=postgres://hydra_user:pass@hydra-db:5432/hydra_db?sslmode=disable
+    depends_on:
+      - hydra-db
+    restart: on-failure
 
   redis:
     container_name: redis
-    image: redis:5
-    networks:
-      - ckan-net
+    image: redis:6
     ports:
       - "6379:6379"
     restart: always
