@@ -1,7 +1,7 @@
 sqlalchemy
 psycopg2
 alembic
-pydantic[email,dotenv]
+pydantic[dotenv]
 itsdangerous
 argon2-cffi
 requests
@@ -27,6 +27,7 @@ wtforms
 gunicorn
 authlib
 bootstrap-flask
+email-validator
 
 # Testing
 pytest

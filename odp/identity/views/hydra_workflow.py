@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from enum import Enum
 from urllib.parse import urlparse, parse_qs
 
@@ -85,8 +86,8 @@ def consent():
             consent_params = {
                 'grant_scope': consent_request['requested_scope'],
                 'grant_audience': consent_request['requested_access_token_audience'],
-                'access_token_data': user_auth.dict(),
-                'id_token_data': user_info.dict(),
+                'access_token_data': asdict(user_auth),
+                'id_token_data': asdict(user_info),
             }
             redirect_to = hydra_admin.accept_consent_request(challenge, **consent_params)
             return redirect(redirect_to)

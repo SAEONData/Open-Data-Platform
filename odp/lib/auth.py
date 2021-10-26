@@ -1,13 +1,13 @@
+from dataclasses import dataclass
 from typing import Union, Set, Literal, Dict, Optional, List
-
-from pydantic import BaseModel, EmailStr
 
 from odp.db import Session
 from odp.db.models import User, Client
 from odp.lib import exceptions as x
 
 
-class Authorization(BaseModel):
+@dataclass
+class Authorization:
     """An Authorization object represents the effective set of permissions
     for a user or a client. It consists of a dictionary of scope ids (OAuth2
     scope identifiers), where the value for each id is either:
@@ -18,9 +18,10 @@ class Authorization(BaseModel):
     scopes: Dict[str, Union[Literal['*'], Set[str]]]
 
 
-class UserInfo(BaseModel):
+@dataclass
+class UserInfo:
     sub: str
-    email: EmailStr
+    email: str
     email_verified: bool
     name: Optional[str]
     picture: Optional[str]
@@ -88,6 +89,10 @@ def get_user_info(user_id: str, client_id: str) -> UserInfo:
     if not user:
         raise x.ODPUserNotFound
 
+    client = Session.get(Client, client_id)
+    if not client:
+        raise x.ODPClientNotFound
+
     return UserInfo(
         sub=user_id,
         email=user.email,
@@ -96,6 +101,6 @@ def get_user_info(user_id: str, client_id: str) -> UserInfo:
         picture=user.picture,
         roles=[
             role.id for role in user.roles
-            if role.client_id in (None, client_id)
+            if not role.provider or not client.provider or role.provider_id == client.provider_id
         ],
     )
