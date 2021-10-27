@@ -1,4 +1,4 @@
-from .client import ClientIn, ClientOut, ClientSort
+from .client import ClientModel, ClientSort
 from .collection import CollectionIn, CollectionOut, CollectionSort
 from .project import ProjectModel, ProjectSort
 from .provider import ProviderIn, ProviderOut, ProviderSort
