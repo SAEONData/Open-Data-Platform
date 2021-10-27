@@ -73,12 +73,12 @@ def update_token(hydra_name, token, refresh_token=None, access_token=None):
         token_model = Session.execute(
             select(OAuth2Token).
             where(OAuth2Token.refresh_token == refresh_token)
-        ).one()
+        ).scalar_one()
     elif access_token:
         token_model = Session.execute(
             select(OAuth2Token).
             where(OAuth2Token.access_token == access_token)
-        ).one()
+        ).scalar_one()
     else:
         return
 

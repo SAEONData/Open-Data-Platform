@@ -13,7 +13,7 @@ docker run -it --rm --network host -e HYDRA_ADMIN_URL=http://localhost:9001 ${HY
   clients create \
     --id ${ODP_APP_CLIENT_ID} \
     --secret ${ODP_APP_CLIENT_SECRET} \
-    --grant-types authorization_code \
+    --grant-types authorization_code,refresh_token \
     --response-types code \
     --scope openid,offline,odp.catalogue:read,odp.client:admin,odp.client:read,odp.collection:admin,odp.collection:read,odp.project:admin,odp.project:read,odp.provider:admin,odp.provider:read,odp.record:admin,odp.record:create,odp.record:read,odp.role:admin,odp.role:read,odp.schema:read,odp.tag:read,odp.user:admin,odp.user:read \
     --callbacks ${ODP_APP_URL}/oauth2/logged_in \
