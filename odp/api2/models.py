@@ -8,6 +8,7 @@ class ClientModel(BaseModel):
     id: str
     name: str
     scope_ids: List[str]
+    provider_id: Optional[str]
 
 
 class ClientSort(str, Enum):

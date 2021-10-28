@@ -33,6 +33,7 @@ async def list_clients(
             id=row.Client.id,
             name=row.Client.name,
             scope_ids=[scope.id for scope in row.Client.scopes],
+            provider_id=row.Client.provider_id,
         )
         for row in Session.execute(stmt)
     ]
@@ -55,6 +56,7 @@ async def get_client(
         id=client.id,
         name=client.name,
         scope_ids=[scope.id for scope in client.scopes],
+        provider_id=client.provider_id,
     )
 
 
@@ -75,6 +77,7 @@ async def create_client(
             Session.get(Scope, scope_id)
             for scope_id in client_in.scope_ids
         ],
+        provider_id=client_in.provider_id,
     )
     client.save()
 
@@ -94,6 +97,7 @@ async def update_client(
         Session.get(Scope, scope_id)
         for scope_id in client_in.scope_ids
     ]
+    client.provider_id = client_in.provider_id,
     client.save()
 
 
