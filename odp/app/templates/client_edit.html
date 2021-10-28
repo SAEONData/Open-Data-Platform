@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    {% if client %}
+        Client: {{ client.name }}
+    {% else %}
+        Create Client
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_form %}
+    {{ render_form(form, client) }}
+{% endblock %}

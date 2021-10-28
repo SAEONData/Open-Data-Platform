@@ -125,9 +125,9 @@
                 {% if obj and field.id == 'id' %}
                     {{ field(class='form-control', readonly='') }}
                 {% elif not field.errors %}
-                    {{ field(class='form-control') }}
+                    {{ field(class='form-control list-unstyled') }}
                 {% else %}
-                    {{ field(class='form-control is-invalid') }}
+                    {{ field(class='form-control list-unstyled is-invalid') }}
                     {% for error in field.errors %}
                         <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}

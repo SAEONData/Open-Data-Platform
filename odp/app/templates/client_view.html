@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Client: {{ client.name }}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_info, obj_links %}
+    {% call(prop) render_info(client, 'Name', 'Scopes') %}
+        {% if prop == 'Name' %}
+            {{ client.name }}
+        {% elif prop == 'Scopes' %}
+            {{ client.scope_ids|join(', ') }}
+        {% endif %}
+    {% endcall %}
+{% endblock %}

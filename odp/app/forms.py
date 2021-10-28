@@ -1,11 +1,17 @@
 from flask import session
-from wtforms import Form, StringField, SelectField, BooleanField
+from wtforms import Form, StringField, SelectField, BooleanField, SelectMultipleField
 from wtforms.csrf.session import SessionCSRF
 from wtforms.validators import input_required, length
+from wtforms.widgets import CheckboxInput, ListWidget
 
 
 def init_app(app):
     BaseForm.Meta.csrf_secret = bytes(app.config['SECRET_KEY'], 'utf-8')
+
+
+class MultiCheckboxField(SelectMultipleField):
+    widget = ListWidget(prefix_label=False)
+    option_widget = CheckboxInput()
 
 
 class BaseForm(Form):
@@ -32,6 +38,9 @@ class ClientForm(BaseForm):
             input_required(),
             length(min=2),
         ],
+    )
+    scope_ids = MultiCheckboxField(
+        label='Scopes',
     )
 
 
