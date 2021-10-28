@@ -1,3 +1,5 @@
+from random import randint
+
 import pytest
 from sqlalchemy import select
 
@@ -11,8 +13,8 @@ from test.factories import ClientFactory, ScopeFactory
 @pytest.fixture
 def client_batch():
     return [
-        ClientFactory(scopes=ScopeFactory.create_batch(3))
-        for _ in range(5)
+        ClientFactory(scopes=ScopeFactory.create_batch(randint(0, 3)))
+        for _ in range(randint(3, 5))
     ]
 
 
@@ -101,7 +103,7 @@ def test_update_client(api, client_batch, scopes, authorized):
     modified_client_batch = client_batch.copy()
     modified_client_batch[2] = (client := ClientFactory.build(
         id=client_batch[2].id,
-        scopes=ScopeFactory.create_batch(2),
+        scopes=ScopeFactory.create_batch(randint(0, 3)),
     ))
     r = api(scopes).put('/client/', json=dict(
         id=client.id,

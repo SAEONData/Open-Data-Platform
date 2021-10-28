@@ -1,3 +1,5 @@
+from random import randint
+
 import pytest
 from sqlalchemy import select
 
@@ -11,8 +13,8 @@ from test.factories import ProjectFactory, CollectionFactory
 @pytest.fixture
 def project_batch():
     return [
-        ProjectFactory(collections=CollectionFactory.create_batch(3))
-        for _ in range(5)
+        ProjectFactory(collections=CollectionFactory.create_batch(randint(0, 3)))
+        for _ in range(randint(3, 5))
     ]
 
 
@@ -100,7 +102,7 @@ def test_update_project(api, project_batch, scopes, authorized):
     modified_project_batch = project_batch.copy()
     modified_project_batch[2] = (project := ProjectFactory.build(
         id=project_batch[2].id,
-        collections=CollectionFactory.create_batch(2),
+        collections=CollectionFactory.create_batch(randint(0, 3)),
     ))
     r = api(scopes).put('/project/', json=dict(
         id=project.id,
