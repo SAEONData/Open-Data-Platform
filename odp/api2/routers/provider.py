@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
-from odp.api2.models import ProviderIn, ProviderOut, ProviderSort
+from odp.api2.models import ProviderModelIn, ProviderModel, ProviderSort
 from odp.api2.routers import Pager, Paging
 from odp.db import Session
 from odp.db.models import Provider
@@ -12,7 +12,10 @@ from odp.db.models import Provider
 router = APIRouter()
 
 
-@router.get('/', response_model=List[ProviderOut])
+@router.get(
+    '/',
+    response_model=List[ProviderModel],
+)
 async def list_providers(
         pager: Pager = Depends(Paging(ProviderSort)),
 ):
@@ -24,7 +27,7 @@ async def list_providers(
     )
 
     providers = [
-        ProviderOut(
+        ProviderModel(
             id=row.Provider.id,
             name=row.Provider.name,
             role_ids=[role.id for role in row.Provider.roles],
@@ -36,14 +39,17 @@ async def list_providers(
     return providers
 
 
-@router.get('/{provider_id}', response_model=ProviderOut)
+@router.get(
+    '/{provider_id}',
+    response_model=ProviderModel,
+)
 async def get_provider(
         provider_id: str,
 ):
     if not (provider := Session.get(Provider, provider_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    return ProviderOut(
+    return ProviderModel(
         id=provider.id,
         name=provider.name,
         role_ids=[role.id for role in provider.roles],
@@ -51,9 +57,11 @@ async def get_provider(
     )
 
 
-@router.post('/')
+@router.post(
+    '/',
+)
 async def create_provider(
-        provider_in: ProviderIn,
+        provider_in: ProviderModelIn,
 ):
     if Session.get(Provider, provider_in.id):
         raise HTTPException(HTTP_409_CONFLICT)
@@ -65,9 +73,11 @@ async def create_provider(
     provider.save()
 
 
-@router.put('/')
+@router.put(
+    '/',
+)
 async def update_provider(
-        provider_in: ProviderIn,
+        provider_in: ProviderModelIn,
 ):
     if not (provider := Session.get(Provider, provider_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -76,7 +86,9 @@ async def update_provider(
     provider.save()
 
 
-@router.delete('/{provider_id}')
+@router.delete(
+    '/{provider_id}',
+)
 async def delete_provider(
         provider_id: str,
 ):

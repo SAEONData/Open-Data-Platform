@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
-from odp.api2.models import CollectionIn, CollectionOut, CollectionSort
+from odp.api2.models import CollectionModelIn, CollectionModel, CollectionSort
 from odp.api2.routers import Pager, Paging
 from odp.db import Session
 from odp.db.models import Collection, Record
@@ -12,7 +12,10 @@ from odp.db.models import Collection, Record
 router = APIRouter()
 
 
-@router.get('/', response_model=List[CollectionOut])
+@router.get(
+    '/',
+    response_model=List[CollectionModel],
+)
 async def list_collections(pager: Pager = Depends(Paging(CollectionSort))):
     stmt = (
         select(Collection, func.count(Record.id)).
@@ -24,7 +27,7 @@ async def list_collections(pager: Pager = Depends(Paging(CollectionSort))):
     )
 
     collections = [
-        CollectionOut(
+        CollectionModel(
             id=row.Collection.id,
             name=row.Collection.name,
             provider_id=row.Collection.provider.id,
@@ -37,7 +40,10 @@ async def list_collections(pager: Pager = Depends(Paging(CollectionSort))):
     return collections
 
 
-@router.get('/{collection_id}', response_model=CollectionOut)
+@router.get(
+    '/{collection_id}',
+    response_model=CollectionModel,
+)
 async def get_collection(
         collection_id: str,
 ):
@@ -51,7 +57,7 @@ async def get_collection(
     if not (result := Session.execute(stmt).one_or_none()):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    return CollectionOut(
+    return CollectionModel(
         id=result.Collection.id,
         name=result.Collection.name,
         provider_id=result.Collection.provider_id,
@@ -60,9 +66,11 @@ async def get_collection(
     )
 
 
-@router.post('/')
+@router.post(
+    '/',
+)
 async def create_collection(
-        collection_in: CollectionIn,
+        collection_in: CollectionModelIn,
 ):
     if Session.get(Collection, collection_in.id):
         raise HTTPException(HTTP_409_CONFLICT)
@@ -75,9 +83,11 @@ async def create_collection(
     collection.save()
 
 
-@router.put('/')
+@router.put(
+    '/',
+)
 async def update_collection(
-        collection_in: CollectionIn,
+        collection_in: CollectionModelIn,
 ):
     if not (collection := Session.get(Collection, collection_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -87,7 +97,9 @@ async def update_collection(
     collection.save()
 
 
-@router.delete('/{collection_id}')
+@router.delete(
+    '/{collection_id}',
+)
 async def delete_collection(
         collection_id: str,
 ):
