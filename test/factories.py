@@ -1,5 +1,3 @@
-import re
-
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 from faker import Faker
@@ -20,7 +18,9 @@ fake = Faker()
 
 
 def id_from_name(obj):
-    return re.sub(r'[^a-z0-9]+', '-', obj.name.lower()).strip('-')
+    name, _, n = obj.name.rpartition('.')
+    prefix, _, _ = name.partition(' ')
+    return f'{prefix}.{n}'
 
 
 class ODPModelFactory(SQLAlchemyModelFactory):
