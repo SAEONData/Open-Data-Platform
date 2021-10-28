@@ -205,6 +205,8 @@ services:
       # as a workaround until such time as we've implemented token refresh on the client side
       - TTL_ACCESS_TOKEN=168h
       - LOG_LEAK_SENSITIVE_VALUES=true
+      - SERVE_PUBLIC_CORS_ENABLED=true
+      - SERVE_PUBLIC_CORS_ALLOWED_HEADERS=Authorization,Content-Type,X-Requested-With
     restart: always
 
   ckan-metadata:
