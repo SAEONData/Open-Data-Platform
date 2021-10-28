@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
+from markupsafe import Markup
 
 from odp import ODPScope
 from odp.app import api
-from odp.app.forms import ProjectForm
 from odp.app.auth import authorize
+from odp.app.forms import ProjectForm
 
 bp = Blueprint('projects', __name__)
 
@@ -25,12 +26,19 @@ def view(id):
 @bp.route('/new', methods=('GET', 'POST'))
 @authorize(ODPScope.PROJECT_ADMIN)
 def create():
+    collections = api.get('/collection/')
+
     form = ProjectForm(request.form)
+    form.collection_ids.choices = [
+        (collection['id'], Markup(f"{collection['id']} &mdash; {collection['name']}"))
+        for collection in collections
+    ]
 
     if request.method == 'POST' and form.validate():
         api.post('/project/', dict(
             id=(id := form.id.data),
             name=form.name.data,
+            collection_ids=form.collection_ids.data,
         ))
         flash(f'Project {id} has been created.', category='success')
         return redirect(url_for('.view', id=id))
@@ -42,12 +50,25 @@ def create():
 @authorize(ODPScope.PROJECT_ADMIN)
 def edit(id):
     project = api.get(f'/project/{id}')
-    form = ProjectForm(request.form, data=project)
+    collections = api.get('/collection/')
+
+    # separate get/post form instantiation to resolve
+    # ambiguity of missing vs empty multiselect field
+    if request.method == 'POST':
+        form = ProjectForm(request.form)
+    else:
+        form = ProjectForm(data=project)
+
+    form.collection_ids.choices = [
+        (collection['id'], Markup(f"{collection['id']} &mdash; {collection['name']}"))
+        for collection in collections
+    ]
 
     if request.method == 'POST' and form.validate():
         api.put('/project/', dict(
             id=id,
             name=form.name.data,
+            collection_ids=form.collection_ids.data,
         ))
         flash(f'Project {id} has been updated.', category='success')
         return redirect(url_for('.view', id=id))
