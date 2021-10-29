@@ -17,4 +17,4 @@ class Tag(Base):
     scope = relationship('Scope')
 
     def __repr__(self):
-        return self._repr('id', 'public', 'schema_uri', 'scope')
+        return self._repr('id', 'public', 'schema_uri', 'scope_id')

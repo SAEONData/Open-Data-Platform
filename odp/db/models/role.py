@@ -32,4 +32,4 @@ class Role(Base):
     users = association_proxy('role_users', 'user', creator=lambda u: UserRole(user=u))
 
     def __repr__(self):
-        return self._repr('id', 'provider')
+        return self._repr('id', 'provider_id')

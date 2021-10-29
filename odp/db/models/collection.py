@@ -23,4 +23,4 @@ class Collection(Base):
     projects = association_proxy('collection_projects', 'project', creator=lambda p: ProjectCollection(project=p))
 
     def __repr__(self):
-        return self._repr('id', 'name', 'provider')
+        return self._repr('id', 'name', 'provider_id')
