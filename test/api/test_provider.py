@@ -86,8 +86,44 @@ def test_list_providers(api, provider_batch, scopes, authorized):
     ([ODPScope.PROVIDER_ADMIN], False),
     ([ODPScope.PROVIDER_ADMIN, ODPScope.PROVIDER_READ], True),
 ])
+def test_list_providers_with_provider_specific_api_client(api, provider_batch, scopes, authorized):
+    api_client_provider = provider_batch[2]
+    r = api(scopes, api_client_provider).get('/provider/')
+    if authorized:
+        assert_json_results(r, r.json(), [provider_batch[2]])
+    else:
+        assert_forbidden(r)
+    assert_db_state(provider_batch)
+
+
+@pytest.mark.parametrize('scopes, authorized', [
+    ([], False),
+    ([ODPScope.PROVIDER_READ], True),
+    ([ODPScope.PROVIDER_ADMIN], False),
+    ([ODPScope.PROVIDER_ADMIN, ODPScope.PROVIDER_READ], True),
+])
 def test_get_provider(api, provider_batch, scopes, authorized):
     r = api(scopes).get(f'/provider/{provider_batch[2].id}')
+    if authorized:
+        assert_json_result(r, r.json(), provider_batch[2])
+    else:
+        assert_forbidden(r)
+    assert_db_state(provider_batch)
+
+
+@pytest.mark.parametrize('scopes, matching_provider, authorized', [
+    ([], False, False),
+    ([ODPScope.PROVIDER_READ], False, False),
+    ([ODPScope.PROVIDER_ADMIN], False, False),
+    ([ODPScope.PROVIDER_ADMIN, ODPScope.PROVIDER_READ], False, False),
+    ([], True, False),
+    ([ODPScope.PROVIDER_READ], True, True),
+    ([ODPScope.PROVIDER_ADMIN], True, False),
+    ([ODPScope.PROVIDER_ADMIN, ODPScope.PROVIDER_READ], True, True),
+])
+def test_get_provider_with_provider_specific_api_client(api, provider_batch, scopes, matching_provider, authorized):
+    api_client_provider = provider_batch[2] if matching_provider else provider_batch[1]
+    r = api(scopes, api_client_provider).get(f'/provider/{provider_batch[2].id}')
     if authorized:
         assert_json_result(r, r.json(), provider_batch[2])
     else:

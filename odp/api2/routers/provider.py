@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN
 
 from odp import ODPScope
 from odp.api2.models import ProviderModelIn, ProviderModel, ProviderSort
@@ -27,6 +27,8 @@ async def list_providers(
         offset(pager.skip).
         limit(pager.limit)
     )
+    if auth.provider_ids != '*':
+        stmt = stmt.where(Provider.id.in_(auth.provider_ids))
 
     providers = [
         ProviderModel(
@@ -50,6 +52,9 @@ async def get_provider(
         provider_id: str,
         auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_READ)),
 ):
+    if auth.provider_ids != '*' and provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
     if not (provider := Session.get(Provider, provider_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 

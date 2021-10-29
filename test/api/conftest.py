@@ -8,11 +8,12 @@ from test.factories import ClientFactory, ScopeFactory
 
 @pytest.fixture
 def api():
-    def scoped_client(scopes):
+    def scoped_client(scopes, provider=None):
         ClientFactory(
             id='odp.test',
             name='ODP Test Client',
             scopes=[ScopeFactory(id=s.value) for s in scopes],
+            provider=provider,
         )
         token = OAuth2Session(
             client_id='odp.test',
