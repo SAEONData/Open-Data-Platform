@@ -12,10 +12,20 @@ from test.factories import ProjectFactory, CollectionFactory
 
 @pytest.fixture
 def project_batch():
+    """Create and commit a batch of Project instances."""
     return [
         ProjectFactory(collections=CollectionFactory.create_batch(randint(0, 3)))
         for _ in range(randint(3, 5))
     ]
+
+
+def project_build(**id):
+    """Build and return an uncommitted Project instance.
+    Referenced collections are however committed."""
+    return ProjectFactory.build(
+        **id,
+        collections=CollectionFactory.create_batch(randint(0, 3)),
+    )
 
 
 def collection_ids(project):
@@ -23,6 +33,7 @@ def collection_ids(project):
 
 
 def assert_db_state(projects):
+    """Verify that the DB project table contains the given project batch."""
     Session.expire_all()
     result = Session.execute(select(Project)).scalars().all()
     assert set((row.id, row.name, collection_ids(row)) for row in result) \
@@ -30,6 +41,7 @@ def assert_db_state(projects):
 
 
 def assert_json_result(response, json, project):
+    """Verify that the API result matches the given project object."""
     assert response.status_code == 200
     assert json['id'] == project.id
     assert json['name'] == project.name
@@ -37,6 +49,7 @@ def assert_json_result(response, json, project):
 
 
 def assert_json_results(response, json, projects):
+    """Verify that the API result list matches the given project batch."""
     for n, project in enumerate(sorted(projects, key=lambda p: p.id)):
         assert_json_result(response, json[n], project)
 
@@ -78,7 +91,7 @@ def test_get_project(api, project_batch, scopes, authorized):
     ([ODPScope.PROJECT_ADMIN, ODPScope.PROJECT_READ], True),
 ])
 def test_create_project(api, project_batch, scopes, authorized):
-    modified_project_batch = project_batch + [project := ProjectFactory.build()]
+    modified_project_batch = project_batch + [project := project_build()]
     r = api(scopes).post('/project/', json=dict(
         id=project.id,
         name=project.name,
@@ -100,10 +113,7 @@ def test_create_project(api, project_batch, scopes, authorized):
 ])
 def test_update_project(api, project_batch, scopes, authorized):
     modified_project_batch = project_batch.copy()
-    modified_project_batch[2] = (project := ProjectFactory.build(
-        id=project_batch[2].id,
-        collections=CollectionFactory.create_batch(randint(0, 3)),
-    ))
+    modified_project_batch[2] = (project := project_build(id=project_batch[2].id))
     r = api(scopes).put('/project/', json=dict(
         id=project.id,
         name=project.name,
