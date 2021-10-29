@@ -1,4 +1,4 @@
-from odp.app.views import (
+from odp.ui.views import (
     home,
     hydra,
     projects,

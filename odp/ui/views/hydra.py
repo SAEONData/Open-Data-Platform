@@ -4,10 +4,10 @@ from authlib.integrations.base_client.errors import OAuthError
 from flask import Blueprint, url_for, redirect, flash, request
 from flask_login import login_user, logout_user, current_user
 
-from odp.app.auth import oauth
 from odp.config import config
 from odp.db import Session
 from odp.db.models import User, OAuth2Token
+from odp.ui.auth import oauth
 
 bp = Blueprint('hydra', __name__)
 

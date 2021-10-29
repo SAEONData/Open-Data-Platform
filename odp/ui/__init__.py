@@ -1,7 +1,7 @@
 from flask import Flask
 
-from odp.app import db, auth, views, forms
 from odp.config import config
+from odp.ui import db, auth, views, forms
 
 
 def create_app():
@@ -10,7 +10,7 @@ def create_app():
     """
     app = Flask(__name__)
     app.config.from_mapping({
-        'SECRET_KEY': config.ODP.APP.FLASK_KEY,
+        'SECRET_KEY': config.ODP.UI.FLASK_KEY,
     })
 
     db.init_app(app)

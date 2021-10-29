@@ -24,8 +24,8 @@ from odp.db import engine, Session, Base
 from odp.db.models import Scope, Role, Client, User, UserRole
 
 ODP_ADMIN_ROLE = 'ODP:Admin'
-ODP_APP_CLIENT_ID = 'odp.saeon.ac.za'
-ODP_APP_CLIENT_NAME = 'The Open Data Platform Web UI'
+ODP_UI_CLIENT_ID = 'odp.saeon.ac.za'
+ODP_UI_CLIENT_NAME = 'The Open Data Platform Web UI'
 
 
 def create_schema():
@@ -61,11 +61,11 @@ def sync_admin_role():
     role.save()
 
 
-def sync_app_client():
-    """Create a client for the ODP app if it does not exist,
+def sync_ui_client():
+    """Create a client for the ODP UI if it does not exist,
     and synchronize its scopes with the system."""
-    client = Session.get(Client, ODP_APP_CLIENT_ID) or Client(id=ODP_APP_CLIENT_ID)
-    client.name = ODP_APP_CLIENT_NAME,
+    client = Session.get(Client, ODP_UI_CLIENT_ID) or Client(id=ODP_UI_CLIENT_ID)
+    client.name = ODP_UI_CLIENT_NAME,
     client.scopes = [Session.get(Scope, s.value) for s in ODPScope]
     client.save()
 
@@ -104,5 +104,5 @@ if __name__ == '__main__':
     with Session.begin():
         sync_system_scopes()
         sync_admin_role()
-        sync_app_client()
+        sync_ui_client()
         create_admin_user()

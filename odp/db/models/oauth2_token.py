@@ -5,7 +5,7 @@ from odp.db import Base
 
 
 class OAuth2Token(Base):
-    """OAuth2 token storage for the ODP app."""
+    """OAuth2 token storage for the ODP UI."""
 
     __tablename__ = 'oauth2_token'
 

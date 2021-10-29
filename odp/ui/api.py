@@ -1,8 +1,8 @@
 from flask import abort
 from requests import RequestException
 
-from odp.app.auth import oauth
 from odp.config import config
+from odp.ui.auth import oauth
 
 
 def get(path, **params):
@@ -25,7 +25,7 @@ def _request(method, path, data, params):
     try:
         r = oauth.hydra.request(
             method,
-            config.ODP.APP.API_URL + path,
+            config.ODP.UI.API_URL + path,
             json=data,
             params=params,
         )

@@ -38,9 +38,9 @@ class ODPAPIConfig(BaseConfig):
     ALLOW_ORIGINS: List[Union[Literal['*'], AnyHttpUrl]] = []
 
 
-class ODPAppConfig(BaseConfig, OAuth2ClientConfigMixin):
+class ODPUIConfig(BaseConfig, OAuth2ClientConfigMixin):
     class Config:
-        env_prefix = 'ODP_APP_'
+        env_prefix = 'ODP_UI_'
 
     FLASK_KEY: str       # Flask secret key
     API_URL: AnyHttpUrl  # URL of the ODP API
@@ -87,7 +87,7 @@ class ODPConfig(BaseConfig):
     _subconfig = {
         'API': ODPAPIConfig,
         'DB': ODPDBConfig,
-        'APP': ODPAppConfig,
+        'UI': ODPUIConfig,
         'IDENTITY': ODPIdentityConfig,
         'MAIL': ODPMailConfig,
         'PUBLISH': ODPPublishConfig,

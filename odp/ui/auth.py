@@ -38,8 +38,8 @@ def init_app(app):
         access_token_url=f'{(hydra_url := config.HYDRA.PUBLIC.URL)}/oauth2/token',
         authorize_url=f'{hydra_url}/oauth2/auth',
         userinfo_endpoint=f'{hydra_url}/userinfo',
-        client_id=config.ODP.APP.CLIENT_ID,
-        client_secret=config.ODP.APP.CLIENT_SECRET,
+        client_id=config.ODP.UI.CLIENT_ID,
+        client_secret=config.ODP.UI.CLIENT_SECRET,
         client_kwargs={'scope': ' '.join(['openid', 'offline'] + [s.value for s in ODPScope])},
     )
 
@@ -53,7 +53,7 @@ def authorize(scope: ODPScope):
             if not current_user.is_authenticated:
                 abort(403)
 
-            g.user_auth = get_user_auth(current_user.id, config.ODP.APP.CLIENT_ID)
+            g.user_auth = get_user_auth(current_user.id, config.ODP.UI.CLIENT_ID)
             if scope not in g.user_auth.scopes:
                 abort(403)
 

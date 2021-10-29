@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, abort
 
-from odp.app import api
-from odp.app.forms import ScopeForm
+from odp.ui import api
+from odp.ui.forms import ScopeForm
 
 bp = Blueprint('scopes', __name__)
 

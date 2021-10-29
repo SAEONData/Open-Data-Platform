@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 
-from odp.app import api
-from odp.app.forms import CollectionForm
+from odp.ui import api
+from odp.ui.forms import CollectionForm
 
 bp = Blueprint('collections', __name__)
 
