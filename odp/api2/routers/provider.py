@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
+from odp import ODPScope
 from odp.api2.models import ProviderModelIn, ProviderModel, ProviderSort
-from odp.api2.routers import Pager, Paging
+from odp.api2.routers import Pager, Paging, Authorize, Authorized
 from odp.db import Session
 from odp.db.models import Provider
 
@@ -18,6 +19,7 @@ router = APIRouter()
 )
 async def list_providers(
         pager: Pager = Depends(Paging(ProviderSort)),
+        auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_READ)),
 ):
     stmt = (
         select(Provider).
@@ -30,8 +32,9 @@ async def list_providers(
         ProviderModel(
             id=row.Provider.id,
             name=row.Provider.name,
-            role_ids=[role.id for role in row.Provider.roles],
             collection_ids=[collection.id for collection in row.Provider.collections],
+            client_ids=[client.id for client in row.Provider.clients],
+            role_ids=[role.id for role in row.Provider.roles],
         )
         for row in Session.execute(stmt)
     ]
@@ -45,6 +48,7 @@ async def list_providers(
 )
 async def get_provider(
         provider_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_READ)),
 ):
     if not (provider := Session.get(Provider, provider_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -52,8 +56,9 @@ async def get_provider(
     return ProviderModel(
         id=provider.id,
         name=provider.name,
-        role_ids=[role.id for role in provider.roles],
         collection_ids=[collection.id for collection in provider.collections],
+        client_ids=[client.id for client in provider.clients],
+        role_ids=[role.id for role in provider.roles],
     )
 
 
@@ -62,6 +67,7 @@ async def get_provider(
 )
 async def create_provider(
         provider_in: ProviderModelIn,
+        auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_ADMIN)),
 ):
     if Session.get(Provider, provider_in.id):
         raise HTTPException(HTTP_409_CONFLICT)
@@ -78,6 +84,7 @@ async def create_provider(
 )
 async def update_provider(
         provider_in: ProviderModelIn,
+        auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_ADMIN)),
 ):
     if not (provider := Session.get(Provider, provider_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -91,6 +98,7 @@ async def update_provider(
 )
 async def delete_provider(
         provider_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_ADMIN)),
 ):
     if not (provider := Session.get(Provider, provider_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
