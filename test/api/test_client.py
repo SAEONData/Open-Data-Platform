@@ -57,7 +57,9 @@ def assert_json_result(response, json, client):
 def assert_json_results(response, json, clients):
     """Verify that the API result list matches the given client batch."""
     json = [j for j in json if j['id'] != 'odp.test']
-    for n, client in enumerate(sorted(clients, key=lambda c: c.id)):
+    json.sort(key=lambda j: j['id'])
+    clients.sort(key=lambda c: c.id)
+    for n, client in enumerate(clients):
         assert_json_result(response, json[n], client)
 
 

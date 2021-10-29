@@ -50,7 +50,9 @@ def assert_json_result(response, json, project):
 
 def assert_json_results(response, json, projects):
     """Verify that the API result list matches the given project batch."""
-    for n, project in enumerate(sorted(projects, key=lambda p: p.id)):
+    json.sort(key=lambda j: j['id'])
+    projects.sort(key=lambda p: p.id)
+    for n, project in enumerate(projects):
         assert_json_result(response, json[n], project)
 
 
