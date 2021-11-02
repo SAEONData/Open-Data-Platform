@@ -99,7 +99,7 @@ class RoleFactory(ODPModelFactory):
         model = Role
         exclude = ('is_provider_role',)
 
-    id = factory.Sequence(lambda n: f'{fake.job()}.{n}')
+    id = factory.Sequence(lambda n: f'{fake.job().replace("/", "|")}.{n}')
 
     is_provider_role = False
     provider = factory.Maybe(

@@ -67,13 +67,12 @@ class ProviderSort(str, Enum):
 
 class RoleModel(BaseModel):
     id: str
-    name: str
     scope_ids: List[str]
+    provider_id: Optional[str]
 
 
 class RoleSort(str, Enum):
     ID = 'id'
-    NAME = 'name'
 
 
 class ScopeModel(BaseModel):

@@ -22,7 +22,7 @@ def api():
         ).fetch_token(
             'http://localhost:7444/oauth2/token',
             grant_type='client_credentials',
-            timeout=0.1,
+            timeout=1.0,
         )
         api_client = TestClient(app=odp.api2.app)
         api_client.headers = {
