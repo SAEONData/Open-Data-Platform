@@ -1,3 +1,5 @@
+from random import randint
+
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 from faker import Faker
@@ -129,7 +131,7 @@ class TagFactory(ODPModelFactory):
         model = Tag
 
     id = factory.LazyAttribute(lambda tag: f'tag-{tag.scope.id}')
-    public = True
+    public = randint(0, 1)
     schema_uri = factory.Faker('uri')
     scope = factory.SubFactory(ScopeFactory)
 
@@ -141,8 +143,8 @@ class UserFactory(ODPModelFactory):
     id = factory.Faker('uuid4')
     name = factory.Faker('name')
     email = factory.Sequence(lambda n: f'{fake.email()}.{n}')
-    active = True
-    verified = True
+    active = randint(0, 1)
+    verified = randint(0, 1)
 
     @factory.post_generation
     def roles(obj, create, roles):

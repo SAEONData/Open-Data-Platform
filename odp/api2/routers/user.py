@@ -4,10 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND
 
+from odp import ODPScope
 from odp.api2.models import UserModelIn, UserModel, UserSort
-from odp.api2.routers import Pager, Paging
+from odp.api2.routers import Pager, Paging, Authorize
 from odp.db import Session
-from odp.db.models import User
+from odp.db.models import User, Role
 
 router = APIRouter()
 
@@ -15,6 +16,7 @@ router = APIRouter()
 @router.get(
     '/',
     response_model=List[UserModel],
+    dependencies=[Depends(Authorize(ODPScope.USER_READ))],
 )
 async def list_users(
         pager: Pager = Depends(Paging(UserSort)),
@@ -45,6 +47,7 @@ async def list_users(
 @router.get(
     '/{user_id}',
     response_model=UserModel,
+    dependencies=[Depends(Authorize(ODPScope.USER_READ))],
 )
 async def get_user(
         user_id: str,
@@ -65,6 +68,7 @@ async def get_user(
 
 @router.put(
     '/',
+    dependencies=[Depends(Authorize(ODPScope.USER_ADMIN))],
 )
 async def update_user(
         user_in: UserModelIn,
@@ -73,11 +77,16 @@ async def update_user(
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     user.active = user_in.active
+    user.roles = [
+        Session.get(Role, role_id)
+        for role_id in user_in.role_ids
+    ]
     user.save()
 
 
 @router.delete(
     '/{user_id}',
+    dependencies=[Depends(Authorize(ODPScope.USER_ADMIN))],
 )
 async def delete_user(
         user_id: str,
