@@ -16,19 +16,19 @@ def client_batch():
     return [
         ClientFactory(
             scopes=ScopeFactory.create_batch(randint(0, 3)),
-            is_provider_client=randint(0, 1),
+            is_provider_client=n in (1, 2) or randint(0, 1),
         )
-        for _ in range(randint(3, 5))
+        for n in range(randint(3, 5))
     ]
 
 
-def client_build(**id):
+def client_build(provider=None, **id):
     """Build and return an uncommitted Client instance.
     Referenced scopes and/or provider are however committed."""
     return ClientFactory.build(
         **id,
         scopes=ScopeFactory.create_batch(randint(0, 3)),
-        provider=(provider := ProviderFactory() if randint(0, 1) else None),
+        provider=provider or (provider := ProviderFactory() if randint(0, 1) else None),
         provider_id=provider.id if provider else None,
     )
 
@@ -84,8 +84,46 @@ def test_list_clients(api, client_batch, scopes, authorized):
     ([ODPScope.CLIENT_ADMIN], False),
     ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True),
 ])
+def test_list_clients_with_provider_specific_api_client(api, client_batch, scopes, authorized):
+    api_client_provider = client_batch[2].provider
+    assert api_client_provider is not None
+    r = api(scopes, api_client_provider).get('/client/')
+    if authorized:
+        assert_json_results(r, r.json(), [client_batch[2]])
+    else:
+        assert_forbidden(r)
+    assert_db_state(client_batch)
+
+
+@pytest.mark.parametrize('scopes, authorized', [
+    ([], False),
+    ([ODPScope.CLIENT_READ], True),
+    ([ODPScope.CLIENT_ADMIN], False),
+    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True),
+])
 def test_get_client(api, client_batch, scopes, authorized):
     r = api(scopes).get(f'/client/{client_batch[2].id}')
+    if authorized:
+        assert_json_result(r, r.json(), client_batch[2])
+    else:
+        assert_forbidden(r)
+    assert_db_state(client_batch)
+
+
+@pytest.mark.parametrize('scopes, matching_provider, authorized', [
+    ([], False, False),
+    ([ODPScope.CLIENT_READ], False, False),
+    ([ODPScope.CLIENT_ADMIN], False, False),
+    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], False, False),
+    ([], True, False),
+    ([ODPScope.CLIENT_READ], True, True),
+    ([ODPScope.CLIENT_ADMIN], True, False),
+    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True, True),
+])
+def test_get_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
+    api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider
+    assert api_client_provider is not None
+    r = api(scopes, api_client_provider).get(f'/client/{client_batch[2].id}')
     if authorized:
         assert_json_result(r, r.json(), client_batch[2])
     else:
@@ -102,6 +140,36 @@ def test_get_client(api, client_batch, scopes, authorized):
 def test_create_client(api, client_batch, scopes, authorized):
     modified_client_batch = client_batch + [client := client_build()]
     r = api(scopes).post('/client/', json=dict(
+        id=client.id,
+        name=client.name,
+        scope_ids=scope_ids(client),
+        provider_id=client.provider_id,
+    ))
+    if authorized:
+        assert_empty_result(r)
+        assert_db_state(modified_client_batch)
+    else:
+        assert_forbidden(r)
+        assert_db_state(client_batch)
+
+
+@pytest.mark.parametrize('scopes, matching_provider, authorized', [
+    ([], False, False),
+    ([ODPScope.CLIENT_READ], False, False),
+    ([ODPScope.CLIENT_ADMIN], False, False),
+    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], False, False),
+    ([], True, False),
+    ([ODPScope.CLIENT_READ], True, False),
+    ([ODPScope.CLIENT_ADMIN], True, True),
+    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True, True),
+])
+def test_create_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
+    api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider
+    assert api_client_provider is not None
+    modified_client_batch = client_batch + [client := client_build(
+        provider=client_batch[2].provider
+    )]
+    r = api(scopes, api_client_provider).post('/client/', json=dict(
         id=client.id,
         name=client.name,
         scope_ids=scope_ids(client),
@@ -138,6 +206,38 @@ def test_update_client(api, client_batch, scopes, authorized):
         assert_db_state(client_batch)
 
 
+@pytest.mark.parametrize('scopes, matching_provider, authorized', [
+    ([], False, False),
+    ([ODPScope.CLIENT_READ], False, False),
+    ([ODPScope.CLIENT_ADMIN], False, False),
+    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], False, False),
+    ([], True, False),
+    ([ODPScope.CLIENT_READ], True, False),
+    ([ODPScope.CLIENT_ADMIN], True, True),
+    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True, True),
+])
+def test_update_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
+    api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider
+    assert api_client_provider is not None
+    modified_client_batch = client_batch.copy()
+    modified_client_batch[2] = (client := client_build(
+        id=client_batch[2].id,
+        provider=client_batch[2].provider,
+    ))
+    r = api(scopes, api_client_provider).put('/client/', json=dict(
+        id=client.id,
+        name=client.name,
+        scope_ids=scope_ids(client),
+        provider_id=client.provider_id,
+    ))
+    if authorized:
+        assert_empty_result(r)
+        assert_db_state(modified_client_batch)
+    else:
+        assert_forbidden(r)
+        assert_db_state(client_batch)
+
+
 @pytest.mark.parametrize('scopes, authorized', [
     ([], False),
     ([ODPScope.CLIENT_READ], False),
@@ -148,6 +248,30 @@ def test_delete_client(api, client_batch, scopes, authorized):
     modified_client_batch = client_batch.copy()
     del modified_client_batch[2]
     r = api(scopes).delete(f'/client/{client_batch[2].id}')
+    if authorized:
+        assert_empty_result(r)
+        assert_db_state(modified_client_batch)
+    else:
+        assert_forbidden(r)
+        assert_db_state(client_batch)
+
+
+@pytest.mark.parametrize('scopes, matching_provider, authorized', [
+    ([], False, False),
+    ([ODPScope.CLIENT_READ], False, False),
+    ([ODPScope.CLIENT_ADMIN], False, False),
+    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], False, False),
+    ([], True, False),
+    ([ODPScope.CLIENT_READ], True, False),
+    ([ODPScope.CLIENT_ADMIN], True, True),
+    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True, True),
+])
+def test_delete_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
+    api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider
+    assert api_client_provider is not None
+    modified_client_batch = client_batch.copy()
+    del modified_client_batch[2]
+    r = api(scopes, api_client_provider).delete(f'/client/{client_batch[2].id}')
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_client_batch)

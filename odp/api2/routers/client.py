@@ -2,11 +2,11 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN
 
 from odp import ODPScope
 from odp.api2.models import ClientModel, ClientSort
-from odp.api2.routers import Pager, Paging, Authorize
+from odp.api2.routers import Pager, Paging, Authorize, Authorized
 from odp.db import Session
 from odp.db.models import Client, Scope
 
@@ -16,10 +16,10 @@ router = APIRouter()
 @router.get(
     '/',
     response_model=List[ClientModel],
-    dependencies=[Depends(Authorize(ODPScope.CLIENT_READ))],
 )
 async def list_clients(
         pager: Pager = Depends(Paging(ClientSort)),
+        auth: Authorized = Depends(Authorize(ODPScope.CLIENT_READ)),
 ):
     stmt = (
         select(Client).
@@ -27,6 +27,8 @@ async def list_clients(
         offset(pager.skip).
         limit(pager.limit)
     )
+    if auth.provider_ids != '*':
+        stmt = stmt.where(Client.provider_id.in_(auth.provider_ids))
 
     clients = [
         ClientModel(
@@ -44,13 +46,16 @@ async def list_clients(
 @router.get(
     '/{client_id}',
     response_model=ClientModel,
-    dependencies=[Depends(Authorize(ODPScope.CLIENT_READ))],
 )
 async def get_client(
         client_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.CLIENT_READ)),
 ):
     if not (client := Session.get(Client, client_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.provider_ids != '*' and client.provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
 
     return ClientModel(
         id=client.id,
@@ -62,11 +67,14 @@ async def get_client(
 
 @router.post(
     '/',
-    dependencies=[Depends(Authorize(ODPScope.CLIENT_ADMIN))],
 )
 async def create_client(
         client_in: ClientModel,
+        auth: Authorized = Depends(Authorize(ODPScope.CLIENT_ADMIN)),
 ):
+    if auth.provider_ids != '*' and client_in.provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
     if Session.get(Client, client_in.id):
         raise HTTPException(HTTP_409_CONFLICT)
 
@@ -84,11 +92,14 @@ async def create_client(
 
 @router.put(
     '/',
-    dependencies=[Depends(Authorize(ODPScope.CLIENT_ADMIN))],
 )
 async def update_client(
         client_in: ClientModel,
+        auth: Authorized = Depends(Authorize(ODPScope.CLIENT_ADMIN)),
 ):
+    if auth.provider_ids != '*' and client_in.provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
     if not (client := Session.get(Client, client_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
@@ -103,12 +114,15 @@ async def update_client(
 
 @router.delete(
     '/{client_id}',
-    dependencies=[Depends(Authorize(ODPScope.CLIENT_ADMIN))],
 )
 async def delete_client(
         client_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.CLIENT_ADMIN)),
 ):
     if not (client := Session.get(Client, client_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.provider_ids != '*' and client.provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
 
     client.delete()
