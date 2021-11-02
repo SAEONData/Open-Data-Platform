@@ -8,6 +8,7 @@ SAEON:Staff:
     - odp.record:read
     - odp.role:read
     - odp.schema:read
+    - odp.scope:read
     - odp.tag:read
     - odp.user:read
 

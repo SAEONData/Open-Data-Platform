@@ -35,6 +35,9 @@ class ODPScope(str, Enum):
     # schema
     SCHEMA_READ = 'odp.schema:read'
 
+    # scope
+    SCOPE_READ = 'odp.scope:read'
+
     # tag
     TAG_READ = 'odp.tag:read'
 
