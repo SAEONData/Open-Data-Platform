@@ -32,7 +32,7 @@ def collection_ids(provider):
 
 
 def client_ids(provider):
-    return tuple(client.id for client in provider.clients)
+    return tuple(client.id for client in provider.clients if client.id != 'odp.test')
 
 
 def role_ids(provider):
@@ -53,7 +53,7 @@ def assert_json_result(response, json, provider):
     assert json['id'] == provider.id
     assert json['name'] == provider.name
     assert tuple(json['collection_ids']) == collection_ids(provider)
-    assert tuple(json['client_ids']) == client_ids(provider)
+    assert tuple(j for j in json['client_ids'] if j != 'odp.test') == client_ids(provider)
     assert tuple(json['role_ids']) == role_ids(provider)
 
 
@@ -154,6 +154,23 @@ def test_create_provider(api, provider_batch, scopes, authorized):
 @pytest.mark.parametrize('scopes, authorized', [
     ([], False),
     ([ODPScope.PROVIDER_READ], False),
+    ([ODPScope.PROVIDER_ADMIN], False),
+    ([ODPScope.PROVIDER_ADMIN, ODPScope.PROVIDER_READ], False),
+])
+def test_create_provider_with_provider_specific_api_client(api, provider_batch, scopes, authorized):
+    api_client_provider = provider_batch[2]
+    modified_provider_batch = provider_batch + [provider := provider_build()]
+    r = api(scopes, api_client_provider).post('/provider/', json=dict(
+        id=provider.id,
+        name=provider.name,
+    ))
+    assert_forbidden(r)
+    assert_db_state(provider_batch)
+
+
+@pytest.mark.parametrize('scopes, authorized', [
+    ([], False),
+    ([ODPScope.PROVIDER_READ], False),
     ([ODPScope.PROVIDER_ADMIN], True),
     ([ODPScope.PROVIDER_ADMIN, ODPScope.PROVIDER_READ], True),
 ])
@@ -177,6 +194,37 @@ def test_update_provider(api, provider_batch, scopes, authorized):
         assert_db_state(provider_batch)
 
 
+@pytest.mark.parametrize('scopes, matching_provider, authorized', [
+    ([], False, False),
+    ([ODPScope.PROVIDER_READ], False, False),
+    ([ODPScope.PROVIDER_ADMIN], False, False),
+    ([ODPScope.PROVIDER_ADMIN, ODPScope.PROVIDER_READ], False, False),
+    ([], True, False),
+    ([ODPScope.PROVIDER_READ], True, False),
+    ([ODPScope.PROVIDER_ADMIN], True, True),
+    ([ODPScope.PROVIDER_ADMIN, ODPScope.PROVIDER_READ], True, True),
+])
+def test_update_provider_with_provider_specific_api_client(api, provider_batch, scopes, matching_provider, authorized):
+    api_client_provider = provider_batch[2] if matching_provider else provider_batch[1]
+    modified_provider_batch = provider_batch.copy()
+    modified_provider_batch[2] = (provider := provider_build(
+        id=provider_batch[2].id,
+        collections=provider_batch[2].collections,
+        clients=provider_batch[2].clients,
+        roles=provider_batch[2].roles,
+    ))
+    r = api(scopes, api_client_provider).put('/provider/', json=dict(
+        id=provider.id,
+        name=provider.name,
+    ))
+    if authorized:
+        assert_empty_result(r)
+        assert_db_state(modified_provider_batch)
+    else:
+        assert_forbidden(r)
+        assert_db_state(provider_batch)
+
+
 @pytest.mark.parametrize('scopes, authorized', [
     ([], False),
     ([ODPScope.PROVIDER_READ], False),
@@ -187,6 +235,29 @@ def test_delete_provider(api, provider_batch, scopes, authorized):
     modified_provider_batch = provider_batch.copy()
     del modified_provider_batch[2]
     r = api(scopes).delete(f'/provider/{provider_batch[2].id}')
+    if authorized:
+        assert_empty_result(r)
+        assert_db_state(modified_provider_batch)
+    else:
+        assert_forbidden(r)
+        assert_db_state(provider_batch)
+
+
+@pytest.mark.parametrize('scopes, matching_provider, authorized', [
+    ([], False, False),
+    ([ODPScope.PROVIDER_READ], False, False),
+    ([ODPScope.PROVIDER_ADMIN], False, False),
+    ([ODPScope.PROVIDER_ADMIN, ODPScope.PROVIDER_READ], False, False),
+    ([], True, False),
+    ([ODPScope.PROVIDER_READ], True, False),
+    ([ODPScope.PROVIDER_ADMIN], True, True),
+    ([ODPScope.PROVIDER_ADMIN, ODPScope.PROVIDER_READ], True, True),
+])
+def test_delete_provider_with_provider_specific_api_client(api, provider_batch, scopes, matching_provider, authorized):
+    api_client_provider = provider_batch[2] if matching_provider else provider_batch[1]
+    modified_provider_batch = provider_batch.copy()
+    del modified_provider_batch[2]
+    r = api(scopes, api_client_provider).delete(f'/provider/{provider_batch[2].id}')
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_provider_batch)

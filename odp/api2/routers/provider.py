@@ -74,6 +74,9 @@ async def create_provider(
         provider_in: ProviderModelIn,
         auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_ADMIN)),
 ):
+    if auth.provider_ids != '*':
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
     if Session.get(Provider, provider_in.id):
         raise HTTPException(HTTP_409_CONFLICT)
 
@@ -91,6 +94,9 @@ async def update_provider(
         provider_in: ProviderModelIn,
         auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_ADMIN)),
 ):
+    if auth.provider_ids != '*' and provider_in.id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
     if not (provider := Session.get(Provider, provider_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
@@ -105,6 +111,9 @@ async def delete_provider(
         provider_id: str,
         auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_ADMIN)),
 ):
+    if auth.provider_ids != '*' and provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
     if not (provider := Session.get(Provider, provider_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
