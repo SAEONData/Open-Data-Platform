@@ -39,8 +39,11 @@ class ClientForm(BaseForm):
             length(min=2),
         ],
     )
+    provider_id = SelectField(
+        label='Provider',
+    )
     scope_ids = MultiCheckboxField(
-        label='Client scopes',
+        label='Scopes',
     )
 
 
@@ -80,7 +83,7 @@ class ProjectForm(BaseForm):
         ],
     )
     collection_ids = MultiCheckboxField(
-        label='Project collections',
+        label='Collections',
     )
 
 

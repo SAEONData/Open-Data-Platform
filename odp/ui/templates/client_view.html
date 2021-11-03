@@ -5,10 +5,12 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_info, obj_links %}
-    {% call(prop) render_info(client, 'Name', 'Scopes') %}
+    {% from 'macros.html' import render_info, obj_link %}
+    {% call(prop) render_info(client, 'Name', 'Provider', 'Scopes') %}
         {% if prop == 'Name' %}
             {{ client.name }}
+        {% elif prop == 'Provider' %}
+            {{ obj_link('providers', client.provider_id) }}
         {% elif prop == 'Scopes' %}
             {{ client.scope_ids|join(', ') }}
         {% endif %}

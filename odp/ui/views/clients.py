@@ -25,9 +25,14 @@ def view(id):
 @bp.route('/new', methods=('GET', 'POST'))
 @authorize(ODPScope.CLIENT_ADMIN)
 def create():
+    providers = api.get('/provider/', sort='name')
     scopes = api.get('/scope/')
 
     form = ClientForm(request.form)
+    form.provider_id.choices = [('', '(None)')] + [
+        (provider['id'], provider['name'])
+        for provider in providers
+    ]
     form.scope_ids.choices = [
         (scope['id'], scope['id'])
         for scope in scopes
@@ -37,6 +42,7 @@ def create():
         api.post('/client/', dict(
             id=(id := form.id.data),
             name=form.name.data,
+            provider_id=form.provider_id.data or None,
             scope_ids=form.scope_ids.data,
         ))
         flash(f'Client {id} has been created.', category='success')
@@ -49,6 +55,7 @@ def create():
 @authorize(ODPScope.CLIENT_ADMIN)
 def edit(id):
     client = api.get(f'/client/{id}')
+    providers = api.get('/provider/', sort='name')
     scopes = api.get('/scope/')
 
     # separate get/post form instantiation to resolve
@@ -58,6 +65,10 @@ def edit(id):
     else:
         form = ClientForm(data=client)
 
+    form.provider_id.choices = [('', '(None)')] + [
+        (provider['id'], provider['name'])
+        for provider in providers
+    ]
     form.scope_ids.choices = [
         (scope['id'], scope['id'])
         for scope in scopes
@@ -67,6 +78,7 @@ def edit(id):
         api.put('/client/', dict(
             id=id,
             name=form.name.data,
+            provider_id=form.provider_id.data or None,
             scope_ids=form.scope_ids.data,
         ))
         flash(f'Client {id} has been updated.', category='success')
