@@ -1,24 +1,29 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 
+from odp import ODPScope
 from odp.ui import api
+from odp.ui.auth import authorize
 from odp.ui.forms import CollectionForm
 
 bp = Blueprint('collections', __name__)
 
 
 @bp.route('/')
+@authorize(ODPScope.COLLECTION_READ)
 def index():
     collections = api.get('/collection/')
     return render_template('collection_list.html', collections=collections)
 
 
 @bp.route('/<id>')
+@authorize(ODPScope.COLLECTION_READ)
 def view(id):
     collection = api.get(f'/collection/{id}')
     return render_template('collection_view.html', collection=collection)
 
 
 @bp.route('/new', methods=('GET', 'POST'))
+@authorize(ODPScope.COLLECTION_ADMIN)
 def create():
     providers = api.get('/provider/', sort='name')
 
@@ -41,6 +46,7 @@ def create():
 
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
+@authorize(ODPScope.COLLECTION_ADMIN)
 def edit(id):
     collection = api.get(f'/collection/{id}')
     providers = api.get('/provider/', sort='name')
@@ -64,6 +70,7 @@ def edit(id):
 
 
 @bp.route('/<id>/delete', methods=('POST',))
+@authorize(ODPScope.COLLECTION_ADMIN)
 def delete(id):
     api.delete(f'/collection/{id}')
     flash(f'Collection {id} has been deleted.', category='success')
