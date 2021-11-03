@@ -26,6 +26,7 @@ class ODPScope(str, Enum):
     # record
     RECORD_ADMIN = 'odp.record:admin'
     RECORD_CREATE = 'odp.record:create'
+    RECORD_MANAGE = 'odp.record:manage'
     RECORD_READ = 'odp.record:read'
 
     # role

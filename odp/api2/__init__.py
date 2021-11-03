@@ -7,6 +7,7 @@ from odp.api2.routers import (
     collection,
     project,
     provider,
+    record,
     role,
     scope,
     status,
@@ -28,6 +29,7 @@ app.include_router(client.router, prefix='/client', tags=['Client'])
 app.include_router(collection.router, prefix='/collection', tags=['Collection'])
 app.include_router(project.router, prefix='/project', tags=['Project'])
 app.include_router(provider.router, prefix='/provider', tags=['Provider'])
+app.include_router(record.router, prefix='/record', tags=['Record'])
 app.include_router(role.router, prefix='/role', tags=['Role'])
 app.include_router(scope.router, prefix='/scope', tags=['Scope'])
 app.include_router(status.router, prefix='/status', tags=['Status'])
