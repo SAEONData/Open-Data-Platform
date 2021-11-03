@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    {% if role %}
+        Role: {{ role.id }}
+    {% else %}
+        Create Role
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_form %}
+    {{ render_form(form, role) }}
+{% endblock %}

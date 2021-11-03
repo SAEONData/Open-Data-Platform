@@ -109,12 +109,11 @@ class RoleForm(BaseForm):
             length(min=2),
         ],
     )
-    name = StringField(
-        label='Role name',
-        validators=[
-            input_required(),
-            length(min=2),
-        ],
+    provider_id = SelectField(
+        label='Provider',
+    )
+    scope_ids = MultiCheckboxField(
+        label='Scopes',
     )
 
 

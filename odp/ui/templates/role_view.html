@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Role: {{ role.id }}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_info, obj_link %}
+    {% call(prop) render_info(role, 'Provider', 'Scopes') %}
+        {% if prop == 'Provider' %}
+            {{ obj_link('providers', role.provider_id) }}
+        {% elif prop == 'Scopes' %}
+            {{ role.scope_ids|join(', ') }}
+        {% endif %}
+    {% endcall %}
+{% endblock %}

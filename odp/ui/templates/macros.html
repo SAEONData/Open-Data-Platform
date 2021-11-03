@@ -142,8 +142,10 @@
 {% endmacro %}
 
 {% macro obj_link(view, obj_id) %}
-    {% set target = url_for(view ~ '.view', id=obj_id) %}
-    <a href="{{ target }}" class="text-decoration-none">{{ obj_id }}</a>
+    {% if obj_id %}
+        {% set target = url_for(view ~ '.view', id=obj_id) %}
+        <a href="{{ target }}" class="text-decoration-none">{{ obj_id }}</a>
+    {% endif %}
 {%- endmacro %}
 
 {% macro obj_links(view, obj_ids) %}
