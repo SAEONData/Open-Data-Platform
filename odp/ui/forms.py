@@ -120,16 +120,6 @@ class RoleForm(BaseForm):
     )
 
 
-class ScopeForm(BaseForm):
-    id = StringField(
-        label='Scope id',
-        validators=[
-            input_required(),
-            length(min=2),
-        ],
-    )
-
-
 class UserForm(BaseForm):
     id = StringField(
         label='User id',
