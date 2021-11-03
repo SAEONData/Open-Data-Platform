@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    User: {{ user.name }}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_form %}
+    {{ render_form(form, user) }}
+{% endblock %}

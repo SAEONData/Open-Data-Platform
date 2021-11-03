@@ -35,11 +35,13 @@
 {% endmacro %}
 
 {% macro render_table(objects) %}
-{# Render a list of objects in a table. Example usage:
-    {% call(project) render_table(projects, 'Name', 'Collections') %}
-        <td>{{ project.name }}</td>
-        <td>{{ project.collection_ids|join(', ') }}</td>
-    {% endcall %}
+{# Render a list of objects in a table.
+    To disable automatic id column rendering, pass kwarg hide_id=True.
+    Example usage:
+        {% call(project) render_table(projects, 'Name', 'Collections') %}
+            <td>{{ project.name }}</td>
+            <td>{{ project.collection_ids|join(', ') }}</td>
+        {% endcall %}
 #}
     <div>
         <a href="{{ url_for('.create') }}" class="btn btn-outline-success btn-action">
@@ -49,7 +51,9 @@
     <table class="table table-hover mt-2">
         <thead>
             <tr>
-                <th scope="col">Id</th>
+                {% if not kwargs.get('hide_id') %}
+                    <th scope="col">Id</th>
+                {% endif %}
                 {% for col in varargs %}
                     <th scope="col">{{ col }}</th>
                 {% endfor %}
@@ -58,11 +62,13 @@
         <tbody>
             {% for obj in objects %}
                 <tr>
-                    <th scope="row">
-                        <a href="{{ url_for('.view', id=obj.id) }}" class="text-decoration-none">
-                            {{ obj.id }}
-                        </a>
-                    </th>
+                    {% if not kwargs.get('hide_id') %}
+                        <th scope="row">
+                            <a href="{{ url_for('.view', id=obj.id) }}" class="text-decoration-none">
+                                {{ obj.id }}
+                            </a>
+                        </th>
+                    {% endif %}
                     {% if caller %}
                         {{ caller(obj) }}
                     {% endif %}
@@ -124,10 +130,16 @@
                 {{ field.label(class='form-label') }}
                 {% if obj and field.id == 'id' %}
                     {{ field(class='form-control', readonly='') }}
-                {% elif not field.errors %}
+                {% elif field.type == 'BooleanField' %}
+                    <div class="form-check">
+                        {{ field(class='form-check-input') }}
+                    </div>
+                {% elif field.type == 'MultiCheckboxField' %}
                     {{ field(class='form-control list-unstyled') }}
+                {% elif not field.errors %}
+                    {{ field(class='form-control') }}
                 {% else %}
-                    {{ field(class='form-control list-unstyled is-invalid') }}
+                    {{ field(class='form-control is-invalid') }}
                     {% for error in field.errors %}
                         <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}

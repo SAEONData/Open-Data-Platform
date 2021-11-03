@@ -143,3 +143,6 @@ class UserForm(BaseForm):
     active = BooleanField(
         label='Active',
     )
+    role_ids = MultiCheckboxField(
+        label='Roles',
+    )
