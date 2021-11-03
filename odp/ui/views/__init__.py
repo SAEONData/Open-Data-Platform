@@ -10,9 +10,7 @@ from odp.ui.views import (
     tags,
     schemas,
     clients,
-    scopes,
     catalogues,
-    datastores,
 )
 
 
@@ -28,6 +26,4 @@ def init_app(app):
     app.register_blueprint(tags.bp, url_prefix='/tags')
     app.register_blueprint(schemas.bp, url_prefix='/schemas')
     app.register_blueprint(clients.bp, url_prefix='/clients')
-    app.register_blueprint(scopes.bp, url_prefix='/scopes')
     app.register_blueprint(catalogues.bp, url_prefix='/catalogues')
-    app.register_blueprint(datastores.bp, url_prefix='/datastores')

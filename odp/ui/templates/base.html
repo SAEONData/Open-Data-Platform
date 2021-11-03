@@ -24,8 +24,8 @@
                 <div class="flex-grow-1 mx-5 mt-1">
                     {% from 'macros.html' import nav_menu %}
                     {{ nav_menu(request.blueprint,
-                        ('projects', 'collections', 'tags', 'users', 'clients', 'catalogues'),
-                        ('providers', 'records', 'schemas', 'roles', 'scopes', 'datastores'),
+                        ('projects', 'collections', 'tags', 'users', 'clients'),
+                        ('providers', 'records', 'schemas', 'roles', 'catalogues'),
                     ) }}
                 </div>
                 <div class="navbar-nav text-end mx-5 mt-1">
