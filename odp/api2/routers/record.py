@@ -8,7 +8,7 @@ from odp import ODPScope
 from odp.api2.models import RecordModel, RecordModelIn, RecordSort
 from odp.api2.routers import Pager, Paging, Authorize, Authorized
 from odp.db import Session
-from odp.db.models import Record, Collection
+from odp.db.models import Record, Collection, SchemaType
 
 router = APIRouter()
 
@@ -94,6 +94,7 @@ async def create_record(
         sid=record_in.sid,
         collection_id=record_in.collection_id,
         schema_id=record_in.schema_id,
+        schema_type=SchemaType.metadata,
         metadata_=record_in.metadata,
     )
     record.save()
@@ -121,6 +122,7 @@ async def update_record(
     record.sid = record_in.sid
     record.collection_id = record_in.collection_id
     record.schema_id = record_in.schema_id
+    record.schema_type = SchemaType.metadata,
     record.metadata_ = record_in.metadata
     record.save()
 
