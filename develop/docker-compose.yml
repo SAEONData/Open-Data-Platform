@@ -36,6 +36,8 @@ services:
       - URLS_CONSENT=http://localhost:9024/hydra/consent
       - URLS_LOGOUT=http://localhost:9024/hydra/logout
       - LOG_LEAK_SENSITIVE_VALUES=true
+      - SERVE_PUBLIC_CORS_ENABLED=true
+      - SERVE_PUBLIC_CORS_ALLOWED_HEADERS=Authorization,Content-Type,X-Requested-With
     depends_on:
       - hydra-db
       - hydra-migrate

@@ -2,10 +2,12 @@ from dataclasses import dataclass
 from typing import Union, Set, Literal
 
 from fastapi import Request, HTTPException
-from fastapi.security import HTTPBearer
+from fastapi.openapi.models import OAuthFlows, OAuthFlowClientCredentials
+from fastapi.security import OAuth2
+from fastapi.security.utils import get_authorization_scheme_param
 from ory_hydra_client import ApiClient, Configuration
 from ory_hydra_client.api.admin_api import AdminApi, OAuth2TokenIntrospection
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
 from odp.config import config
@@ -38,14 +40,25 @@ class Authorized:
     provider_ids: Union[Set[str], Literal['*']]
 
 
-class Authorize(HTTPBearer):
+class Authorize(OAuth2):
     def __init__(self, scope: ODPScope):
-        super().__init__()
         self.scope_id = scope.value
 
+        # this setup is simply to enable client-credentials access to the Swagger UI
+        if config.ODP.ENV != 'testing':
+            super().__init__(flows=OAuthFlows(clientCredentials=OAuthFlowClientCredentials(
+                tokenUrl=f'{config.HYDRA.PUBLIC.URL}/oauth2/token',
+                scopes={s.value: s.value for s in ODPScope},
+            )))
+
     async def __call__(self, request: Request) -> Authorized:
-        http_auth = await super().__call__(request)
-        access_token = http_auth.credentials
+        auth_header = request.headers.get('Authorization')
+        scheme, access_token = get_authorization_scheme_param(auth_header)
+        if not auth_header or scheme.lower() != 'bearer':
+            raise HTTPException(
+                status_code=HTTP_401_UNAUTHORIZED,
+                headers={'WWW-Authenticate': 'Bearer'},
+            )
 
         hydra = AdminApi(ApiClient(Configuration(config.HYDRA.ADMIN.URL)))
         token: OAuth2TokenIntrospection = hydra.introspect_o_auth2_token(
