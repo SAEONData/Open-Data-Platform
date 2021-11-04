@@ -41,6 +41,8 @@ class Authorized:
 
 
 class Authorize(OAuth2):
+    hydra_admin_api = AdminApi(ApiClient(Configuration(config.HYDRA.ADMIN.URL)))
+
     def __init__(self, scope: ODPScope):
         self.scope_id = scope.value
 
@@ -60,8 +62,7 @@ class Authorize(OAuth2):
                 headers={'WWW-Authenticate': 'Bearer'},
             )
 
-        hydra = AdminApi(ApiClient(Configuration(config.HYDRA.ADMIN.URL)))
-        token: OAuth2TokenIntrospection = hydra.introspect_o_auth2_token(
+        token: OAuth2TokenIntrospection = self.hydra_admin_api.introspect_o_auth2_token(
             token=access_token,
             scope=self.scope_id,
         )
