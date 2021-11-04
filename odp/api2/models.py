@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 from typing import List, Optional, Dict, Any
 
@@ -95,6 +96,9 @@ class RecordModelIn(BaseModel):
                 raise ValueError("Secondary ID is mandatory if a DOI is not provided")
         except KeyError:
             pass  # doi validation failed
+
+        if sid and re.match(DOI_REGEX, sid):
+            raise ValueError("The secondary ID cannot be a DOI")
 
         return sid
 
