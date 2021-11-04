@@ -13,7 +13,7 @@ rootdir = pathlib.Path(__file__).parent.parent
 sys.path.append(str(rootdir))
 
 from odp.db import Session
-from odp.db.models import Role, Scope, Project, Provider, Collection
+from odp.db.models import Role, Scope, Project, Provider, Collection, Schema
 
 datadir = pathlib.Path(__file__).parent / 'saeondata'
 
@@ -59,8 +59,21 @@ def create_providers_and_collections():
             collection.save()
 
 
+def create_schemas():
+    """Create or update schema definitions."""
+    with open(datadir / 'schemas.yml') as f:
+        schema_data = yaml.safe_load(f)
+
+    for schema_id, schema_spec in schema_data.items():
+        schema_type = schema_spec['type']
+        schema = Session.get(Schema, (schema_id, schema_type)) or Schema(id=schema_id, type=schema_type)
+        schema.uri = schema_spec['uri']
+        schema.save()
+
+
 if __name__ == '__main__':
     with Session.begin():
         create_roles()
         create_projects()
         create_providers_and_collections()
+        create_schemas()
