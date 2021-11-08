@@ -10,8 +10,10 @@ from odp.db.models import (
     Project,
     ProjectCollection,
     Provider,
+    Record,
     Role,
     RoleScope,
+    Schema,
     Scope,
     Tag,
     User,
@@ -22,7 +24,9 @@ from test.factories import (
     CollectionFactory,
     ProjectFactory,
     ProviderFactory,
+    RecordFactory,
     RoleFactory,
+    SchemaFactory,
     ScopeFactory,
     TagFactory,
     UserFactory,
@@ -103,6 +107,13 @@ def test_create_provider():
     assert (result.id, result.name) == (provider.id, provider.name)
 
 
+def test_create_record():
+    record = RecordFactory()
+    result = Session.execute(select(Record)).scalar_one()
+    assert (result.id, result.doi, result.sid, result.metadata_, result.validity, result.collection_id, result.schema_id, result.schema_type) \
+           == (record.id, record.doi, record.sid, record.metadata_, record.validity, record.collection.id, record.schema.id, record.schema.type)
+
+
 def test_create_role():
     role = RoleFactory()
     result = Session.execute(select(Role)).scalar_one()
@@ -122,6 +133,12 @@ def test_create_role_with_scopes():
     result = Session.execute(select(RoleScope)).scalars()
     assert [(row.role_id, row.scope_id) for row in result] \
            == [(role.id, scope.id) for scope in scopes]
+
+
+def test_create_schema():
+    schema = SchemaFactory()
+    result = Session.execute(select(Schema)).scalar_one()
+    assert (result.id, result.type, result.uri) == (schema.id, schema.type, schema.uri)
 
 
 def test_create_scope():

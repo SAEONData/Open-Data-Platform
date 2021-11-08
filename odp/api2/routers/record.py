@@ -30,12 +30,13 @@ async def list_records(
 ):
     stmt = (
         select(Record).
+        join(Collection).
         order_by(getattr(Record, pager.sort)).
         offset(pager.skip).
         limit(pager.limit)
     )
     if auth.provider_ids != '*':
-        stmt = stmt.where(Record.collection.provider_id.in_(auth.provider_ids))
+        stmt = stmt.where(Collection.provider_id.in_(auth.provider_ids))
 
     records = [
         RecordModel(
@@ -80,6 +81,7 @@ async def get_record(
 
 @router.post(
     '/',
+    response_model=RecordModel,
 )
 async def create_record(
         record_in: RecordModelIn,
@@ -93,7 +95,10 @@ async def create_record(
 
     if Session.execute(
         select(Record).
-        where((Record.doi == record_in.doi) | (Record.sid == record_in.sid))
+        where(
+            ((Record.doi != None) & (Record.doi == record_in.doi)) |
+            ((Record.sid != None) & (Record.sid == record_in.sid))
+        )
     ).first() is not None:
         raise HTTPException(HTTP_409_CONFLICT)
 
@@ -108,25 +113,42 @@ async def create_record(
     )
     record.save()
 
+    return RecordModel(
+        id=record.id,
+        doi=record.doi,
+        sid=record.sid,
+        collection_id=record.collection_id,
+        schema_id=record.schema_id,
+        metadata=record.metadata_,
+        validity=record.validity,
+    )
+
 
 @router.put(
-    '/',
+    '/{record_id}',
+    response_model=RecordModel,
 )
 async def update_record(
+        record_id: str,
         record_in: RecordModelIn,
         jsonschema: JSONSchema = Depends(get_jsonschema),
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_MANAGE)),
 ):
-    if (auth.provider_ids != '*'
-            and (collection := Session.get(Collection, record_in.collection_id))
-            and collection.provider_id not in auth.provider_ids):
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if (record := Session.execute(
-            select(Record).
-            where((Record.doi == record_in.doi) | (Record.sid == record_in.sid))
-    ).scalar_one_or_none()) is None:
-        raise HTTPException(HTTP_404_NOT_FOUND)
+    if Session.execute(
+        select(Record).
+        where(
+            (Record.id != record_id) &
+            (((Record.doi != None) & (Record.doi == record_in.doi)) |
+             ((Record.sid != None) & (Record.sid == record_in.sid)))
+        )
+    ).first() is not None:
+        raise HTTPException(HTTP_409_CONFLICT)
 
     record.doi = record_in.doi
     record.sid = record_in.sid
@@ -136,6 +158,16 @@ async def update_record(
     record.metadata_ = record_in.metadata
     record.validity = jsonschema.evaluate(JSON(record_in.metadata)).output('detailed')
     record.save()
+
+    return RecordModel(
+        id=record.id,
+        doi=record.doi,
+        sid=record.sid,
+        collection_id=record.collection_id,
+        schema_id=record.schema_id,
+        metadata=record.metadata_,
+        validity=record.validity,
+    )
 
 
 @router.delete(

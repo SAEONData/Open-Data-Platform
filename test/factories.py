@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
@@ -10,7 +10,9 @@ from odp.db.models import (
     Collection,
     Project,
     Provider,
+    Record,
     Role,
+    Schema,
     Scope,
     Tag,
     User,
@@ -23,6 +25,16 @@ def id_from_name(obj):
     name, _, n = obj.name.rpartition('.')
     prefix, _, _ = name.partition(' ')
     return f'{prefix}.{n}'
+
+
+def schema_uri_from_type(schema):
+    if schema.type == 'metadata':
+        return choice((
+            'https://odp.saeon.ac.za/schema/metadata/datacite4-saeon',
+            'https://odp.saeon.ac.za/schema/metadata/iso19115-saeon',
+        ))
+    else:
+        return fake.uri()
 
 
 class ODPModelFactory(SQLAlchemyModelFactory):
@@ -94,6 +106,27 @@ class ProjectFactory(ODPModelFactory):
                 obj.collections.append(collection)
             if create:
                 Session.commit()
+
+
+class SchemaFactory(ODPModelFactory):
+    class Meta:
+        model = Schema
+
+    id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
+    type = choice(('catalog', 'metadata', 'tag'))
+    uri = factory.LazyAttribute(schema_uri_from_type)
+
+
+class RecordFactory(ODPModelFactory):
+    class Meta:
+        model = Record
+
+    doi = factory.Sequence(lambda n: f'10.5555/test-{n}')
+    sid = factory.Sequence(lambda n: f'test-{n}' if randint(0, 1) else None)
+    metadata_ = {}
+    validity = {}
+    collection = factory.SubFactory(CollectionFactory)
+    schema = factory.SubFactory(SchemaFactory, type='metadata')
 
 
 class RoleFactory(ODPModelFactory):
