@@ -36,7 +36,7 @@ class Record(Base):
     doi = Column(String, unique=True)
     sid = Column(String, unique=True)
     metadata_ = Column(JSONB, nullable=False)
-    validity = Column(JSONB)
+    validity = Column(JSONB, nullable=False)
 
     collection_id = Column(String, ForeignKey('collection.id', ondelete='RESTRICT'), nullable=False)
     collection = relationship('Collection')

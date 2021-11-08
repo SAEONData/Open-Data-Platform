@@ -84,6 +84,8 @@ itsdangerous==2.0.1
     #   flask-wtf
 jinja2==3.0.2
     # via flask
+jschon==0.7.3
+    # via -r requirements.in
 mako==1.1.5
     # via alembic
 markupsafe==2.0.1
@@ -129,6 +131,8 @@ requests==2.26.0
     # via
     #   -r requirements.in
     #   ckanapi
+rfc3986==1.5.0
+    # via jschon
 six==1.16.0
     # via
     #   ckanapi

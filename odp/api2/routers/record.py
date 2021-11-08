@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
+from jschon import URI, JSONSchema, JSON
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN
 
@@ -8,9 +9,15 @@ from odp import ODPScope
 from odp.api2.models import RecordModel, RecordModelIn, RecordSort
 from odp.api2.routers import Pager, Paging, Authorize, Authorized
 from odp.db import Session
-from odp.db.models import Record, Collection, SchemaType
+from odp.db.models import Record, Collection, SchemaType, Schema
 
 router = APIRouter()
+
+
+async def get_jsonschema(record_in: RecordModelIn) -> JSONSchema:
+    from odp.api2 import catalog
+    schema = Session.get(Schema, (record_in.schema_id, SchemaType.metadata))
+    return catalog.get_schema(URI(schema.uri))
 
 
 @router.get(
@@ -76,6 +83,7 @@ async def get_record(
 )
 async def create_record(
         record_in: RecordModelIn,
+        jsonschema: JSONSchema = Depends(get_jsonschema),
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_CREATE)),
 ):
     if (auth.provider_ids != '*'
@@ -96,6 +104,7 @@ async def create_record(
         schema_id=record_in.schema_id,
         schema_type=SchemaType.metadata,
         metadata_=record_in.metadata,
+        validity=jsonschema.evaluate(JSON(record_in.metadata)).output('detailed'),
     )
     record.save()
 
@@ -105,6 +114,7 @@ async def create_record(
 )
 async def update_record(
         record_in: RecordModelIn,
+        jsonschema: JSONSchema = Depends(get_jsonschema),
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_MANAGE)),
 ):
     if (auth.provider_ids != '*'
@@ -112,18 +122,19 @@ async def update_record(
             and collection.provider_id not in auth.provider_ids):
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if record := Session.execute(
-        select(Record).
-        where((Record.doi == record_in.doi) | (Record.sid == record_in.sid))
-    ).one_or_none() is None:
+    if (record := Session.execute(
+            select(Record).
+            where((Record.doi == record_in.doi) | (Record.sid == record_in.sid))
+    ).scalar_one_or_none()) is None:
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     record.doi = record_in.doi
     record.sid = record_in.sid
     record.collection_id = record_in.collection_id
     record.schema_id = record_in.schema_id
-    record.schema_type = SchemaType.metadata,
+    record.schema_type = SchemaType.metadata
     record.metadata_ = record_in.metadata
+    record.validity = jsonschema.evaluate(JSON(record_in.metadata)).output('detailed')
     record.save()
 
 

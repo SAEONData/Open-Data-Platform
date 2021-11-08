@@ -15,6 +15,7 @@ uvicorn
 python-multipart
 ckanapi
 xmltodict
+jschon
 
 # UIs
 flask
