@@ -12,6 +12,7 @@ from odp.api2.routers import (
     provider,
     record,
     role,
+    schema,
     scope,
     status,
     user,
@@ -37,6 +38,7 @@ app.include_router(project.router, prefix='/project', tags=['Project'])
 app.include_router(provider.router, prefix='/provider', tags=['Provider'])
 app.include_router(record.router, prefix='/record', tags=['Record'])
 app.include_router(role.router, prefix='/role', tags=['Role'])
+app.include_router(schema.router, prefix='/schema', tags=['Schema'])
 app.include_router(scope.router, prefix='/scope', tags=['Scope'])
 app.include_router(status.router, prefix='/status', tags=['Status'])
 app.include_router(user.router, prefix='/user', tags=['User'])

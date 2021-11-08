@@ -52,7 +52,7 @@ def assert_json_result(response, json, record):
 def assert_json_results(response, json, records):
     """Verify that the API result list matches the given record batch."""
     json.sort(key=lambda j: j['id'])
-    records.sort(key=lambda c: c.id)
+    records.sort(key=lambda r: r.id)
     for n, record in enumerate(records):
         assert_json_result(response, json[n], record)
 

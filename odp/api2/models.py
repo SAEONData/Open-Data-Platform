@@ -118,6 +118,18 @@ class RoleSort(str, Enum):
     ID = 'id'
 
 
+class SchemaModel(BaseModel):
+    id: str
+    type: str
+    uri: str
+    schema_: Dict[str, Any]
+
+
+class SchemaSort(str, Enum):
+    ID = 'id'
+    TYPE = 'type'
+
+
 class ScopeModel(BaseModel):
     id: str
 

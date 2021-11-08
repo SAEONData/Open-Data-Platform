@@ -113,7 +113,7 @@ class SchemaFactory(ODPModelFactory):
         model = Schema
 
     id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
-    type = choice(('catalog', 'metadata', 'tag'))
+    type = choice(('catalogue', 'metadata', 'tag'))
     uri = factory.LazyAttribute(schema_uri_from_type)
 
 
