@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union, Set, Literal, Dict, Optional, List
+from typing import Union, Literal, Dict, Optional, List
 
 from odp.db import Session
 from odp.db.models import User, Client
@@ -13,9 +13,10 @@ class Authorization:
     scope identifiers), where the value for each id is either:
 
     - '*' if the scope is applicable across all relevant platform entities; or
-    - a set of provider ids to which the scope's usage is limited
+    - a set of provider ids to which the scope's usage is limited (implemented
+      as a list for JSON serialization)
     """
-    scopes: Dict[str, Union[Literal['*'], Set[str]]]
+    scopes: Dict[str, Union[Literal['*'], List[str]]]
 
 
 @dataclass
@@ -35,7 +36,7 @@ def get_client_auth(client_id: str) -> Authorization:
         raise x.ODPClientNotFound
 
     return Authorization(
-        scopes={scope.id: '*' if not client.provider else {client.provider_id}
+        scopes={scope.id: '*' if not client.provider else [client.provider_id]
                 for scope in client.scopes}
     )
 
@@ -72,6 +73,11 @@ def get_user_auth(user_id: str, client_id: str) -> Authorization:
                     continue
                 provider_scopes.setdefault(scope.id, set())
                 provider_scopes[scope.id] |= {role.provider_id if role.provider else client.provider_id}
+
+    provider_scopes = {
+        scope: list(providers)
+        for scope, providers in provider_scopes.items()
+    }
 
     return Authorization(
         scopes={scope: '*' for scope in platform_scopes} | provider_scopes

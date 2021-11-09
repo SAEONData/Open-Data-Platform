@@ -2,6 +2,21 @@ from odp.lib.auth import get_user_auth, get_client_auth, Authorization, get_user
 from test.factories import ScopeFactory, ClientFactory, RoleFactory, UserFactory
 
 
+def assert_compare(expected: Authorization, actual: Authorization):
+    if expected == actual:
+        return
+
+    expected.scopes = {
+        scope_id: set(provider_ids) if provider_ids != '*' else '*'
+        for scope_id, provider_ids in expected.scopes.items()
+    }
+    actual.scopes = {
+        scope_id: set(provider_ids) if provider_ids != '*' else '*'
+        for scope_id, provider_ids in actual.scopes.items()
+    }
+    assert expected == actual
+
+
 def test_platform_roles():
     scopes = ScopeFactory.create_batch(8)
     client = ClientFactory(scopes=scopes[1:7])
@@ -15,14 +30,14 @@ def test_platform_roles():
         for n, scope in enumerate(scopes)
         if n in (1, 2, 5, 6)
     })
-    assert actual_user_auth == expected_user_auth
+    assert_compare(expected_user_auth, actual_user_auth)
 
     actual_client_auth = get_client_auth(client.id)
     expected_client_auth = Authorization(scopes={
         scope.id: '*'
         for scope in scopes[1:7]
     })
-    assert actual_client_auth == expected_client_auth
+    assert_compare(expected_client_auth, actual_client_auth)
 
 
 def test_provider_roles():
@@ -34,26 +49,26 @@ def test_provider_roles():
 
     actual_user_auth = get_user_auth(user.id, client.id)
     expected_user_auth = Authorization(scopes={
-        scope.id: {role1.provider_id}
+        scope.id: [role1.provider_id]
         for n, scope in enumerate(scopes)
         if n in (1, 2)
     } | {
-        scope.id: {role1.provider_id, role2.provider_id}
+        scope.id: [role1.provider_id, role2.provider_id]
         for n, scope in enumerate(scopes)
         if n in (3, 4)
     } | {
-        scope.id: {role2.provider_id}
+        scope.id: [role2.provider_id]
         for n, scope in enumerate(scopes)
         if n in (5, 6)
     })
-    assert actual_user_auth == expected_user_auth
+    assert_compare(expected_user_auth, actual_user_auth)
 
     actual_client_auth = get_client_auth(client.id)
     expected_client_auth = Authorization(scopes={
         scope.id: '*'
         for scope in scopes[1:7]
     })
-    assert actual_client_auth == expected_client_auth
+    assert_compare(expected_client_auth, actual_client_auth)
 
 
 def test_platform_provider_role_mix():
@@ -70,22 +85,22 @@ def test_platform_provider_role_mix():
         for n, scope in enumerate(scopes)
         if n in (1, 2, 3)
     } | {
-        scope.id: {role2.provider_id}
+        scope.id: [role2.provider_id]
         for n, scope in enumerate(scopes)
         if n == 4
     } | {
-        scope.id: {role2.provider_id, role3.provider_id}
+        scope.id: [role2.provider_id, role3.provider_id]
         for n, scope in enumerate(scopes)
         if n in (5, 6)
     })
-    assert actual_user_auth == expected_user_auth
+    assert_compare(expected_user_auth, actual_user_auth)
 
     actual_client_auth = get_client_auth(client.id)
     expected_client_auth = Authorization(scopes={
         scope.id: '*'
         for scope in scopes[1:7]
     })
-    assert actual_client_auth == expected_client_auth
+    assert_compare(expected_client_auth, actual_client_auth)
 
 
 def test_provider_client():
@@ -97,18 +112,18 @@ def test_provider_client():
 
     actual_user_auth = get_user_auth(user.id, client.id)
     expected_user_auth = Authorization(scopes={
-        scope.id: {client.provider_id}
+        scope.id: [client.provider_id]
         for n, scope in enumerate(scopes)
         if n in (1, 2, 5, 6)
     })
-    assert actual_user_auth == expected_user_auth
+    assert_compare(expected_user_auth, actual_user_auth)
 
     actual_client_auth = get_client_auth(client.id)
     expected_client_auth = Authorization(scopes={
-        scope.id: {client.provider_id}
+        scope.id: [client.provider_id]
         for scope in scopes[1:7]
     })
-    assert actual_client_auth == expected_client_auth
+    assert_compare(expected_client_auth, actual_client_auth)
 
 
 def test_provider_client_platform_provider_role_mix():
@@ -121,18 +136,18 @@ def test_provider_client_platform_provider_role_mix():
 
     actual_user_auth = get_user_auth(user.id, client.id)
     expected_user_auth = Authorization(scopes={
-        scope.id: {client.provider_id}
+        scope.id: [client.provider_id]
         for n, scope in enumerate(scopes)
         if n in (1, 2, 5, 6)
     })
-    assert actual_user_auth == expected_user_auth
+    assert_compare(expected_user_auth, actual_user_auth)
 
     actual_client_auth = get_client_auth(client.id)
     expected_client_auth = Authorization(scopes={
-        scope.id: {client.provider_id}
+        scope.id: [client.provider_id]
         for scope in scopes[1:7]
     })
-    assert actual_client_auth == expected_client_auth
+    assert_compare(expected_client_auth, actual_client_auth)
 
 
 def test_user_info():
@@ -150,7 +165,7 @@ def test_user_info():
         picture=None,
         roles=[role1.id, role2.id],
     )
-    assert actual_user_info == expected_user_info
+    assert expected_user_info == actual_user_info
 
 
 def test_user_info_provider_roles():
@@ -169,7 +184,7 @@ def test_user_info_provider_roles():
         picture=None,
         roles=[role1.id, role2.id, role3.id],
     )
-    assert actual_user_info == expected_user_info
+    assert expected_user_info == actual_user_info
 
 
 def test_user_info_provider_roles_and_client():
@@ -189,4 +204,4 @@ def test_user_info_provider_roles_and_client():
         picture=None,
         roles=[role1.id, role2.id, role3.id],
     )
-    assert actual_user_info == expected_user_info
+    assert expected_user_info == actual_user_info
