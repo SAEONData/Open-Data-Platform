@@ -2,10 +2,9 @@ from functools import wraps
 
 import redis
 from authlib.integrations.flask_client import OAuth
-from flask import g
+from flask import g, flash, redirect, url_for, request
 from flask_login import LoginManager, current_user
 from sqlalchemy import select
-from werkzeug.exceptions import abort
 
 from odp import ODPScope
 from odp.config import config
@@ -51,11 +50,13 @@ def authorize(scope: ODPScope):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if not current_user.is_authenticated:
-                abort(403)
+                flash('Please log in to access that page.')
+                return redirect(url_for('home.index'))
 
             g.user_auth = get_user_auth(current_user.id, config.ODP.UI.CLIENT_ID)
             if scope not in g.user_auth.scopes:
-                abort(403)
+                flash('You do not have permission to access that page.', category='warning')
+                return redirect(request.referrer)
 
             return f(*args, **kwargs)
 

@@ -10,6 +10,7 @@ bp = Blueprint('providers', __name__)
 
 @bp.route('/')
 @authorize(ODPScope.PROVIDER_READ)
+@api.wrapper
 def index():
     providers = api.get('/provider/')
     return render_template('provider_list.html', providers=providers)
@@ -17,6 +18,7 @@ def index():
 
 @bp.route('/<id>')
 @authorize(ODPScope.PROVIDER_READ)
+@api.wrapper
 def view(id):
     provider = api.get(f'/provider/{id}')
     return render_template('provider_view.html', provider=provider)
@@ -24,6 +26,7 @@ def view(id):
 
 @bp.route('/new', methods=('GET', 'POST'))
 @authorize(ODPScope.PROVIDER_ADMIN)
+@api.wrapper
 def create():
     form = ProviderForm(request.form)
 
@@ -40,6 +43,7 @@ def create():
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
 @authorize(ODPScope.PROVIDER_ADMIN)
+@api.wrapper
 def edit(id):
     provider = api.get(f'/provider/{id}')
     form = ProviderForm(request.form, data=provider)
@@ -57,6 +61,7 @@ def edit(id):
 
 @bp.route('/<id>/delete', methods=('POST',))
 @authorize(ODPScope.PROVIDER_ADMIN)
+@api.wrapper
 def delete(id):
     api.delete(f'/provider/{id}')
     flash(f'Provider {id} has been deleted.', category='success')

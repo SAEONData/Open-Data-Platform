@@ -10,6 +10,7 @@ bp = Blueprint('roles', __name__)
 
 @bp.route('/')
 @authorize(ODPScope.ROLE_READ)
+@api.wrapper
 def index():
     roles = api.get('/role/')
     return render_template('role_list.html', roles=roles)
@@ -17,6 +18,7 @@ def index():
 
 @bp.route('/<id>')
 @authorize(ODPScope.ROLE_READ)
+@api.wrapper
 def view(id):
     role = api.get(f'/role/{id}')
     return render_template('role_view.html', role=role)
@@ -24,6 +26,7 @@ def view(id):
 
 @bp.route('/new', methods=('GET', 'POST'))
 @authorize(ODPScope.ROLE_ADMIN)
+@api.wrapper
 def create():
     providers = api.get('/provider/', sort='name')
     scopes = api.get('/scope/')
@@ -52,6 +55,7 @@ def create():
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
 @authorize(ODPScope.ROLE_ADMIN)
+@api.wrapper
 def edit(id):
     role = api.get(f'/role/{id}')
     providers = api.get('/provider/', sort='name')
@@ -87,6 +91,7 @@ def edit(id):
 
 @bp.route('/<id>/delete', methods=('POST',))
 @authorize(ODPScope.ROLE_ADMIN)
+@api.wrapper
 def delete(id):
     api.delete(f'/role/{id}')
     flash(f'Role {id} has been deleted.', category='success')

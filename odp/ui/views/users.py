@@ -10,6 +10,7 @@ bp = Blueprint('users', __name__)
 
 @bp.route('/')
 @authorize(ODPScope.USER_READ)
+@api.wrapper
 def index():
     users = api.get('/user/')
     return render_template('user_list.html', users=users)
@@ -17,6 +18,7 @@ def index():
 
 @bp.route('/<id>')
 @authorize(ODPScope.USER_READ)
+@api.wrapper
 def view(id):
     user = api.get(f'/user/{id}')
     return render_template('user_view.html', user=user)
@@ -30,6 +32,7 @@ def create():
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
 @authorize(ODPScope.USER_ADMIN)
+@api.wrapper
 def edit(id):
     user = api.get(f'/user/{id}')
     roles = api.get('/role/')
@@ -60,6 +63,7 @@ def edit(id):
 
 @bp.route('/<id>/delete', methods=('POST',))
 @authorize(ODPScope.USER_ADMIN)
+@api.wrapper
 def delete(id):
     api.delete(f'/user/{id}')
     flash(f'User {id} has been deleted.', category='success')

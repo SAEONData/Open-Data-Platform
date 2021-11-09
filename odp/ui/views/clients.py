@@ -10,6 +10,7 @@ bp = Blueprint('clients', __name__)
 
 @bp.route('/')
 @authorize(ODPScope.CLIENT_READ)
+@api.wrapper
 def index():
     clients = api.get('/client/')
     return render_template('client_list.html', clients=clients)
@@ -17,6 +18,7 @@ def index():
 
 @bp.route('/<id>')
 @authorize(ODPScope.CLIENT_READ)
+@api.wrapper
 def view(id):
     client = api.get(f'/client/{id}')
     return render_template('client_view.html', client=client)
@@ -24,6 +26,7 @@ def view(id):
 
 @bp.route('/new', methods=('GET', 'POST'))
 @authorize(ODPScope.CLIENT_ADMIN)
+@api.wrapper
 def create():
     providers = api.get('/provider/', sort='name')
     scopes = api.get('/scope/')
@@ -53,6 +56,7 @@ def create():
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
 @authorize(ODPScope.CLIENT_ADMIN)
+@api.wrapper
 def edit(id):
     client = api.get(f'/client/{id}')
     providers = api.get('/provider/', sort='name')
@@ -89,6 +93,7 @@ def edit(id):
 
 @bp.route('/<id>/delete', methods=('POST',))
 @authorize(ODPScope.CLIENT_ADMIN)
+@api.wrapper
 def delete(id):
     api.delete(f'/client/{id}')
     flash(f'Client {id} has been deleted.', category='success')

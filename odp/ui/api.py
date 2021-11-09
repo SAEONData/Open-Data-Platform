@@ -1,8 +1,17 @@
-from flask import abort
+from functools import wraps
+
+from authlib.integrations.base_client.errors import OAuthError
+from flask import flash, url_for, redirect, request, abort
 from requests import RequestException
 
 from odp.config import config
 from odp.ui.auth import oauth
+
+
+class ODPAPIError(Exception):
+    def __init__(self, status_code, error_detail):
+        self.status_code = status_code
+        self.error_detail = error_detail
 
 
 def get(path, **params):
@@ -31,8 +40,50 @@ def _request(method, path, data, params):
         )
         r.raise_for_status()
         return r.json()
+
     except RequestException as e:
         if e.response is not None:
-            abort(e.response.status_code, e.response.text)
+            status_code = e.response.status_code
+            error_detail = e.response.text
         else:
-            abort(503, str(e))
+            status_code = 503
+            error_detail = str(e)
+
+        raise ODPAPIError(status_code, error_detail) from e
+
+    except OAuthError as e:
+        raise ODPAPIError(401, str(e)) from e
+
+
+def wrapper(f):
+    """View decorator providing API error handling."""
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except ODPAPIError as e:
+            return _handle_error(e)
+
+    return decorated_function
+
+
+def _handle_error(e: ODPAPIError):
+    if e.status_code == 401:
+        flash('An authentication error occurred. Please log in again to continue.', category='error')
+        return redirect(url_for('hydra.logout'))
+
+    if e.status_code == 503:
+        flash('Service unavailable.', category='error')
+        return redirect(url_for('home.index'))
+
+    if e.status_code == 403:
+        flash('You do not have permission to access that page.', category='warning')
+    elif 400 <= e.status_code < 500:
+        flash(f'Request error: {e.error_detail}', category='error')
+    elif 500 <= e.status_code < 600:
+        flash(f'Server error: {e.error_detail}', category='error')
+    else:
+        abort(500)
+
+    return redirect(request.referrer)

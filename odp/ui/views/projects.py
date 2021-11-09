@@ -11,6 +11,7 @@ bp = Blueprint('projects', __name__)
 
 @bp.route('/')
 @authorize(ODPScope.PROJECT_READ)
+@api.wrapper
 def index():
     projects = api.get('/project/')
     return render_template('project_list.html', projects=projects)
@@ -18,6 +19,7 @@ def index():
 
 @bp.route('/<id>')
 @authorize(ODPScope.PROJECT_READ)
+@api.wrapper
 def view(id):
     project = api.get(f'/project/{id}')
     return render_template('project_view.html', project=project)
@@ -25,6 +27,7 @@ def view(id):
 
 @bp.route('/new', methods=('GET', 'POST'))
 @authorize(ODPScope.PROJECT_ADMIN)
+@api.wrapper
 def create():
     collections = api.get('/collection/')
 
@@ -48,6 +51,7 @@ def create():
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
 @authorize(ODPScope.PROJECT_ADMIN)
+@api.wrapper
 def edit(id):
     project = api.get(f'/project/{id}')
     collections = api.get('/collection/')
@@ -78,6 +82,7 @@ def edit(id):
 
 @bp.route('/<id>/delete', methods=('POST',))
 @authorize(ODPScope.PROJECT_ADMIN)
+@api.wrapper
 def delete(id):
     api.delete(f'/project/{id}')
     flash(f'Project {id} has been deleted.', category='success')

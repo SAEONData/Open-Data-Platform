@@ -10,6 +10,7 @@ bp = Blueprint('collections', __name__)
 
 @bp.route('/')
 @authorize(ODPScope.COLLECTION_READ)
+@api.wrapper
 def index():
     collections = api.get('/collection/')
     return render_template('collection_list.html', collections=collections)
@@ -17,6 +18,7 @@ def index():
 
 @bp.route('/<id>')
 @authorize(ODPScope.COLLECTION_READ)
+@api.wrapper
 def view(id):
     collection = api.get(f'/collection/{id}')
     return render_template('collection_view.html', collection=collection)
@@ -24,6 +26,7 @@ def view(id):
 
 @bp.route('/new', methods=('GET', 'POST'))
 @authorize(ODPScope.COLLECTION_ADMIN)
+@api.wrapper
 def create():
     providers = api.get('/provider/', sort='name')
 
@@ -47,6 +50,7 @@ def create():
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
 @authorize(ODPScope.COLLECTION_ADMIN)
+@api.wrapper
 def edit(id):
     collection = api.get(f'/collection/{id}')
     providers = api.get('/provider/', sort='name')
@@ -71,6 +75,7 @@ def edit(id):
 
 @bp.route('/<id>/delete', methods=('POST',))
 @authorize(ODPScope.COLLECTION_ADMIN)
+@api.wrapper
 def delete(id):
     api.delete(f'/collection/{id}')
     flash(f'Collection {id} has been deleted.', category='success')
