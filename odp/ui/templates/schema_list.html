@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Schemas
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_table %}
+    {% call(schema) render_table(schemas, 'Type', 'URI') %}
+        <td>{{ schema.type }}</td>
+        <td>{{ schema.uri }}</td>
+    {% endcall %}
+{% endblock %}

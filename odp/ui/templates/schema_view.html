@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Schema: {{ schema.id }}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_info %}
+    {% call(prop) render_info(schema, 'Type', 'URI', 'JSON Schema') %}
+        {% if prop == 'Type' %}
+            {{ schema.type }}
+        {% elif prop == 'URI' %}
+            {{ schema.uri }}
+        {% elif prop == 'JSON Schema' %}
+            {{ schema.schema_ }}
+        {% endif %}
+    {% endcall %}
+{% endblock %}

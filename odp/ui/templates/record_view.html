@@ -14,7 +14,7 @@
         {% elif prop == 'Collection' %}
             {{ obj_link('collections', record.collection_id) }}
         {% elif prop == 'Schema' %}
-            {{ record.schema_id }}
+            {{ obj_link('schemas', record.schema_id) }}
         {% elif prop == 'Metadata' %}
             {{ record.metadata }}
         {% elif prop == 'Validity' %}
