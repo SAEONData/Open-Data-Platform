@@ -10,5 +10,5 @@
 
 {% block content %}
     {% from 'macros.html' import render_form %}
-    {{ render_form(form, record) }}
+    {{ render_form(form, record, ['metadata']) }}
 {% endblock %}

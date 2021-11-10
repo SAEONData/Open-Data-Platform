@@ -10,5 +10,5 @@
 
 {% block content %}
     {% from 'macros.html' import render_form %}
-    {{ render_form(form, project) }}
+    {{ render_form(form, project, ['collection_ids']) }}
 {% endblock %}

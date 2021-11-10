@@ -26,7 +26,7 @@ def json_object(form, field):
     try:
         obj = json.loads(field.data)
         if not isinstance(obj, dict):
-            raise ValidationError('The value must be a JSON object (dictionary)')
+            raise ValidationError('The value must be a JSON object.')
     except json.JSONDecodeError:
         raise ValidationError('Invalid JSON')
 
@@ -131,6 +131,7 @@ class RecordForm(BaseForm):
     metadata = JSONTextField(
         label='Metadata',
         validators=[input_required(), json_object],
+        render_kw={'rows': 24},
     )
 
 

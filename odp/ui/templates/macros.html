@@ -111,7 +111,7 @@
     </div>
 {% endmacro %}
 
-{% macro render_form(form, obj) %}
+{% macro render_form(form, obj, col2_fields) %}
     {% if obj %}
         {% set submit_target = url_for('.edit', id=obj.id) %}
         {% set cancel_target = url_for('.view', id=obj.id) %}
@@ -121,32 +121,52 @@
     {% endif %}
     <form action="{{ submit_target }}" method="post">
         {{ form.csrf_token }}
-        {% for field in form if field.id != 'csrf_token' %}
-            <div class="form-group mt-4">
-                {{ field.label(class='form-label') }}
-                {% if obj and field.id == 'id' %}
-                    {{ field(class='form-control', readonly='') }}
-                {% elif field.type == 'BooleanField' %}
-                    <div class="form-check">
-                        {{ field(class='form-check-input') }}
-                    </div>
-                {% elif field.type == 'MultiCheckboxField' %}
-                    {{ field(class='form-control list-unstyled') }}
-                {% elif not field.errors %}
-                    {{ field(class='form-control') }}
-                {% else %}
-                    {{ field(class='form-control is-invalid') }}
-                    {% for error in field.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
+        <div class="row">
+            <div class="col-5">
+                {% for field in form if field.id != 'csrf_token' and field.id not in col2_fields %}
+                    {{ render_field(field, obj) }}
+                {% endfor %}
             </div>
-        {% endfor %}
+            <div class="col-7">
+                {% for field in form if field.id in col2_fields %}
+                    {{ render_field(field, obj) }}
+                {% endfor %}
+            </div>
+        </div>
         <div class="mt-4">
             <button type="submit" class="btn btn-outline-primary btn-action">Save</button>
             <a href="{{ cancel_target }}" class="btn btn-outline-secondary btn-action">Cancel</a>
         </div>
     </form>
+{% endmacro %}
+
+{% macro render_field(field, obj) %}
+    <div class="mt-4">
+        {{ field.label(class='form-label') }}
+        {% if obj and field.id == 'id' %}
+            {{ field(class='form-control', readonly='') }}
+        {% elif field.type == 'BooleanField' %}
+            <div class="form-check">
+                {{ field(class='form-check-input') }}
+            </div>
+        {% else %}
+            {% set classes = ['form-control'] %}
+            {% if field.type == 'JSONTextField' %}
+                {% set classes = classes + ['font-monospace'] %}
+            {% elif field.type == 'MultiCheckboxField' %}
+                {% set classes = classes + ['list-unstyled'] %}
+            {% endif %}
+            {% if field.errors %}
+                {% set classes = classes + ['is-invalid'] %}
+            {% endif %}
+            {{ field(class=classes|join(' ')) }}
+            {% for error in field.errors %}
+                <div class="invalid-feedback">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
 {% endmacro %}
 
 {% macro obj_link(view, obj_id, display_text=None) %}
