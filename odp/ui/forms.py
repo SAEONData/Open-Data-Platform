@@ -1,6 +1,6 @@
 import json
 
-from flask import session
+from flask import Flask, session
 from wtforms import (
     Form,
     StringField,
@@ -17,7 +17,7 @@ from wtforms.widgets import CheckboxInput, ListWidget
 from odp.api2.models import DOI_REGEX, SID_REGEX
 
 
-def init_app(app):
+def init_app(app: Flask):
     BaseForm.Meta.csrf_secret = bytes(app.config['SECRET_KEY'], 'utf-8')
 
 

@@ -1,3 +1,7 @@
+import json
+
+from flask import Flask
+
 from odp.ui.views import (
     home,
     hydra,
@@ -14,7 +18,7 @@ from odp.ui.views import (
 )
 
 
-def init_app(app):
+def init_app(app: Flask):
     app.register_blueprint(home.bp)
     app.register_blueprint(hydra.bp, url_prefix='/oauth2')
     app.register_blueprint(projects.bp, url_prefix='/projects')
@@ -27,3 +31,8 @@ def init_app(app):
     app.register_blueprint(schemas.bp, url_prefix='/schemas')
     app.register_blueprint(clients.bp, url_prefix='/clients')
     app.register_blueprint(catalogues.bp, url_prefix='/catalogues')
+
+    @app.template_filter()
+    def tojson(obj):
+        """Replaces the Jinja built-in tojson filter."""
+        return json.dumps(obj, indent=4, ensure_ascii=False)

@@ -5,20 +5,47 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_info, obj_link %}
-    {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Metadata', 'Validity') %}
-        {% if prop == 'DOI' %}
-            {{ record.doi if record.doi }}
-        {% elif prop == 'SID' %}
-            {{ record.sid if record.sid }}
-        {% elif prop == 'Collection' %}
-            {{ obj_link('collections', record.collection_id) }}
-        {% elif prop == 'Schema' %}
-            {{ obj_link('schemas', record.schema_id) }}
-        {% elif prop == 'Metadata' %}
-            {{ record.metadata }}
-        {% elif prop == 'Validity' %}
-            {{ record.validity }}
-        {% endif %}
-    {% endcall %}
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                Info
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#metadata" type="button" role="tab">
+                Metadata
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#validity" type="button" role="tab">
+                Validity
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div id="info" class="tab-pane fade show active" role="tabpanel">
+            {% from 'macros.html' import render_info, obj_link %}
+            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema') %}
+                {% if prop == 'DOI' %}
+                    {{ record.doi if record.doi }}
+                {% elif prop == 'SID' %}
+                    {{ record.sid if record.sid }}
+                {% elif prop == 'Collection' %}
+                    {{ obj_link('collections', record.collection_id) }}
+                {% elif prop == 'Schema' %}
+                    {{ obj_link('schemas', record.schema_id) }}
+                {% endif %}
+            {% endcall %}
+        </div>
+        <div id="metadata" class="tab-pane fade" role="tabpanel">
+            <pre class="m-3">
+                {{- record.metadata|tojson -}}
+            </pre>
+        </div>
+        <div id="validity" class="tab-pane fade" role="tabpanel">
+            <pre class="m-3">
+                {{- record.validity|tojson -}}
+            </pre>
+        </div>
+    </div>
 {% endblock %}

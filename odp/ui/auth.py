@@ -2,7 +2,7 @@ from functools import wraps
 
 import redis
 from authlib.integrations.flask_client import OAuth
-from flask import g, flash, redirect, url_for, request
+from flask import Flask, g, flash, redirect, url_for, request
 from flask_login import LoginManager, current_user
 from sqlalchemy import select
 
@@ -23,7 +23,7 @@ def load_user(user_id):
     return Session.get(User, user_id)
 
 
-def init_app(app):
+def init_app(app: Flask):
     login_manager.init_app(app)
     cache = redis.Redis(
         host=config.REDIS.HOST,

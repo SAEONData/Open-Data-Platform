@@ -1,4 +1,7 @@
-def init_app(app):
+from flask import Flask
+
+
+def init_app(app: Flask):
     from odp.db import Session
 
     @app.after_request
