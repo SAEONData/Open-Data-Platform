@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Record: {{ record.doi or record.sid }}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_info, obj_link %}
+    {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Metadata', 'Validity') %}
+        {% if prop == 'DOI' %}
+            {{ record.doi if record.doi }}
+        {% elif prop == 'SID' %}
+            {{ record.sid if record.sid }}
+        {% elif prop == 'Collection' %}
+            {{ obj_link('collections', record.collection_id) }}
+        {% elif prop == 'Schema' %}
+            {{ record.schema_id }}
+        {% elif prop == 'Metadata' %}
+            {{ record.metadata }}
+        {% elif prop == 'Validity' %}
+            {{ record.validity }}
+        {% endif %}
+    {% endcall %}
+{% endblock %}

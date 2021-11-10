@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Records
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_table, obj_link %}
+    {% call(record) render_table(records, 'DOI', 'SID', 'Collection', 'Schema', 'Valid', hide_id=True) %}
+        <th scope="row">{{ obj_link('records', record.id, record.doi or '') }}</th>
+        <th scope="row">{{ obj_link('records', record.id, record.sid or '') }}</th>
+        <td>{{ obj_link('collections', record.collection_id) }}</td>
+        <td>{{ record.schema_id }}</td>
+        <td>{{ record.validity['valid'] }}</td>
+    {% endcall %}
+{% endblock %}

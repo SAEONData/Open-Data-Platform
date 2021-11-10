@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    {% if record %}
+        Record: {{ record.doi or record.sid }}
+    {% else %}
+        Create Record
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_form %}
+    {{ render_form(form, record) }}
+{% endblock %}

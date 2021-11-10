@@ -1,12 +1,39 @@
+import json
+
 from flask import session
-from wtforms import Form, StringField, SelectField, BooleanField, SelectMultipleField
+from wtforms import (
+    Form,
+    StringField,
+    SelectField,
+    BooleanField,
+    SelectMultipleField,
+    TextAreaField,
+    ValidationError,
+)
 from wtforms.csrf.session import SessionCSRF
-from wtforms.validators import input_required, length
+from wtforms.validators import input_required, length, regexp
 from wtforms.widgets import CheckboxInput, ListWidget
+
+from odp.api2.models import DOI_REGEX, SID_REGEX
 
 
 def init_app(app):
     BaseForm.Meta.csrf_secret = bytes(app.config['SECRET_KEY'], 'utf-8')
+
+
+def json_object(form, field):
+    """A JSONTextField validator that ensures the value is a JSON object."""
+    try:
+        obj = json.loads(field.data)
+        if not isinstance(obj, dict):
+            raise ValidationError('The value must be a JSON object (dictionary)')
+    except json.JSONDecodeError:
+        raise ValidationError('Invalid JSON')
+
+
+class JSONTextField(TextAreaField):
+    def process_data(self, value):
+        self.data = json.dumps(value)
 
 
 class MultiCheckboxField(SelectMultipleField):
@@ -27,17 +54,11 @@ class BaseForm(Form):
 class ClientForm(BaseForm):
     id = StringField(
         label='Client id',
-        validators=[
-            input_required(),
-            length(min=2),
-        ],
+        validators=[input_required(), length(min=2)],
     )
     name = StringField(
         label='Client name',
-        validators=[
-            input_required(),
-            length(min=2),
-        ],
+        validators=[input_required(), length(min=2)],
     )
     provider_id = SelectField(
         label='Provider',
@@ -50,17 +71,11 @@ class ClientForm(BaseForm):
 class CollectionForm(BaseForm):
     id = StringField(
         label='Collection id',
-        validators=[
-            input_required(),
-            length(min=2),
-        ],
+        validators=[input_required(), length(min=2)],
     )
     name = StringField(
         label='Collection name',
-        validators=[
-            input_required(),
-            length(min=2),
-        ],
+        validators=[input_required(), length(min=2)],
     )
     provider_id = SelectField(
         label='Provider',
@@ -70,17 +85,11 @@ class CollectionForm(BaseForm):
 class ProjectForm(BaseForm):
     id = StringField(
         label='Project id',
-        validators=[
-            input_required(),
-            length(min=2),
-        ],
+        validators=[input_required(), length(min=2)],
     )
     name = StringField(
         label='Project name',
-        validators=[
-            input_required(),
-            length(min=2),
-        ],
+        validators=[input_required(), length(min=2)],
     )
     collection_ids = MultiCheckboxField(
         label='Collections',
@@ -90,27 +99,45 @@ class ProjectForm(BaseForm):
 class ProviderForm(BaseForm):
     id = StringField(
         label='Provider id',
-        validators=[
-            input_required(),
-            length(min=2),
-        ],
+        validators=[input_required(), length(min=2)],
     )
     name = StringField(
         label='Provider name',
-        validators=[
-            input_required(),
-            length(min=2),
-        ],
+        validators=[input_required(), length(min=2)],
+    )
+
+
+class RecordForm(BaseForm):
+    id = StringField(
+        label='Record id',
+        render_kw=dict(readonly=''),
+    )
+    doi = StringField(
+        label='DOI',
+        description='Digital Object Identifier',
+        validators=[regexp(DOI_REGEX)],
+    )
+    sid = StringField(
+        label='SID',
+        description='Secondary Identifier',
+        validators=[regexp(SID_REGEX)],
+    )
+    collection_id = SelectField(
+        label='Collection',
+    )
+    schema_id = SelectField(
+        label='Schema',
+    )
+    metadata = JSONTextField(
+        label='Metadata',
+        validators=[input_required(), json_object],
     )
 
 
 class RoleForm(BaseForm):
     id = StringField(
         label='Role id',
-        validators=[
-            input_required(),
-            length(min=2),
-        ],
+        validators=[input_required(), length(min=2)],
     )
     provider_id = SelectField(
         label='Provider',
