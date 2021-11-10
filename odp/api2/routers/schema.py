@@ -1,8 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from jschon import URI
 from sqlalchemy import select
+from starlette.status import HTTP_404_NOT_FOUND
 
 from odp import ODPScope
 from odp.api2.models import SchemaModel, SchemaSort
@@ -41,3 +42,29 @@ async def list_schemas(
     ]
 
     return schemas
+
+
+@router.get(
+    '/{schema_id}',
+    response_model=SchemaModel,
+    dependencies=[Depends(Authorize(ODPScope.SCHEMA_READ))],
+)
+async def get_schema(
+        schema_id: str,
+):
+    from odp.api2 import catalog
+
+    schema = Session.execute(
+        select(Schema).
+        where(Schema.id == schema_id)
+    ).scalar_one_or_none()
+
+    if not schema:
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    return SchemaModel(
+        id=schema.id,
+        type=schema.type,
+        uri=schema.uri,
+        schema_=catalog.get_schema(URI(schema.uri)).value,
+    )

@@ -59,3 +59,18 @@ def test_list_schemas(api, schema_batch, scopes, authorized):
     else:
         assert_forbidden(r)
     assert_db_state(schema_batch)
+
+
+@pytest.mark.parametrize('scopes, authorized', [
+    ([], False),
+    ([ODPScope.SCHEMA_READ], True),
+    ([ODPScope.TAG_READ], False),
+    ([ODPScope.TAG_READ, ODPScope.SCHEMA_READ], True),
+])
+def test_get_schema(api, schema_batch, scopes, authorized):
+    r = api(scopes).get(f'/schema/{schema_batch[2].id}')
+    if authorized:
+        assert_json_result(r, r.json(), schema_batch[2])
+    else:
+        assert_forbidden(r)
+    assert_db_state(schema_batch)
