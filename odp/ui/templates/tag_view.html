@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Tag: {{ tag.id }}
+{% endblock %}
+
+{% block content %}
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                Info
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#schema" type="button" role="tab">
+                Schema
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div id="info" class="tab-pane fade show active" role="tabpanel">
+            {% from 'macros.html' import render_info %}
+            {% call(prop) render_info(tag, 'Public', 'Scope') %}
+                {% if prop == 'Public' %}
+                    {{ tag.public }}
+                {% elif prop == 'Scope' %}
+                    {{ tag.scope_id }}
+                {% endif %}
+            {% endcall %}
+        </div>
+        <div id="schema" class="tab-pane fade" role="tabpanel">
+            <pre class="m-3">
+                {{- tag.schema_|tojson -}}
+            </pre>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Tags
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_table, obj_link %}
+    {% call(tag) render_table(tags, 'Public', 'Scope', 'Schema') %}
+        <td>{{ tag.public }}</td>
+        <td>{{ tag.scope_id }}</td>
+        <td>{{ obj_link('schemas', tag.schema_id) }}</td>
+    {% endcall %}
+{% endblock %}
