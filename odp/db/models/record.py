@@ -49,4 +49,4 @@ class Record(Base):
     tags = relationship('RecordTag', back_populates='record', cascade='all, delete-orphan', passive_deletes=True)
 
     def __repr__(self):
-        return self._repr('id', 'doi', 'sid', 'collection_id', 'schema_id')
+        return self._repr('id', 'doi', 'sid', 'collection_id', 'schema_id', 'schema_type')

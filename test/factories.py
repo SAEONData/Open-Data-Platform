@@ -33,6 +33,10 @@ def schema_uri_from_type(schema):
             'https://odp.saeon.ac.za/schema/metadata/datacite4-saeon',
             'https://odp.saeon.ac.za/schema/metadata/iso19115-saeon',
         ))
+    elif schema.type == 'tag':
+        return choice((
+            'https://odp.saeon.ac.za/schema/tag/record-qc',
+        ))
     else:
         return fake.uri()
 
@@ -165,8 +169,8 @@ class TagFactory(ODPModelFactory):
 
     id = factory.LazyAttribute(lambda tag: f'tag-{tag.scope.id}')
     public = randint(0, 1)
-    schema_uri = factory.Faker('uri')
     scope = factory.SubFactory(ScopeFactory)
+    schema = factory.SubFactory(SchemaFactory, type='tag')
 
 
 class UserFactory(ODPModelFactory):

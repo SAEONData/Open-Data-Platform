@@ -138,6 +138,18 @@ class ScopeSort(str, Enum):
     ID = 'id'
 
 
+class TagModel(BaseModel):
+    id: str
+    public: bool
+    scope_id: str
+    schema_id: str
+    schema_: Dict[str, Any]
+
+
+class TagSort(str, Enum):
+    ID = 'id'
+
+
 class UserModel(BaseModel):
     id: str
     email: str

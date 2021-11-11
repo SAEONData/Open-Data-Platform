@@ -15,6 +15,7 @@ from odp.api2.routers import (
     schema,
     scope,
     status,
+    tag,
     user,
 )
 from odp.config import config
@@ -41,6 +42,7 @@ app.include_router(role.router, prefix='/role', tags=['Role'])
 app.include_router(schema.router, prefix='/schema', tags=['Schema'])
 app.include_router(scope.router, prefix='/scope', tags=['Scope'])
 app.include_router(status.router, prefix='/status', tags=['Status'])
+app.include_router(tag.router, prefix='/tag', tags=['Tag'])
 app.include_router(user.router, prefix='/user', tags=['User'])
 
 app.add_middleware(
