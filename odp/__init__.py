@@ -29,6 +29,9 @@ class ODPScope(str, Enum):
     RECORD_MANAGE = 'odp.record:manage'
     RECORD_READ = 'odp.record:read'
 
+    # record tag
+    RECORD_TAG_QC = 'odp.record_tag:qc'
+
     # role
     ROLE_ADMIN = 'odp.role:admin'
     ROLE_READ = 'odp.role:read'

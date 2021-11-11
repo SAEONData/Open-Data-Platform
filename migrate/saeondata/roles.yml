@@ -18,3 +18,4 @@ SAEON:Curator:
     - odp.project:admin
     - odp.provider:admin
     - odp.record:admin
+    - odp.record_tag:qc

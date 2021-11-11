@@ -5,3 +5,7 @@ datacite4-saeon:
 iso19115-saeon:
   type: metadata
   uri: https://odp.saeon.ac.za/schema/metadata/iso19115-saeon
+
+record-qc:
+  type: tag
+  uri: https://odp.saeon.ac.za/schema/tag/record-qc
