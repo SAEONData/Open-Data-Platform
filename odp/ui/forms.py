@@ -113,14 +113,12 @@ class RecordForm(BaseForm):
         render_kw=dict(readonly=''),
     )
     doi = StringField(
-        label='DOI',
-        description='Digital Object Identifier',
-        validators=[regexp(DOI_REGEX)],
+        label='DOI (Digital Object Identifier)',
+        validators=[regexp('^$|' + DOI_REGEX)],
     )
     sid = StringField(
-        label='SID',
-        description='Secondary Identifier',
-        validators=[regexp(SID_REGEX)],
+        label='SID (Secondary Identifier)',
+        validators=[regexp('^$|' + SID_REGEX)],
     )
     collection_id = SelectField(
         label='Collection',
@@ -133,6 +131,10 @@ class RecordForm(BaseForm):
         validators=[input_required(), json_object],
         render_kw={'rows': 24},
     )
+    
+    def validate_sid(self, field):
+        if not self.doi.data and not field.data:
+            raise ValidationError('SID is required if there is no DOI.')
 
 
 class RoleForm(BaseForm):

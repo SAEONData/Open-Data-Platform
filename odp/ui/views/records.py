@@ -45,8 +45,8 @@ def create():
 
     if request.method == 'POST' and form.validate():
         record = api.post('/record/', dict(
-            doi=(doi := form.doi.data),
-            sid=(sid := form.sid.data),
+            doi=(doi := form.doi.data) or None,
+            sid=(sid := form.sid.data) or None,
             collection_id=form.collection_id.data,
             schema_id=form.schema_id.data,
             metadata=json.loads(form.metadata.data),
@@ -77,8 +77,8 @@ def edit(id):
 
     if request.method == 'POST' and form.validate():
         api.put(f'/record/{id}', dict(
-            doi=(doi := form.doi.data),
-            sid=(sid := form.sid.data),
+            doi=(doi := form.doi.data) or None,
+            sid=(sid := form.sid.data) or None,
             collection_id=form.collection_id.data,
             schema_id=form.schema_id.data,
             metadata=json.loads(form.metadata.data),
