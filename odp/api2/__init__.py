@@ -6,6 +6,7 @@ from jschon import create_catalog, URI
 
 import odp
 from odp.api2.routers import (
+    catalogue,
     client,
     collection,
     project,
@@ -33,6 +34,7 @@ app = FastAPI(
     redoc_url='/docs',
 )
 
+app.include_router(catalogue.router, prefix='/catalogue', tags=['Catalogue'])
 app.include_router(client.router, prefix='/client', tags=['Client'])
 app.include_router(collection.router, prefix='/collection', tags=['Collection'])
 app.include_router(project.router, prefix='/project', tags=['Project'])

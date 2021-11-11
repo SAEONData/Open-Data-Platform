@@ -6,6 +6,7 @@ from faker import Faker
 
 from odp.db import Session
 from odp.db.models import (
+    Catalogue,
     Client,
     Collection,
     Project,
@@ -37,6 +38,10 @@ def schema_uri_from_type(schema):
         return choice((
             'https://odp.saeon.ac.za/schema/tag/record-qc',
         ))
+    elif schema.type == 'catalogue':
+        return choice((
+            'https://odp.saeon.ac.za/schema/catalogue/saeon',
+        ))
     else:
         return fake.uri()
 
@@ -45,6 +50,23 @@ class ODPModelFactory(SQLAlchemyModelFactory):
     class Meta:
         sqlalchemy_session = Session
         sqlalchemy_session_persistence = 'commit'
+
+
+class SchemaFactory(ODPModelFactory):
+    class Meta:
+        model = Schema
+
+    id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
+    type = choice(('catalogue', 'metadata', 'tag'))
+    uri = factory.LazyAttribute(schema_uri_from_type)
+
+
+class CatalogueFactory(ODPModelFactory):
+    class Meta:
+        model = Catalogue
+
+    id = factory.Sequence(lambda n: f'{fake.slug()}.{n}')
+    schema = factory.SubFactory(SchemaFactory, type='catalogue')
 
 
 class ProviderFactory(ODPModelFactory):
@@ -110,15 +132,6 @@ class ProjectFactory(ODPModelFactory):
                 obj.collections.append(collection)
             if create:
                 Session.commit()
-
-
-class SchemaFactory(ODPModelFactory):
-    class Meta:
-        model = Schema
-
-    id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
-    type = choice(('catalogue', 'metadata', 'tag'))
-    uri = factory.LazyAttribute(schema_uri_from_type)
 
 
 class RecordFactory(ODPModelFactory):

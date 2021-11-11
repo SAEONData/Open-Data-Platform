@@ -4,6 +4,7 @@ import migrate.systemdata
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import (
+    Catalogue,
     Client,
     ClientScope,
     Collection,
@@ -20,6 +21,7 @@ from odp.db.models import (
     UserRole,
 )
 from test.factories import (
+    CatalogueFactory,
     ClientFactory,
     CollectionFactory,
     ProjectFactory,
@@ -49,6 +51,13 @@ def test_db_setup():
     result = Session.execute(select(RoleScope)).scalars()
     assert [(row.role_id, row.scope_id) for row in result] \
            == [(migrate.systemdata.ODP_ADMIN_ROLE, s.value) for s in ODPScope]
+
+
+def test_create_catalogue():
+    catalogue = CatalogueFactory()
+    result = Session.execute(select(Catalogue, Schema).join(Schema)).one()
+    assert (result.Catalogue.id, result.Catalogue.schema_id, result.Catalogue.schema_type, result.Schema.uri) \
+           == (catalogue.id, catalogue.schema_id, catalogue.schema_type, catalogue.schema.uri)
 
 
 def test_create_client():

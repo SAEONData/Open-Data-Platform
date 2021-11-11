@@ -11,6 +11,16 @@ DOI_REGEX = r'^10\.\d{4,}(\.\d+)*/[-._;()/:a-zA-Z0-9]+$'
 SID_REGEX = r'^[-._;()/:a-zA-Z0-9]+$'
 
 
+class CatalogueModel(BaseModel):
+    id: str
+    schema_id: str
+    schema_: Dict[str, Any]
+
+
+class CatalogueSort(str, Enum):
+    ID = 'id'
+
+
 class ClientModel(BaseModel):
     id: str
     name: str

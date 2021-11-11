@@ -1,3 +1,4 @@
+from .catalogue import Catalogue
 from .catalogue_record import CatalogueRecord
 from .client import Client
 from .client_scope import ClientScope

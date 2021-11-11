@@ -1,0 +1,36 @@
+{
+    "$id": "https://odp.saeon.ac.za/schema/catalogue/saeon",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+        "validity": {
+            "type": "object",
+            "properties": {
+                "valid": {"const": true}
+            },
+            "required": ["valid"]
+        }
+    },
+    "type": "object",
+    "properties": {
+        "validity": {"$ref": "#/$defs/validity"},
+        "tags": {
+            "type": "array",
+            "contains": {
+                "type": "object",
+                "properties": {
+                    "tag_id": {"const": "record-qc"},
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "pass": {"const": true}
+                        },
+                        "required": ["pass"]
+                    },
+                    "validity": {"$ref": "#/$defs/validity"}
+                },
+                "required": ["tag_id", "data", "validity"]
+            }
+        }
+    },
+    "required": ["validity", "tags"]
+}
