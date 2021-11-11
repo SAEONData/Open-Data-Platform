@@ -33,7 +33,7 @@ def json_object(form, field):
 
 class JSONTextField(TextAreaField):
     def process_data(self, value):
-        self.data = json.dumps(value)
+        self.data = json.dumps(value, indent=4, ensure_ascii=False)
 
 
 class MultiCheckboxField(SelectMultipleField):
@@ -131,7 +131,7 @@ class RecordForm(BaseForm):
         validators=[input_required(), json_object],
         render_kw={'rows': 24},
     )
-    
+
     def validate_sid(self, field):
         if not self.doi.data and not field.data:
             raise ValidationError('SID is required if there is no DOI.')
