@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Catalogues
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_table, obj_link %}
+    {% call(catalogue) render_table(catalogues, 'Schema') %}
+        <td>{{ obj_link('schemas', catalogue.schema_id) }}</td>
+    {% endcall %}
+{% endblock %}
