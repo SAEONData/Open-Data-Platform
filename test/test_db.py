@@ -150,8 +150,8 @@ def test_create_scope():
 def test_create_tag():
     tag = TagFactory()
     result = Session.execute(select(Tag, Scope).join(Scope)).one()
-    assert (result.Tag.id, result.Tag.public, result.Tag.schema_uri, result.Tag.scope_id) \
-           == (tag.id, tag.public, tag.schema_uri, tag.scope.id)
+    assert (result.Tag.id, result.Tag.public, result.Tag.schema_id, result.Tag.scope_id) \
+           == (tag.id, tag.public, tag.schema_id, tag.scope.id)
 
 
 def test_create_user():
