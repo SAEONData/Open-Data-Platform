@@ -13,7 +13,17 @@ rootdir = pathlib.Path(__file__).parent.parent
 sys.path.append(str(rootdir))
 
 from odp.db import Session
-from odp.db.models import Role, Scope, Project, Provider, Collection, Schema, SchemaType, Tag
+from odp.db.models import (
+    Catalogue,
+    Collection,
+    Project,
+    Provider,
+    Role,
+    Schema,
+    SchemaType,
+    Scope,
+    Tag,
+)
 
 datadir = pathlib.Path(__file__).parent / 'saeondata'
 
@@ -85,6 +95,18 @@ def create_providers_and_collections():
             collection.save()
 
 
+def create_catalogues():
+    """Create or update catalogue definitions."""
+    with open(datadir / 'catalogues.yml') as f:
+        catalogue_data = yaml.safe_load(f)
+
+    for catalogue_id, catalogue_spec in catalogue_data.items():
+        catalogue = Session.get(Catalogue, catalogue_id) or Catalogue(id=catalogue_id)
+        catalogue.schema_id = catalogue_spec['schema_id']
+        catalogue.schema_type = SchemaType.catalogue
+        catalogue.save()
+
+
 if __name__ == '__main__':
     with Session.begin():
         create_schemas()
@@ -92,3 +114,4 @@ if __name__ == '__main__':
         create_roles()
         create_projects()
         create_providers_and_collections()
+        create_catalogues()

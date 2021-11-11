@@ -40,7 +40,7 @@ def schema_uri_from_type(schema):
         ))
     elif schema.type == 'catalogue':
         return choice((
-            'https://odp.saeon.ac.za/schema/catalogue/saeon',
+            'https://odp.saeon.ac.za/schema/catalogue/saeon-catalogue',
         ))
     else:
         return fake.uri()

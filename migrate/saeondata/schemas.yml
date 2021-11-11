@@ -9,3 +9,7 @@ iso19115-saeon:
 record-qc:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/record-qc
+
+saeon-catalogue:
+  type: catalogue
+  uri: https://odp.saeon.ac.za/schema/catalogue/saeon-catalogue
