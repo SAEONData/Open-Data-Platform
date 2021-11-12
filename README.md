@@ -1,5 +1,7 @@
 # SAEON Open Data Platform
 
+![CI](https://github.com/SAEON/Open-Data-Platform/actions/workflows/main.yml/badge.svg)
+
 ## Repository info
 
 * **main**: ODP v2 development. Work in progress! :construction:
