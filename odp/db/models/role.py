@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 
 from odp.db import Base
 from odp.db.models.role_scope import RoleScope
-from odp.db.models.user_role import UserRole
 
 
 class Role(Base):
@@ -23,13 +22,14 @@ class Role(Base):
     provider_id = Column(String, ForeignKey('provider.id', ondelete='CASCADE'))
     provider = relationship('Provider')
 
-    # many-to-many relationship between role and scope
-    role_scopes = relationship('RoleScope', back_populates='role', cascade='all, delete-orphan', passive_deletes=True)
+    # many-to-many role_scope entities are persisted by
+    # assigning/removing Scope instances to/from scopes
+    role_scopes = relationship('RoleScope', cascade='all, delete-orphan', passive_deletes=True)
     scopes = association_proxy('role_scopes', 'scope', creator=lambda s: RoleScope(scope=s))
 
-    # many-to-many relationship between role and user
-    role_users = relationship('UserRole', back_populates='role', cascade='all, delete-orphan', passive_deletes=True)
-    users = association_proxy('role_users', 'user', creator=lambda u: UserRole(user=u))
+    # view of associated users via many-to-many user_role relation
+    role_users = relationship('UserRole', viewonly=True)
+    users = association_proxy('role_users', 'user')
 
     def __repr__(self):
         return self._repr('id', 'provider_id')

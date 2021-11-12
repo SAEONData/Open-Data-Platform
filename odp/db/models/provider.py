@@ -17,14 +17,14 @@ class Provider(Base):
     id = Column(String, primary_key=True)
     name = Column(String, unique=True, nullable=False)
 
-    # one-to-many relationship with collection
-    collections = relationship('Collection', back_populates='provider', cascade='all, delete-orphan', passive_deletes=True)
+    # view of associated collections (one-to-many)
+    collections = relationship('Collection', viewonly=True)
 
-    # zero-or-one-to-many relationship with role
-    roles = relationship('Role', cascade='all, delete-orphan', passive_deletes=True)
+    # view of associated roles (zero-or-one-to-many)
+    roles = relationship('Role', viewonly=True)
 
-    # zero-or-one-to-many relationship with client
-    clients = relationship('Client', cascade='all, delete-orphan', passive_deletes=True)
+    # view of associated clients (zero-or-one-to-many)
+    clients = relationship('Client', viewonly=True)
 
     def __repr__(self):
         return self._repr('id', 'name')

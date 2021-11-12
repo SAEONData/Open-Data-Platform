@@ -12,5 +12,5 @@ class ProjectCollection(Base):
     project_id = Column(String, ForeignKey('project.id', ondelete='CASCADE'), primary_key=True)
     collection_id = Column(String, ForeignKey('collection.id', ondelete='CASCADE'), primary_key=True)
 
-    project = relationship('Project', back_populates='project_collections')
-    collection = relationship('Collection', back_populates='collection_projects')
+    project = relationship('Project', viewonly=True)
+    collection = relationship('Collection')

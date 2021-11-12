@@ -12,5 +12,5 @@ class RoleScope(Base):
     role_id = Column(String, ForeignKey('role.id', ondelete='CASCADE'), primary_key=True)
     scope_id = Column(String, ForeignKey('scope.id', ondelete='CASCADE'), primary_key=True)
 
-    role = relationship('Role', back_populates='role_scopes')
-    scope = relationship('Scope', back_populates='scope_roles')
+    role = relationship('Role', viewonly=True)
+    scope = relationship('Scope')

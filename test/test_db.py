@@ -88,14 +88,6 @@ def test_create_collection():
            == (collection.id, collection.name, collection.provider.id, collection.provider.name)
 
 
-def test_create_collection_with_projects():
-    projects = ProjectFactory.create_batch(5)
-    collection = CollectionFactory(projects=projects)
-    result = Session.execute(select(ProjectCollection)).scalars()
-    assert [(row.project_id, row.collection_id) for row in result] \
-           == [(project.id, collection.id) for project in projects]
-
-
 def test_create_project():
     project = ProjectFactory()
     result = Session.execute(select(Project)).scalar_one()

@@ -22,8 +22,9 @@ class Client(Base):
     provider_id = Column(String, ForeignKey('provider.id', ondelete='CASCADE'))
     provider = relationship('Provider')
 
-    # many-to-many relationship between client and scope
-    client_scopes = relationship('ClientScope', back_populates='client', cascade='all, delete-orphan', passive_deletes=True)
+    # many-to-many client_scope entities are persisted by
+    # assigning/removing Scope instances to/from scopes
+    client_scopes = relationship('ClientScope', cascade='all, delete-orphan', passive_deletes=True)
     scopes = association_proxy('client_scopes', 'scope', creator=lambda s: ClientScope(scope=s))
 
     def __repr__(self):

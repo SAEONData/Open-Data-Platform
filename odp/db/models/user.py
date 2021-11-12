@@ -21,8 +21,9 @@ class User(Base):
     name = Column(String)
     picture = Column(String)
 
-    # many-to-many relationship between user and role
-    user_roles = relationship('UserRole', back_populates='user', cascade='all, delete-orphan', passive_deletes=True)
+    # many-to-many user_role entities are persisted by
+    # assigning/removing Role instances to/from roles
+    user_roles = relationship('UserRole', cascade='all, delete-orphan', passive_deletes=True)
     roles = association_proxy('user_roles', 'role', creator=lambda r: UserRole(role=r))
 
     def __repr__(self):

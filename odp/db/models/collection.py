@@ -3,7 +3,6 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
-from odp.db.models.project_collection import ProjectCollection
 
 
 class Collection(Base):
@@ -16,11 +15,11 @@ class Collection(Base):
     doi_key = Column(String)
 
     provider_id = Column(String, ForeignKey('provider.id', ondelete='CASCADE'), nullable=False)
-    provider = relationship('Provider', back_populates='collections')
+    provider = relationship('Provider')
 
-    # many-to-many relationship between collection and project
-    collection_projects = relationship('ProjectCollection', back_populates='collection', cascade='all, delete-orphan', passive_deletes=True)
-    projects = association_proxy('collection_projects', 'project', creator=lambda p: ProjectCollection(project=p))
+    # view of associated projects via many-to-many project_collection relation
+    collection_projects = relationship('ProjectCollection', viewonly=True)
+    projects = association_proxy('collection_projects', 'project')
 
     def __repr__(self):
         return self._repr('id', 'name', 'provider_id')

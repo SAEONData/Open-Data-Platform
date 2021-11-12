@@ -25,6 +25,6 @@ class RecordTag(Base):
     validity = Column(JSONB)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc))
 
-    record = relationship('Record', back_populates='tags')
+    record = relationship('Record')
     tag = relationship('Tag')
     user = relationship('User')

@@ -45,8 +45,8 @@ class Record(Base):
     schema_type = Column(Enum(SchemaType), nullable=False)
     schema = relationship('Schema')
 
-    # one-to-many relationship with record_tag
-    tags = relationship('RecordTag', back_populates='record', cascade='all, delete-orphan', passive_deletes=True)
+    # view of associated tags
+    tags = relationship('RecordTag', viewonly=True)
 
     def __repr__(self):
         return self._repr('id', 'doi', 'sid', 'collection_id', 'schema_id', 'schema_type')

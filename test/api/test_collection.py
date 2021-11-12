@@ -13,20 +13,26 @@ from test.factories import CollectionFactory, ProjectFactory, ProviderFactory
 @pytest.fixture
 def collection_batch():
     """Create and commit a batch of Collection instances."""
-    return [
-        CollectionFactory(projects=ProjectFactory.create_batch(randint(0, 3)))
-        for _ in range(randint(3, 5))
-    ]
+    collections = [CollectionFactory() for _ in range(randint(3, 5))]
+    ProjectFactory.create_batch(randint(0, 3), collections=collections)
+    return collections
 
 
-def collection_build(provider=None, projects=None, **id):
+@pytest.fixture
+def collection_batch_no_projects():
+    """Create and commit a batch of Collection instances
+    without projects, for testing the update API - we cannot
+    assign projects to collections, only the other way around."""
+    return [CollectionFactory() for _ in range(randint(3, 5))]
+
+
+def collection_build(provider=None, **id):
     """Build and return an uncommitted Collection instance.
     Referenced provider is however committed."""
     return CollectionFactory.build(
         **id,
         provider=provider or (provider := ProviderFactory()),
         provider_id=provider.id,
-        projects=projects,
     )
 
 
@@ -180,11 +186,10 @@ def test_create_collection_with_provider_specific_api_client(api, collection_bat
     ([ODPScope.COLLECTION_ADMIN], True),
     ([ODPScope.COLLECTION_ADMIN, ODPScope.COLLECTION_READ], True),
 ])
-def test_update_collection(api, collection_batch, scopes, authorized):
-    modified_collection_batch = collection_batch.copy()
+def test_update_collection(api, collection_batch_no_projects, scopes, authorized):
+    modified_collection_batch = collection_batch_no_projects.copy()
     modified_collection_batch[2] = (collection := collection_build(
-        id=collection_batch[2].id,
-        projects=collection_batch[2].projects,
+        id=collection_batch_no_projects[2].id,
     ))
     r = api(scopes).put('/collection/', json=dict(
         id=collection.id,
@@ -196,7 +201,7 @@ def test_update_collection(api, collection_batch, scopes, authorized):
         assert_db_state(modified_collection_batch)
     else:
         assert_forbidden(r)
-        assert_db_state(collection_batch)
+        assert_db_state(collection_batch_no_projects)
 
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
@@ -209,13 +214,12 @@ def test_update_collection(api, collection_batch, scopes, authorized):
     ([ODPScope.COLLECTION_ADMIN], True, True),
     ([ODPScope.COLLECTION_ADMIN, ODPScope.COLLECTION_READ], True, True),
 ])
-def test_update_collection_with_provider_specific_api_client(api, collection_batch, scopes, matching_provider, authorized):
-    api_client_provider = collection_batch[2].provider if matching_provider else collection_batch[1].provider
-    modified_collection_batch = collection_batch.copy()
+def test_update_collection_with_provider_specific_api_client(api, collection_batch_no_projects, scopes, matching_provider, authorized):
+    api_client_provider = collection_batch_no_projects[2].provider if matching_provider else collection_batch_no_projects[1].provider
+    modified_collection_batch = collection_batch_no_projects.copy()
     modified_collection_batch[2] = (collection := collection_build(
-        id=collection_batch[2].id,
-        provider=collection_batch[2].provider,
-        projects=collection_batch[2].projects,
+        id=collection_batch_no_projects[2].id,
+        provider=collection_batch_no_projects[2].provider,
     ))
     r = api(scopes, api_client_provider).put('/collection/', json=dict(
         id=collection.id,
@@ -227,7 +231,7 @@ def test_update_collection_with_provider_specific_api_client(api, collection_bat
         assert_db_state(modified_collection_batch)
     else:
         assert_forbidden(r)
-        assert_db_state(collection_batch)
+        assert_db_state(collection_batch_no_projects)
 
 
 @pytest.mark.parametrize('scopes, authorized', [

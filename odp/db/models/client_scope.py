@@ -14,5 +14,5 @@ class ClientScope(Base):
     client_id = Column(String, ForeignKey('client.id', ondelete='CASCADE'), primary_key=True)
     scope_id = Column(String, ForeignKey('scope.id', ondelete='CASCADE'), primary_key=True)
 
-    client = relationship('Client', back_populates='client_scopes')
-    scope = relationship('Scope', back_populates='scope_clients')
+    client = relationship('Client', viewonly=True)
+    scope = relationship('Scope')
