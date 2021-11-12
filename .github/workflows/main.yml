@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip pip-tools
+          pip-sync
+      - name: Set up testing environment
+        working-directory: ./test
+        shell: bash
+        run: |
+          cp .env.example .env
+          docker-compose up -d
+          sleep 30s
+      - name: Run the tests
+        working-directory: ./test
+        run: pytest
