@@ -27,4 +27,8 @@ jobs:
           sleep 30s
       - name: Run the tests
         working-directory: ./test
-        run: pytest
+        run: |
+          coverage run -m pytest
+          coverage xml
+      - name: Upload coverage
+        uses: codecov/codecov-action@v2
