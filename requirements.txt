@@ -34,6 +34,8 @@ click==8.0.3
     # via
     #   flask
     #   uvicorn
+coverage==6.1.2
+    # via -r requirements.in
 cryptography==35.0.0
     # via authlib
 dnspython==2.1.0

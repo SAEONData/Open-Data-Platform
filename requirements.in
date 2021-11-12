@@ -33,3 +33,4 @@ email-validator
 pytest
 factory-boy
 sqlalchemy-utils
+coverage
