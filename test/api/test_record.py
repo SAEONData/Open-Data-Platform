@@ -44,7 +44,7 @@ def assert_audit_log(command, record=None, record_id=None):
     assert result.client_id == 'odp.test'
     assert result.user_id is None
     assert result.command == command
-    assert datetime.now(timezone.utc) - timedelta(seconds=30) < result.timestamp < datetime.now(timezone.utc)
+    assert datetime.now(timezone.utc) - timedelta(seconds=120) < result.timestamp < datetime.now(timezone.utc)
     if command in ('insert', 'update'):
         assert result._id == record.id
         assert result._doi == record.doi
