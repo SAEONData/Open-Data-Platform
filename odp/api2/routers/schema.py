@@ -22,7 +22,7 @@ router = APIRouter()
 async def list_schemas(
         pager: Pager = Depends(Paging(SchemaSort)),
 ):
-    from odp.api2 import catalog
+    from odp.api2 import schema_catalog
 
     stmt = (
         select(Schema).
@@ -36,7 +36,7 @@ async def list_schemas(
             id=row.Schema.id,
             type=row.Schema.type,
             uri=row.Schema.uri,
-            schema_=catalog.get_schema(URI(row.Schema.uri)).value,
+            schema_=schema_catalog.get_schema(URI(row.Schema.uri)).value,
         )
         for row in Session.execute(stmt)
     ]
@@ -52,7 +52,7 @@ async def list_schemas(
 async def get_schema(
         schema_id: str,
 ):
-    from odp.api2 import catalog
+    from odp.api2 import schema_catalog
 
     schema = Session.execute(
         select(Schema).
@@ -66,5 +66,5 @@ async def get_schema(
         id=schema.id,
         type=schema.type,
         uri=schema.uri,
-        schema_=catalog.get_schema(URI(schema.uri)).value,
+        schema_=schema_catalog.get_schema(URI(schema.uri)).value,
     )

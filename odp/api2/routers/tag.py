@@ -22,7 +22,7 @@ router = APIRouter()
 async def list_tags(
         pager: Pager = Depends(Paging(TagSort)),
 ):
-    from odp.api2 import catalog
+    from odp.api2 import schema_catalog
 
     stmt = (
         select(Tag).
@@ -37,7 +37,7 @@ async def list_tags(
             public=row.Tag.public,
             scope_id=row.Tag.scope_id,
             schema_id=row.Tag.schema_id,
-            schema_=catalog.get_schema(URI(row.Tag.schema.uri)).value,
+            schema_=schema_catalog.get_schema(URI(row.Tag.schema.uri)).value,
         )
         for row in Session.execute(stmt)
     ]
@@ -53,7 +53,7 @@ async def list_tags(
 async def get_tag(
         tag_id: str,
 ):
-    from odp.api2 import catalog
+    from odp.api2 import schema_catalog
 
     if not (tag := Session.get(Tag, tag_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -63,5 +63,5 @@ async def get_tag(
         public=tag.public,
         scope_id=tag.scope_id,
         schema_id=tag.schema_id,
-        schema_=catalog.get_schema(URI(tag.schema.uri)).value,
+        schema_=schema_catalog.get_schema(URI(tag.schema.uri)).value,
     )

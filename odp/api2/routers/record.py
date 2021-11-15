@@ -15,9 +15,9 @@ router = APIRouter()
 
 
 async def get_jsonschema(record_in: RecordModelIn) -> JSONSchema:
-    from odp.api2 import catalog
+    from odp.api2 import schema_catalog
     schema = Session.get(Schema, (record_in.schema_id, SchemaType.metadata))
-    return catalog.get_schema(URI(schema.uri))
+    return schema_catalog.get_schema(URI(schema.uri))
 
 
 @router.get(

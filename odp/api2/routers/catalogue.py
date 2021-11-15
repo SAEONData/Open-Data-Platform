@@ -22,7 +22,7 @@ router = APIRouter()
 async def list_catalogues(
         pager: Pager = Depends(Paging(CatalogueSort)),
 ):
-    from odp.api2 import catalog
+    from odp.api2 import schema_catalog
 
     stmt = (
         select(Catalogue).
@@ -35,7 +35,7 @@ async def list_catalogues(
         CatalogueModel(
             id=row.Catalogue.id,
             schema_id=row.Catalogue.schema_id,
-            schema_=catalog.get_schema(URI(row.Catalogue.schema.uri)).value,
+            schema_=schema_catalog.get_schema(URI(row.Catalogue.schema.uri)).value,
         )
         for row in Session.execute(stmt)
     ]
@@ -51,7 +51,7 @@ async def list_catalogues(
 async def get_catalogue(
         catalogue_id: str,
 ):
-    from odp.api2 import catalog
+    from odp.api2 import schema_catalog
 
     if not (catalogue := Session.get(Catalogue, catalogue_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -59,5 +59,5 @@ async def get_catalogue(
     return CatalogueModel(
         id=catalogue.id,
         schema_id=catalogue.schema_id,
-        schema_=catalog.get_schema(URI(catalogue.schema.uri)).value,
+        schema_=schema_catalog.get_schema(URI(catalogue.schema.uri)).value,
     )
