@@ -29,4 +29,4 @@ class Catalogue(Base):
     schema = relationship('Schema')
 
     def __repr__(self):
-        return self._repr('id', 'schema_id', 'schema_type')
+        return self._repr('id', 'schema_id')

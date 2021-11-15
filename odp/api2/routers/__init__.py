@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union, Set, Literal
+from typing import Union, Set, Literal, Optional
 
 from fastapi import Request, HTTPException
 from fastapi.openapi.models import OAuthFlows, OAuthFlowClientCredentials
@@ -37,6 +37,8 @@ class Paging:
 
 @dataclass
 class Authorized:
+    client_id: str
+    user_id: Optional[str]
     provider_ids: Union[Set[str], Literal['*']]
 
 
@@ -75,6 +77,8 @@ class Authorize(OAuth2):
             client_auth = get_client_auth(token.client_id)
             try:
                 return Authorized(
+                    client_id=token.client_id,
+                    user_id=None,
                     provider_ids=client_auth.scopes[self.scope_id]
                 )
             except KeyError:
@@ -84,6 +88,8 @@ class Authorize(OAuth2):
         user_auth = get_user_auth(token.sub, token.client_id)
         try:
             return Authorized(
+                client_id=token.client_id,
+                user_id=token.sub,
                 provider_ids=user_auth.scopes[self.scope_id]
             )
         except KeyError:

@@ -1,11 +1,12 @@
 import uuid
+from datetime import datetime, timezone
 
-from sqlalchemy import Column, String, ForeignKey, CheckConstraint, Enum, ForeignKeyConstraint
+from sqlalchemy import Column, String, ForeignKey, CheckConstraint, Enum, ForeignKeyConstraint, Integer, TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
-from odp.db.models.types import SchemaType
+from odp.db.models.types import SchemaType, AuditCommand
 
 
 class Record(Base):
@@ -49,4 +50,23 @@ class Record(Base):
     tags = relationship('RecordTag', viewonly=True)
 
     def __repr__(self):
-        return self._repr('id', 'doi', 'sid', 'collection_id', 'schema_id', 'schema_type')
+        return self._repr('id', 'doi', 'sid', 'collection_id', 'schema_id')
+
+
+class RecordAudit(Base):
+    """Record audit log."""
+    
+    __tablename__ = 'record_audit'
+    
+    id = Column(Integer, primary_key=True)
+    client_id = Column(String, nullable=False)
+    user_id = Column(String)
+    command = Column(Enum(AuditCommand), nullable=False)
+    timestamp = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc))
+
+    _id = Column(String, nullable=False)
+    _doi = Column(String)
+    _sid = Column(String)
+    _metadata = Column(JSONB)
+    _collection_id = Column(String)
+    _schema_id = Column(String)

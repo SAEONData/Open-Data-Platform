@@ -9,7 +9,7 @@ from odp import ODPScope
 from odp.api2.models import RecordModel, RecordModelIn, RecordSort
 from odp.api2.routers import Pager, Paging, Authorize, Authorized
 from odp.db import Session
-from odp.db.models import Record, Collection, SchemaType, Schema
+from odp.db.models import Record, Collection, SchemaType, Schema, RecordAudit, AuditCommand
 
 router = APIRouter()
 
@@ -113,6 +113,18 @@ async def create_record(
     )
     record.save()
 
+    RecordAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=AuditCommand.insert,
+        _id=record.id,
+        _doi=record.doi,
+        _sid=record.sid,
+        _metadata=record.metadata_,
+        _collection_id=record.collection_id,
+        _schema_id=record.schema_id,
+    ).save()
+
     return RecordModel(
         id=record.id,
         doi=record.doi,
@@ -150,14 +162,33 @@ async def update_record(
     ).first() is not None:
         raise HTTPException(HTTP_409_CONFLICT)
 
-    record.doi = record_in.doi
-    record.sid = record_in.sid
-    record.collection_id = record_in.collection_id
-    record.schema_id = record_in.schema_id
-    record.schema_type = SchemaType.metadata
-    record.metadata_ = record_in.metadata
-    record.validity = jsonschema.evaluate(JSON(record_in.metadata)).output('detailed')
-    record.save()
+    if (
+        record.doi != record_in.doi or
+        record.sid != record_in.sid or
+        record.collection_id != record_in.collection_id or
+        record.schema_id != record_in.schema_id or
+        record.metadata_ != record_in.metadata
+    ):
+        record.doi = record_in.doi
+        record.sid = record_in.sid
+        record.collection_id = record_in.collection_id
+        record.schema_id = record_in.schema_id
+        record.schema_type = SchemaType.metadata
+        record.metadata_ = record_in.metadata
+        record.validity = jsonschema.evaluate(JSON(record_in.metadata)).output('detailed')
+        record.save()
+
+        RecordAudit(
+            client_id=auth.client_id,
+            user_id=auth.user_id,
+            command=AuditCommand.update,
+            _id=record.id,
+            _doi=record.doi,
+            _sid=record.sid,
+            _metadata=record.metadata_,
+            _collection_id=record.collection_id,
+            _schema_id=record.schema_id,
+        ).save()
 
     return RecordModel(
         id=record.id,
@@ -184,3 +215,10 @@ async def delete_record(
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     record.delete()
+
+    RecordAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=AuditCommand.delete,
+        _id=record_id,
+    ).save()

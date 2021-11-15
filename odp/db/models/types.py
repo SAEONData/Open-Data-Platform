@@ -8,3 +8,12 @@ class SchemaType(str, Enum):
 
     def __repr__(self):
         return repr(self.value)
+
+
+class AuditCommand(str, Enum):
+    insert = 'insert'
+    update = 'update'
+    delete = 'delete'
+
+    def __repr__(self):
+        return repr(self.value)
