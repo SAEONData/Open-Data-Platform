@@ -4,23 +4,12 @@ DFFE:
     DFFE:
       name: Department of Forestry, Fisheries and the Environment
       doi_key: DEFF
-      projects:
-        - SAEON-ODP
-        - SASDI
-        - SANEIM
     NCCIS:
       name: National Climate Change Information System
       doi_key: NCCIS.DATA
-      projects:
-        - GCDC
-        - SANEIM
     Carbon-Sinks:
       name: South African Carbon Sinks Atlas
       doi_key: DEA.CARBON
-      projects:
-        - SAEON-ODP
-        - SASDI
-        - SANEIM
 
 Oceans-and-Coasts:
   name: "Chief Directorate: Oceans and Coastal Research"
@@ -28,14 +17,8 @@ Oceans-and-Coasts:
     MIMS:
       name: Marine Information Management System
       doi_key: DEA.MIMS
-      projects:
-        - MIMS
-        - SANEIM
     SADCO:
       name: Southern African Data Centre for Oceanography
-      projects:
-        - MIMS
-        - SADCO
 
 CoGTA:
   name: Department of Cooperative Governance and Traditional Affairs
@@ -43,8 +26,6 @@ CoGTA:
     CoGTA:
       name: Department of Cooperative Governance and Traditional Affairs
       doi_key: SASDI
-      projects:
-        - SASDI
 
 DHS:
   name: Department of Human Settlements
@@ -52,8 +33,6 @@ DHS:
     DHS:
       name: Department of Human Settlements
       doi_key: SASDI
-      projects:
-        - SASDI
 
 StatsSA:
   name: Department of Statistics South Africa
@@ -61,8 +40,6 @@ StatsSA:
     StatsSA:
       name: Statistics South Africa
       doi_key: SASDI
-      projects:
-        - SASDI
 
 NGI:
   name: "Chief Directorate: National Geo-spatial Information"
@@ -70,8 +47,6 @@ NGI:
     NGI:
       name: National Geo-spatial Information
       doi_key: SASDI
-      projects:
-        - SASDI
 
 CSG:
   name: Chief Surveyor General
@@ -79,8 +54,6 @@ CSG:
     CSG-KZN:
       name: "Surveyor General: KwaZulu-Natal"
       doi_key: SASDI
-      projects:
-        - SASDI
 
 CPT-Metro:
   name: City of Cape Town Metropolitan Municipality
@@ -88,8 +61,6 @@ CPT-Metro:
     CPT-Metro:
       name: City of Cape Town Metropolitan Municipality
       doi_key: SASDI
-      projects:
-        - SASDI
 
 JHB-Metro:
   name: City of Johannesburg Metropolitan Municipality
@@ -97,8 +68,6 @@ JHB-Metro:
     JHB-Metro:
       name: City of Johannesburg Metropolitan Municipality
       doi_key: SASDI
-      projects:
-        - SASDI
 
 TSH-Metro:
   name: City of Tshwane Metropolitan Municipality
@@ -106,8 +75,6 @@ TSH-Metro:
     TSH-Metro:
       name: City of Tshwane Metropolitan Municipality
       doi_key: SASDI
-      projects:
-        - SASDI
 
 UCT:
   name: University of Cape Town
@@ -115,8 +82,6 @@ UCT:
     CSAG:
       name: Climate Systems Analysis Group
       doi_key: SARVA.CSAG
-      projects:
-        - GCDC
 
 UKZN:
   name: University of KwaZulu-Natal
@@ -124,8 +89,6 @@ UKZN:
     Bioresources-Eng:
       name: Bioresources Engineering
       doi_key: SARVA.BEEH
-      projects:
-        - GCDC
 
 SUN:
   name: Stellenbosch University
@@ -133,8 +96,6 @@ SUN:
     SUN:
       name: Stellenbosch University
       doi_key: SAEON.SU
-      projects:
-        - SAEON-ODP
 
 Demarcation-Board:
   name: Municipal Demarcation Board
@@ -142,8 +103,6 @@ Demarcation-Board:
     Demarcation-Board:
       name: Municipal Demarcation Board
       doi_key: SASDI
-      projects:
-        - SASDI
 
 SAWS:
   name: South African Weather Service
@@ -151,8 +110,6 @@ SAWS:
     Climate-Atlas:
       name: SAWS Climate Atlas
       doi_key: SARVA.SAWS
-      projects:
-        - GCDC
 
 SANBI:
   name: South African National Biodiversity Institute
@@ -160,8 +117,6 @@ SANBI:
     Biodiversity-GIS:
       name: Biodiversity GIS
       doi_key: SANBI
-      projects:
-        - SASDI
 
 SAEON:
   name: South African Environmental Observation Network
@@ -169,22 +124,14 @@ SAEON:
     Metacat:
       name: Metacat
       doi_key: SAEON.METACAT
-      projects:
-        - SAEON-ODP
     SAEON-Pub:
       name: SAEON Publications
       doi_key: SAEON.PUB
-      projects:
-        - SAEON-ODP
     SAEON-NO:
       name: SAEON National Office
       doi_key: SAEON
-      projects:
-        - SAEON-ODP
     SAEON-ObsDB:
       name: SAEON Observations Database
-      projects:
-        - SAEON-ObsDB
 
 SAEON-uLwazi:
   name: SAEON uLwazi Node
@@ -192,28 +139,18 @@ SAEON-uLwazi:
     BEA:
       name: BioEnergy Atlas for South Africa
       doi_key: BEA.DATA
-      projects:
-        - GCDC
     Context-BD:
       name: Contextual Boundary Data
       doi_key: SAEON.CONTEXT
-      projects:
-        - SAEON-ODP
     SARVA-SANBI:
       name: "SARVA: SANBI Datasets"
       doi_key: SARVA.BGIS
-      projects:
-        - GCDC
     SARVA-Energy:
       name: "SARVA: Energy Atlas"
       doi_key: SARVA.ENERGY
-      projects:
-        - GCDC
     SARVA:
       name: South African Risk and Vulnerability Atlas
       doi_key: SARVA3.DATA
-      projects:
-        - GCDC
 
 SAEON-Fynbos:
   name: SAEON Fynbos Node
@@ -221,8 +158,6 @@ SAEON-Fynbos:
     SAEON-Fynbos:
       name: SAEON Fynbos Node
       doi_key: SAEON.FYNBOS
-      projects:
-        - SAEON-ODP
 
 SAEON-Ndlovu:
   name: SAEON Ndlovu Node
@@ -230,8 +165,6 @@ SAEON-Ndlovu:
     SAEON-Ndlovu:
       name: SAEON Ndlovu Node
       doi_key: SAEON.NDLOVU
-      projects:
-        - SAEON-ODP
 
 SAEON-Egagasini:
   name: SAEON Egagasini Node
@@ -239,8 +172,6 @@ SAEON-Egagasini:
     SAEON-Egagasini:
       name: SAEON Egagasini Node
       doi_key: SAEON.EGAGASINI
-      projects:
-        - SAEON-ODP
 
 SAEON-GFW:
   name: SAEON Grasslands-Forests-Wetlands Node
@@ -248,8 +179,6 @@ SAEON-GFW:
     SAEON-GFW:
       name: SAEON GFW Node
       doi_key: SAEON.GFW
-      projects:
-        - GCDC
 
 WC-Gov-Dept-Premier:
   name: "Western Cape Government: Department of the Premier"
@@ -257,8 +186,6 @@ WC-Gov-Dept-Premier:
     WC-Gov-Dept-Premier:
       name: "Western Cape Government: Department of the Premier"
       doi_key: SASDI
-      projects:
-        - SASDI
 
 GEOSS:
   name: GEOSS South Africa (Pty) Ltd
@@ -266,5 +193,3 @@ GEOSS:
     GEOSS:
       name: GEOSS South Africa
       doi_key: SARVA.GEOSS
-      projects:
-        - GCDC

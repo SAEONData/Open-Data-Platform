@@ -73,6 +73,7 @@ def create_projects():
     for project_id, project_spec in project_data.items():
         project = Session.get(Project, project_id) or Project(id=project_id)
         project.name = project_spec['name']
+        project.collections = [Session.get(Collection, collection_id) for collection_id in project_spec['collections']]
         project.save()
 
 
@@ -91,7 +92,6 @@ def create_providers_and_collections():
             collection.name = collection_spec['name']
             collection.doi_key = collection_spec.get('doi_key')
             collection.provider_id = provider_id
-            collection.projects = [Session.get(Project, project_id) for project_id in collection_spec['projects']]
             collection.save()
 
 
@@ -112,6 +112,6 @@ if __name__ == '__main__':
         create_schemas()
         create_tags()
         create_roles()
-        create_projects()
         create_providers_and_collections()
+        create_projects()
         create_catalogues()

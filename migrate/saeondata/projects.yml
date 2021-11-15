@@ -1,20 +1,68 @@
 GCDC:
   name: Global Change Data Centre
+  collections:
+    - NCCIS
+    - CSAG
+    - Bioresources-Eng
+    - Climate-Atlas
+    - BEA
+    - SARVA-SANBI
+    - SARVA-Energy
+    - SARVA
+    - SAEON-GFW
+    - GEOSS
 
 SASDI:
   name: South African Spatial Data Infrastructure
+  collections:
+    - DFFE
+    - Carbon-Sinks
+    - CoGTA
+    - DHS
+    - StatsSA
+    - NGI
+    - CSG-KZN
+    - CPT-Metro
+    - JHB-Metro
+    - TSH-Metro
+    - Demarcation-Board
+    - Biodiversity-GIS
+    - WC-Gov-Dept-Premier
 
 SAEON-ODP:
   name: SAEON Open Data Platform
+  collections:
+    - DFFE
+    - Carbon-Sinks
+    - SUN
+    - Metacat
+    - SAEON-Pub
+    - SAEON-NO
+    - Context-BD
+    - SAEON-Fynbos
+    - SAEON-Ndlovu
+    - SAEON-Egagasini
 
 SANEIM:
   name: South African National Environmental Information Metadata System
+  collections:
+    - DFFE
+    - NCCIS
+    - Carbon-Sinks
+    - MIMS
 
 MIMS:
   name: Marine Information Management System
+  collections:
+    - MIMS
+    - SADCO
 
 SAEON-ObsDB:
   name: SAEON Observations Database
+  collections:
+    - SAEON-ObsDB
 
 SADCO:
   name: Southern African Data Centre for Oceanography
+  collections:
+    - SADCO
