@@ -21,6 +21,11 @@
                 Validity
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tag-qc" type="button" role="tab">
+                QC
+            </button>
+        </li>
     </ul>
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
@@ -46,6 +51,21 @@
             <pre class="m-3">
                 {{- record.validity|tojson -}}
             </pre>
+        </div>
+        <div id="tag-qc" class="tab-pane fade" role="tabpanel">
+            {% from 'macros.html' import render_table, obj_link %}
+            {% set qc_tags = record.tags|selectattr('tag_id', 'eq', 'record-qc') %}
+            {% call(qc_tag) render_table(qc_tags, 'Pass', 'Comment', 'User', 'Timestamp', hide_id=True) %}
+                <td>{{ qc_tag.data['pass_'] }}</td>
+                <td>{{ qc_tag.data['comment'] }}</td>
+                <td>{{ obj_link('users', qc_tag.user_id, qc_tag.user_name) }}</td>
+                <td>{{ qc_tag.timestamp }}</td>
+            {% endcall %}
+            <div class="btn-toolbar justify-content-between mt-4">
+                <a href="{{ url_for('.tag_qc', id=record.id) }}" class="btn btn-outline-warning btn-action">
+                    Tag
+                </a>
+            </div>
         </div>
     </div>
 {% endblock %}

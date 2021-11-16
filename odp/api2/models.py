@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Dict, Any
 
@@ -82,6 +83,20 @@ class ProviderSort(str, Enum):
     NAME = 'name'
 
 
+class RecordTagModel(BaseModel):
+    tag_id: str
+    user_id: str
+    user_name: str
+    data: Dict[str, Any]
+    validity: Dict[str, Any]
+    timestamp: datetime
+
+
+class RecordTagModelIn(BaseModel):
+    tag_id: str
+    data: Dict[str, Any]
+
+
 class RecordModel(BaseModel):
     id: str
     doi: Optional[str]
@@ -90,6 +105,7 @@ class RecordModel(BaseModel):
     schema_id: str
     metadata: Dict[str, Any]
     validity: Dict[str, Any]
+    tags: List[RecordTagModel]
 
 
 class RecordModelIn(BaseModel):

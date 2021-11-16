@@ -9,7 +9,7 @@ from .project import Project
 from .project_collection import ProjectCollection
 from .provider import Provider
 from .record import Record, RecordAudit
-from .record_tag import RecordTag
+from .record_tag import RecordTag, RecordTagAudit
 from .role import Role
 from .role_scope import RoleScope
 from .schema import Schema

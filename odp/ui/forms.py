@@ -137,6 +137,15 @@ class RecordForm(BaseForm):
             raise ValidationError('SID is required if there is no DOI.')
 
 
+class RecordTagQCForm(BaseForm):
+    pass_ = BooleanField(
+        label='Pass',
+    )
+    comment = StringField(
+        label='Comment',
+    )
+
+
 class RoleForm(BaseForm):
     id = StringField(
         label='Role id',

@@ -3,9 +3,9 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "properties": {
-        "pass": {"type": "boolean"},
+        "pass_": {"type": "boolean"},
         "comment": {"type": "string"}
     },
-    "required": ["pass"],
+    "required": ["pass_"],
     "additionalProperties": false
 }

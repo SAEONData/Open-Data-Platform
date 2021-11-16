@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Record: {{ record.doi or record.sid }}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_field %}
+    <form action="{{ url_for('.tag_qc', id=record.id) }}" method="post">
+        {{ form.csrf_token }}
+        {{ render_field(form.pass_) }}
+        {{ render_field(form.comment) }}
+        <div class="mt-4">
+            <button type="submit" class="btn btn-outline-primary btn-action">Save</button>
+            <a href="{{ url_for('.view', id=record.id) }}" class="btn btn-outline-secondary btn-action">Cancel</a>
+        </div>
+    </form>
+{% endblock %}

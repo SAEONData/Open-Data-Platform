@@ -1,23 +1,51 @@
+from datetime import datetime, timezone
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from jschon import URI, JSONSchema, JSON
 from sqlalchemy import select
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
-from odp.api2.models import RecordModel, RecordModelIn, RecordSort
+from odp.api2.models import RecordModel, RecordModelIn, RecordSort, RecordTagModel, RecordTagModelIn
 from odp.api2.routers import Pager, Paging, Authorize, Authorized
 from odp.db import Session
-from odp.db.models import Record, Collection, SchemaType, Schema, RecordAudit, AuditCommand
+from odp.db.models import (
+    Record,
+    Collection,
+    SchemaType,
+    Schema,
+    RecordAudit,
+    AuditCommand,
+    Tag,
+    RecordTag,
+    RecordTagAudit,
+)
 
 router = APIRouter()
 
 
-async def get_jsonschema(record_in: RecordModelIn) -> JSONSchema:
+async def get_metadata_schema(record_in: RecordModelIn) -> JSONSchema:
     from odp.api2 import schema_catalog
     schema = Session.get(Schema, (record_in.schema_id, SchemaType.metadata))
     return schema_catalog.get_schema(URI(schema.uri))
+
+
+async def get_tag_schema(record_tag_in: RecordTagModelIn) -> JSONSchema:
+    from odp.api2 import schema_catalog
+    if not (tag := Session.get(Tag, record_tag_in.tag_id)):
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
+
+    schema = Session.get(Schema, (tag.schema_id, SchemaType.tag))
+    return schema_catalog.get_schema(URI(schema.uri))
+
+
+async def authorize_tag(record_tag_in: RecordTagModelIn, request: Request) -> Authorized:
+    if not (tag := Session.get(Tag, record_tag_in.tag_id)):
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
+
+    auth = await Authorize(ODPScope(tag.scope_id))(request)
+    return auth
 
 
 @router.get(
@@ -47,6 +75,14 @@ async def list_records(
             schema_id=row.Record.schema_id,
             metadata=row.Record.metadata_,
             validity=row.Record.validity,
+            tags=[RecordTagModel(
+                tag_id=record_tag.tag_id,
+                user_id=record_tag.user_id,
+                user_name=record_tag.user.name,
+                data=record_tag.data,
+                validity=record_tag.validity,
+                timestamp=record_tag.timestamp,
+            ) for record_tag in row.Record.tags],
         )
         for row in Session.execute(stmt)
     ]
@@ -76,6 +112,14 @@ async def get_record(
         schema_id=record.schema_id,
         metadata=record.metadata_,
         validity=record.validity,
+        tags=[RecordTagModel(
+            tag_id=record_tag.tag_id,
+            user_id=record_tag.user_id,
+            user_name=record_tag.user.name,
+            data=record_tag.data,
+            validity=record_tag.validity,
+            timestamp=record_tag.timestamp,
+        ) for record_tag in record.tags],
     )
 
 
@@ -85,7 +129,7 @@ async def get_record(
 )
 async def create_record(
         record_in: RecordModelIn,
-        jsonschema: JSONSchema = Depends(get_jsonschema),
+        metadata_schema: JSONSchema = Depends(get_metadata_schema),
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_CREATE)),
 ):
     if (auth.provider_ids != '*'
@@ -109,7 +153,7 @@ async def create_record(
         schema_id=record_in.schema_id,
         schema_type=SchemaType.metadata,
         metadata_=record_in.metadata,
-        validity=jsonschema.evaluate(JSON(record_in.metadata)).output('detailed'),
+        validity=metadata_schema.evaluate(JSON(record_in.metadata)).output('detailed'),
     )
     record.save()
 
@@ -133,6 +177,7 @@ async def create_record(
         schema_id=record.schema_id,
         metadata=record.metadata_,
         validity=record.validity,
+        tags=[],
     )
 
 
@@ -143,7 +188,7 @@ async def create_record(
 async def update_record(
         record_id: str,
         record_in: RecordModelIn,
-        jsonschema: JSONSchema = Depends(get_jsonschema),
+        metadata_schema: JSONSchema = Depends(get_metadata_schema),
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_MANAGE)),
 ):
     if not (record := Session.get(Record, record_id)):
@@ -175,7 +220,7 @@ async def update_record(
         record.schema_id = record_in.schema_id
         record.schema_type = SchemaType.metadata
         record.metadata_ = record_in.metadata
-        record.validity = jsonschema.evaluate(JSON(record_in.metadata)).output('detailed')
+        record.validity = metadata_schema.evaluate(JSON(record_in.metadata)).output('detailed')
         record.save()
 
         RecordAudit(
@@ -198,6 +243,14 @@ async def update_record(
         schema_id=record.schema_id,
         metadata=record.metadata_,
         validity=record.validity,
+        tags=[RecordTagModel(
+            tag_id=record_tag.tag_id,
+            user_id=record_tag.user_id,
+            user_name=record_tag.user.name,
+            data=record_tag.data,
+            validity=record_tag.validity,
+            timestamp=record_tag.timestamp,
+        ) for record_tag in record.tags],
     )
 
 
@@ -222,3 +275,59 @@ async def delete_record(
         command=AuditCommand.delete,
         _id=record_id,
     ).save()
+
+
+@router.post(
+    '/{record_id}/tag',
+    response_model=RecordTagModel,
+)
+async def tag_record(
+        record_id: str,
+        record_tag_in: RecordTagModelIn,
+        tag_schema: JSONSchema = Depends(get_tag_schema),
+        auth: Authorized = Depends(authorize_tag),
+):
+    if not auth.user_id:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if record_tag := Session.get(RecordTag, (record_id, record_tag_in.tag_id, auth.user_id)):
+        command = AuditCommand.update
+    else:
+        record_tag = RecordTag(
+            record_id=record_id,
+            tag_id=record_tag_in.tag_id,
+            user_id=auth.user_id,
+        )
+        command = AuditCommand.insert
+ 
+    if record_tag.data != record_tag_in.data:
+        record_tag.data = record_tag_in.data
+        record_tag.validity = tag_schema.evaluate(JSON(record_tag_in.data)).output('detailed')
+        record_tag.timestamp = (timestamp := datetime.now(timezone.utc))
+        record_tag.save()
+
+        RecordTagAudit(
+            client_id=auth.client_id,
+            user_id=auth.user_id,
+            command=command,
+            timestamp=timestamp,
+            _record_id=record_tag.record_id,
+            _tag_id=record_tag.tag_id,
+            _user_id=record_tag.user_id,
+            _data=record_tag.data,
+        ).save()
+
+    return RecordTagModel(
+        tag_id=record_tag.tag_id,
+        user_id=record_tag.user_id,
+        user_name=record_tag.user.name,
+        data=record_tag.data,
+        validity=record_tag.validity,
+        timestamp=record_tag.timestamp,
+    )
