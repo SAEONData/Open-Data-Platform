@@ -83,6 +83,7 @@ async def list_records(
             schema_id=row.Record.schema_id,
             metadata=row.Record.metadata_,
             validity=row.Record.validity,
+            timestamp=row.Record.timestamp,
             tags=[RecordTagModel(
                 tag_id=record_tag.tag_id,
                 user_id=record_tag.user_id,
@@ -120,6 +121,7 @@ async def get_record(
         schema_id=record.schema_id,
         metadata=record.metadata_,
         validity=record.validity,
+        timestamp=record.timestamp,
         tags=[RecordTagModel(
             tag_id=record_tag.tag_id,
             user_id=record_tag.user_id,
@@ -162,6 +164,7 @@ async def create_record(
         schema_type=SchemaType.metadata,
         metadata_=record_in.metadata,
         validity=metadata_schema.evaluate(JSON(record_in.metadata)).output('detailed'),
+        timestamp=(timestamp := datetime.now(timezone.utc)),
     )
     record.save()
 
@@ -169,6 +172,7 @@ async def create_record(
         client_id=auth.client_id,
         user_id=auth.user_id,
         command=AuditCommand.insert,
+        timestamp=timestamp,
         _id=record.id,
         _doi=record.doi,
         _sid=record.sid,
@@ -185,6 +189,7 @@ async def create_record(
         schema_id=record.schema_id,
         metadata=record.metadata_,
         validity=record.validity,
+        timestamp=record.timestamp,
         tags=[],
     )
 
@@ -229,12 +234,14 @@ async def update_record(
         record.schema_type = SchemaType.metadata
         record.metadata_ = record_in.metadata
         record.validity = metadata_schema.evaluate(JSON(record_in.metadata)).output('detailed')
+        record.timestamp = (timestamp := datetime.now(timezone.utc))
         record.save()
 
         RecordAudit(
             client_id=auth.client_id,
             user_id=auth.user_id,
             command=AuditCommand.update,
+            timestamp=timestamp,
             _id=record.id,
             _doi=record.doi,
             _sid=record.sid,
@@ -251,6 +258,7 @@ async def update_record(
         schema_id=record.schema_id,
         metadata=record.metadata_,
         validity=record.validity,
+        timestamp=record.timestamp,
         tags=[RecordTagModel(
             tag_id=record_tag.tag_id,
             user_id=record_tag.user_id,
@@ -281,6 +289,7 @@ async def delete_record(
         client_id=auth.client_id,
         user_id=auth.user_id,
         command=AuditCommand.delete,
+        timestamp=datetime.now(timezone.utc),
         _id=record_id,
     ).save()
 

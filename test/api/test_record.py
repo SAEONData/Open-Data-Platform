@@ -35,8 +35,18 @@ def assert_db_state(records):
     Don't check metadata/validity as dicts are unhashable."""
     Session.expire_all()
     result = Session.execute(select(Record)).scalars().all()
-    assert set((row.id, row.doi, row.sid, row.collection_id, row.schema_id, row.schema_type) for row in result) \
-           == set((record.id, record.doi, record.sid, record.collection_id, record.schema_id, record.schema_type) for record in records)
+    result.sort(key=lambda r: r.id)
+    records.sort(key=lambda r: r.id)
+    assert len(result) == len(records)
+    for n, row in enumerate(result):
+        assert row.id == records[n].id
+        assert row.doi == records[n].doi
+        assert row.sid == records[n].sid
+        assert row.metadata_ == records[n].metadata_
+        assert row.timestamp < records[n].timestamp + timedelta(seconds=120)
+        assert row.collection_id == records[n].collection_id
+        assert row.schema_id == records[n].schema_id
+        assert row.schema_type == records[n].schema_type
 
 
 def assert_audit_log(command, record=None, record_id=None):

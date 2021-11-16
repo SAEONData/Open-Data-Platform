@@ -1,5 +1,4 @@
 import uuid
-from datetime import datetime, timezone
 
 from sqlalchemy import Column, String, ForeignKey, CheckConstraint, Enum, ForeignKeyConstraint, Integer, TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB
@@ -38,6 +37,7 @@ class Record(Base):
     sid = Column(String, unique=True)
     metadata_ = Column(JSONB, nullable=False)
     validity = Column(JSONB, nullable=False)
+    timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
 
     collection_id = Column(String, ForeignKey('collection.id', ondelete='RESTRICT'), nullable=False)
     collection = relationship('Collection')
@@ -62,7 +62,7 @@ class RecordAudit(Base):
     client_id = Column(String, nullable=False)
     user_id = Column(String)
     command = Column(Enum(AuditCommand), nullable=False)
-    timestamp = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc))
+    timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
 
     _id = Column(String, nullable=False)
     _doi = Column(String)

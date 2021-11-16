@@ -105,6 +105,7 @@ class RecordModel(BaseModel):
     schema_id: str
     metadata: Dict[str, Any]
     validity: Dict[str, Any]
+    timestamp: datetime
     tags: List[RecordTagModel]
 
 

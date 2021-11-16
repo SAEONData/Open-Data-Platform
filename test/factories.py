@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from random import randint, choice
 
 import factory
@@ -144,6 +145,7 @@ class RecordFactory(ODPModelFactory):
     validity = {}
     collection = factory.SubFactory(CollectionFactory)
     schema = factory.SubFactory(SchemaFactory, type='metadata')
+    timestamp = datetime.now(timezone.utc)
 
 
 class RoleFactory(ODPModelFactory):
