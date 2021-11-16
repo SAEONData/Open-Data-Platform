@@ -31,8 +31,7 @@ def record_build(collection=None, **id):
 
 
 def assert_db_state(records):
-    """Verify that the DB record table contains the given record batch.
-    Don't check metadata/validity as dicts are unhashable."""
+    """Verify that the DB record table contains the given record batch."""
     Session.expire_all()
     result = Session.execute(select(Record)).scalars().all()
     result.sort(key=lambda r: r.id)
