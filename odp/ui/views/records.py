@@ -106,7 +106,7 @@ def tag_qc(id):
     record = api.get(f'/record/{id}')
 
     # separate get/post form instantiation to resolve
-    # ambiguity of missing vs empty boolean field
+    # ambiguity of missing vs false boolean field
     if request.method == 'POST':
         form = RecordTagQCForm(request.form)
     else:

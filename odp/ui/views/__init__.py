@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from flask import Flask
 
@@ -36,3 +38,8 @@ def init_app(app: Flask):
     def tojson(obj):
         """Replaces the Jinja built-in tojson filter."""
         return json.dumps(obj, indent=4, ensure_ascii=False)
+
+    @app.template_filter()
+    def timestamp(value):
+        dt = datetime.fromisoformat(value).astimezone(ZoneInfo('Africa/Johannesburg'))
+        return dt.strftime('%d %b %Y, %H:%M %Z')

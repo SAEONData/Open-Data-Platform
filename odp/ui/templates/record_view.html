@@ -30,7 +30,7 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% from 'macros.html' import render_info, obj_link %}
-            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema') %}
+            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Timestamp') %}
                 {% if prop == 'DOI' %}
                     {{ record.doi if record.doi }}
                 {% elif prop == 'SID' %}
@@ -39,6 +39,8 @@
                     {{ obj_link('collections', record.collection_id) }}
                 {% elif prop == 'Schema' %}
                     {{ obj_link('schemas', record.schema_id) }}
+                {% elif prop == 'Timestamp' %}
+                    {{ record.timestamp|timestamp }}
                 {% endif %}
             {% endcall %}
         </div>
@@ -59,7 +61,7 @@
                 <td>{{ qc_tag.data['pass_'] }}</td>
                 <td>{{ qc_tag.data['comment'] }}</td>
                 <td>{{ obj_link('users', qc_tag.user_id, qc_tag.user_name) }}</td>
-                <td>{{ qc_tag.timestamp }}</td>
+                <td>{{ qc_tag.timestamp|timestamp }}</td>
             {% endcall %}
             <div class="btn-toolbar justify-content-between mt-4">
                 <a href="{{ url_for('.tag_qc', id=record.id) }}" class="btn btn-outline-warning btn-action">
