@@ -48,6 +48,14 @@ async def authorize_tag(record_tag_in: RecordTagModelIn, request: Request) -> Au
     return auth
 
 
+async def authorize_untag(tag_id: str, request: Request) -> Authorized:
+    if not (tag := Session.get(Tag, tag_id)):
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
+
+    auth = await Authorize(ODPScope(tag.scope_id))(request)
+    return auth
+
+
 @router.get(
     '/',
     response_model=List[RecordModel],
@@ -331,3 +339,33 @@ async def tag_record(
         validity=record_tag.validity,
         timestamp=record_tag.timestamp,
     )
+
+
+@router.delete(
+    '/{record_id}/tag/{tag_id}',
+)
+async def untag_record(
+        record_id: str,
+        tag_id: str,
+        auth: Authorized = Depends(authorize_untag),
+):
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not (record_tag := Session.get(RecordTag, (record_id, tag_id, auth.user_id))):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    record_tag.delete()
+
+    RecordTagAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=AuditCommand.delete,
+        timestamp=datetime.now(timezone.utc),
+        _record_id=record_tag.record_id,
+        _tag_id=record_tag.tag_id,
+        _user_id=record_tag.user_id,
+    ).save()

@@ -129,3 +129,12 @@ def tag_qc(id):
         return redirect(url_for('.view', id=record['id']))
 
     return render_template('record_tag_qc.html', record=record, form=form)
+
+
+@bp.route('/<id>/untag/qc', methods=('POST',))
+@authorize(ODPScope.RECORD_TAG_QC)
+@api.wrapper
+def untag_qc(id):
+    api.delete(f'/record/{id}/tag/record-qc')
+    flash(f'record-qc tag has been removed.', category='success')
+    return redirect(url_for('.view', id=id))
