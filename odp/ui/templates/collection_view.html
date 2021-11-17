@@ -12,7 +12,7 @@
         {% elif prop == 'Provider' %}
             {{ obj_link('providers', collection.provider_id) }}
         {% elif prop == 'Projects' %}
-            {{ obj_links('projects', collection.project_ids) }}
+            {{ obj_links('projects', collection.project_ids, newlines=True) }}
         {% elif prop == 'Records' %}
             {{ collection.record_count }}
         {% endif %}

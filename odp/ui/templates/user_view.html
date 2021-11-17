@@ -19,7 +19,7 @@
         {% elif prop == 'Active' %}
             {{ user.active }}
         {% elif prop == 'Roles' %}
-            {{ obj_links('roles', user.role_ids) }}
+            {{ obj_links('roles', user.role_ids, newlines=True) }}
         {% endif %}
     {% endcall %}
     {{ render_buttons(user, edit=True, delete=True) }}

@@ -184,13 +184,18 @@
     {% if obj_id %}
         {% set target = url_for(view ~ '.view', id=obj_id) %}
         <a href="{{ target }}" class="text-decoration-none">
-            {{ display_text if display_text is not none else obj_id }}
+            {{ display_text if display_text is not none else obj_id -}}
         </a>
-    {% endif %}
+    {%- endif %}
 {%- endmacro %}
 
-{% macro obj_links(view, obj_ids) %}
-    {% for obj_id in obj_ids %}
-        {{ obj_link(view, obj_id) }}{% if not loop.last %}, {% endif %}
+{% macro obj_links(view, obj_ids, newlines=False) %}
+    {% if newlines %}
+        {% set sep = '<br/>'|safe %}
+    {% else %}
+        {% set sep = ', ' %}
+    {% endif %}
+    {% for obj_id in obj_ids|sort %}
+        {{ obj_link(view, obj_id) }}{% if not loop.last %}{{ sep }}{% endif %}
     {% endfor %}
 {% endmacro %}

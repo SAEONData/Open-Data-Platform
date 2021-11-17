@@ -12,7 +12,7 @@
         {% elif prop == 'Provider' %}
             {{ obj_link('providers', client.provider_id) }}
         {% elif prop == 'Scopes' %}
-            {{ client.scope_ids|join(', ') }}
+            {{ client.scope_ids|join('<br/>')|safe }}
         {% endif %}
     {% endcall %}
     {{ render_buttons(client, edit=True, delete=True) }}

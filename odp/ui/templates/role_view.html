@@ -10,7 +10,7 @@
         {% if prop == 'Provider' %}
             {{ obj_link('providers', role.provider_id) }}
         {% elif prop == 'Scopes' %}
-            {{ role.scope_ids|join(', ') }}
+            {{ role.scope_ids|join('<br/>')|safe }}
         {% endif %}
     {% endcall %}
     {{ render_buttons(role, edit=True, delete=True) }}

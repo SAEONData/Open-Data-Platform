@@ -10,7 +10,7 @@
         {% if prop == 'Name' %}
             {{ provider.name }}
         {% elif prop == 'Collections' %}
-            {{ obj_links('collections', provider.collection_ids) }}
+            {{ obj_links('collections', provider.collection_ids, newlines=True) }}
         {% endif %}
     {% endcall %}
     {{ render_buttons(provider, edit=True, delete=True) }}

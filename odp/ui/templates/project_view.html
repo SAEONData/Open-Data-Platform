@@ -10,7 +10,7 @@
         {% if prop == 'Name' %}
             {{ project.name }}
         {% elif prop == 'Collections' %}
-            {{ obj_links('collections', project.collection_ids) }}
+            {{ obj_links('collections', project.collection_ids, newlines=True) }}
         {% endif %}
     {% endcall %}
     {{ render_buttons(project, edit=True, delete=True) }}
