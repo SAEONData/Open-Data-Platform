@@ -8,7 +8,7 @@
     {% if user.picture %}
         <img src="{{ user.picture }}" class="mb-3">
     {% endif %}
-    {% from 'macros.html' import render_info, obj_links %}
+    {% from 'macros.html' import render_info, render_buttons, obj_links %}
     {% call(prop) render_info(user, 'Name', 'Email', 'Verified', 'Active', 'Roles') %}
         {% if prop == 'Name' %}
             {{ user.name }}
@@ -22,4 +22,5 @@
             {{ obj_links('roles', user.role_ids) }}
         {% endif %}
     {% endcall %}
+    {{ render_buttons(user, edit=True, delete=True) }}
 {% endblock %}

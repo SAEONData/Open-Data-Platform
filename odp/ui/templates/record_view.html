@@ -29,7 +29,7 @@
     </ul>
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
-            {% from 'macros.html' import render_info, obj_link %}
+            {% from 'macros.html' import render_info, render_buttons, obj_link %}
             {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Timestamp') %}
                 {% if prop == 'DOI' %}
                     {{ record.doi if record.doi }}
@@ -43,6 +43,7 @@
                     {{ record.timestamp|timestamp }}
                 {% endif %}
             {% endcall %}
+            {{ render_buttons(record, edit=True, delete=True) }}
         </div>
         <div id="metadata" class="tab-pane fade" role="tabpanel">
             <pre class="m-3">

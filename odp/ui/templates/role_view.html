@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_info, obj_link %}
+    {% from 'macros.html' import render_info, render_buttons, obj_link %}
     {% call(prop) render_info(role, 'Provider', 'Scopes') %}
         {% if prop == 'Provider' %}
             {{ obj_link('providers', role.provider_id) }}
@@ -13,4 +13,5 @@
             {{ role.scope_ids|join(', ') }}
         {% endif %}
     {% endcall %}
+    {{ render_buttons(role, edit=True, delete=True) }}
 {% endblock %}

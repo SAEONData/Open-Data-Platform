@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, abort
+from flask import Blueprint, render_template
 
 from odp import ODPScope
 from odp.ui import api
@@ -21,13 +21,3 @@ def index():
 def view(id):
     tag = api.get(f'/tag/{id}')
     return render_template('tag_view.html', tag=tag)
-
-
-@bp.route('/<id>/edit', methods=('GET', 'POST'))
-def edit(id):
-    abort(404)
-
-
-@bp.route('/<id>/delete', methods=('POST',))
-def delete(id):
-    abort(404)

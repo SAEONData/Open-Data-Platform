@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, abort
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from odp import ODPScope
 from odp.ui import api

@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_table, obj_link, obj_links, create_button %}
-    {{ create_button() }}
+    {% from 'macros.html' import render_table, render_buttons, obj_link, obj_links %}
+    {{ render_buttons(create=True) }}
     {% call(collection) render_table(collections, 'Name', 'Provider', 'Projects', 'Records') %}
         <td>{{ collection.name }}</td>
         <td>{{ obj_link('providers', collection.provider_id) }}</td>

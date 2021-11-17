@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_table, obj_link, create_button %}
-    {{ create_button() }}
+    {% from 'macros.html' import render_table, render_buttons, obj_link %}
+    {{ render_buttons(create=True) }}
     {% call(client) render_table(clients, 'Name', 'Provider') %}
         <td>{{ client.name }}</td>
         <td>{{ obj_link('providers', client.provider_id) }}</td>

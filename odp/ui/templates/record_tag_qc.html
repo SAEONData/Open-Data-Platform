@@ -11,8 +11,12 @@
         {{ render_field(form.pass_) }}
         {{ render_field(form.comment) }}
         <div class="mt-4">
-            <button type="submit" class="btn btn-outline-primary btn-action">Save</button>
-            <a href="{{ url_for('.view', id=record.id) }}" class="btn btn-outline-secondary btn-action">Cancel</a>
+            <button type="submit" class="btn btn-outline-primary btn-action">
+                Save
+            </button>
+            <a href="{{ url_for('.view', id=record.id) }}" class="btn btn-outline-secondary btn-action">
+                Cancel
+            </a>
         </div>
     </form>
 {% endblock %}

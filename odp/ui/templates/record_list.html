@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_table, obj_link, create_button %}
-    {{ create_button() }}
+    {% from 'macros.html' import render_table, render_buttons, obj_link %}
+    {{ render_buttons(create=True) }}
     {% call(record) render_table(records, 'DOI', 'SID', 'Collection', 'Schema', 'Valid', hide_id=True) %}
         <th scope="row">{{ obj_link('records', record.id, record.doi or '') }}</th>
         <th scope="row">{{ obj_link('records', record.id, record.sid or '') }}</th>

@@ -69,11 +69,26 @@
     </table>
 {% endmacro %}
 
-{% macro create_button() %}
-    <div>
-        <a href="{{ url_for('.create') }}" class="btn btn-outline-success btn-action">
-            Create
-        </a>
+{% macro render_buttons(obj, create=False, edit=False, delete=False) %}
+    <div class="btn-toolbar justify-content-between mt-4">
+        {% if create %}
+            <a href="{{ url_for('.create') }}" class="btn btn-outline-success btn-action">
+                Create
+            </a>
+        {% endif %}
+        {% if edit %}
+            <a href="{{ url_for('.edit', id=obj.id) }}" class="btn btn-outline-primary btn-action">
+                Edit
+            </a>
+        {% endif %}
+        {% if delete %}
+            <form action="{{ url_for('.delete', id=obj.id) }}" method="post">
+                <button type="submit" class="btn btn-outline-danger btn-action"
+                        onclick="return confirm('Are you sure you want to delete {{ obj.id }}? This cannot be undone!')">
+                    Delete
+                </button>
+            </form>
+        {% endif %}
     </div>
 {% endmacro %}
 
@@ -101,17 +116,6 @@
             {% endfor %}
         </tbody>
     </table>
-    <div class="btn-toolbar justify-content-between mt-4">
-        <a href="{{ url_for('.edit', id=obj.id) }}" class="btn btn-outline-primary btn-action">
-            Edit
-        </a>
-        <form action="{{ url_for('.delete', id=obj.id) }}" method="post">
-            <button type="submit" class="btn btn-outline-danger btn-action"
-                    onclick="return confirm('Are you sure you want to delete {{ obj.id }}? This cannot be undone!')">
-                Delete
-            </button>
-        </form>
-    </div>
 {% endmacro %}
 
 {% macro render_form(form, obj, col2_fields) %}
@@ -137,8 +141,12 @@
             </div>
         </div>
         <div class="mt-4">
-            <button type="submit" class="btn btn-outline-primary btn-action">Save</button>
-            <a href="{{ cancel_target }}" class="btn btn-outline-secondary btn-action">Cancel</a>
+            <button type="submit" class="btn btn-outline-primary btn-action">
+                Save
+            </button>
+            <a href="{{ cancel_target }}" class="btn btn-outline-secondary btn-action">
+                Cancel
+            </a>
         </div>
     </form>
 {% endmacro %}

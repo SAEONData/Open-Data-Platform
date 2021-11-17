@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_info, obj_links %}
+    {% from 'macros.html' import render_info, render_buttons, obj_links %}
     {% call(prop) render_info(project, 'Name', 'Collections') %}
         {% if prop == 'Name' %}
             {{ project.name }}
@@ -13,4 +13,5 @@
             {{ obj_links('collections', project.collection_ids) }}
         {% endif %}
     {% endcall %}
+    {{ render_buttons(project, edit=True, delete=True) }}
 {% endblock %}
