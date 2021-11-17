@@ -4,6 +4,7 @@ from odp import ODPScope
 from odp.ui import api
 from odp.ui.auth import authorize
 from odp.ui.forms import UserForm
+from odp.ui.views import utils
 
 bp = Blueprint('users', __name__)
 
@@ -35,7 +36,6 @@ def create():
 @api.wrapper
 def edit(id):
     user = api.get(f'/user/{id}')
-    roles = api.get('/role/')
 
     # separate get/post form instantiation to resolve
     # ambiguity of missing vs empty multiselect field
@@ -44,10 +44,7 @@ def edit(id):
     else:
         form = UserForm(data=user)
 
-    form.role_ids.choices = [
-        (role['id'], role['id'])
-        for role in roles
-    ]
+    utils.populate_role_choices(form.role_ids)
 
     if request.method == 'POST' and form.validate():
         api.put('/user/', dict(

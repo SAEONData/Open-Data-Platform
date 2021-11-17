@@ -7,6 +7,7 @@ from odp import ODPScope
 from odp.ui import api
 from odp.ui.auth import authorize
 from odp.ui.forms import RecordForm, RecordTagQCForm
+from odp.ui.views import utils
 
 bp = Blueprint('records', __name__)
 
@@ -31,18 +32,9 @@ def view(id):
 @authorize(ODPScope.RECORD_CREATE)
 @api.wrapper
 def create():
-    collections = api.get('/collection/', sort='name')
-    schemas = api.get('/schema/')
-
     form = RecordForm(request.form)
-    form.collection_id.choices = [
-        (collection['id'], collection['name'])
-        for collection in collections
-    ]
-    form.schema_id.choices = [
-        (schema['id'], schema['id'])
-        for schema in schemas
-    ]
+    utils.populate_collection_choices(form.collection_id, include_none=True)
+    utils.populate_schema_choices(form.schema_id, 'metadata')
 
     if request.method == 'POST' and form.validate():
         record = api.post('/record/', dict(
@@ -63,18 +55,10 @@ def create():
 @api.wrapper
 def edit(id):
     record = api.get(f'/record/{id}')
-    collections = api.get('/collection/', sort='name')
-    schemas = api.get('/schema/')
 
     form = RecordForm(request.form, data=record)
-    form.collection_id.choices = [
-        (collection['id'], collection['name'])
-        for collection in collections
-    ]
-    form.schema_id.choices = [
-        (schema['id'], schema['id'])
-        for schema in schemas
-    ]
+    utils.populate_collection_choices(form.collection_id)
+    utils.populate_schema_choices(form.schema_id, 'metadata')
 
     if request.method == 'POST' and form.validate():
         api.put(f'/record/{id}', dict(

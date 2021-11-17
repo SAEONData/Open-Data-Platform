@@ -4,6 +4,7 @@ from odp import ODPScope
 from odp.ui import api
 from odp.ui.auth import authorize
 from odp.ui.forms import RoleForm
+from odp.ui.views import utils
 
 bp = Blueprint('roles', __name__)
 
@@ -28,18 +29,9 @@ def view(id):
 @authorize(ODPScope.ROLE_ADMIN)
 @api.wrapper
 def create():
-    providers = api.get('/provider/', sort='name')
-    scopes = api.get('/scope/')
-
     form = RoleForm(request.form)
-    form.provider_id.choices = [('', '(None)')] + [
-        (provider['id'], provider['name'])
-        for provider in providers
-    ]
-    form.scope_ids.choices = [
-        (scope['id'], scope['id'])
-        for scope in scopes
-    ]
+    utils.populate_provider_choices(form.provider_id, include_none=True)
+    utils.populate_scope_choices(form.scope_ids)
 
     if request.method == 'POST' and form.validate():
         api.post('/role/', dict(
@@ -58,8 +50,6 @@ def create():
 @api.wrapper
 def edit(id):
     role = api.get(f'/role/{id}')
-    providers = api.get('/provider/', sort='name')
-    scopes = api.get('/scope/')
 
     # separate get/post form instantiation to resolve
     # ambiguity of missing vs empty multiselect field
@@ -68,14 +58,8 @@ def edit(id):
     else:
         form = RoleForm(data=role)
 
-    form.provider_id.choices = [('', '(None)')] + [
-        (provider['id'], provider['name'])
-        for provider in providers
-    ]
-    form.scope_ids.choices = [
-        (scope['id'], scope['id'])
-        for scope in scopes
-    ]
+    utils.populate_provider_choices(form.provider_id, include_none=True)
+    utils.populate_scope_choices(form.scope_ids)
 
     if request.method == 'POST' and form.validate():
         api.put('/role/', dict(

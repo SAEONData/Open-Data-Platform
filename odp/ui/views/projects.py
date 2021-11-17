@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from markupsafe import Markup
 
 from odp import ODPScope
 from odp.ui import api
 from odp.ui.auth import authorize
 from odp.ui.forms import ProjectForm
+from odp.ui.views import utils
 
 bp = Blueprint('projects', __name__)
 
@@ -29,13 +29,8 @@ def view(id):
 @authorize(ODPScope.PROJECT_ADMIN)
 @api.wrapper
 def create():
-    collections = api.get('/collection/')
-
     form = ProjectForm(request.form)
-    form.collection_ids.choices = [
-        (collection['id'], Markup(f"{collection['id']} &mdash; {collection['name']}"))
-        for collection in collections
-    ]
+    utils.populate_collection_choices(form.collection_ids)
 
     if request.method == 'POST' and form.validate():
         api.post('/project/', dict(
@@ -54,7 +49,6 @@ def create():
 @api.wrapper
 def edit(id):
     project = api.get(f'/project/{id}')
-    collections = api.get('/collection/')
 
     # separate get/post form instantiation to resolve
     # ambiguity of missing vs empty multiselect field
@@ -63,10 +57,7 @@ def edit(id):
     else:
         form = ProjectForm(data=project)
 
-    form.collection_ids.choices = [
-        (collection['id'], Markup(f"{collection['id']} &mdash; {collection['name']}"))
-        for collection in collections
-    ]
+    utils.populate_collection_choices(form.collection_ids)
 
     if request.method == 'POST' and form.validate():
         api.put('/project/', dict(

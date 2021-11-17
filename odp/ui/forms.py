@@ -79,6 +79,7 @@ class CollectionForm(BaseForm):
     )
     provider_id = SelectField(
         label='Provider',
+        validators=[input_required()],
     )
 
 
@@ -110,7 +111,7 @@ class ProviderForm(BaseForm):
 class RecordForm(BaseForm):
     id = StringField(
         label='Record id',
-        render_kw=dict(readonly=''),
+        render_kw={'readonly': ''},
     )
     doi = StringField(
         label='DOI (Digital Object Identifier)',
@@ -122,9 +123,11 @@ class RecordForm(BaseForm):
     )
     collection_id = SelectField(
         label='Collection',
+        validators=[input_required()],
     )
     schema_id = SelectField(
         label='Schema',
+        validators=[input_required()],
     )
     metadata = JSONTextField(
         label='Metadata',
@@ -162,15 +165,15 @@ class RoleForm(BaseForm):
 class UserForm(BaseForm):
     id = StringField(
         label='User id',
-        render_kw=dict(readonly=''),
+        render_kw={'readonly': ''},
     )
     email = StringField(
         label='Email',
-        render_kw=dict(readonly=''),
+        render_kw={'readonly': ''},
     )
     name = StringField(
         label='Name',
-        render_kw=dict(readonly=''),
+        render_kw={'readonly': ''},
     )
     active = BooleanField(
         label='Active',

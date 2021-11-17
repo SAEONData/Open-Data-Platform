@@ -4,6 +4,7 @@ from odp import ODPScope
 from odp.ui import api
 from odp.ui.auth import authorize
 from odp.ui.forms import CollectionForm
+from odp.ui.views import utils
 
 bp = Blueprint('collections', __name__)
 
@@ -28,13 +29,8 @@ def view(id):
 @authorize(ODPScope.COLLECTION_ADMIN)
 @api.wrapper
 def create():
-    providers = api.get('/provider/', sort='name')
-
     form = CollectionForm(request.form)
-    form.provider_id.choices = [
-        (provider['id'], provider['name'])
-        for provider in providers
-    ]
+    utils.populate_provider_choices(form.provider_id, include_none=True)
 
     if request.method == 'POST' and form.validate():
         api.post('/collection/', dict(
@@ -53,13 +49,9 @@ def create():
 @api.wrapper
 def edit(id):
     collection = api.get(f'/collection/{id}')
-    providers = api.get('/provider/', sort='name')
 
     form = CollectionForm(request.form, data=collection)
-    form.provider_id.choices = [
-        (provider['id'], provider['name'])
-        for provider in providers
-    ]
+    utils.populate_provider_choices(form.provider_id)
 
     if request.method == 'POST' and form.validate():
         api.put('/collection/', dict(
