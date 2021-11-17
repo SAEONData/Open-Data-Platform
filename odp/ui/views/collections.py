@@ -10,7 +10,7 @@ bp = Blueprint('collections', __name__)
 
 
 @bp.route('/')
-@authorize(ODPScope.COLLECTION_READ)
+@authorize(ODPScope.COLLECTION_ADMIN, ODPScope.COLLECTION_READ)
 @api.wrapper
 def index():
     collections = api.get('/collection/')
@@ -18,7 +18,7 @@ def index():
 
 
 @bp.route('/<id>')
-@authorize(ODPScope.COLLECTION_READ)
+@authorize(ODPScope.COLLECTION_ADMIN, ODPScope.COLLECTION_READ)
 @api.wrapper
 def view(id):
     collection = api.get(f'/collection/{id}')

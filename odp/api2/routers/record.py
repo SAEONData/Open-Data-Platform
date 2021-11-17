@@ -10,17 +10,7 @@ from odp import ODPScope
 from odp.api2.models import RecordModel, RecordModelIn, RecordSort, RecordTagModel, RecordTagModelIn
 from odp.api2.routers import Pager, Paging, Authorize, Authorized
 from odp.db import Session
-from odp.db.models import (
-    Record,
-    Collection,
-    SchemaType,
-    Schema,
-    RecordAudit,
-    AuditCommand,
-    Tag,
-    RecordTag,
-    RecordTagAudit,
-)
+from odp.db.models import Record, Collection, SchemaType, Schema, RecordAudit, AuditCommand, Tag, RecordTag, RecordTagAudit
 
 router = APIRouter()
 
@@ -44,16 +34,22 @@ async def authorize_tag(record_tag_in: RecordTagModelIn, request: Request) -> Au
     if not (tag := Session.get(Tag, record_tag_in.tag_id)):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
 
-    auth = await Authorize(ODPScope(tag.scope_id))(request)
-    return auth
+    authorizer = Authorize(
+        ODPScope.RECORD_ADMIN,
+        ODPScope(tag.scope_id),
+    )
+    return await authorizer(request)
 
 
 async def authorize_untag(tag_id: str, request: Request) -> Authorized:
     if not (tag := Session.get(Tag, tag_id)):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
 
-    auth = await Authorize(ODPScope(tag.scope_id))(request)
-    return auth
+    authorizer = Authorize(
+        ODPScope.RECORD_ADMIN,
+        ODPScope(tag.scope_id),
+    )
+    return await authorizer(request)
 
 
 @router.get(
@@ -62,7 +58,10 @@ async def authorize_untag(tag_id: str, request: Request) -> Authorized:
 )
 async def list_records(
         pager: Pager = Depends(Paging(RecordSort)),
-        auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
+        auth: Authorized = Depends(Authorize(
+            ODPScope.RECORD_ADMIN,
+            ODPScope.RECORD_READ,
+        )),
 ):
     stmt = (
         select(Record).
@@ -105,7 +104,10 @@ async def list_records(
 )
 async def get_record(
         record_id: str,
-        auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
+        auth: Authorized = Depends(Authorize(
+            ODPScope.RECORD_ADMIN,
+            ODPScope.RECORD_READ,
+        )),
 ):
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -140,7 +142,10 @@ async def get_record(
 async def create_record(
         record_in: RecordModelIn,
         metadata_schema: JSONSchema = Depends(get_metadata_schema),
-        auth: Authorized = Depends(Authorize(ODPScope.RECORD_CREATE)),
+        auth: Authorized = Depends(Authorize(
+            ODPScope.RECORD_ADMIN,
+            ODPScope.RECORD_CREATE,
+        )),
 ):
     if (auth.provider_ids != '*'
             and (collection := Session.get(Collection, record_in.collection_id))
@@ -202,7 +207,10 @@ async def update_record(
         record_id: str,
         record_in: RecordModelIn,
         metadata_schema: JSONSchema = Depends(get_metadata_schema),
-        auth: Authorized = Depends(Authorize(ODPScope.RECORD_MANAGE)),
+        auth: Authorized = Depends(Authorize(
+            ODPScope.RECORD_ADMIN,
+            ODPScope.RECORD_MANAGE,
+        )),
 ):
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -275,7 +283,10 @@ async def update_record(
 )
 async def delete_record(
         record_id: str,
-        auth: Authorized = Depends(Authorize(ODPScope.RECORD_MANAGE)),
+        auth: Authorized = Depends(Authorize(
+            ODPScope.RECORD_ADMIN,
+            ODPScope.RECORD_MANAGE,
+        )),
 ):
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -322,7 +333,7 @@ async def tag_record(
             user_id=auth.user_id,
         )
         command = AuditCommand.insert
- 
+
     if record_tag.data != record_tag_in.data:
         record_tag.data = record_tag_in.data
         record_tag.validity = tag_schema.evaluate(JSON(record_tag_in.data)).output('detailed')

@@ -17,7 +17,9 @@ router = APIRouter()
 @router.get(
     '/',
     response_model=List[TagModel],
-    dependencies=[Depends(Authorize(ODPScope.TAG_READ))],
+    dependencies=[Depends(Authorize(
+        ODPScope.TAG_READ,
+    ))],
 )
 async def list_tags(
         pager: Pager = Depends(Paging(TagSort)),
@@ -48,7 +50,9 @@ async def list_tags(
 @router.get(
     '/{tag_id}',
     response_model=TagModel,
-    dependencies=[Depends(Authorize(ODPScope.TAG_READ))],
+    dependencies=[Depends(Authorize(
+        ODPScope.TAG_READ,
+    ))],
 )
 async def get_tag(
         tag_id: str,

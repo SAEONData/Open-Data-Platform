@@ -19,7 +19,10 @@ router = APIRouter()
 )
 async def list_collections(
         pager: Pager = Depends(Paging(CollectionSort)),
-        auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_READ)),
+        auth: Authorized = Depends(Authorize(
+            ODPScope.COLLECTION_ADMIN,
+            ODPScope.COLLECTION_READ,
+        )),
 ):
     stmt = (
         select(Collection, func.count(Record.id)).
@@ -52,7 +55,10 @@ async def list_collections(
 )
 async def get_collection(
         collection_id: str,
-        auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_READ)),
+        auth: Authorized = Depends(Authorize(
+            ODPScope.COLLECTION_ADMIN,
+            ODPScope.COLLECTION_READ,
+        )),
 ):
     stmt = (
         select(Collection, func.count(Record.id)).
@@ -81,7 +87,9 @@ async def get_collection(
 )
 async def create_collection(
         collection_in: CollectionModelIn,
-        auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_ADMIN)),
+        auth: Authorized = Depends(Authorize(
+            ODPScope.COLLECTION_ADMIN,
+        )),
 ):
     if auth.provider_ids != '*' and collection_in.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
@@ -102,7 +110,9 @@ async def create_collection(
 )
 async def update_collection(
         collection_in: CollectionModelIn,
-        auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_ADMIN)),
+        auth: Authorized = Depends(Authorize(
+            ODPScope.COLLECTION_ADMIN,
+        )),
 ):
     if auth.provider_ids != '*' and collection_in.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
@@ -120,7 +130,9 @@ async def update_collection(
 )
 async def delete_collection(
         collection_id: str,
-        auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_ADMIN)),
+        auth: Authorized = Depends(Authorize(
+            ODPScope.COLLECTION_ADMIN,
+        )),
 ):
     if not (collection := Session.get(Collection, collection_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)

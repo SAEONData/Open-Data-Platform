@@ -13,7 +13,7 @@ bp = Blueprint('records', __name__)
 
 
 @bp.route('/')
-@authorize(ODPScope.RECORD_READ)
+@authorize(ODPScope.RECORD_ADMIN, ODPScope.RECORD_READ)
 @api.wrapper
 def index():
     records = api.get('/record/')
@@ -21,7 +21,7 @@ def index():
 
 
 @bp.route('/<id>')
-@authorize(ODPScope.RECORD_READ)
+@authorize(ODPScope.RECORD_ADMIN, ODPScope.RECORD_READ)
 @api.wrapper
 def view(id):
     record = api.get(f'/record/{id}')
@@ -29,7 +29,7 @@ def view(id):
 
 
 @bp.route('/new', methods=('GET', 'POST'))
-@authorize(ODPScope.RECORD_CREATE)
+@authorize(ODPScope.RECORD_ADMIN, ODPScope.RECORD_CREATE)
 @api.wrapper
 def create():
     form = RecordForm(request.form)
@@ -51,7 +51,7 @@ def create():
 
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
-@authorize(ODPScope.RECORD_MANAGE)
+@authorize(ODPScope.RECORD_ADMIN, ODPScope.RECORD_MANAGE)
 @api.wrapper
 def edit(id):
     record = api.get(f'/record/{id}')
@@ -75,7 +75,7 @@ def edit(id):
 
 
 @bp.route('/<id>/delete', methods=('POST',))
-@authorize(ODPScope.RECORD_MANAGE)
+@authorize(ODPScope.RECORD_ADMIN, ODPScope.RECORD_MANAGE)
 @api.wrapper
 def delete(id):
     api.delete(f'/record/{id}')
@@ -84,7 +84,7 @@ def delete(id):
 
 
 @bp.route('/<id>/tag/qc', methods=('GET', 'POST'))
-@authorize(ODPScope.RECORD_TAG_QC)
+@authorize(ODPScope.RECORD_ADMIN, ODPScope.RECORD_TAG_QC)
 @api.wrapper
 def tag_qc(id):
     record = api.get(f'/record/{id}')
@@ -116,7 +116,7 @@ def tag_qc(id):
 
 
 @bp.route('/<id>/untag/qc', methods=('POST',))
-@authorize(ODPScope.RECORD_TAG_QC)
+@authorize(ODPScope.RECORD_ADMIN, ODPScope.RECORD_TAG_QC)
 @api.wrapper
 def untag_qc(id):
     api.delete(f'/record/{id}/tag/record-qc')

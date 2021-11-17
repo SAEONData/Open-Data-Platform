@@ -17,7 +17,9 @@ router = APIRouter()
 @router.get(
     '/',
     response_model=List[CatalogueModel],
-    dependencies=[Depends(Authorize(ODPScope.CATALOGUE_READ))],
+    dependencies=[Depends(Authorize(
+        ODPScope.CATALOGUE_READ,
+    ))],
 )
 async def list_catalogues(
         pager: Pager = Depends(Paging(CatalogueSort)),
@@ -46,7 +48,9 @@ async def list_catalogues(
 @router.get(
     '/{catalogue_id}',
     response_model=CatalogueModel,
-    dependencies=[Depends(Authorize(ODPScope.CATALOGUE_READ))],
+    dependencies=[Depends(Authorize(
+        ODPScope.CATALOGUE_READ,
+    ))],
 )
 async def get_catalogue(
         catalogue_id: str,
