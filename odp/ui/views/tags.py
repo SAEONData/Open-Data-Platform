@@ -23,11 +23,6 @@ def view(id):
     return render_template('tag_view.html', tag=tag)
 
 
-@bp.route('/new')
-def create():
-    abort(404)
-
-
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
 def edit(id):
     abort(404)

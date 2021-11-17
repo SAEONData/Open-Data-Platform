@@ -25,12 +25,6 @@ def view(id):
     return render_template('user_view.html', user=user)
 
 
-@bp.route('/new')
-@authorize(ODPScope.USER_ADMIN)
-def create():
-    abort(404)
-
-
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
 @authorize(ODPScope.USER_ADMIN)
 @api.wrapper
