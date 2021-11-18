@@ -4,6 +4,7 @@ from urllib.parse import urlparse, parse_qs
 
 from flask import Blueprint, request, redirect, url_for
 
+from odp import ODPScope
 from odp.config import config
 from odp.identity import hydra_admin
 from odp.identity.views import hydra_error_page, encode_token
@@ -83,8 +84,13 @@ def consent():
             user_auth = get_user_auth(user_id, client_id)
             user_info = get_user_info(user_id, client_id)
 
+            grant_scopes = [
+                requested_scope for requested_scope in consent_request['requested_scope']
+                if requested_scope not in ODPScope.__members__.values()
+                or requested_scope in user_auth.scopes
+            ]
             consent_params = {
-                'grant_scope': consent_request['requested_scope'],
+                'grant_scope': grant_scopes,
                 'grant_audience': consent_request['requested_access_token_audience'],
                 'access_token_data': asdict(user_auth),
                 'id_token_data': asdict(user_info),
