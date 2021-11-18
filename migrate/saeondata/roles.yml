@@ -14,8 +14,20 @@ SAEON:Staff:
 
 SAEON:Curator:
   scopes:
+    - odp.catalogue:read
+    - odp.client:read
     - odp.collection:admin
+    - odp.collection:read
     - odp.project:admin
+    - odp.project:read
     - odp.provider:admin
-    - odp.record:admin
+    - odp.provider:read
+    - odp.record:create
+    - odp.record:manage
+    - odp.record:read
     - odp.record_tag:qc
+    - odp.role:read
+    - odp.schema:read
+    - odp.scope:read
+    - odp.tag:read
+    - odp.user:read
