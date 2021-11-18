@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Tag
-from test.api import assert_forbidden
+from test.api import assert_forbidden, all_scopes, all_scopes_excluding
 from test.factories import TagFactory
 
 
@@ -42,10 +42,10 @@ def assert_json_results(response, json, tags):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.TAG_READ], True),
-    ([ODPScope.CATALOGUE_READ], False),
-    ([ODPScope.CATALOGUE_READ, ODPScope.TAG_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.TAG_READ), False),
 ])
 def test_list_tags(api, tag_batch, scopes, authorized):
     r = api(scopes).get('/tag/')
@@ -57,10 +57,10 @@ def test_list_tags(api, tag_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.TAG_READ], True),
-    ([ODPScope.CATALOGUE_READ], False),
-    ([ODPScope.CATALOGUE_READ, ODPScope.TAG_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.TAG_READ), False),
 ])
 def test_get_tag(api, tag_batch, scopes, authorized):
     r = api(scopes).get(f'/tag/{tag_batch[2].id}')

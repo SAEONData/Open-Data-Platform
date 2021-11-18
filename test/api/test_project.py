@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Project
-from test.api import assert_empty_result, assert_forbidden
+from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding
 from test.factories import ProjectFactory, CollectionFactory
 
 
@@ -57,10 +57,11 @@ def assert_json_results(response, json, projects):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.PROJECT_READ], True),
-    ([ODPScope.PROJECT_ADMIN], False),
-    ([ODPScope.PROJECT_ADMIN, ODPScope.PROJECT_READ], True),
+    ([ODPScope.PROJECT_ADMIN], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.PROJECT_READ, ODPScope.PROJECT_ADMIN), False),
 ])
 def test_list_projects(api, project_batch, scopes, authorized):
     r = api(scopes).get('/project/')
@@ -72,10 +73,11 @@ def test_list_projects(api, project_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.PROJECT_READ], True),
-    ([ODPScope.PROJECT_ADMIN], False),
-    ([ODPScope.PROJECT_ADMIN, ODPScope.PROJECT_READ], True),
+    ([ODPScope.PROJECT_ADMIN], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.PROJECT_READ, ODPScope.PROJECT_ADMIN), False),
 ])
 def test_get_project(api, project_batch, scopes, authorized):
     r = api(scopes).get(f'/project/{project_batch[2].id}')
@@ -87,10 +89,10 @@ def test_get_project(api, project_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
-    ([ODPScope.PROJECT_READ], False),
     ([ODPScope.PROJECT_ADMIN], True),
-    ([ODPScope.PROJECT_ADMIN, ODPScope.PROJECT_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.PROJECT_ADMIN), False),
 ])
 def test_create_project(api, project_batch, scopes, authorized):
     modified_project_batch = project_batch + [project := project_build()]
@@ -108,10 +110,10 @@ def test_create_project(api, project_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
-    ([ODPScope.PROJECT_READ], False),
     ([ODPScope.PROJECT_ADMIN], True),
-    ([ODPScope.PROJECT_ADMIN, ODPScope.PROJECT_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.PROJECT_ADMIN), False),
 ])
 def test_update_project(api, project_batch, scopes, authorized):
     modified_project_batch = project_batch.copy()
@@ -130,10 +132,10 @@ def test_update_project(api, project_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
-    ([ODPScope.PROJECT_READ], False),
     ([ODPScope.PROJECT_ADMIN], True),
-    ([ODPScope.PROJECT_ADMIN, ODPScope.PROJECT_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.PROJECT_ADMIN), False),
 ])
 def test_delete_project(api, project_batch, scopes, authorized):
     modified_project_batch = project_batch.copy()

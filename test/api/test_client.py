@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Client
-from test.api import assert_empty_result, assert_forbidden
+from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding
 from test.factories import ClientFactory, ScopeFactory, ProviderFactory
 
 
@@ -64,10 +64,11 @@ def assert_json_results(response, json, clients):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.CLIENT_READ], True),
-    ([ODPScope.CLIENT_ADMIN], False),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True),
+    ([ODPScope.CLIENT_ADMIN], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.CLIENT_READ, ODPScope.CLIENT_ADMIN), False),
 ])
 def test_list_clients(api, client_batch, scopes, authorized):
     r = api(scopes).get('/client/')
@@ -79,10 +80,11 @@ def test_list_clients(api, client_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.CLIENT_READ], True),
-    ([ODPScope.CLIENT_ADMIN], False),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True),
+    ([ODPScope.CLIENT_ADMIN], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.CLIENT_READ, ODPScope.CLIENT_ADMIN), False),
 ])
 def test_list_clients_with_provider_specific_api_client(api, client_batch, scopes, authorized):
     api_client_provider = client_batch[2].provider
@@ -96,10 +98,11 @@ def test_list_clients_with_provider_specific_api_client(api, client_batch, scope
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.CLIENT_READ], True),
-    ([ODPScope.CLIENT_ADMIN], False),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True),
+    ([ODPScope.CLIENT_ADMIN], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.CLIENT_READ, ODPScope.CLIENT_ADMIN), False),
 ])
 def test_get_client(api, client_batch, scopes, authorized):
     r = api(scopes).get(f'/client/{client_batch[2].id}')
@@ -111,14 +114,12 @@ def test_get_client(api, client_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([], False, False),
-    ([ODPScope.CLIENT_READ], False, False),
-    ([ODPScope.CLIENT_ADMIN], False, False),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], False, False),
-    ([], True, False),
     ([ODPScope.CLIENT_READ], True, True),
-    ([ODPScope.CLIENT_ADMIN], True, False),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True, True),
+    ([ODPScope.CLIENT_ADMIN], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes, False, False),
+    (all_scopes_excluding(ODPScope.CLIENT_READ, ODPScope.CLIENT_ADMIN), True, False),
 ])
 def test_get_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
     api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider
@@ -132,10 +133,10 @@ def test_get_client_with_provider_specific_api_client(api, client_batch, scopes,
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
-    ([ODPScope.CLIENT_READ], False),
     ([ODPScope.CLIENT_ADMIN], True),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), False),
 ])
 def test_create_client(api, client_batch, scopes, authorized):
     modified_client_batch = client_batch + [client := client_build()]
@@ -154,14 +155,11 @@ def test_create_client(api, client_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([], False, False),
-    ([ODPScope.CLIENT_READ], False, False),
-    ([ODPScope.CLIENT_ADMIN], False, False),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], False, False),
-    ([], True, False),
-    ([ODPScope.CLIENT_READ], True, False),
     ([ODPScope.CLIENT_ADMIN], True, True),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes, False, False),
+    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), True, False),
 ])
 def test_create_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
     api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider
@@ -184,10 +182,10 @@ def test_create_client_with_provider_specific_api_client(api, client_batch, scop
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
-    ([ODPScope.CLIENT_READ], False),
     ([ODPScope.CLIENT_ADMIN], True),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), False),
 ])
 def test_update_client(api, client_batch, scopes, authorized):
     modified_client_batch = client_batch.copy()
@@ -207,14 +205,11 @@ def test_update_client(api, client_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([], False, False),
-    ([ODPScope.CLIENT_READ], False, False),
-    ([ODPScope.CLIENT_ADMIN], False, False),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], False, False),
-    ([], True, False),
-    ([ODPScope.CLIENT_READ], True, False),
     ([ODPScope.CLIENT_ADMIN], True, True),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes, False, False),
+    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), True, False),
 ])
 def test_update_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
     api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider
@@ -239,10 +234,10 @@ def test_update_client_with_provider_specific_api_client(api, client_batch, scop
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
-    ([ODPScope.CLIENT_READ], False),
     ([ODPScope.CLIENT_ADMIN], True),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), False),
 ])
 def test_delete_client(api, client_batch, scopes, authorized):
     modified_client_batch = client_batch.copy()
@@ -257,14 +252,11 @@ def test_delete_client(api, client_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([], False, False),
-    ([ODPScope.CLIENT_READ], False, False),
-    ([ODPScope.CLIENT_ADMIN], False, False),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], False, False),
-    ([], True, False),
-    ([ODPScope.CLIENT_READ], True, False),
     ([ODPScope.CLIENT_ADMIN], True, True),
-    ([ODPScope.CLIENT_ADMIN, ODPScope.CLIENT_READ], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes, False, False),
+    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), True, False),
 ])
 def test_delete_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
     api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider

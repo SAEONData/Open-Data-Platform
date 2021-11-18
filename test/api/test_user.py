@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import User
-from test.api import assert_empty_result, assert_forbidden, assert_method_not_allowed
+from test.api import assert_empty_result, assert_forbidden, assert_method_not_allowed, all_scopes, all_scopes_excluding
 from test.factories import UserFactory, RoleFactory
 
 
@@ -51,10 +51,11 @@ def assert_json_results(response, json, users):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.USER_READ], True),
-    ([ODPScope.USER_ADMIN], False),
-    ([ODPScope.USER_ADMIN, ODPScope.USER_READ], True),
+    ([ODPScope.USER_ADMIN], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.USER_READ, ODPScope.USER_ADMIN), False),
 ])
 def test_list_users(api, user_batch, scopes, authorized):
     r = api(scopes).get('/user/')
@@ -66,10 +67,11 @@ def test_list_users(api, user_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.USER_READ], True),
-    ([ODPScope.USER_ADMIN], False),
-    ([ODPScope.USER_ADMIN, ODPScope.USER_READ], True),
+    ([ODPScope.USER_ADMIN], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.USER_READ, ODPScope.USER_ADMIN), False),
 ])
 def test_get_user(api, user_batch, scopes, authorized):
     r = api(scopes).get(f'/user/{user_batch[2].id}')
@@ -81,15 +83,15 @@ def test_get_user(api, user_batch, scopes, authorized):
 
 
 def test_create_user(api):
-    r = api([]).post('/user/')
+    r = api(all_scopes).post('/user/')
     assert_method_not_allowed(r)
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
-    ([ODPScope.USER_READ], False),
     ([ODPScope.USER_ADMIN], True),
-    ([ODPScope.USER_ADMIN, ODPScope.USER_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.USER_ADMIN), False),
 ])
 def test_update_user(api, user_batch, scopes, authorized):
     modified_user_batch = user_batch.copy()
@@ -114,10 +116,10 @@ def test_update_user(api, user_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
-    ([ODPScope.USER_READ], False),
     ([ODPScope.USER_ADMIN], True),
-    ([ODPScope.USER_ADMIN, ODPScope.USER_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.USER_ADMIN), False),
 ])
 def test_delete_user(api, user_batch, scopes, authorized):
     modified_user_batch = user_batch.copy()

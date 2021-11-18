@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Role
-from test.api import assert_empty_result, assert_forbidden
+from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding
 from test.factories import RoleFactory, ScopeFactory, ProviderFactory
 
 
@@ -62,10 +62,11 @@ def assert_json_results(response, json, roles):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.ROLE_READ], True),
-    ([ODPScope.ROLE_ADMIN], False),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], True),
+    ([ODPScope.ROLE_ADMIN], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.ROLE_READ, ODPScope.ROLE_ADMIN), False),
 ])
 def test_list_roles(api, role_batch, scopes, authorized):
     r = api(scopes).get('/role/')
@@ -77,10 +78,11 @@ def test_list_roles(api, role_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.ROLE_READ], True),
-    ([ODPScope.ROLE_ADMIN], False),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], True),
+    ([ODPScope.ROLE_ADMIN], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.ROLE_READ, ODPScope.ROLE_ADMIN), False),
 ])
 def test_list_roles_with_provider_specific_api_client(api, role_batch, scopes, authorized):
     api_client_provider = role_batch[2].provider
@@ -94,10 +96,11 @@ def test_list_roles_with_provider_specific_api_client(api, role_batch, scopes, a
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.ROLE_READ], True),
-    ([ODPScope.ROLE_ADMIN], False),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], True),
+    ([ODPScope.ROLE_ADMIN], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.ROLE_READ, ODPScope.ROLE_ADMIN), False),
 ])
 def test_get_role(api, role_batch, scopes, authorized):
     r = api(scopes).get(f'/role/{role_batch[2].id}')
@@ -109,14 +112,12 @@ def test_get_role(api, role_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([], False, False),
-    ([ODPScope.ROLE_READ], False, False),
-    ([ODPScope.ROLE_ADMIN], False, False),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], False, False),
-    ([], True, False),
     ([ODPScope.ROLE_READ], True, True),
-    ([ODPScope.ROLE_ADMIN], True, False),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], True, True),
+    ([ODPScope.ROLE_ADMIN], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes, False, False),
+    (all_scopes_excluding(ODPScope.ROLE_READ, ODPScope.ROLE_ADMIN), True, False),
 ])
 def test_get_role_with_provider_specific_api_client(api, role_batch, scopes, matching_provider, authorized):
     api_client_provider = role_batch[2].provider if matching_provider else role_batch[1].provider
@@ -130,10 +131,10 @@ def test_get_role_with_provider_specific_api_client(api, role_batch, scopes, mat
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
-    ([ODPScope.ROLE_READ], False),
     ([ODPScope.ROLE_ADMIN], True),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.ROLE_ADMIN), False),
 ])
 def test_create_role(api, role_batch, scopes, authorized):
     modified_role_batch = role_batch + [role := role_build()]
@@ -151,14 +152,11 @@ def test_create_role(api, role_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([], False, False),
-    ([ODPScope.ROLE_READ], False, False),
-    ([ODPScope.ROLE_ADMIN], False, False),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], False, False),
-    ([], True, False),
-    ([ODPScope.ROLE_READ], True, False),
     ([ODPScope.ROLE_ADMIN], True, True),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes, False, False),
+    (all_scopes_excluding(ODPScope.ROLE_ADMIN), True, False),
 ])
 def test_create_role_with_provider_specific_api_client(api, role_batch, scopes, matching_provider, authorized):
     api_client_provider = role_batch[2].provider if matching_provider else role_batch[1].provider
@@ -180,10 +178,10 @@ def test_create_role_with_provider_specific_api_client(api, role_batch, scopes, 
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
-    ([ODPScope.ROLE_READ], False),
     ([ODPScope.ROLE_ADMIN], True),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.ROLE_ADMIN), False),
 ])
 def test_update_role(api, role_batch, scopes, authorized):
     modified_role_batch = role_batch.copy()
@@ -202,14 +200,11 @@ def test_update_role(api, role_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([], False, False),
-    ([ODPScope.ROLE_READ], False, False),
-    ([ODPScope.ROLE_ADMIN], False, False),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], False, False),
-    ([], True, False),
-    ([ODPScope.ROLE_READ], True, False),
     ([ODPScope.ROLE_ADMIN], True, True),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes, False, False),
+    (all_scopes_excluding(ODPScope.ROLE_ADMIN), True, False),
 ])
 def test_update_role_with_provider_specific_api_client(api, role_batch, scopes, matching_provider, authorized):
     api_client_provider = role_batch[2].provider if matching_provider else role_batch[1].provider
@@ -233,10 +228,10 @@ def test_update_role_with_provider_specific_api_client(api, role_batch, scopes, 
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
-    ([ODPScope.ROLE_READ], False),
     ([ODPScope.ROLE_ADMIN], True),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.ROLE_ADMIN), False),
 ])
 def test_delete_role(api, role_batch, scopes, authorized):
     modified_role_batch = role_batch.copy()
@@ -251,14 +246,11 @@ def test_delete_role(api, role_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([], False, False),
-    ([ODPScope.ROLE_READ], False, False),
-    ([ODPScope.ROLE_ADMIN], False, False),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], False, False),
-    ([], True, False),
-    ([ODPScope.ROLE_READ], True, False),
     ([ODPScope.ROLE_ADMIN], True, True),
-    ([ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes, False, False),
+    (all_scopes_excluding(ODPScope.ROLE_ADMIN), True, False),
 ])
 def test_delete_role_with_provider_specific_api_client(api, role_batch, scopes, matching_provider, authorized):
     api_client_provider = role_batch[2].provider if matching_provider else role_batch[1].provider

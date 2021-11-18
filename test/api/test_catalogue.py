@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Catalogue
-from test.api import assert_forbidden
+from test.api import assert_forbidden, all_scopes, all_scopes_excluding
 from test.factories import CatalogueFactory
 
 
@@ -40,10 +40,10 @@ def assert_json_results(response, json, catalogues):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.CATALOGUE_READ], True),
-    ([ODPScope.TAG_READ], False),
-    ([ODPScope.TAG_READ, ODPScope.CATALOGUE_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.CATALOGUE_READ), False),
 ])
 def test_list_catalogues(api, catalogue_batch, scopes, authorized):
     r = api(scopes).get('/catalogue/')
@@ -55,10 +55,10 @@ def test_list_catalogues(api, catalogue_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([], False),
     ([ODPScope.CATALOGUE_READ], True),
-    ([ODPScope.TAG_READ], False),
-    ([ODPScope.TAG_READ, ODPScope.CATALOGUE_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.CATALOGUE_READ), False),
 ])
 def test_get_catalogue(api, catalogue_batch, scopes, authorized):
     r = api(scopes).get(f'/catalogue/{catalogue_batch[2].id}')
