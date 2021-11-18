@@ -3,8 +3,8 @@ from odp import ODPScope
 all_scopes = [s for s in ODPScope]
 
 
-def all_scopes_excluding(*scopes):
-    return [s for s in ODPScope if s not in scopes]
+def all_scopes_excluding(scope):
+    return [s for s in ODPScope if s != scope]
 
 
 def assert_empty_result(response):

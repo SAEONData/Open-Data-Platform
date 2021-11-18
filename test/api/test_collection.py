@@ -67,10 +67,9 @@ def assert_json_results(response, json, collections):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.COLLECTION_READ], True),
-    ([ODPScope.COLLECTION_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.COLLECTION_READ, ODPScope.COLLECTION_ADMIN), False),
+    (all_scopes_excluding(ODPScope.COLLECTION_READ), False),
 ])
 def test_list_collections(api, collection_batch, scopes, authorized):
     r = api(scopes).get('/collection/')
@@ -83,10 +82,9 @@ def test_list_collections(api, collection_batch, scopes, authorized):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.COLLECTION_READ], True),
-    ([ODPScope.COLLECTION_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.COLLECTION_READ, ODPScope.COLLECTION_ADMIN), False),
+    (all_scopes_excluding(ODPScope.COLLECTION_READ), False),
 ])
 def test_list_collections_with_provider_specific_api_client(api, collection_batch, scopes, authorized):
     api_client_provider = collection_batch[2].provider
@@ -100,10 +98,9 @@ def test_list_collections_with_provider_specific_api_client(api, collection_batc
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.COLLECTION_READ], True),
-    ([ODPScope.COLLECTION_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.COLLECTION_READ, ODPScope.COLLECTION_ADMIN), False),
+    (all_scopes_excluding(ODPScope.COLLECTION_READ), False),
 ])
 def test_get_collection(api, collection_batch, scopes, authorized):
     r = api(scopes).get(f'/collection/{collection_batch[2].id}')
@@ -116,11 +113,10 @@ def test_get_collection(api, collection_batch, scopes, authorized):
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
     ([ODPScope.COLLECTION_READ], True, True),
-    ([ODPScope.COLLECTION_ADMIN], True, True),
     ([], True, False),
     (all_scopes, True, True),
     (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.COLLECTION_READ, ODPScope.COLLECTION_ADMIN), True, False),
+    (all_scopes_excluding(ODPScope.COLLECTION_READ), True, False),
 ])
 def test_get_collection_with_provider_specific_api_client(api, collection_batch, scopes, matching_provider, authorized):
     api_client_provider = collection_batch[2].provider if matching_provider else collection_batch[1].provider

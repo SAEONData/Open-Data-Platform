@@ -65,10 +65,9 @@ def assert_json_results(response, json, clients):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.CLIENT_READ], True),
-    ([ODPScope.CLIENT_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.CLIENT_READ, ODPScope.CLIENT_ADMIN), False),
+    (all_scopes_excluding(ODPScope.CLIENT_READ), False),
 ])
 def test_list_clients(api, client_batch, scopes, authorized):
     r = api(scopes).get('/client/')
@@ -81,10 +80,9 @@ def test_list_clients(api, client_batch, scopes, authorized):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.CLIENT_READ], True),
-    ([ODPScope.CLIENT_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.CLIENT_READ, ODPScope.CLIENT_ADMIN), False),
+    (all_scopes_excluding(ODPScope.CLIENT_READ), False),
 ])
 def test_list_clients_with_provider_specific_api_client(api, client_batch, scopes, authorized):
     api_client_provider = client_batch[2].provider
@@ -99,10 +97,9 @@ def test_list_clients_with_provider_specific_api_client(api, client_batch, scope
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.CLIENT_READ], True),
-    ([ODPScope.CLIENT_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.CLIENT_READ, ODPScope.CLIENT_ADMIN), False),
+    (all_scopes_excluding(ODPScope.CLIENT_READ), False),
 ])
 def test_get_client(api, client_batch, scopes, authorized):
     r = api(scopes).get(f'/client/{client_batch[2].id}')
@@ -115,11 +112,10 @@ def test_get_client(api, client_batch, scopes, authorized):
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
     ([ODPScope.CLIENT_READ], True, True),
-    ([ODPScope.CLIENT_ADMIN], True, True),
     ([], True, False),
     (all_scopes, True, True),
     (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.CLIENT_READ, ODPScope.CLIENT_ADMIN), True, False),
+    (all_scopes_excluding(ODPScope.CLIENT_READ), True, False),
 ])
 def test_get_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
     api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider

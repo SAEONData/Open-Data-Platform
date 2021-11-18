@@ -63,10 +63,9 @@ def assert_json_results(response, json, roles):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.ROLE_READ], True),
-    ([ODPScope.ROLE_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.ROLE_READ, ODPScope.ROLE_ADMIN), False),
+    (all_scopes_excluding(ODPScope.ROLE_READ), False),
 ])
 def test_list_roles(api, role_batch, scopes, authorized):
     r = api(scopes).get('/role/')
@@ -79,10 +78,9 @@ def test_list_roles(api, role_batch, scopes, authorized):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.ROLE_READ], True),
-    ([ODPScope.ROLE_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.ROLE_READ, ODPScope.ROLE_ADMIN), False),
+    (all_scopes_excluding(ODPScope.ROLE_READ), False),
 ])
 def test_list_roles_with_provider_specific_api_client(api, role_batch, scopes, authorized):
     api_client_provider = role_batch[2].provider
@@ -97,10 +95,9 @@ def test_list_roles_with_provider_specific_api_client(api, role_batch, scopes, a
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.ROLE_READ], True),
-    ([ODPScope.ROLE_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.ROLE_READ, ODPScope.ROLE_ADMIN), False),
+    (all_scopes_excluding(ODPScope.ROLE_READ), False),
 ])
 def test_get_role(api, role_batch, scopes, authorized):
     r = api(scopes).get(f'/role/{role_batch[2].id}')
@@ -113,11 +110,10 @@ def test_get_role(api, role_batch, scopes, authorized):
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
     ([ODPScope.ROLE_READ], True, True),
-    ([ODPScope.ROLE_ADMIN], True, True),
     ([], True, False),
     (all_scopes, True, True),
     (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.ROLE_READ, ODPScope.ROLE_ADMIN), True, False),
+    (all_scopes_excluding(ODPScope.ROLE_READ), True, False),
 ])
 def test_get_role_with_provider_specific_api_client(api, role_batch, scopes, matching_provider, authorized):
     api_client_provider = role_batch[2].provider if matching_provider else role_batch[1].provider

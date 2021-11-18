@@ -58,10 +58,9 @@ def assert_json_results(response, json, projects):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.PROJECT_READ], True),
-    ([ODPScope.PROJECT_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.PROJECT_READ, ODPScope.PROJECT_ADMIN), False),
+    (all_scopes_excluding(ODPScope.PROJECT_READ), False),
 ])
 def test_list_projects(api, project_batch, scopes, authorized):
     r = api(scopes).get('/project/')
@@ -74,10 +73,9 @@ def test_list_projects(api, project_batch, scopes, authorized):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.PROJECT_READ], True),
-    ([ODPScope.PROJECT_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.PROJECT_READ, ODPScope.PROJECT_ADMIN), False),
+    (all_scopes_excluding(ODPScope.PROJECT_READ), False),
 ])
 def test_get_project(api, project_batch, scopes, authorized):
     r = api(scopes).get(f'/project/{project_batch[2].id}')

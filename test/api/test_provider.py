@@ -67,10 +67,9 @@ def assert_json_results(response, json, providers):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.PROVIDER_READ], True),
-    ([ODPScope.PROVIDER_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.PROVIDER_READ, ODPScope.PROVIDER_ADMIN), False),
+    (all_scopes_excluding(ODPScope.PROVIDER_READ), False),
 ])
 def test_list_providers(api, provider_batch, scopes, authorized):
     r = api(scopes).get('/provider/')
@@ -83,10 +82,9 @@ def test_list_providers(api, provider_batch, scopes, authorized):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.PROVIDER_READ], True),
-    ([ODPScope.PROVIDER_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.PROVIDER_READ, ODPScope.PROVIDER_ADMIN), False),
+    (all_scopes_excluding(ODPScope.PROVIDER_READ), False),
 ])
 def test_list_providers_with_provider_specific_api_client(api, provider_batch, scopes, authorized):
     api_client_provider = provider_batch[2]
@@ -100,10 +98,9 @@ def test_list_providers_with_provider_specific_api_client(api, provider_batch, s
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.PROVIDER_READ], True),
-    ([ODPScope.PROVIDER_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.PROVIDER_READ, ODPScope.PROVIDER_ADMIN), False),
+    (all_scopes_excluding(ODPScope.PROVIDER_READ), False),
 ])
 def test_get_provider(api, provider_batch, scopes, authorized):
     r = api(scopes).get(f'/provider/{provider_batch[2].id}')
@@ -116,11 +113,10 @@ def test_get_provider(api, provider_batch, scopes, authorized):
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
     ([ODPScope.PROVIDER_READ], True, True),
-    ([ODPScope.PROVIDER_ADMIN], True, True),
     ([], True, False),
     (all_scopes, True, True),
     (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.PROVIDER_READ, ODPScope.PROVIDER_ADMIN), True, False),
+    (all_scopes_excluding(ODPScope.PROVIDER_READ), True, False),
 ])
 def test_get_provider_with_provider_specific_api_client(api, provider_batch, scopes, matching_provider, authorized):
     api_client_provider = provider_batch[2] if matching_provider else provider_batch[1]

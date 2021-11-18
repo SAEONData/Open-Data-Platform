@@ -52,10 +52,9 @@ def assert_json_results(response, json, users):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.USER_READ], True),
-    ([ODPScope.USER_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.USER_READ, ODPScope.USER_ADMIN), False),
+    (all_scopes_excluding(ODPScope.USER_READ), False),
 ])
 def test_list_users(api, user_batch, scopes, authorized):
     r = api(scopes).get('/user/')
@@ -68,10 +67,9 @@ def test_list_users(api, user_batch, scopes, authorized):
 
 @pytest.mark.parametrize('scopes, authorized', [
     ([ODPScope.USER_READ], True),
-    ([ODPScope.USER_ADMIN], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.USER_READ, ODPScope.USER_ADMIN), False),
+    (all_scopes_excluding(ODPScope.USER_READ), False),
 ])
 def test_get_user(api, user_batch, scopes, authorized):
     r = api(scopes).get(f'/user/{user_batch[2].id}')
