@@ -19,10 +19,7 @@ router = APIRouter()
 )
 async def list_roles(
         pager: Pager = Depends(Paging(RoleSort)),
-        auth: Authorized = Depends(Authorize(
-            ODPScope.ROLE_ADMIN,
-            ODPScope.ROLE_READ,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.ROLE_READ)),
 ):
     stmt = (
         select(Role).
@@ -51,10 +48,7 @@ async def list_roles(
 )
 async def get_role(
         role_id: str,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.ROLE_ADMIN,
-            ODPScope.ROLE_READ,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.ROLE_READ)),
 ):
     if not (role := Session.get(Role, role_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -74,9 +68,7 @@ async def get_role(
 )
 async def create_role(
         role_in: RoleModel,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.ROLE_ADMIN,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.ROLE_ADMIN)),
 ):
     if auth.provider_ids != '*' and role_in.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
@@ -100,9 +92,7 @@ async def create_role(
 )
 async def update_role(
         role_in: RoleModel,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.ROLE_ADMIN,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.ROLE_ADMIN)),
 ):
     if auth.provider_ids != '*' and role_in.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
@@ -123,9 +113,7 @@ async def update_role(
 )
 async def delete_role(
         role_id: str,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.ROLE_ADMIN,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.ROLE_ADMIN)),
 ):
     if not (role := Session.get(Role, role_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)

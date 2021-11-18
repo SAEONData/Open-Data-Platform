@@ -16,10 +16,7 @@ router = APIRouter()
 @router.get(
     '/',
     response_model=List[ProjectModel],
-    dependencies=[Depends(Authorize(
-        ODPScope.PROJECT_ADMIN,
-        ODPScope.PROJECT_READ,
-    ))],
+    dependencies=[Depends(Authorize(ODPScope.PROJECT_READ))],
 )
 async def list_projects(
         pager: Pager = Depends(Paging(ProjectSort)),
@@ -46,10 +43,7 @@ async def list_projects(
 @router.get(
     '/{project_id}',
     response_model=ProjectModel,
-    dependencies=[Depends(Authorize(
-        ODPScope.PROJECT_ADMIN,
-        ODPScope.PROJECT_READ,
-    ))],
+    dependencies=[Depends(Authorize(ODPScope.PROJECT_READ))],
 )
 async def get_project(
         project_id: str,
@@ -66,9 +60,7 @@ async def get_project(
 
 @router.post(
     '/',
-    dependencies=[Depends(Authorize(
-        ODPScope.PROJECT_ADMIN,
-    ))],
+    dependencies=[Depends(Authorize(ODPScope.PROJECT_ADMIN))],
 )
 async def create_project(
         project_in: ProjectModel,
@@ -89,9 +81,7 @@ async def create_project(
 
 @router.put(
     '/',
-    dependencies=[Depends(Authorize(
-        ODPScope.PROJECT_ADMIN,
-    ))],
+    dependencies=[Depends(Authorize(ODPScope.PROJECT_ADMIN))],
 )
 async def update_project(
         project_in: ProjectModel,
@@ -109,9 +99,7 @@ async def update_project(
 
 @router.delete(
     '/{project_id}',
-    dependencies=[Depends(Authorize(
-        ODPScope.PROJECT_ADMIN,
-    ))],
+    dependencies=[Depends(Authorize(ODPScope.PROJECT_ADMIN))],
 )
 async def delete_project(
         project_id: str,

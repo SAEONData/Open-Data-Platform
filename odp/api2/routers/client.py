@@ -19,10 +19,7 @@ router = APIRouter()
 )
 async def list_clients(
         pager: Pager = Depends(Paging(ClientSort)),
-        auth: Authorized = Depends(Authorize(
-            ODPScope.CLIENT_ADMIN,
-            ODPScope.CLIENT_READ,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.CLIENT_READ)),
 ):
     stmt = (
         select(Client).
@@ -52,10 +49,7 @@ async def list_clients(
 )
 async def get_client(
         client_id: str,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.CLIENT_ADMIN,
-            ODPScope.CLIENT_READ,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.CLIENT_READ)),
 ):
     if not (client := Session.get(Client, client_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -76,9 +70,7 @@ async def get_client(
 )
 async def create_client(
         client_in: ClientModel,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.CLIENT_ADMIN,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.CLIENT_ADMIN)),
 ):
     if auth.provider_ids != '*' and client_in.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
@@ -103,9 +95,7 @@ async def create_client(
 )
 async def update_client(
         client_in: ClientModel,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.CLIENT_ADMIN,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.CLIENT_ADMIN)),
 ):
     if auth.provider_ids != '*' and client_in.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
@@ -127,9 +117,7 @@ async def update_client(
 )
 async def delete_client(
         client_id: str,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.CLIENT_ADMIN,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.CLIENT_ADMIN)),
 ):
     if not (client := Session.get(Client, client_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)

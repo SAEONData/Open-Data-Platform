@@ -43,7 +43,7 @@ def init_app(app: Flask):
     )
 
 
-def authorize(*scopes: ODPScope):
+def authorize(scope: ODPScope):
     """Decorator for authorizing access to a view."""
 
     def decorator(f):
@@ -54,7 +54,7 @@ def authorize(*scopes: ODPScope):
                 return redirect(url_for('home.index'))
 
             g.user_auth = get_user_auth(current_user.id, config.ODP.UI.CLIENT_ID)
-            if not (set(scopes) & set(g.user_auth.scopes)):
+            if scope not in g.user_auth.scopes:
                 flash('You do not have permission to access that page.', category='warning')
                 return redirect(request.referrer)
 

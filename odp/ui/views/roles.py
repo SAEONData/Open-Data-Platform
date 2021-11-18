@@ -10,7 +10,7 @@ bp = Blueprint('roles', __name__)
 
 
 @bp.route('/')
-@authorize(ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ)
+@authorize(ODPScope.ROLE_READ)
 @api.wrapper
 def index():
     roles = api.get('/role/')
@@ -18,7 +18,7 @@ def index():
 
 
 @bp.route('/<id>')
-@authorize(ODPScope.ROLE_ADMIN, ODPScope.ROLE_READ)
+@authorize(ODPScope.ROLE_READ)
 @api.wrapper
 def view(id):
     role = api.get(f'/role/{id}')

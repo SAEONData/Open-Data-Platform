@@ -45,8 +45,8 @@ class Authorized:
 class Authorize(OAuth2):
     hydra_admin_api = AdminApi(ApiClient(Configuration(config.HYDRA.ADMIN.URL)))
 
-    def __init__(self, *allowed_scopes: ODPScope):
-        self.scope_ids = {s.value for s in allowed_scopes}
+    def __init__(self, scope: ODPScope):
+        self.scope_id = scope.value
 
         # this setup is simply to enable client-credentials access to the Swagger UI
         if config.ODP.ENV != 'testing':
@@ -66,7 +66,7 @@ class Authorize(OAuth2):
 
         token: OAuth2TokenIntrospection = self.hydra_admin_api.introspect_o_auth2_token(
             token=access_token,
-            scope=' '.join(self.scope_ids),
+            scope=self.scope_id,
         )
         if not token.active:
             raise HTTPException(HTTP_403_FORBIDDEN)
@@ -75,32 +75,22 @@ class Authorize(OAuth2):
         # using a client credentials grant
         if token.sub == token.client_id:
             client_auth = get_client_auth(token.client_id)
-            if self.scope_ids.isdisjoint(client_auth.scopes):
+            try:
+                return Authorized(
+                    client_id=token.client_id,
+                    user_id=None,
+                    provider_ids=client_auth.scopes[self.scope_id]
+                )
+            except KeyError:
                 raise HTTPException(HTTP_403_FORBIDDEN)
-
-            return Authorized(
-                client_id=token.client_id,
-                user_id=None,
-                provider_ids=self.authorized_provider_ids(client_auth.scopes)
-            )
 
         # user-initiated API call
         user_auth = get_user_auth(token.sub, token.client_id)
-        if self.scope_ids.isdisjoint(user_auth.scopes):
+        try:
+            return Authorized(
+                client_id=token.client_id,
+                user_id=token.sub,
+                provider_ids=user_auth.scopes[self.scope_id]
+            )
+        except KeyError:
             raise HTTPException(HTTP_403_FORBIDDEN)
-
-        return Authorized(
-            client_id=token.client_id,
-            user_id=token.sub,
-            provider_ids=self.authorized_provider_ids(user_auth.scopes)
-        )
-
-    def authorized_provider_ids(self, authorized_scopes) -> Union[Set[str], Literal['*']]:
-        provider_ids = set()
-        for scope_id in self.scope_ids:
-            if scope_id not in authorized_scopes:
-                continue
-            if authorized_scopes[scope_id] == '*':
-                return '*'
-            provider_ids |= set(authorized_scopes[scope_id])
-        return provider_ids

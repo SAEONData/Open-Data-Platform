@@ -19,10 +19,7 @@ router = APIRouter()
 )
 async def list_providers(
         pager: Pager = Depends(Paging(ProviderSort)),
-        auth: Authorized = Depends(Authorize(
-            ODPScope.PROVIDER_ADMIN,
-            ODPScope.PROVIDER_READ,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_READ)),
 ):
     stmt = (
         select(Provider).
@@ -53,10 +50,7 @@ async def list_providers(
 )
 async def get_provider(
         provider_id: str,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.PROVIDER_ADMIN,
-            ODPScope.PROVIDER_READ,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_READ)),
 ):
     if auth.provider_ids != '*' and provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
@@ -78,9 +72,7 @@ async def get_provider(
 )
 async def create_provider(
         provider_in: ProviderModelIn,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.PROVIDER_ADMIN,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_ADMIN)),
 ):
     if auth.provider_ids != '*':
         raise HTTPException(HTTP_403_FORBIDDEN)
@@ -100,9 +92,7 @@ async def create_provider(
 )
 async def update_provider(
         provider_in: ProviderModelIn,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.PROVIDER_ADMIN,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_ADMIN)),
 ):
     if auth.provider_ids != '*' and provider_in.id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
@@ -119,9 +109,7 @@ async def update_provider(
 )
 async def delete_provider(
         provider_id: str,
-        auth: Authorized = Depends(Authorize(
-            ODPScope.PROVIDER_ADMIN,
-        )),
+        auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_ADMIN)),
 ):
     if auth.provider_ids != '*' and provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)

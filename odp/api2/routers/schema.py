@@ -17,9 +17,7 @@ router = APIRouter()
 @router.get(
     '/',
     response_model=List[SchemaModel],
-    dependencies=[Depends(Authorize(
-        ODPScope.SCHEMA_READ,
-    ))],
+    dependencies=[Depends(Authorize(ODPScope.SCHEMA_READ))],
 )
 async def list_schemas(
         pager: Pager = Depends(Paging(SchemaSort)),
@@ -49,9 +47,7 @@ async def list_schemas(
 @router.get(
     '/{schema_id}',
     response_model=SchemaModel,
-    dependencies=[Depends(Authorize(
-        ODPScope.SCHEMA_READ,
-    ))],
+    dependencies=[Depends(Authorize(ODPScope.SCHEMA_READ))],
 )
 async def get_schema(
         schema_id: str,

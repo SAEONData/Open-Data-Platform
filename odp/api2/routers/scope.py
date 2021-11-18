@@ -15,9 +15,7 @@ router = APIRouter()
 @router.get(
     '/',
     response_model=List[ScopeModel],
-    dependencies=[Depends(Authorize(
-        ODPScope.SCOPE_READ,
-    ))],
+    dependencies=[Depends(Authorize(ODPScope.SCOPE_READ))],
 )
 async def list_scopes(
         pager: Pager = Depends(Paging(ScopeSort)),
