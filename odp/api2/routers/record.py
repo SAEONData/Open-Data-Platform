@@ -10,17 +10,7 @@ from odp import ODPScope
 from odp.api2.models import RecordModel, RecordModelIn, RecordSort, RecordTagModel, RecordTagModelIn
 from odp.api2.routers import Pager, Paging, Authorize, Authorized
 from odp.db import Session
-from odp.db.models import (
-    Record,
-    Collection,
-    SchemaType,
-    Schema,
-    RecordAudit,
-    AuditCommand,
-    Tag,
-    RecordTag,
-    RecordTagAudit,
-)
+from odp.db.models import Record, Collection, SchemaType, Schema, RecordAudit, AuditCommand, Tag, RecordTag, RecordTagAudit
 
 router = APIRouter()
 
@@ -44,16 +34,16 @@ async def authorize_tag(record_tag_in: RecordTagModelIn, request: Request) -> Au
     if not (tag := Session.get(Tag, record_tag_in.tag_id)):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
 
-    auth = await Authorize(ODPScope(tag.scope_id))(request)
-    return auth
+    authorizer = Authorize(ODPScope(tag.scope_id))
+    return await authorizer(request)
 
 
 async def authorize_untag(tag_id: str, request: Request) -> Authorized:
     if not (tag := Session.get(Tag, tag_id)):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
 
-    auth = await Authorize(ODPScope(tag.scope_id))(request)
-    return auth
+    authorizer = Authorize(ODPScope(tag.scope_id))
+    return await authorizer(request)
 
 
 @router.get(
@@ -89,7 +79,6 @@ async def list_records(
                 user_id=record_tag.user_id,
                 user_name=record_tag.user.name,
                 data=record_tag.data,
-                validity=record_tag.validity,
                 timestamp=record_tag.timestamp,
             ) for record_tag in row.Record.tags],
         )
@@ -127,7 +116,6 @@ async def get_record(
             user_id=record_tag.user_id,
             user_name=record_tag.user.name,
             data=record_tag.data,
-            validity=record_tag.validity,
             timestamp=record_tag.timestamp,
         ) for record_tag in record.tags],
     )
@@ -264,7 +252,6 @@ async def update_record(
             user_id=record_tag.user_id,
             user_name=record_tag.user.name,
             data=record_tag.data,
-            validity=record_tag.validity,
             timestamp=record_tag.timestamp,
         ) for record_tag in record.tags],
     )
@@ -322,10 +309,13 @@ async def tag_record(
             user_id=auth.user_id,
         )
         command = AuditCommand.insert
- 
+
     if record_tag.data != record_tag_in.data:
+        validity = tag_schema.evaluate(JSON(record_tag_in.data)).output('detailed')
+        if not validity['valid']:
+            raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, validity)
+
         record_tag.data = record_tag_in.data
-        record_tag.validity = tag_schema.evaluate(JSON(record_tag_in.data)).output('detailed')
         record_tag.timestamp = (timestamp := datetime.now(timezone.utc))
         record_tag.save()
 
@@ -345,7 +335,6 @@ async def tag_record(
         user_id=record_tag.user_id,
         user_name=record_tag.user.name,
         data=record_tag.data,
-        validity=record_tag.validity,
         timestamp=record_tag.timestamp,
     )
 

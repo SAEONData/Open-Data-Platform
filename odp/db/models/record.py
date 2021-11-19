@@ -46,7 +46,7 @@ class Record(Base):
     schema_type = Column(Enum(SchemaType), nullable=False)
     schema = relationship('Schema')
 
-    # view of associated tags
+    # view of associated tags (one-to-many)
     tags = relationship('RecordTag', viewonly=True)
 
     def __repr__(self):

@@ -21,7 +21,6 @@ class RecordTag(Base):
     user_id = Column(String, ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
 
     data = Column(JSONB, nullable=False)
-    validity = Column(JSONB, nullable=False)
     timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
 
     record = relationship('Record')

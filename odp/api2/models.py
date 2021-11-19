@@ -88,7 +88,6 @@ class RecordTagModel(BaseModel):
     user_id: str
     user_name: str
     data: Dict[str, Any]
-    validity: Dict[str, Any]
     timestamp: datetime
 
 
