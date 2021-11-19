@@ -85,8 +85,8 @@ class ProviderSort(str, Enum):
 
 class RecordTagModel(BaseModel):
     tag_id: str
-    user_id: str
-    user_name: str
+    user_id: Optional[str]
+    user_name: Optional[str]
     data: Dict[str, Any]
     timestamp: datetime
 

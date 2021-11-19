@@ -6,9 +6,9 @@ from sqlalchemy import select
 
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import Record, RecordAudit
+from odp.db.models import Record, RecordAudit, Scope, RecordTag, RecordTagAudit
 from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding
-from test.factories import RecordFactory, CollectionFactory, SchemaFactory
+from test.factories import RecordFactory, CollectionFactory, SchemaFactory, TagFactory
 
 
 @pytest.fixture
@@ -48,6 +48,20 @@ def assert_db_state(records):
         assert row.schema_type == records[n].schema_type
 
 
+def assert_db_tag_state(record_id, record_tag):
+    """Verify that the record_tag table contains the given record tag."""
+    Session.expire_all()
+    result = Session.execute(select(RecordTag)).scalar_one_or_none()
+    if record_tag:
+        assert result.record_id == record_id
+        assert result.tag_id == record_tag['tag_id']
+        assert result.user_id is None
+        assert result.data == record_tag['data']
+        assert datetime.now(timezone.utc) - timedelta(seconds=120) < result.timestamp < datetime.now(timezone.utc)
+    else:
+        assert result is None
+
+
 def assert_audit_log(command, record=None, record_id=None):
     result = Session.execute(select(RecordAudit)).scalar_one_or_none()
     assert result.client_id == 'odp.test'
@@ -68,13 +82,34 @@ def assert_audit_log(command, record=None, record_id=None):
         assert result._metadata is None
         assert result._collection_id is None
         assert result._schema_id is None
+    else:
+        assert False
 
 
 def assert_no_audit_log():
     assert Session.execute(select(RecordAudit)).first() is None
 
 
-def assert_json_result(response, json, record):
+def assert_tag_audit_log(*entries):
+    result = Session.execute(select(RecordTagAudit)).scalars().all()
+    assert len(result) == len(entries)
+    for n, row in enumerate(result):
+        assert row.client_id == 'odp.test'
+        assert row.user_id is None
+        assert row.command == entries[n]['command']
+        assert datetime.now(timezone.utc) - timedelta(seconds=120) < row.timestamp < datetime.now(timezone.utc)
+        assert row._record_id == entries[n]['record_id']
+        assert row._tag_id == entries[n]['record_tag']['tag_id']
+        assert row._user_id is None
+        if row.command in ('insert', 'update'):
+            assert row._data == entries[n]['record_tag']['data']
+        elif row.command == 'delete':
+            assert row._data is None
+        else:
+            assert False
+
+
+def assert_json_record_result(response, json, record):
     """Verify that the API result matches the given record object."""
     assert response.status_code == 200
     assert json['id'] == record.id
@@ -85,12 +120,22 @@ def assert_json_result(response, json, record):
     assert json['metadata'] == record.metadata_
 
 
-def assert_json_results(response, json, records):
+def assert_json_tag_result(response, json, record_tag):
+    """Verify that the API result matches the given record tag dict."""
+    assert response.status_code == 200
+    assert json['tag_id'] == record_tag['tag_id']
+    assert json['user_id'] is None
+    assert json['user_name'] is None
+    assert json['data'] == record_tag['data']
+    assert datetime.now(timezone.utc) - timedelta(seconds=120) < datetime.fromisoformat(json['timestamp']) < datetime.now(timezone.utc)
+
+
+def assert_json_record_results(response, json, records):
     """Verify that the API result list matches the given record batch."""
     json.sort(key=lambda j: j['id'])
     records.sort(key=lambda r: r.id)
     for n, record in enumerate(records):
-        assert_json_result(response, json[n], record)
+        assert_json_record_result(response, json[n], record)
 
 
 @pytest.mark.parametrize('scopes, authorized', [
@@ -102,10 +147,11 @@ def assert_json_results(response, json, records):
 def test_list_records(api, record_batch, scopes, authorized):
     r = api(scopes).get('/record/')
     if authorized:
-        assert_json_results(r, r.json(), record_batch)
+        assert_json_record_results(r, r.json(), record_batch)
     else:
         assert_forbidden(r)
     assert_db_state(record_batch)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes, authorized', [
@@ -118,10 +164,11 @@ def test_list_records_with_provider_specific_api_client(api, record_batch, scope
     api_client_provider = record_batch[2].collection.provider
     r = api(scopes, api_client_provider).get('/record/')
     if authorized:
-        assert_json_results(r, r.json(), [record_batch[2]])
+        assert_json_record_results(r, r.json(), [record_batch[2]])
     else:
         assert_forbidden(r)
     assert_db_state(record_batch)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes, authorized', [
@@ -133,10 +180,11 @@ def test_list_records_with_provider_specific_api_client(api, record_batch, scope
 def test_get_record(api, record_batch, scopes, authorized):
     r = api(scopes).get(f'/record/{record_batch[2].id}')
     if authorized:
-        assert_json_result(r, r.json(), record_batch[2])
+        assert_json_record_result(r, r.json(), record_batch[2])
     else:
         assert_forbidden(r)
     assert_db_state(record_batch)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
@@ -150,10 +198,11 @@ def test_get_record_with_provider_specific_api_client(api, record_batch, scopes,
     api_client_provider = record_batch[2].collection.provider if matching_provider else record_batch[1].collection.provider
     r = api(scopes, api_client_provider).get(f'/record/{record_batch[2].id}')
     if authorized:
-        assert_json_result(r, r.json(), record_batch[2])
+        assert_json_record_result(r, r.json(), record_batch[2])
     else:
         assert_forbidden(r)
     assert_db_state(record_batch)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes, authorized', [
@@ -173,7 +222,7 @@ def test_create_record(api, record_batch, scopes, authorized):
     ))
     if authorized:
         record.id = r.json().get('id')
-        assert_json_result(r, r.json(), record)
+        assert_json_record_result(r, r.json(), record)
         assert_db_state(modified_record_batch)
         assert_audit_log('insert', record)
     else:
@@ -203,7 +252,7 @@ def test_create_record_with_provider_specific_api_client(api, record_batch, scop
     ))
     if authorized:
         record.id = r.json().get('id')
-        assert_json_result(r, r.json(), record)
+        assert_json_record_result(r, r.json(), record)
         assert_db_state(modified_record_batch)
         assert_audit_log('insert', record)
     else:
@@ -231,7 +280,7 @@ def test_update_record(api, record_batch, scopes, authorized):
         metadata=record.metadata_,
     ))
     if authorized:
-        assert_json_result(r, r.json(), record)
+        assert_json_record_result(r, r.json(), record)
         assert_db_state(modified_record_batch)
         assert_audit_log('update', record)
     else:
@@ -262,7 +311,7 @@ def test_update_record_with_provider_specific_api_client(api, record_batch, scop
         metadata=record.metadata_,
     ))
     if authorized:
-        assert_json_result(r, r.json(), record)
+        assert_json_record_result(r, r.json(), record)
         assert_db_state(modified_record_batch)
         assert_audit_log('update', record)
     else:
@@ -311,3 +360,81 @@ def test_delete_record_with_provider_specific_api_client(api, record_batch, scop
         assert_forbidden(r)
         assert_db_state(record_batch)
         assert_no_audit_log()
+
+
+@pytest.mark.parametrize('scopes, authorized', [
+    ([ODPScope.RECORD_TAG_QC], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.RECORD_TAG_QC), False),
+])
+def test_tag_record(api, record_batch, scopes, authorized):
+    client = api(scopes)
+    TagFactory(
+        id='record-qc',
+        scope=Session.get(Scope, ODPScope.RECORD_TAG_QC) or Scope(id=ODPScope.RECORD_TAG_QC),
+        schema=SchemaFactory(
+            type='tag',
+            uri='https://odp.saeon.ac.za/schema/tag/record-qc',
+        ),
+    )
+    # insert tag
+    r = client.post(
+        f'/record/{(record_id := record_batch[2].id)}/tag',
+        json=(record_tag_v1 := dict(
+            tag_id='record-qc',
+            data={
+                'pass_': (qc_passed := bool(randint(0, 1))),
+            },
+        )))
+    if authorized:
+        assert_json_tag_result(r, r.json(), record_tag_v1)
+        assert_db_tag_state(record_id, record_tag_v1)
+        assert_tag_audit_log(
+            dict(command='insert', record_id=record_id, record_tag=record_tag_v1),
+        )
+    else:
+        assert_forbidden(r)
+        assert_db_tag_state(record_id, None)
+        assert_tag_audit_log()
+    assert_db_state(record_batch)
+    assert_no_audit_log()
+    # update tag
+    r = client.post(
+        f'/record/{record_id}/tag',
+        json=(record_tag_v2 := dict(
+            tag_id='record-qc',
+            data={
+                'pass_': not qc_passed,
+                'comment': 'Hello',
+            },
+        )))
+    if authorized:
+        assert_json_tag_result(r, r.json(), record_tag_v2)
+        assert_db_tag_state(record_id, record_tag_v2)
+        assert_tag_audit_log(
+            dict(command='insert', record_id=record_id, record_tag=record_tag_v1),
+            dict(command='update', record_id=record_id, record_tag=record_tag_v2),
+        )
+    else:
+        assert_forbidden(r)
+        assert_db_tag_state(record_id, None)
+        assert_tag_audit_log()
+    assert_db_state(record_batch)
+    assert_no_audit_log()
+    # delete tag
+    r = client.delete(f'/record/{record_id}/tag/{record_tag_v1["tag_id"]}')
+    if authorized:
+        assert_empty_result(r)
+        assert_db_tag_state(record_id, None)
+        assert_tag_audit_log(
+            dict(command='insert', record_id=record_id, record_tag=record_tag_v1),
+            dict(command='update', record_id=record_id, record_tag=record_tag_v2),
+            dict(command='delete', record_id=record_id, record_tag=record_tag_v2),
+        )
+    else:
+        assert_forbidden(r)
+        assert_db_tag_state(record_id, None)
+        assert_tag_audit_log()
+    assert_db_state(record_batch)
+    assert_no_audit_log()

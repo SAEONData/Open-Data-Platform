@@ -46,6 +46,33 @@ async def authorize_untag(tag_id: str, request: Request) -> Authorized:
     return await authorizer(request)
 
 
+def output_record_model(record: Record) -> RecordModel:
+    return RecordModel(
+        id=record.id,
+        doi=record.doi,
+        sid=record.sid,
+        collection_id=record.collection_id,
+        schema_id=record.schema_id,
+        metadata=record.metadata_,
+        validity=record.validity,
+        timestamp=record.timestamp,
+        tags=[
+            output_record_tag_model(record_tag)
+            for record_tag in record.tags
+        ],
+    )
+
+
+def output_record_tag_model(record_tag: RecordTag) -> RecordTagModel:
+    return RecordTagModel(
+        tag_id=record_tag.tag_id,
+        user_id=record_tag.user_id,
+        user_name=record_tag.user.name if record_tag.user_id else None,
+        data=record_tag.data,
+        timestamp=record_tag.timestamp,
+    )
+
+
 @router.get(
     '/',
     response_model=List[RecordModel],
@@ -65,23 +92,7 @@ async def list_records(
         stmt = stmt.where(Collection.provider_id.in_(auth.provider_ids))
 
     records = [
-        RecordModel(
-            id=row.Record.id,
-            doi=row.Record.doi,
-            sid=row.Record.sid,
-            collection_id=row.Record.collection_id,
-            schema_id=row.Record.schema_id,
-            metadata=row.Record.metadata_,
-            validity=row.Record.validity,
-            timestamp=row.Record.timestamp,
-            tags=[RecordTagModel(
-                tag_id=record_tag.tag_id,
-                user_id=record_tag.user_id,
-                user_name=record_tag.user.name,
-                data=record_tag.data,
-                timestamp=record_tag.timestamp,
-            ) for record_tag in row.Record.tags],
-        )
+        output_record_model(row.Record)
         for row in Session.execute(stmt)
     ]
 
@@ -102,23 +113,7 @@ async def get_record(
     if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    return RecordModel(
-        id=record.id,
-        doi=record.doi,
-        sid=record.sid,
-        collection_id=record.collection_id,
-        schema_id=record.schema_id,
-        metadata=record.metadata_,
-        validity=record.validity,
-        timestamp=record.timestamp,
-        tags=[RecordTagModel(
-            tag_id=record_tag.tag_id,
-            user_id=record_tag.user_id,
-            user_name=record_tag.user.name,
-            data=record_tag.data,
-            timestamp=record_tag.timestamp,
-        ) for record_tag in record.tags],
-    )
+    return output_record_model(record)
 
 
 @router.post(
@@ -169,17 +164,7 @@ async def create_record(
         _schema_id=record.schema_id,
     ).save()
 
-    return RecordModel(
-        id=record.id,
-        doi=record.doi,
-        sid=record.sid,
-        collection_id=record.collection_id,
-        schema_id=record.schema_id,
-        metadata=record.metadata_,
-        validity=record.validity,
-        timestamp=record.timestamp,
-        tags=[],
-    )
+    return output_record_model(record)
 
 
 @router.put(
@@ -238,23 +223,7 @@ async def update_record(
             _schema_id=record.schema_id,
         ).save()
 
-    return RecordModel(
-        id=record.id,
-        doi=record.doi,
-        sid=record.sid,
-        collection_id=record.collection_id,
-        schema_id=record.schema_id,
-        metadata=record.metadata_,
-        validity=record.validity,
-        timestamp=record.timestamp,
-        tags=[RecordTagModel(
-            tag_id=record_tag.tag_id,
-            user_id=record_tag.user_id,
-            user_name=record_tag.user.name,
-            data=record_tag.data,
-            timestamp=record_tag.timestamp,
-        ) for record_tag in record.tags],
-    )
+    return output_record_model(record)
 
 
 @router.delete(
@@ -291,16 +260,18 @@ async def tag_record(
         tag_schema: JSONSchema = Depends(get_tag_schema),
         auth: Authorized = Depends(authorize_tag),
 ):
-    if not auth.user_id:
-        raise HTTPException(HTTP_403_FORBIDDEN)
-
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if record_tag := Session.get(RecordTag, (record_id, record_tag_in.tag_id, auth.user_id)):
+    if record_tag := Session.execute(
+        select(RecordTag).
+        where(RecordTag.record_id == record_id).
+        where(RecordTag.tag_id == record_tag_in.tag_id).
+        where(RecordTag.user_id == auth.user_id)
+    ).scalar_one_or_none():
         command = AuditCommand.update
     else:
         record_tag = RecordTag(
@@ -330,13 +301,7 @@ async def tag_record(
             _data=record_tag.data,
         ).save()
 
-    return RecordTagModel(
-        tag_id=record_tag.tag_id,
-        user_id=record_tag.user_id,
-        user_name=record_tag.user.name,
-        data=record_tag.data,
-        timestamp=record_tag.timestamp,
-    )
+    return output_record_tag_model(record_tag)
 
 
 @router.delete(
@@ -353,7 +318,12 @@ async def untag_record(
     if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if not (record_tag := Session.get(RecordTag, (record_id, tag_id, auth.user_id))):
+    if not (record_tag := Session.execute(
+        select(RecordTag).
+        where(RecordTag.record_id == record_id).
+        where(RecordTag.tag_id == tag_id).
+        where(RecordTag.user_id == auth.user_id)
+    ).scalar_one_or_none()):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     record_tag.delete()
