@@ -21,5 +21,8 @@ class Collection(Base):
     collection_projects = relationship('ProjectCollection', viewonly=True)
     projects = association_proxy('collection_projects', 'project')
 
+    # view of associated tags (one-to-many)
+    tags = relationship('CollectionTag', viewonly=True)
+
     def __repr__(self):
-        return self._repr('id', 'name', 'provider_id')
+        return self._repr('id', 'name', 'doi_key', 'provider_id')

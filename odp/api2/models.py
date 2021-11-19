@@ -34,12 +34,26 @@ class ClientSort(str, Enum):
     NAME = 'name'
 
 
+class CollectionTagModel(BaseModel):
+    tag_id: str
+    user_id: Optional[str]
+    user_name: Optional[str]
+    data: Dict[str, Any]
+    timestamp: datetime
+
+
+class CollectionTagModelIn(BaseModel):
+    tag_id: str
+    data: Dict[str, Any]
+
+
 class CollectionModel(BaseModel):
     id: str
     name: str
     provider_id: str
     project_ids: List[str]
     record_count: int
+    tags: List[CollectionTagModel]
 
 
 class CollectionModelIn(BaseModel):
