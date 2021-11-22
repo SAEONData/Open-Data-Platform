@@ -57,7 +57,7 @@
         </div>
         <div id="tag-qc" class="tab-pane fade" role="tabpanel">
             {% from 'macros.html' import render_table, obj_link %}
-            {% set qc_tags = record.tags|selectattr('tag_id', 'eq', 'record-qc') %}
+            {% set qc_tags = record.tags|selectattr('tag_id', 'eq', 'Record-QC') %}
             {% call(qc_tag) render_table(qc_tags, 'Pass', 'Comment', 'User', 'Timestamp', hide_id=True) %}
                 <td>{{ qc_tag.data['pass_'] }}</td>
                 <td>{{ qc_tag.data['comment'] }}</td>

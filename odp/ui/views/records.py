@@ -96,20 +96,20 @@ def tag_qc(id):
     else:
         record_tag = next(
             (tag for tag in record['tags']
-             if tag['tag_id'] == 'record-qc' and tag['user_id'] == current_user.id),
+             if tag['tag_id'] == 'Record-QC' and tag['user_id'] == current_user.id),
             None
         )
         form = RecordTagQCForm(data=record_tag['data'] if record_tag else None)
 
     if request.method == 'POST' and form.validate():
         api.post(f'/record/{id}/tag', dict(
-            tag_id='record-qc',
+            tag_id='Record-QC',
             data={
                 'pass_': form.pass_.data,
                 'comment': form.comment.data,
             },
         ))
-        flash(f'record-qc tag has been set.', category='success')
+        flash(f'Record-QC tag has been set.', category='success')
         return redirect(url_for('.view', id=record['id']))
 
     return render_template('record_tag_qc.html', record=record, form=form)
@@ -119,6 +119,6 @@ def tag_qc(id):
 @authorize(ODPScope.RECORD_TAG_QC)
 @api.wrapper
 def untag_qc(id):
-    api.delete(f'/record/{id}/tag/record-qc')
-    flash(f'record-qc tag has been removed.', category='success')
+    api.delete(f'/record/{id}/tag/Record-QC')
+    flash(f'Record-QC tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
