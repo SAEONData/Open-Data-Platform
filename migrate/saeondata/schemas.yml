@@ -1,15 +1,15 @@
-datacite4-saeon:
+DataCite4-SAEON:
   type: metadata
   uri: https://odp.saeon.ac.za/schema/metadata/datacite4-saeon
 
-iso19115-saeon:
+ISO19115-SAEON:
   type: metadata
   uri: https://odp.saeon.ac.za/schema/metadata/iso19115-saeon
 
-record-qc:
+Record-QC:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/record-qc
 
-saeon-catalogue:
+SAEON-Catalogue:
   type: catalogue
   uri: https://odp.saeon.ac.za/schema/catalogue/saeon-catalogue

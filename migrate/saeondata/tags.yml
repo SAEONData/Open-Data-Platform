@@ -1,4 +1,4 @@
-record-qc:
+Record-QC:
   public: False
   scope_id: odp.record_tag:qc
-  schema_id: record-qc
+  schema_id: Record-QC
