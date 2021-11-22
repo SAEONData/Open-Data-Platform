@@ -12,12 +12,9 @@ from test.factories import SchemaFactory
 
 @pytest.fixture
 def schema_batch():
-    """Create and commit a batch of Schema instances.
-
-    TODO: test other schema types; currently we only have metadata schema documents
-    """
+    """Create and commit a batch of Schema instances."""
     return [
-        SchemaFactory(type='metadata')
+        SchemaFactory()
         for _ in range(randint(3, 5))
     ]
 
