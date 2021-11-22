@@ -7,8 +7,8 @@ from sqlalchemy import select, func
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
-from odp.api2.models import CollectionModelIn, CollectionModel, CollectionSort, CollectionTagModel, CollectionTagModelIn
-from odp.api2.routers import Pager, Paging, Authorize, Authorized
+from odp.api.models import CollectionModelIn, CollectionModel, CollectionSort, CollectionTagModel, CollectionTagModelIn
+from odp.api.routers import Pager, Paging, Authorize, Authorized
 from odp.db import Session
 from odp.db.models import Collection, Record, Tag, CollectionTag, CollectionTagAudit, AuditCommand, Schema, SchemaType
 
@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 async def get_tag_schema(collection_tag_in: CollectionTagModelIn) -> JSONSchema:
-    from odp.api2 import schema_catalog
+    from odp.api import schema_catalog
     if not (tag := Session.get(Tag, collection_tag_in.tag_id)):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
 

@@ -6,8 +6,8 @@ from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND
 
 from odp import ODPScope
-from odp.api2.models import SchemaModel, SchemaSort
-from odp.api2.routers import Pager, Paging, Authorize
+from odp.api.models import SchemaModel, SchemaSort
+from odp.api.routers import Pager, Paging, Authorize
 from odp.db import Session
 from odp.db.models import Schema
 
@@ -22,7 +22,7 @@ router = APIRouter()
 async def list_schemas(
         pager: Pager = Depends(Paging(SchemaSort)),
 ):
-    from odp.api2 import schema_catalog
+    from odp.api import schema_catalog
 
     stmt = (
         select(Schema).
@@ -52,7 +52,7 @@ async def list_schemas(
 async def get_schema(
         schema_id: str,
 ):
-    from odp.api2 import schema_catalog
+    from odp.api import schema_catalog
 
     schema = Session.execute(
         select(Schema).

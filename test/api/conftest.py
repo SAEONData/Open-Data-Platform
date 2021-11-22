@@ -2,7 +2,7 @@ import pytest
 from authlib.integrations.requests_client import OAuth2Session
 from starlette.testclient import TestClient
 
-import odp.api2
+import odp.api
 from test.factories import ClientFactory, ScopeFactory
 
 
@@ -24,7 +24,7 @@ def api():
             grant_type='client_credentials',
             timeout=1.0,
         )
-        api_client = TestClient(app=odp.api2.app)
+        api_client = TestClient(app=odp.api.app)
         api_client.headers = {
             'Accept': 'application/json',
             'Authorization': 'Bearer ' + token['access_token'],

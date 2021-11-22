@@ -14,7 +14,7 @@ from wtforms.csrf.session import SessionCSRF
 from wtforms.validators import input_required, length, regexp
 from wtforms.widgets import CheckboxInput, ListWidget
 
-from odp.api2.models import DOI_REGEX, SID_REGEX
+from odp.api.models import DOI_REGEX, SID_REGEX
 
 
 def init_app(app: Flask):

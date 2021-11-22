@@ -5,8 +5,8 @@ from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from odp import ODPScope
-from odp.api2.models import ProjectModel, ProjectSort
-from odp.api2.routers import Pager, Paging, Authorize
+from odp.api.models import ProjectModel, ProjectSort
+from odp.api.routers import Pager, Paging, Authorize
 from odp.db import Session
 from odp.db.models import Project, Collection
 

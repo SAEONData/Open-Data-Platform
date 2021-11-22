@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from jschon import create_catalog, URI
 
 import odp
-from odp.api2.routers import (
+from odp.api.routers import (
     catalogue,
     client,
     collection,
