@@ -64,7 +64,7 @@ class ClientForm(BaseForm):
         label='Provider',
     )
     scope_ids = MultiCheckboxField(
-        label='Scopes',
+        label='Scope',
     )
 
 
@@ -158,7 +158,7 @@ class RoleForm(BaseForm):
         label='Provider',
     )
     scope_ids = MultiCheckboxField(
-        label='Scopes',
+        label='Scope',
     )
 
 

@@ -6,13 +6,13 @@
 
 {% block content %}
     {% from 'macros.html' import render_info, render_buttons, obj_link %}
-    {% call(prop) render_info(client, 'Name', 'Provider', 'Scopes') %}
+    {% call(prop) render_info(client, 'Name', 'Provider', 'Scope') %}
         {% if prop == 'Name' %}
             {{ client.name }}
         {% elif prop == 'Provider' %}
             {{ obj_link('providers', client.provider_id) }}
-        {% elif prop == 'Scopes' %}
-            {{ client.scope_ids|join('<br/>')|safe }}
+        {% elif prop == 'Scope' %}
+            {{ client.scope_ids|sort|join('<br/>')|safe }}
         {% endif %}
     {% endcall %}
     {{ render_buttons(client, edit=True, delete=True) }}
