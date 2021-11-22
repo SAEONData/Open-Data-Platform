@@ -58,7 +58,7 @@ class SchemaFactory(ODPModelFactory):
         model = Schema
 
     id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
-    type = choice(('catalogue', 'metadata', 'tag'))
+    type = factory.LazyFunction(lambda: choice(('catalogue', 'metadata', 'tag')))
     uri = factory.LazyAttribute(schema_uri_from_type)
 
 
@@ -183,7 +183,7 @@ class TagFactory(ODPModelFactory):
         model = Tag
 
     id = factory.LazyAttribute(lambda tag: f'tag-{tag.scope.id}')
-    public = randint(0, 1)
+    public = factory.LazyFunction(lambda: randint(0, 1))
     scope = factory.SubFactory(ScopeFactory)
     schema = factory.SubFactory(SchemaFactory, type='tag')
 
@@ -195,8 +195,8 @@ class UserFactory(ODPModelFactory):
     id = factory.Faker('uuid4')
     name = factory.Faker('name')
     email = factory.Sequence(lambda n: f'{fake.email()}.{n}')
-    active = randint(0, 1)
-    verified = randint(0, 1)
+    active = factory.LazyFunction(lambda: randint(0, 1))
+    verified = factory.LazyFunction(lambda: randint(0, 1))
 
     @factory.post_generation
     def roles(obj, create, roles):
