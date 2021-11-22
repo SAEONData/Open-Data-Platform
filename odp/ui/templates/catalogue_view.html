@@ -20,7 +20,11 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% from 'macros.html' import render_info %}
-            {{ render_info(catalogue) }}
+            {% call(prop) render_info(catalogue, 'Schema URI') %}
+                {% if prop == 'Schema URI' %}
+                    {{ catalogue.schema_uri }}
+                {% endif %}
+            {% endcall %}
         </div>
         <div id="schema" class="tab-pane fade" role="tabpanel">
             <pre class="m-3">

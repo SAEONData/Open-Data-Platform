@@ -9,7 +9,7 @@ from odp import ODPScope
 from odp.api.models import SchemaModel, SchemaSort
 from odp.api.routers import Pager, Paging, Authorize
 from odp.db import Session
-from odp.db.models import Schema
+from odp.db.models import Schema, SchemaType
 
 router = APIRouter()
 
@@ -20,6 +20,7 @@ router = APIRouter()
     dependencies=[Depends(Authorize(ODPScope.SCHEMA_READ))],
 )
 async def list_schemas(
+        schema_type: SchemaType = None,
         pager: Pager = Depends(Paging(SchemaSort)),
 ):
     from odp.api import schema_catalog
@@ -30,6 +31,8 @@ async def list_schemas(
         offset(pager.skip).
         limit(pager.limit)
     )
+    if schema_type:
+        stmt = stmt.where(Schema.type == schema_type)
 
     schemas = [
         SchemaModel(

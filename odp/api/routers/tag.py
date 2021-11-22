@@ -37,6 +37,7 @@ async def list_tags(
             public=row.Tag.public,
             scope_id=row.Tag.scope_id,
             schema_id=row.Tag.schema_id,
+            schema_uri=row.Tag.schema.uri,
             schema_=schema_catalog.get_schema(URI(row.Tag.schema.uri)).value,
         )
         for row in Session.execute(stmt)
@@ -63,5 +64,6 @@ async def get_tag(
         public=tag.public,
         scope_id=tag.scope_id,
         schema_id=tag.schema_id,
+        schema_uri=tag.schema.uri,
         schema_=schema_catalog.get_schema(URI(tag.schema.uri)).value,
     )

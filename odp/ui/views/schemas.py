@@ -11,7 +11,7 @@ bp = Blueprint('schemas', __name__)
 @authorize(ODPScope.SCHEMA_READ)
 @api.wrapper
 def index():
-    schemas = api.get('/schema/')
+    schemas = api.get('/schema/?schema_type=metadata')
     return render_template('schema_list.html', schemas=schemas)
 
 

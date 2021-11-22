@@ -6,8 +6,7 @@
 
 {% block content %}
     {% from 'macros.html' import render_table %}
-    {% call(schema) render_table(schemas, 'Type', 'URI') %}
-        <td>{{ schema.type }}</td>
+    {% call(schema) render_table(schemas, 'URI') %}
         <td>{{ schema.uri }}</td>
     {% endcall %}
 {% endblock %}

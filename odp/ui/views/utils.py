@@ -22,11 +22,10 @@ def populate_provider_choices(field, include_none=False):
 
 
 def populate_schema_choices(field, schema_type):
-    schemas = api.get('/schema/')
+    schemas = api.get(f'/schema/?schema_type={schema_type}')
     field.choices = [
         (schema['id'], schema['id'])
         for schema in schemas
-        if schema['type'] == schema_type  # todo filter on the API side
     ]
 
 

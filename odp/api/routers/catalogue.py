@@ -35,6 +35,7 @@ async def list_catalogues(
         CatalogueModel(
             id=row.Catalogue.id,
             schema_id=row.Catalogue.schema_id,
+            schema_uri=row.Catalogue.schema.uri,
             schema_=schema_catalog.get_schema(URI(row.Catalogue.schema.uri)).value,
         )
         for row in Session.execute(stmt)
@@ -59,5 +60,6 @@ async def get_catalogue(
     return CatalogueModel(
         id=catalogue.id,
         schema_id=catalogue.schema_id,
+        schema_uri=catalogue.schema.uri,
         schema_=schema_catalog.get_schema(URI(catalogue.schema.uri)).value,
     )

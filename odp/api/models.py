@@ -15,6 +15,7 @@ SID_REGEX = r'^[-._;()/:a-zA-Z0-9]+$'
 class CatalogueModel(BaseModel):
     id: str
     schema_id: str
+    schema_uri: str
     schema_: Dict[str, Any]
 
 
@@ -183,6 +184,7 @@ class TagModel(BaseModel):
     public: bool
     scope_id: str
     schema_id: str
+    schema_uri: str
     schema_: Dict[str, Any]
 
 

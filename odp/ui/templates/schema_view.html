@@ -20,10 +20,8 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% from 'macros.html' import render_info %}
-            {% call(prop) render_info(schema, 'Type', 'URI') %}
-                {% if prop == 'Type' %}
-                    {{ schema.type }}
-                {% elif prop == 'URI' %}
+            {% call(prop) render_info(schema, 'URI') %}
+                {% if prop == 'URI' %}
                     {{ schema.uri }}
                 {% endif %}
             {% endcall %}

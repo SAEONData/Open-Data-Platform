@@ -20,11 +20,13 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% from 'macros.html' import render_info %}
-            {% call(prop) render_info(tag, 'Public', 'Scope') %}
+            {% call(prop) render_info(tag, 'Public', 'Scope', 'Schema URI') %}
                 {% if prop == 'Public' %}
                     {{ tag.public }}
                 {% elif prop == 'Scope' %}
                     {{ tag.scope_id }}
+                {% elif prop == 'Schema URI' %}
+                    {{ tag.schema_uri }}
                 {% endif %}
             {% endcall %}
         </div>
