@@ -13,14 +13,12 @@ ory-hydra-client
 fastapi
 uvicorn
 python-multipart
-ckanapi
 xmltodict
 jschon
 
 # UIs
 flask
 flask-login
-flask-admin
 flask-wtf
 flask-mail
 wtforms
