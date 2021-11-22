@@ -5,11 +5,11 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse
 from starlette.status import HTTP_404_NOT_FOUND
 
-from odp.api.dependencies.auth import Authorizer
-from odp.api.dependencies.catalogue import get_metadata_landing_page_url
-from odp.api.models import Pagination
-from odp.api.models.auth import Role, Scope
-from odp.api.models.catalogue import CatalogueRecord
+from odp.api_old.dependencies.auth import Authorizer
+from odp.api_old.dependencies.catalogue import get_metadata_landing_page_url
+from odp.api_old.models import Pagination
+from odp.api_old.models.auth import Role, Scope
+from odp.api_old.models.catalogue import CatalogueRecord
 from odp.lib import catalogue
 
 router = APIRouter()

@@ -5,7 +5,7 @@ from typing import Iterator
 from sqlalchemy import create_engine
 from sqlalchemy.sql import text
 
-from odp.api.models.catalogue import CatalogueRecord
+from odp.api_old.models.catalogue import CatalogueRecord
 from odp.publish.harvester import Harvester
 
 

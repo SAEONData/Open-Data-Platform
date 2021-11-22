@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, Query
 from fastapi.exceptions import HTTPException
 
-from odp.api.dependencies.auth import Authorizer
-from odp.api.dependencies.datacite import get_datacite_client
-from odp.api.models.auth import Role, Scope
-from odp.api.models.datacite import DataciteRecordIn, DataciteRecord, DataciteRecordList
+from odp.api_old.dependencies.auth import Authorizer
+from odp.api_old.dependencies.datacite import get_datacite_client
+from odp.api_old.models.auth import Role, Scope
+from odp.api_old.models.datacite import DataciteRecordIn, DataciteRecord, DataciteRecordList
 from odp.lib.datacite import DataciteClient
 from odp.lib.exceptions import DataciteError
 

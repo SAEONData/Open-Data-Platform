@@ -2,7 +2,7 @@ from typing import Union
 
 from pydantic import UUID4, constr
 
-from odp.api.models.metadata import DOI_REGEX
+from odp.api_old.models.metadata import DOI_REGEX
 from odp.config import config
 
 

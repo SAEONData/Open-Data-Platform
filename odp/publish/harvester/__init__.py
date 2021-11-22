@@ -1,6 +1,6 @@
 from typing import Iterator
 
-from odp.api.models.catalogue import CatalogueRecord
+from odp.api_old.models.catalogue import CatalogueRecord
 
 
 class Harvester:

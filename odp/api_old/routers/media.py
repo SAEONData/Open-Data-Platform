@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse
 
 from odp.lib.media import MediaRepoClient
 from odp.lib.exceptions import MediaRepositoryError
-from odp.api.dependencies.media import get_media_repo_client
+from odp.api_old.dependencies.media import get_media_repo_client
 
 router = APIRouter()
 

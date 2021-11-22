@@ -3,7 +3,7 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from pydantic.networks import AnyHttpUrl
 
-from odp.api.models.metadata import DOI_REGEX
+from odp.api_old.models.metadata import DOI_REGEX
 
 
 class DataciteRecordIn(BaseModel):

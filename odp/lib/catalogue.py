@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-from odp.api.models import Pagination
-from odp.api.models.catalogue import CatalogueRecord
+from odp.api_old.models import Pagination
+from odp.api_old.models.catalogue import CatalogueRecord
 from odp.db.models import CatalogueRecord as CatalogueRecordORM
 
 

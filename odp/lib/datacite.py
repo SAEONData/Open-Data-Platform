@@ -1,6 +1,6 @@
 import requests
 
-from odp.api.models.datacite import DataciteRecordIn, DataciteRecord, DataciteRecordList
+from odp.api_old.models.datacite import DataciteRecordIn, DataciteRecord, DataciteRecordList
 from odp.lib.exceptions import DataciteError
 
 

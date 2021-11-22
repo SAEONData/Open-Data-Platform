@@ -5,7 +5,7 @@ from typing import Tuple
 import pydantic
 from sqlalchemy import or_, and_, not_
 
-from odp.api.models.datacite import DataciteRecordIn
+from odp.api_old.models.datacite import DataciteRecordIn
 from odp.db import session, transaction
 from odp.db.models import CatalogueRecord, DataciteRecord
 from odp.lib.datacite import DataciteClient
