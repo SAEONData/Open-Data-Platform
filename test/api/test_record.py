@@ -378,6 +378,7 @@ def test_tag_record(api, record_batch, scopes, authorized):
             uri='https://odp.saeon.ac.za/schema/tag/record-qc',
         ),
     )
+
     # insert tag
     r = client.post(
         f'/record/{(record_id := record_batch[2].id)}/tag',
@@ -399,6 +400,7 @@ def test_tag_record(api, record_batch, scopes, authorized):
         assert_tag_audit_log()
     assert_db_state(record_batch)
     assert_no_audit_log()
+
     # update tag
     r = client.post(
         f'/record/{record_id}/tag',
@@ -422,6 +424,7 @@ def test_tag_record(api, record_batch, scopes, authorized):
         assert_tag_audit_log()
     assert_db_state(record_batch)
     assert_no_audit_log()
+
     # delete tag
     r = client.delete(f'/record/{record_id}/tag/{record_tag_v1["tag_id"]}')
     if authorized:

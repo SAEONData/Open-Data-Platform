@@ -19,6 +19,7 @@ SAEON:Curator:
     - odp.client:read
     - odp.collection:admin
     - odp.collection:read
+    - odp.collection_flag:publish
     - odp.flag:read
     - odp.project:admin
     - odp.project:read

@@ -14,6 +14,7 @@ class ODPScope(str, Enum):
     # collection
     COLLECTION_ADMIN = 'odp.collection:admin'
     COLLECTION_READ = 'odp.collection:read'
+    COLLECTION_FLAG_PUBLISH = 'odp.collection_flag:publish'
 
     # flag
     FLAG_READ = 'odp.flag:read'

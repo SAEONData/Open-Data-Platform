@@ -1,0 +1,4 @@
+Collection-Publish:
+  public: False
+  scope_id: odp.collection_flag:publish
+  schema_id: Generic-Flag
