@@ -121,6 +121,19 @@ class ProviderSort(str, Enum):
     NAME = 'name'
 
 
+class RecordFlagModel(BaseModel):
+    flag_id: str
+    user_id: Optional[str]
+    user_name: Optional[str]
+    data: Dict[str, Any]
+    timestamp: datetime
+
+
+class RecordFlagModelIn(BaseModel):
+    flag_id: str
+    data: Dict[str, Any]
+
+
 class RecordTagModel(BaseModel):
     tag_id: str
     user_id: Optional[str]
@@ -143,6 +156,7 @@ class RecordModel(BaseModel):
     metadata: Dict[str, Any]
     validity: Dict[str, Any]
     timestamp: datetime
+    flags: List[RecordFlagModel]
     tags: List[RecordTagModel]
 
 

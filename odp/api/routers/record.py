@@ -7,10 +7,10 @@ from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
-from odp.api.models import RecordModel, RecordModelIn, RecordSort, RecordTagModel, RecordTagModelIn
+from odp.api.models import RecordModel, RecordModelIn, RecordSort, RecordTagModel, RecordTagModelIn, RecordFlagModel, RecordFlagModelIn
 from odp.api.routers import Pager, Paging, Authorize, Authorized
 from odp.db import Session
-from odp.db.models import Record, Collection, SchemaType, Schema, RecordAudit, AuditCommand, Tag, RecordTag, RecordTagAudit
+from odp.db.models import Record, Collection, SchemaType, Schema, RecordAudit, AuditCommand, Tag, RecordTag, RecordTagAudit, Flag, RecordFlag, RecordFlagAudit
 
 router = APIRouter()
 
@@ -19,6 +19,31 @@ async def get_metadata_schema(record_in: RecordModelIn) -> JSONSchema:
     from odp.api import schema_catalog
     schema = Session.get(Schema, (record_in.schema_id, SchemaType.metadata))
     return schema_catalog.get_schema(URI(schema.uri))
+
+
+async def get_flag_schema(record_flag_in: RecordFlagModelIn) -> JSONSchema:
+    from odp.api import schema_catalog
+    if not (flag := Session.get(Flag, record_flag_in.flag_id)):
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
+
+    schema = Session.get(Schema, (flag.schema_id, SchemaType.flag))
+    return schema_catalog.get_schema(URI(schema.uri))
+
+
+async def authorize_flag(record_flag_in: RecordFlagModelIn, request: Request) -> Authorized:
+    if not (flag := Session.get(Flag, record_flag_in.flag_id)):
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
+
+    authorizer = Authorize(ODPScope(flag.scope_id))
+    return await authorizer(request)
+
+
+async def authorize_unflag(flag_id: str, request: Request) -> Authorized:
+    if not (flag := Session.get(Flag, flag_id)):
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
+
+    authorizer = Authorize(ODPScope(flag.scope_id))
+    return await authorizer(request)
 
 
 async def get_tag_schema(record_tag_in: RecordTagModelIn) -> JSONSchema:
@@ -56,10 +81,24 @@ def output_record_model(record: Record) -> RecordModel:
         metadata=record.metadata_,
         validity=record.validity,
         timestamp=record.timestamp,
+        flags=[
+            output_record_flag_model(record_flag)
+            for record_flag in record.flags
+        ],
         tags=[
             output_record_tag_model(record_tag)
             for record_tag in record.tags
         ],
+    )
+
+
+def output_record_flag_model(record_flag: RecordFlag) -> RecordFlagModel:
+    return RecordFlagModel(
+        flag_id=record_flag.flag_id,
+        user_id=record_flag.user_id,
+        user_name=record_flag.user.name if record_flag.user_id else None,
+        data=record_flag.data,
+        timestamp=record_flag.timestamp,
     )
 
 
@@ -336,4 +375,82 @@ async def untag_record(
         _record_id=record_tag.record_id,
         _tag_id=record_tag.tag_id,
         _user_id=record_tag.user_id,
+    ).save()
+
+
+@router.post(
+    '/{record_id}/flag',
+    response_model=RecordFlagModel,
+)
+async def flag_record(
+        record_id: str,
+        record_flag_in: RecordFlagModelIn,
+        flag_schema: JSONSchema = Depends(get_flag_schema),
+        auth: Authorized = Depends(authorize_flag),
+):
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if record_flag := Session.get(RecordFlag, (record_id, record_flag_in.flag_id)):
+        command = AuditCommand.update
+    else:
+        record_flag = RecordFlag(
+            record_id=record_id,
+            flag_id=record_flag_in.flag_id,
+        )
+        command = AuditCommand.insert
+
+    if record_flag.data != record_flag_in.data:
+        validity = flag_schema.evaluate(JSON(record_flag_in.data)).output('detailed')
+        if not validity['valid']:
+            raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, validity)
+
+        record_flag.user_id = auth.user_id
+        record_flag.data = record_flag_in.data
+        record_flag.timestamp = (timestamp := datetime.now(timezone.utc))
+        record_flag.save()
+
+        RecordFlagAudit(
+            client_id=auth.client_id,
+            user_id=auth.user_id,
+            command=command,
+            timestamp=timestamp,
+            _record_id=record_flag.record_id,
+            _flag_id=record_flag.flag_id,
+            _user_id=record_flag.user_id,
+            _data=record_flag.data,
+        ).save()
+
+    return output_record_flag_model(record_flag)
+
+
+@router.delete(
+    '/{record_id}/flag/{flag_id}',
+)
+async def unflag_record(
+        record_id: str,
+        flag_id: str,
+        auth: Authorized = Depends(authorize_unflag),
+):
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not (record_flag := Session.get(RecordFlag, (record_id, flag_id))):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    record_flag.delete()
+
+    RecordFlagAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=AuditCommand.delete,
+        timestamp=datetime.now(timezone.utc),
+        _record_id=record_flag.record_id,
+        _flag_id=record_flag.flag_id,
     ).save()
