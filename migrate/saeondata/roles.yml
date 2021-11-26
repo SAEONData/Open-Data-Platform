@@ -3,6 +3,7 @@ SAEON:Staff:
     - odp.catalogue:read
     - odp.client:read
     - odp.collection:read
+    - odp.flag:read
     - odp.project:read
     - odp.provider:read
     - odp.record:read
@@ -18,6 +19,7 @@ SAEON:Curator:
     - odp.client:read
     - odp.collection:admin
     - odp.collection:read
+    - odp.flag:read
     - odp.project:admin
     - odp.project:read
     - odp.provider:admin
