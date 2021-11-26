@@ -8,6 +8,7 @@ from odp.db.models import (
     Client,
     ClientScope,
     Collection,
+    Flag,
     Project,
     ProjectCollection,
     Provider,
@@ -24,6 +25,7 @@ from test.factories import (
     CatalogueFactory,
     ClientFactory,
     CollectionFactory,
+    FlagFactory,
     ProjectFactory,
     ProviderFactory,
     RecordFactory,
@@ -86,6 +88,13 @@ def test_create_collection():
     result = Session.execute(select(Collection, Provider).join(Provider)).one()
     assert (result.Collection.id, result.Collection.name, result.Collection.provider_id, result.Provider.name) \
            == (collection.id, collection.name, collection.provider.id, collection.provider.name)
+
+
+def test_create_flag():
+    flag = FlagFactory()
+    result = Session.execute(select(Flag, Scope).join(Scope)).one()
+    assert (result.Flag.id, result.Flag.public, result.Flag.schema_id, result.Flag.scope_id) \
+           == (flag.id, flag.public, flag.schema_id, flag.scope.id)
 
 
 def test_create_project():

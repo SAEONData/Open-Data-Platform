@@ -10,6 +10,7 @@ from odp.db.models import (
     Catalogue,
     Client,
     Collection,
+    Flag,
     Project,
     Provider,
     Record,
@@ -35,6 +36,10 @@ def schema_uri_from_type(schema):
             'https://odp.saeon.ac.za/schema/metadata/datacite4-saeon',
             'https://odp.saeon.ac.za/schema/metadata/iso19115-saeon',
         ))
+    elif schema.type == 'flag':
+        return choice((
+            'https://odp.saeon.ac.za/schema/flag/generic',
+        ))
     elif schema.type == 'tag':
         return choice((
             'https://odp.saeon.ac.za/schema/tag/record-qc',
@@ -51,6 +56,13 @@ class ODPModelFactory(SQLAlchemyModelFactory):
     class Meta:
         sqlalchemy_session = Session
         sqlalchemy_session_persistence = 'commit'
+
+
+class ScopeFactory(ODPModelFactory):
+    class Meta:
+        model = Scope
+
+    id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
 
 
 class SchemaFactory(ODPModelFactory):
@@ -119,6 +131,16 @@ class CollectionFactory(ODPModelFactory):
                 Session.commit()
 
 
+class FlagFactory(ODPModelFactory):
+    class Meta:
+        model = Flag
+
+    id = factory.LazyAttribute(lambda flag: f'flag-{flag.scope.id}')
+    public = factory.LazyFunction(lambda: randint(0, 1))
+    scope = factory.SubFactory(ScopeFactory)
+    schema = factory.SubFactory(SchemaFactory, type='flag')
+
+
 class ProjectFactory(ODPModelFactory):
     class Meta:
         model = Project
@@ -169,13 +191,6 @@ class RoleFactory(ODPModelFactory):
                 obj.scopes.append(scope)
             if create:
                 Session.commit()
-
-
-class ScopeFactory(ODPModelFactory):
-    class Meta:
-        model = Scope
-
-    id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
 
 
 class TagFactory(ODPModelFactory):
