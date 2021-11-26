@@ -3,7 +3,8 @@ FROM python:3.9
 WORKDIR /srv/Open-Data-Platform
 
 COPY odp odp/
+COPY schema schema/
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-CMD ["gunicorn", "odp.identity.app:create_app()", "--bind=0.0.0.0:2019", "--workers=4"]
+CMD ["uvicorn", "odp.api:app", "--host", "0.0.0.0", "--port", "2020", "--workers", "4"]

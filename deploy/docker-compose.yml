@@ -1,23 +1,12 @@
 version: "3.5"
 
-networks:
-  odp-net:
-    name: odp-net
-  ckan-net:
-    name: ckan-net
-
 services:
   odp-identity:
     container_name: odp-identity
     build:
       context: ..
       dockerfile: deploy/odp-identity/Dockerfile
-      args:
-        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
-    networks:
-      - odp-net
-    ports:
-      - "9024:9024"
+    network_mode: host
     environment:
       - ODP_ENV
       - FLASK_ENV=${ODP_ENV}
@@ -31,7 +20,6 @@ services:
       - ODP_MAIL_TLS
       - ODP_MAIL_USERNAME
       - ODP_MAIL_PASSWORD
-      - ODP_ADMIN_INSTITUTION=saeon
       - ODP_IDENTITY_LOGIN_EXPIRY=2592000
       - ODP_IDENTITY_NCCRD_BRAND_CLIENT_ID
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
@@ -47,89 +35,22 @@ services:
       - GOOGLE_OPENID_URI=https://accounts.google.com/.well-known/openid-configuration
     restart: always
 
-  odp-admin:
-    container_name: odp-admin
+  odp-api:
+    container_name: odp-api
     build:
       context: ..
-      dockerfile: deploy/odp-admin/Dockerfile
-      args:
-        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
-    networks:
-      - odp-net
-    ports:
-      - "9025:9025"
-    environment:
-      - ODP_ENV
-      - FLASK_ENV=${ODP_ENV}
-      - ODP_ADMIN_UI_FLASK_KEY
-      - ODP_ADMIN_UI_THEME=flatly
-      - ODP_DB_HOST
-      - ODP_DB_NAME
-      - ODP_DB_USER
-      - ODP_DB_PASS
-      - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
-      - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
-      - ODP_ADMIN_UI_CLIENT_ID
-      - ODP_ADMIN_UI_CLIENT_SECRET
-      - ODP_ADMIN_UI_SCOPE=["openid","offline","ODP.Admin"]
-      - ODP_ADMIN_INSTITUTION=saeon
-      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-      - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
-      - TZ
-      - REDIS_HOST=redis
-    restart: always
-
-  odp-admin-api:
-    container_name: odp-admin-api
-    build:
-      context: ..
-      dockerfile: deploy/odp-admin-api/Dockerfile
-      args:
-        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
-    networks:
-      - odp-net
-      - ckan-net
-    ports:
-      - "9999:9999"
-    environment:
-      - ODP_ENV
-      - ODP_API_PATH_PREFIX=/api
-      - ODP_API_ADMIN_API_URL=http://odp-admin-api:9999
-      - ODP_DB_HOST
-      - ODP_DB_NAME
-      - ODP_DB_USER
-      - ODP_DB_PASS
-      - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
-      - ODP_ADMIN_INSTITUTION=saeon
-      - CKAN_URL=http://ckan-metadata:5000
-      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-      - TZ
-    restart: always
-
-  odp-public-api:
-    container_name: odp-public-api
-    build:
-      context: ..
-      dockerfile: deploy/odp-public-api/Dockerfile
-      args:
-        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
-    networks:
-      - odp-net
-      - ckan-net
-    ports:
-      - "8888:8888"
+      dockerfile: deploy/odp-api/Dockerfile
+    network_mode: host
     environment:
       - ODP_ENV
       - ODP_API_PATH_PREFIX=/api
       - ODP_API_ALLOW_ORIGINS
-      - ODP_API_ADMIN_API_URL=http://odp-admin-api:9999
       - ODP_DB_HOST
       - ODP_DB_NAME
       - ODP_DB_USER
       - ODP_DB_PASS
-      - ODP_ADMIN_INSTITUTION=saeon
       - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
-      - CKAN_URL=http://ckan-metadata:5000
+      - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
       - CATALOGUE_METADATA_LANDING_PAGE_BASE_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - TZ
@@ -138,124 +59,58 @@ services:
       - MEDIA_PASSWORD
     restart: always
 
-  odp-publisher:
-    container_name: odp-publisher
+  odp-ui:
+    container_name: odp-ui
     build:
       context: ..
-      dockerfile: deploy/odp-publisher/Dockerfile
-      args:
-        - ODP_PUBLISH_JOB_INTERVAL
+      dockerfile: deploy/odp-ui/Dockerfile
+    network_mode: host
     environment:
       - ODP_ENV
-      - ODP_LOG_LEVEL
-      - ODP_PUBLISH_HARVEST_CHECK_INTERVAL
-      - ODP_PUBLISH_BATCH_SIZE
+      - FLASK_ENV=${ODP_ENV}
+      - ODP_UI_FLASK_KEY
+      - ODP_UI_CLIENT_ID
+      - ODP_UI_CLIENT_SECRET
+      - ODP_UI_API_URL=${ODP_PUBLIC_URL}/api
       - ODP_DB_HOST
       - ODP_DB_NAME
       - ODP_DB_USER
       - ODP_DB_PASS
-      - CKAN_URL
-      - CKAN_DB_HOST
-      - CKAN_DB_NAME
-      - CKAN_DB_USER
-      - CKAN_DB_PASS
-      - TZ
-    restart: always
-
-  datacite-publisher:
-    container_name: datacite-publisher
-    build:
-      context: ..
-      dockerfile: deploy/datacite-publisher/Dockerfile
-      args:
-        - DATACITE_PUBLISH_JOB_INTERVAL
-    environment:
-      - ODP_ENV
-      - ODP_LOG_LEVEL
-      - ODP_DB_HOST
-      - ODP_DB_NAME
-      - ODP_DB_USER
-      - ODP_DB_PASS
-      - DATACITE_API_URL
-      - DATACITE_USERNAME
-      - DATACITE_PASSWORD
-      - DATACITE_DOI_PREFIX
-      - DATACITE_DOI_LANDING_PAGE_BASE_URL=${ODP_PUBLIC_URL}/api/catalogue/go
-      - DATACITE_PUBLISH_BATCH_SIZE
-      - DATACITE_PUBLISH_MAX_RETRIES=3
+      - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
       - TZ
     restart: always
 
   hydra:
     container_name: hydra
     image: ${HYDRA_IMAGE}
-    networks:
-      - odp-net
-    ports:
-      - "9000:4444"
-      - "9001:4445"
+    network_mode: host
     environment:
-      - URLS_SELF_ISSUER=${ODP_PUBLIC_URL}/auth
-      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
       - DSN=postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASS}@${HYDRA_DB_HOST}:5432/${HYDRA_DB_NAME}?sslmode=disable
+      - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
+      - URLS_SELF_ISSUER=${ODP_PUBLIC_URL}/auth
       - URLS_LOGIN=${ODP_PUBLIC_URL}/id/hydra/login
       - URLS_CONSENT=${ODP_PUBLIC_URL}/id/hydra/consent
       - URLS_LOGOUT=${ODP_PUBLIC_URL}/id/hydra/logout
-      # TODO remove; the following makes access token lifetime 1 week (the default is 1 hour),
-      # as a workaround until such time as we've implemented token refresh on the client side
-      - TTL_ACCESS_TOKEN=168h
       - LOG_LEAK_SENSITIVE_VALUES=true
       - SERVE_PUBLIC_CORS_ENABLED=true
       - SERVE_PUBLIC_CORS_ALLOWED_HEADERS=Authorization,Content-Type,X-Requested-With
-    restart: always
-
-  ckan-metadata:
-    container_name: ckan-metadata
-    build:
-      context: ckan-metadata
-      args:
-        - SERVER_ENV=${ODP_ENV}
-        - CA_CERT_URL=${ODP_ADMIN_URL}/ca.crt
-        - CKAN_URL
-        - CKAN_DB_URL=postgresql://${CKAN_DB_USER}:${CKAN_DB_PASS}@${CKAN_DB_HOST}/${CKAN_DB_NAME}
-        - DOI_PREFIX=${DATACITE_DOI_PREFIX}
-        - ODP_INTROSPECTION_URL=${ODP_ADMIN_URL}/api/auth/introspect
-        - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
-        - OAUTH2_CLIENT_ID=${CKAN_CLIENT_ID}
-        - OAUTH2_CLIENT_SECRET=${CKAN_CLIENT_SECRET}
-        - OAUTH2_SCOPE=ODP.Metadata
-        - IDENTITY_SERVICE_URL=${ODP_PUBLIC_URL}/id
-        - SOLR_URL=http://solr:8983/solr
-        - REDIS_URL=http://redis:6379/0
-        - CKAN_ADMIN_ORG=saeon
-        - CKAN_ADMIN_ROLE=admin
-        - CKAN_CURATOR_ROLE=curator
-        - CKAN_HARVESTER_ROLE=harvester
-        - CKAN_CONTRIBUTOR_ROLE=contributor
-    networks:
-      - ckan-net
-    ports:
-      - "5000:5000"
-    environment:
-      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-      - TZ
     depends_on:
-      - solr
-      - redis
+      - hydra-migrate
     restart: always
 
-  solr:
-    container_name: solr
-    build:
-      context: solr
-    networks:
-      - ckan-net
-    restart: always
+  hydra-migrate:
+    container_name: hydra-migrate
+    image: ${HYDRA_IMAGE}
+    command: migrate sql -e --yes
+    network_mode: host
+    environment:
+      - DSN=postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASS}@${HYDRA_DB_HOST}:5432/${HYDRA_DB_NAME}?sslmode=disable
+    restart: on-failure
 
   redis:
     container_name: redis
-    image: redis:5
-    networks:
-      - odp-net
-      - ckan-net
+    image: redis:6
+    network_mode: host
     restart: always
