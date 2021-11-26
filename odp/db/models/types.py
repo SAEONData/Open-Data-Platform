@@ -2,9 +2,10 @@ from enum import Enum
 
 
 class SchemaType(str, Enum):
-    catalogue = 'catalogue'
     metadata = 'metadata'
+    flag = 'flag'
     tag = 'tag'
+    catalogue = 'catalogue'
 
     def __repr__(self):
         return repr(self.value)

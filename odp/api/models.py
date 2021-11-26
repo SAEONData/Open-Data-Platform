@@ -31,6 +31,19 @@ class ClientSort(str, Enum):
     NAME = 'name'
 
 
+class CollectionFlagModel(BaseModel):
+    flag_id: str
+    user_id: Optional[str]
+    user_name: Optional[str]
+    data: Dict[str, Any]
+    timestamp: datetime
+
+
+class CollectionFlagModelIn(BaseModel):
+    flag_id: str
+    data: Dict[str, Any]
+
+
 class CollectionTagModel(BaseModel):
     tag_id: str
     user_id: Optional[str]
@@ -50,6 +63,7 @@ class CollectionModel(BaseModel):
     provider_id: str
     project_ids: List[str]
     record_count: int
+    flags: List[CollectionFlagModel]
     tags: List[CollectionTagModel]
 
 
@@ -63,6 +77,19 @@ class CollectionSort(str, Enum):
     ID = 'id'
     NAME = 'name'
     PROVIDER_ID = 'provider_id'
+
+
+class FlagModel(BaseModel):
+    id: str
+    public: bool
+    scope_id: str
+    schema_id: str
+    schema_uri: str
+    schema_: Dict[str, Any]
+
+
+class FlagSort(str, Enum):
+    ID = 'id'
 
 
 class ProjectModel(BaseModel):

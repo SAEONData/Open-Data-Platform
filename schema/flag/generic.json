@@ -1,0 +1,9 @@
+{
+    "$id": "https://odp.saeon.ac.za/schema/flag/generic",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "comment": {"type": "string"}
+    },
+    "additionalProperties": false
+}

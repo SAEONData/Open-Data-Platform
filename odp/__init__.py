@@ -15,6 +15,9 @@ class ODPScope(str, Enum):
     COLLECTION_ADMIN = 'odp.collection:admin'
     COLLECTION_READ = 'odp.collection:read'
 
+    # flag
+    FLAG_READ = 'odp.flag:read'
+
     # project
     PROJECT_ADMIN = 'odp.project:admin'
     PROJECT_READ = 'odp.project:read'

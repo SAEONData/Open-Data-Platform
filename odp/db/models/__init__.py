@@ -3,8 +3,10 @@ from .catalogue_record import CatalogueRecord
 from .client import Client
 from .client_scope import ClientScope
 from .collection import Collection
+from .collection_flag import CollectionFlag, CollectionFlagAudit
 from .collection_tag import CollectionTag, CollectionTagAudit
 from .datacite_record import DataciteRecord
+from .flag import Flag
 from .oauth2_token import OAuth2Token
 from .project import Project
 from .project_collection import ProjectCollection
