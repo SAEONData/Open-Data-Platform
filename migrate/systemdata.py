@@ -24,7 +24,7 @@ from odp.db import engine, Session, Base
 from odp.db.models import Scope, Role, Client, User, UserRole
 
 ODP_ADMIN_ROLE = 'ODP:Admin'
-ODP_UI_CLIENT_ID = 'odp.saeon.ac.za'
+ODP_UI_CLIENT_ID = 'ODP.UI'
 ODP_UI_CLIENT_NAME = 'The Open Data Platform Web UI'
 
 
