@@ -16,6 +16,7 @@ from odp.db import Session
 from odp.db.models import (
     Catalogue,
     Collection,
+    Flag,
     Project,
     Provider,
     Role,
@@ -38,6 +39,20 @@ def create_schemas():
         schema = Session.get(Schema, (schema_id, schema_type)) or Schema(id=schema_id, type=schema_type)
         schema.uri = schema_spec['uri']
         schema.save()
+
+
+def create_flags():
+    """Create or update flag definitions."""
+    with open(datadir / 'flags.yml') as f:
+        flag_data = yaml.safe_load(f)
+
+    for flag_id, flag_spec in flag_data.items():
+        flag = Session.get(Flag, flag_id) or Flag(id=flag_id)
+        flag.public = flag_spec['public']
+        flag.scope_id = flag_spec['scope_id']
+        flag.schema_id = flag_spec['schema_id']
+        flag.schema_type = SchemaType.flag
+        flag.save()
 
 
 def create_tags():
@@ -110,6 +125,7 @@ def create_catalogues():
 if __name__ == '__main__':
     with Session.begin():
         create_schemas()
+        create_flags()
         create_tags()
         create_roles()
         create_providers_and_collections()
