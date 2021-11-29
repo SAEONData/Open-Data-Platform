@@ -6,6 +6,7 @@ from odp.api.routers import (
     catalogue,
     client,
     collection,
+    flag,
     project,
     provider,
     record,
@@ -31,6 +32,7 @@ app = FastAPI(
 app.include_router(catalogue.router, prefix='/catalogue', tags=['Catalogue'])
 app.include_router(client.router, prefix='/client', tags=['Client'])
 app.include_router(collection.router, prefix='/collection', tags=['Collection'])
+app.include_router(flag.router, prefix='/flag', tags=['Flag'])
 app.include_router(project.router, prefix='/project', tags=['Project'])
 app.include_router(provider.router, prefix='/provider', tags=['Provider'])
 app.include_router(record.router, prefix='/record', tags=['Record'])
