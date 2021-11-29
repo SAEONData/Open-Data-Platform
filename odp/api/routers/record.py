@@ -16,7 +16,9 @@ router = APIRouter()
 
 
 async def get_metadata_schema(record_in: RecordModelIn) -> JSONSchema:
-    schema = Session.get(Schema, (record_in.schema_id, SchemaType.metadata))
+    if not (schema := Session.get(Schema, (record_in.schema_id, SchemaType.metadata))):
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid schema id')
+
     return schema_catalog.get_schema(URI(schema.uri))
 
 
