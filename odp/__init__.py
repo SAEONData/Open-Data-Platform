@@ -49,3 +49,13 @@ class ODPScope(str, Enum):
     # user
     USER_ADMIN = 'odp.user:admin'
     USER_READ = 'odp.user:read'
+
+
+class ODPFlag(str, Enum):
+    # collection
+    COLLECTION_PUBLISH = 'Collection-Publish'
+
+
+class ODPTag(str, Enum):
+    # record
+    RECORD_QC = 'Record-QC'

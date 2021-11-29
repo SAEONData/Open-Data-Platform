@@ -3,7 +3,7 @@ import json
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import current_user
 
-from odp import ODPScope
+from odp import ODPScope, ODPTag
 from odp.ui import api
 from odp.ui.auth import authorize
 from odp.ui.forms import RecordForm, RecordTagQCForm
@@ -25,7 +25,7 @@ def index():
 @api.wrapper
 def view(id):
     record = api.get(f'/record/{id}')
-    return render_template('record_view.html', record=record)
+    return render_template('record_view.html', record=record, qc_tag_id=ODPTag.RECORD_QC.value)
 
 
 @bp.route('/new', methods=('GET', 'POST'))
@@ -96,20 +96,20 @@ def tag_qc(id):
     else:
         record_tag = next(
             (tag for tag in record['tags']
-             if tag['tag_id'] == 'Record-QC' and tag['user_id'] == current_user.id),
+             if tag['tag_id'] == ODPTag.RECORD_QC and tag['user_id'] == current_user.id),
             None
         )
         form = RecordTagQCForm(data=record_tag['data'] if record_tag else None)
 
     if request.method == 'POST' and form.validate():
         api.post(f'/record/{id}/tag', dict(
-            tag_id='Record-QC',
+            tag_id=ODPTag.RECORD_QC,
             data={
                 'pass_': form.pass_.data,
                 'comment': form.comment.data,
             },
         ))
-        flash(f'Record-QC tag has been set.', category='success')
+        flash(f'{ODPTag.RECORD_QC} tag has been set.', category='success')
         return redirect(url_for('.view', id=record['id']))
 
     return render_template('record_tag_qc.html', record=record, form=form)
@@ -119,6 +119,6 @@ def tag_qc(id):
 @authorize(ODPScope.RECORD_TAG_QC)
 @api.wrapper
 def untag_qc(id):
-    api.delete(f'/record/{id}/tag/Record-QC')
-    flash(f'Record-QC tag has been removed.', category='success')
+    api.delete(f'/record/{id}/tag/{ODPTag.RECORD_QC}')
+    flash(f'{ODPTag.RECORD_QC} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))

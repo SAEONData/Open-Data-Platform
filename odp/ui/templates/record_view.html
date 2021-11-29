@@ -57,7 +57,7 @@
         </div>
         <div id="tag-qc" class="tab-pane fade" role="tabpanel">
             {% from 'macros.html' import render_table, obj_link %}
-            {% set qc_tags = record.tags|selectattr('tag_id', 'eq', 'Record-QC') %}
+            {% set qc_tags = record.tags|selectattr('tag_id', 'eq', qc_tag_id) %}
             {% call(qc_tag) render_table(qc_tags, 'Pass', 'Comment', 'User', 'Timestamp', hide_id=True) %}
                 <td>{{ qc_tag.data['pass_'] }}</td>
                 <td>{{ qc_tag.data['comment'] }}</td>
@@ -70,7 +70,7 @@
                 </a>
                 <form action="{{ url_for('.untag_qc', id=record.id) }}" method="post">
                     <button type="submit" class="btn btn-outline-secondary btn-action"
-                            onclick="return confirm('Are you sure you want to delete your QC tag?')">
+                            onclick="return confirm('Are you sure you want to delete your {{ qc_tag_id }} tag?')">
                         Untag
                     </button>
                 </form>
