@@ -6,8 +6,8 @@ from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND
 
 from odp import ODPScope
+from odp.api.lib import Pager, Paging, Authorize, schema_catalog
 from odp.api.models import CatalogueModel, CatalogueSort
-from odp.api.routers import Pager, Paging, Authorize
 from odp.db import Session
 from odp.db.models import Catalogue
 
@@ -22,8 +22,6 @@ router = APIRouter()
 async def list_catalogues(
         pager: Pager = Depends(Paging(CatalogueSort)),
 ):
-    from odp.api import schema_catalog
-
     stmt = (
         select(Catalogue).
         order_by(getattr(Catalogue, pager.sort)).
@@ -52,8 +50,6 @@ async def list_catalogues(
 async def get_catalogue(
         catalogue_id: str,
 ):
-    from odp.api import schema_catalog
-
     if not (catalogue := Session.get(Catalogue, catalogue_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 

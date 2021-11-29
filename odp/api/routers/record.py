@@ -7,8 +7,8 @@ from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
+from odp.api.lib import Pager, Paging, Authorize, Authorized, schema_catalog
 from odp.api.models import RecordModel, RecordModelIn, RecordSort, RecordTagModel, RecordTagModelIn, RecordFlagModel, RecordFlagModelIn
-from odp.api.routers import Pager, Paging, Authorize, Authorized
 from odp.db import Session
 from odp.db.models import Record, Collection, SchemaType, Schema, RecordAudit, AuditCommand, Tag, RecordTag, RecordTagAudit, Flag, RecordFlag, RecordFlagAudit
 
@@ -16,13 +16,11 @@ router = APIRouter()
 
 
 async def get_metadata_schema(record_in: RecordModelIn) -> JSONSchema:
-    from odp.api import schema_catalog
     schema = Session.get(Schema, (record_in.schema_id, SchemaType.metadata))
     return schema_catalog.get_schema(URI(schema.uri))
 
 
 async def get_flag_schema(record_flag_in: RecordFlagModelIn) -> JSONSchema:
-    from odp.api import schema_catalog
     if not (flag := Session.get(Flag, record_flag_in.flag_id)):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
 
@@ -47,7 +45,6 @@ async def authorize_unflag(flag_id: str, request: Request) -> Authorized:
 
 
 async def get_tag_schema(record_tag_in: RecordTagModelIn) -> JSONSchema:
-    from odp.api import schema_catalog
     if not (tag := Session.get(Tag, record_tag_in.tag_id)):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
 

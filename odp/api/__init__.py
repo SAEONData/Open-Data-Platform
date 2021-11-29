@@ -1,8 +1,5 @@
-from pathlib import Path
-
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from jschon import create_catalog, URI
 
 import odp
 from odp.api.routers import (
@@ -21,9 +18,6 @@ from odp.api.routers import (
 )
 from odp.config import config
 from odp.db import Session
-
-schema_catalog = create_catalog('2020-12')
-schema_catalog.add_directory(URI('https://odp.saeon.ac.za/schema/'), Path(__file__).parent.parent.parent / 'schema')
 
 app = FastAPI(
     title="ODP API",

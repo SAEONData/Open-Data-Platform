@@ -6,8 +6,8 @@ from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND
 
 from odp import ODPScope
+from odp.api.lib import Pager, Paging, Authorize, schema_catalog
 from odp.api.models import FlagModel, FlagSort
-from odp.api.routers import Pager, Paging, Authorize
 from odp.db import Session
 from odp.db.models import Flag
 
@@ -22,8 +22,6 @@ router = APIRouter()
 async def list_flags(
         pager: Pager = Depends(Paging(FlagSort)),
 ):
-    from odp.api import schema_catalog
-
     stmt = (
         select(Flag).
         order_by(getattr(Flag, pager.sort)).
@@ -54,8 +52,6 @@ async def list_flags(
 async def get_flag(
         flag_id: str,
 ):
-    from odp.api import schema_catalog
-
     if not (flag := Session.get(Flag, flag_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
