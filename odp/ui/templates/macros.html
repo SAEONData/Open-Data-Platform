@@ -69,7 +69,7 @@
     </table>
 {% endmacro %}
 
-{% macro render_buttons(obj, create=False, edit=False, delete=False) %}
+{% macro render_buttons(obj, create=False, edit=False, delete=False, custom=[]) %}
     <div class="btn-toolbar justify-content-between mt-4">
         {% if create %}
             <a href="{{ url_for('.create') }}" class="btn btn-outline-success btn-action">
@@ -81,6 +81,9 @@
                 Edit
             </a>
         {% endif %}
+        {% for btn in custom %}
+            {{ caller(btn) }}
+        {% endfor %}
         {% if delete %}
             <form action="{{ url_for('.delete', id=obj.id) }}" method="post">
                 <button type="submit" class="btn btn-outline-danger btn-action"

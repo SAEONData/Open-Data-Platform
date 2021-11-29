@@ -6,7 +6,7 @@
 
 {% block content %}
     {% from 'macros.html' import render_info, render_buttons, obj_link, obj_links %}
-    {% call(prop) render_info(collection, 'Name', 'Provider', 'Projects', 'Records') %}
+    {% call(prop) render_info(collection, 'Name', 'Provider', 'Projects', 'Records', 'Published') %}
         {% if prop == 'Name' %}
             {{ collection.name }}
         {% elif prop == 'Provider' %}
@@ -15,7 +15,32 @@
             {{ obj_links('projects', collection.project_ids, newlines=True) }}
         {% elif prop == 'Records' %}
             {{ collection.record_count }}
+        {% elif prop == 'Published' %}
+            {% if publish_flag %}
+                {{ publish_flag.timestamp|timestamp }} by {{ obj_link('users', publish_flag.user_id, publish_flag.user_name) }}
+            {% endif %}
         {% endif %}
     {% endcall %}
-    {{ render_buttons(collection, edit=True, delete=True) }}
+    {% if publish_flag %}
+        {% set custom_buttons = ['unpublish'] %}
+    {% else %}
+        {% set custom_buttons = ['publish'] %}
+    {% endif %}
+    {% call(btn) render_buttons(collection, edit=True, delete=True, custom=custom_buttons) %}
+        {% if btn == 'publish' %}
+            <form action="{{ url_for('.flag_publish', id=collection.id) }}" method="post">
+                <button type="submit" class="btn btn-outline-success btn-action"
+                        onclick="return confirm('Are you sure you want to publish the collection?')">
+                    Publish
+                </button>
+            </form>
+        {% elif btn == 'unpublish' %}
+            <form action="{{ url_for('.unflag_publish', id=collection.id) }}" method="post">
+                <button type="submit" class="btn btn-outline-warning btn-action"
+                        onclick="return confirm('Are you sure you want to un-publish the collection?')">
+                    Un-publish
+                </button>
+            </form>
+        {% endif %}
+    {% endcall %}
 {% endblock %}

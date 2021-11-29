@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 
-from odp import ODPScope
+from odp import ODPScope, ODPFlag
 from odp.ui import api
 from odp.ui.auth import authorize
 from odp.ui.forms import CollectionForm
@@ -22,7 +22,12 @@ def index():
 @api.wrapper
 def view(id):
     collection = api.get(f'/collection/{id}')
-    return render_template('collection_view.html', collection=collection)
+    publish_flag = next(
+        (flag for flag in collection['flags']
+         if flag['flag_id'] == ODPFlag.COLLECTION_PUBLISH),
+        None
+    )
+    return render_template('collection_view.html', collection=collection, publish_flag=publish_flag)
 
 
 @bp.route('/new', methods=('GET', 'POST'))
@@ -72,3 +77,24 @@ def delete(id):
     api.delete(f'/collection/{id}')
     flash(f'Collection {id} has been deleted.', category='success')
     return redirect(url_for('.index'))
+
+
+@bp.route('/<id>/flag/publish', methods=('POST',))
+@authorize(ODPScope.COLLECTION_FLAG_PUBLISH)
+@api.wrapper
+def flag_publish(id):
+    api.post(f'/collection/{id}/flag', dict(
+        flag_id=ODPFlag.COLLECTION_PUBLISH,
+        data={},
+    ))
+    flash(f'{ODPFlag.COLLECTION_PUBLISH} flag has been set.', category='success')
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/unflag/publish', methods=('POST',))
+@authorize(ODPScope.COLLECTION_FLAG_PUBLISH)
+@api.wrapper
+def unflag_publish(id):
+    api.delete(f'/collection/{id}/flag/{ODPFlag.COLLECTION_PUBLISH}')
+    flash(f'{ODPFlag.COLLECTION_PUBLISH} flag has been removed.', category='success')
+    return redirect(url_for('.view', id=id))
