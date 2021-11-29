@@ -25,7 +25,10 @@ def index():
 @api.wrapper
 def view(id):
     record = api.get(f'/record/{id}')
-    return render_template('record_view.html', record=record, qc_tag_id=ODPTag.RECORD_QC.value)
+    qc_tags = [tag for tag in record['tags'] if tag['tag_id'] == ODPTag.RECORD_QC]
+    has_user_qc_tag = any(tag for tag in qc_tags if tag['user_id'] == current_user.id)
+    return render_template('record_view.html', record=record, qc_tags=qc_tags,
+                           has_user_qc_tag=has_user_qc_tag)
 
 
 @bp.route('/new', methods=('GET', 'POST'))
@@ -110,7 +113,7 @@ def tag_qc(id):
             },
         ))
         flash(f'{ODPTag.RECORD_QC} tag has been set.', category='success')
-        return redirect(url_for('.view', id=record['id']))
+        return redirect(url_for('.view', id=id))
 
     return render_template('record_tag_qc.html', record=record, form=form)
 

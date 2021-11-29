@@ -12,6 +12,6 @@
         <th scope="row">{{ obj_link('records', record.id, record.sid or '') }}</th>
         <td>{{ obj_link('collections', record.collection_id) }}</td>
         <td>{{ obj_link('schemas', record.schema_id) }}</td>
-        <td>{{ record.validity['valid'] }}</td>
+        <td>{{ record.validity.valid }}</td>
     {% endcall %}
 {% endblock %}

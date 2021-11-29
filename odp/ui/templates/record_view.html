@@ -30,7 +30,7 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% from 'macros.html' import render_info, render_buttons, obj_link %}
-            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Timestamp') %}
+            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Timestamp', 'Quality Control') %}
                 {% if prop == 'DOI' %}
                     {{ record.doi if record.doi }}
                 {% elif prop == 'SID' %}
@@ -41,6 +41,11 @@
                     {{ obj_link('schemas', record.schema_id) }}
                 {% elif prop == 'Timestamp' %}
                     {{ record.timestamp|timestamp }}
+                {% elif prop == 'Quality Control' %}
+                    {% for qc_tag in qc_tags %}
+                        {{ qc_tag.data.pass_|replace('True', 'Passed')|replace('False', 'Failed') }}
+                        by {{ obj_link('users', qc_tag.user_id, qc_tag.user_name) }}<br/>
+                    {% endfor %}
                 {% endif %}
             {% endcall %}
             {{ render_buttons(record, edit=True, delete=True) }}
@@ -57,23 +62,24 @@
         </div>
         <div id="tag-qc" class="tab-pane fade" role="tabpanel">
             {% from 'macros.html' import render_table, obj_link %}
-            {% set qc_tags = record.tags|selectattr('tag_id', 'eq', qc_tag_id) %}
             {% call(qc_tag) render_table(qc_tags, 'Pass', 'Comment', 'User', 'Timestamp', hide_id=True) %}
-                <td>{{ qc_tag.data['pass_'] }}</td>
-                <td>{{ qc_tag.data['comment'] }}</td>
+                <td>{{ qc_tag.data.pass_ }}</td>
+                <td>{{ qc_tag.data.comment }}</td>
                 <td>{{ obj_link('users', qc_tag.user_id, qc_tag.user_name) }}</td>
                 <td>{{ qc_tag.timestamp|timestamp }}</td>
             {% endcall %}
             <div class="btn-toolbar justify-content-between mt-4">
-                <a href="{{ url_for('.tag_qc', id=record.id) }}" class="btn btn-outline-warning btn-action">
+                <a href="{{ url_for('.tag_qc', id=record.id) }}" class="btn btn-outline-success btn-action">
                     Tag
                 </a>
-                <form action="{{ url_for('.untag_qc', id=record.id) }}" method="post">
-                    <button type="submit" class="btn btn-outline-secondary btn-action"
-                            onclick="return confirm('Are you sure you want to delete your {{ qc_tag_id }} tag?')">
-                        Untag
-                    </button>
-                </form>
+                {% if has_user_qc_tag %}
+                    <form action="{{ url_for('.untag_qc', id=record.id) }}" method="post">
+                        <button type="submit" class="btn btn-outline-warning btn-action"
+                                onclick="return confirm('Are you sure you want to delete your QC tag?')">
+                            Untag
+                        </button>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>
