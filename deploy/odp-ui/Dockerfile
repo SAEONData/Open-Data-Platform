@@ -6,4 +6,8 @@ COPY odp odp/
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
+ARG CA_CERT_URL
+RUN if [ -n "${CA_CERT_URL}" ]; then curl ${CA_CERT_URL} -k -o /usr/local/share/ca-certificates/saeon-ca.crt; fi
+RUN if [ -n "${CA_CERT_URL}" ]; then update-ca-certificates; fi
+
 CMD ["gunicorn", "odp.ui:create_app()", "--bind=0.0.0.0:2021", "--workers=4"]
