@@ -2,13 +2,11 @@ FROM python:3.8
 RUN apt-get update && apt-get install -y cron
 
 WORKDIR /srv/Open-Data-Platform
-
-COPY odp odp/
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
+COPY odp odp/
 
 WORKDIR /etc/cron.d
-
 COPY deploy/odp-publisher/crontab odp-publisher
 ARG ODP_PUBLISH_JOB_INTERVAL
 RUN sed -i "s/ODP_PUBLISH_JOB_INTERVAL/${ODP_PUBLISH_JOB_INTERVAL}/" odp-publisher
