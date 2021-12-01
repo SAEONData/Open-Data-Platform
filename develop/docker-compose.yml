@@ -2,13 +2,13 @@ version: "3.5"
 
 volumes:
   odp-data:
-    name: odp-data
+    name: DEV-odp-data
   hydra-data:
-    name: hydra-data
+    name: DEV-hydra-data
 
 services:
   odp-db:
-    container_name: odp-db
+    container_name: DEV-odp-db
     image: postgres:14
     ports:
       - "1337:5432"
@@ -22,7 +22,7 @@ services:
     restart: always
 
   hydra:
-    container_name: hydra
+    container_name: DEV-hydra
     image: ${HYDRA_IMAGE}
     command: serve all --dangerous-force-http
     ports:
@@ -32,9 +32,9 @@ services:
       - DSN=postgres://hydra_user:pass@hydra-db:5432/hydra_db?sslmode=disable
       - SECRETS_SYSTEM=8a9c0d27e04e7ba1
       - URLS_SELF_ISSUER=http://localhost:9000
-      - URLS_LOGIN=http://localhost:9024/hydra/login
-      - URLS_CONSENT=http://localhost:9024/hydra/consent
-      - URLS_LOGOUT=http://localhost:9024/hydra/logout
+      - URLS_LOGIN=${ODP_IDENTITY_URL}/hydra/login
+      - URLS_CONSENT=${ODP_IDENTITY_URL}/hydra/consent
+      - URLS_LOGOUT=${ODP_IDENTITY_URL}/hydra/logout
       - LOG_LEAK_SENSITIVE_VALUES=true
       - SERVE_PUBLIC_CORS_ENABLED=true
       - SERVE_PUBLIC_CORS_ALLOWED_HEADERS=Authorization,Content-Type,X-Requested-With
@@ -44,7 +44,7 @@ services:
     restart: always
 
   hydra-db:
-    container_name: hydra-db
+    container_name: DEV-hydra-db
     image: postgres:14
     volumes:
       - hydra-data:/var/lib/postgresql/data
@@ -56,7 +56,7 @@ services:
     restart: always
 
   hydra-migrate:
-    container_name: hydra-migrate
+    container_name: DEV-hydra-migrate
     image: ${HYDRA_IMAGE}
     command: migrate sql -e --yes
     environment:
@@ -66,8 +66,8 @@ services:
     restart: on-failure
 
   redis:
-    container_name: redis
+    container_name: DEV-redis
     image: redis:6
     ports:
-      - "6379:6379"
+      - "1379:6379"
     restart: always

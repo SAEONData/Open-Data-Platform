@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """
 This script creates the ODP database schema and initializes
-static and administrative data.
+static system data. It should be run from the ../deploy or
+../develop directory, as applicable.
 
 An admin user is created, with prompts, if not found.
 
@@ -9,22 +10,27 @@ The script may be re-run as needed to synchronize static
 data with the ODP codebase.
 """
 
+import os
 import pathlib
 import sys
 from getpass import getpass
 
 import argon2
+from dotenv import load_dotenv
 from sqlalchemy import select, delete
 
 rootdir = pathlib.Path(__file__).parent.parent
 sys.path.append(str(rootdir))
+
+dotenv_path = pathlib.Path.cwd() / '.env'
+load_dotenv(dotenv_path)
 
 from odp import ODPScope
 from odp.db import engine, Session, Base
 from odp.db.models import Scope, Role, Client, User, UserRole
 
 ODP_ADMIN_ROLE = 'ODP:Admin'
-ODP_UI_CLIENT_ID = 'ODP.UI'
+ODP_UI_CLIENT_ID = os.getenv('ODP_UI_CLIENT_ID')
 ODP_UI_CLIENT_NAME = 'The Open Data Platform Web UI'
 
 
@@ -100,9 +106,11 @@ def create_admin_user():
 
 
 if __name__ == '__main__':
+    print('Initializing static system data...')
     create_schema()
     with Session.begin():
         sync_system_scopes()
         sync_admin_role()
         sync_ui_client()
         create_admin_user()
+    print('Done.')

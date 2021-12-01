@@ -1,7 +1,7 @@
 version: "3.5"
 
 services:
-  TEST-odp-db:
+  odp-db:
     container_name: TEST-odp-db
     image: postgres:14
     ports:
@@ -11,7 +11,8 @@ services:
       - POSTGRES_PASSWORD=${ODP_DB_PASS}
     restart: always
 
-  TEST-odp-client:
+  odp-client:
+    container_name: TEST-odp-client
     image: oryd/hydra:v1.10.6
     command: >
       clients create
@@ -20,12 +21,12 @@ services:
         --grant-types client_credentials
         --scope odp.catalogue:read,odp.client:admin,odp.client:read,odp.collection:admin,odp.collection:read,odp.collection_flag:publish,odp.flag:read,odp.project:admin,odp.project:read,odp.provider:admin,odp.provider:read,odp.record:create,odp.record:manage,odp.record:read,odp.record_tag:qc,odp.role:admin,odp.role:read,odp.schema:read,odp.scope:read,odp.tag:read,odp.user:admin,odp.user:read
     environment:
-      - HYDRA_ADMIN_URL=http://TEST-hydra:4445
+      - HYDRA_ADMIN_URL=http://hydra:4445
     depends_on:
-      - TEST-hydra
+      - hydra
     restart: on-failure
 
-  TEST-hydra:
+  hydra:
     container_name: TEST-hydra
     image: oryd/hydra:v1.10.6
     command: serve all --dangerous-force-http
@@ -33,14 +34,14 @@ services:
       - "7444:4444"
       - "7445:4445"
     environment:
-      - DSN=postgres://hydra_user:pass@TEST-hydra-db:5432/hydra_db?sslmode=disable
+      - DSN=postgres://hydra_user:pass@hydra-db:5432/hydra_db?sslmode=disable
       - SECRETS_SYSTEM=5de88ee200321468
     depends_on:
-      - TEST-hydra-db
-      - TEST-hydra-migrate
+      - hydra-db
+      - hydra-migrate
     restart: always
 
-  TEST-hydra-db:
+  hydra-db:
     container_name: TEST-hydra-db
     image: postgres:14
     environment:
@@ -49,11 +50,12 @@ services:
       - POSTGRES_PASSWORD=pass
     restart: always
 
-  TEST-hydra-migrate:
+  hydra-migrate:
+    container_name: TEST-hydra-migrate
     image: oryd/hydra:v1.10.6
     command: migrate sql -e --yes
     environment:
-      - DSN=postgres://hydra_user:pass@TEST-hydra-db:5432/hydra_db?sslmode=disable
+      - DSN=postgres://hydra_user:pass@hydra-db:5432/hydra_db?sslmode=disable
     depends_on:
-      - TEST-hydra-db
+      - hydra-db
     restart: on-failure

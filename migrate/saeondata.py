@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """
-This script can be used to initialize SAEON roles, projects,
-providers and collections.
+This script can be used to initialize SAEON admin data.
+It should be run from the ../deploy or ../develop directory,
+as applicable.
 """
 
 import pathlib
@@ -123,6 +124,7 @@ def create_catalogues():
 
 
 if __name__ == '__main__':
+    print('Initializing SAEON admin data...')
     with Session.begin():
         create_schemas()
         create_flags()
@@ -131,3 +133,4 @@ if __name__ == '__main__':
         create_providers_and_collections()
         create_projects()
         create_catalogues()
+    print('Done.')

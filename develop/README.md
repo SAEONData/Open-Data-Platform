@@ -3,29 +3,43 @@
 ## Prerequisites
 * Python 3.9+
 * Docker
-* docker-compose
+* Docker Compose
 
 ## Local dev environment setup
 First, `cd` to the project root directory, and create a Python virtual environment:
 
-    python -m venv .venv
-    . .venv/bin/activate
+    python3.9 -m venv .venv
+    source .venv/bin/activate
     pip install -U pip setuptools pip-tools
     pip-sync
 
-Next, `cd` to the `develop` directory and start up the Docker containers:
+Next, `cd` to the `develop` directory and create a `.env` file by copying the
+adjacent `.env.example` and filling in username and password fields as needed.
+
+Start up the containerized dependencies:
 
     docker-compose up -d
 
-Type `docker ps` to check that the containerized dev services have started up
-successfully (Hydra will be "restarting" until the SQL migrations have completed).
-Then run the following command to create your local OAuth2 clients:
+Type `docker ps` to check that the containers have started up successfully
+(Hydra will be 'restarting' until the SQL migrations have completed).
 
-    ./init-oauth2-clients.sh
+Finally, run the following commands to initialize platform data:
 
-Finally, `cd` to the `migrate` directory, and initialize the ODP database.
-The `systemdata.py` script will prompt you to input admin user details the
-first time it is run:
+    ../migrate/systemdata.py
+    ../migrate/saeondata.py
+    ../migrate/hydradata.sh
 
-    python -m systemdata
-    python -m saeondata
+## Running ODP services locally
+Activate your Python virtual environment and `cd` to the `develop` directory.
+Add the project root to the Python path:
+
+    export PYTHONPATH=..
+
+### ODP API
+    uvicorn odp.api:app --port 2020
+
+### ODP UI
+    FLASK_APP=odp.ui flask run --port=2021 --host=odp.localhost
+
+### Identity Service
+    FLASK_APP=odp.identity.app flask run --port=2022 --host=localhost

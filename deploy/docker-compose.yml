@@ -24,7 +24,7 @@ services:
       - ODP_MAIL_PASSWORD
       - ODP_IDENTITY_LOGIN_EXPIRY=2592000
       - ODP_IDENTITY_NCCRD_BRAND_CLIENT_ID
-      - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
+      - HYDRA_ADMIN_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
       - TZ
@@ -53,8 +53,8 @@ services:
       - ODP_DB_NAME
       - ODP_DB_USER
       - ODP_DB_PASS
-      - HYDRA_ADMIN_URL=${ODP_ADMIN_URL}/hydra
-      - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
+      - HYDRA_ADMIN_URL
+      - HYDRA_PUBLIC_URL
       - CATALOGUE_METADATA_LANDING_PAGE_BASE_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - TZ
@@ -82,7 +82,7 @@ services:
       - ODP_DB_NAME
       - ODP_DB_USER
       - ODP_DB_PASS
-      - HYDRA_PUBLIC_URL=${ODP_PUBLIC_URL}/auth
+      - HYDRA_PUBLIC_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
       - TZ

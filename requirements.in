@@ -1,7 +1,8 @@
 sqlalchemy
 psycopg2
 alembic
-pydantic[dotenv]
+pydantic
+python-dotenv
 itsdangerous
 argon2-cffi
 requests
