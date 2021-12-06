@@ -38,6 +38,7 @@ def create():
             id=(id := form.id.data),
             name=form.name.data,
             provider_id=form.provider_id.data,
+            doi_key=form.doi_key.data or None,
         ))
         flash(f'Collection {id} has been created.', category='success')
         return redirect(url_for('.view', id=id))
@@ -58,6 +59,7 @@ def edit(id):
             id=id,
             name=form.name.data,
             provider_id=form.provider_id.data,
+            doi_key=form.doi_key.data or None,
         ))
         flash(f'Collection {id} has been updated.', category='success')
         return redirect(url_for('.view', id=id))

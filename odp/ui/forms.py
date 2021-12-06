@@ -81,6 +81,9 @@ class CollectionForm(BaseForm):
         label='Provider',
         validators=[input_required()],
     )
+    doi_key = StringField(
+        label='DOI key',
+    )
 
 
 class ProjectForm(BaseForm):
