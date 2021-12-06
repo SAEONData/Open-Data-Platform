@@ -45,8 +45,8 @@ def assert_db_state(collections):
     """Verify that the DB collection table contains the given collection batch."""
     Session.expire_all()
     result = Session.execute(select(Collection)).scalars().all()
-    assert set((row.id, row.name, row.provider_id, project_ids(row)) for row in result) \
-           == set((collection.id, collection.name, collection.provider_id, project_ids(collection)) for collection in collections)
+    assert set((row.id, row.name, row.doi_key, row.provider_id, project_ids(row)) for row in result) \
+           == set((collection.id, collection.name, collection.doi_key, collection.provider_id, project_ids(collection)) for collection in collections)
 
 
 def assert_db_flag_state(collection_id, collection_flag):
@@ -87,6 +87,7 @@ def assert_json_collection_result(response, json, collection):
     assert response.status_code == 200
     assert json['id'] == collection.id
     assert json['name'] == collection.name
+    assert json['doi_key'] == collection.doi_key
     assert json['provider_id'] == collection.provider_id
     assert tuple(json['project_ids']) == project_ids(collection)
 
@@ -183,6 +184,7 @@ def test_create_collection(api, collection_batch, scopes, authorized):
     r = api(scopes).post('/collection/', json=dict(
         id=collection.id,
         name=collection.name,
+        doi_key=collection.doi_key,
         provider_id=collection.provider_id,
     ))
     if authorized:
@@ -208,6 +210,7 @@ def test_create_collection_with_provider_specific_api_client(api, collection_bat
     r = api(scopes, api_client_provider).post('/collection/', json=dict(
         id=collection.id,
         name=collection.name,
+        doi_key=collection.doi_key,
         provider_id=collection.provider_id,
     ))
     if authorized:
@@ -232,6 +235,7 @@ def test_update_collection(api, collection_batch_no_projects, scopes, authorized
     r = api(scopes).put('/collection/', json=dict(
         id=collection.id,
         name=collection.name,
+        doi_key=collection.doi_key,
         provider_id=collection.provider_id,
     ))
     if authorized:
@@ -259,6 +263,7 @@ def test_update_collection_with_provider_specific_api_client(api, collection_bat
     r = api(scopes, api_client_provider).put('/collection/', json=dict(
         id=collection.id,
         name=collection.name,
+        doi_key=collection.doi_key,
         provider_id=collection.provider_id,
     ))
     if authorized:

@@ -60,6 +60,7 @@ class CollectionTagModelIn(BaseModel):
 class CollectionModel(BaseModel):
     id: str
     name: str
+    doi_key: Optional[str]
     provider_id: str
     project_ids: List[str]
     record_count: int
@@ -70,6 +71,7 @@ class CollectionModel(BaseModel):
 class CollectionModelIn(BaseModel):
     id: str
     name: str
+    doi_key: Optional[str]
     provider_id: str
 
 

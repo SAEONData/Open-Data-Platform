@@ -67,6 +67,7 @@ def output_collection_model(result) -> CollectionModel:
     return CollectionModel(
         id=result.Collection.id,
         name=result.Collection.name,
+        doi_key=result.Collection.doi_key,
         provider_id=result.Collection.provider_id,
         project_ids=[project.id for project in result.Collection.projects],
         record_count=result.count,
@@ -168,6 +169,7 @@ async def create_collection(
     collection = Collection(
         id=collection_in.id,
         name=collection_in.name,
+        doi_key=collection_in.doi_key,
         provider_id=collection_in.provider_id,
     )
     collection.save()
@@ -187,6 +189,7 @@ async def update_collection(
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     collection.name = collection_in.name
+    collection.doi_key = collection_in.doi_key
     collection.provider_id = collection_in.provider_id
     collection.save()
 

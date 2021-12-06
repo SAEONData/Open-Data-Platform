@@ -86,8 +86,8 @@ def test_create_client_with_scopes():
 def test_create_collection():
     collection = CollectionFactory()
     result = Session.execute(select(Collection, Provider).join(Provider)).one()
-    assert (result.Collection.id, result.Collection.name, result.Collection.provider_id, result.Provider.name) \
-           == (collection.id, collection.name, collection.provider.id, collection.provider.name)
+    assert (result.Collection.id, result.Collection.name, result.Collection.doi_key, result.Collection.provider_id, result.Provider.name) \
+           == (collection.id, collection.name, collection.doi_key, collection.provider.id, collection.provider.name)
 
 
 def test_create_flag():
