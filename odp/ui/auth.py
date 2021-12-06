@@ -1,8 +1,6 @@
-from functools import wraps
-
 import redis
 from authlib.integrations.flask_client import OAuth
-from flask import Flask, g, flash, redirect, url_for, request
+from flask import Flask
 from flask_login import LoginManager, current_user
 from sqlalchemy import select
 
@@ -10,7 +8,6 @@ from odp import ODPScope
 from odp.config import config
 from odp.db import Session
 from odp.db.models import User, OAuth2Token
-from odp.lib.auth import get_user_auth
 
 login_manager = LoginManager()
 login_manager.login_view = 'hydra.login'
@@ -41,28 +38,6 @@ def init_app(app: Flask):
         client_secret=config.ODP.UI.CLIENT_SECRET,
         client_kwargs={'scope': ' '.join(['openid', 'offline'] + [s.value for s in ODPScope])},
     )
-
-
-def authorize(scope: ODPScope):
-    """Decorator for authorizing access to a view."""
-
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated:
-                flash('Please log in to access that page.')
-                return redirect(url_for('home.index'))
-
-            g.user_auth = get_user_auth(current_user.id, config.ODP.UI.CLIENT_ID)
-            if scope not in g.user_auth.scopes:
-                flash('You do not have permission to access that page.', category='warning')
-                return redirect(request.referrer)
-
-            return f(*args, **kwargs)
-
-        return decorated_function
-
-    return decorator
 
 
 def fetch_token(hydra_name):

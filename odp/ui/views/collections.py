@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from odp import ODPScope, ODPFlag
 from odp.ui import api
-from odp.ui.auth import authorize
 from odp.ui.forms import CollectionForm
 from odp.ui.views import utils
 
@@ -10,16 +9,14 @@ bp = Blueprint('collections', __name__)
 
 
 @bp.route('/')
-@authorize(ODPScope.COLLECTION_READ)
-@api.wrapper
+@api.client(ODPScope.COLLECTION_READ)
 def index():
     collections = api.get('/collection/')
     return render_template('collection_list.html', collections=collections)
 
 
 @bp.route('/<id>')
-@authorize(ODPScope.COLLECTION_READ)
-@api.wrapper
+@api.client(ODPScope.COLLECTION_READ)
 def view(id):
     collection = api.get(f'/collection/{id}')
     publish_flag = next(
@@ -31,8 +28,7 @@ def view(id):
 
 
 @bp.route('/new', methods=('GET', 'POST'))
-@authorize(ODPScope.COLLECTION_ADMIN)
-@api.wrapper
+@api.client(ODPScope.COLLECTION_ADMIN)
 def create():
     form = CollectionForm(request.form)
     utils.populate_provider_choices(form.provider_id, include_none=True)
@@ -50,8 +46,7 @@ def create():
 
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
-@authorize(ODPScope.COLLECTION_ADMIN)
-@api.wrapper
+@api.client(ODPScope.COLLECTION_ADMIN)
 def edit(id):
     collection = api.get(f'/collection/{id}')
 
@@ -71,8 +66,7 @@ def edit(id):
 
 
 @bp.route('/<id>/delete', methods=('POST',))
-@authorize(ODPScope.COLLECTION_ADMIN)
-@api.wrapper
+@api.client(ODPScope.COLLECTION_ADMIN)
 def delete(id):
     api.delete(f'/collection/{id}')
     flash(f'Collection {id} has been deleted.', category='success')
@@ -80,8 +74,7 @@ def delete(id):
 
 
 @bp.route('/<id>/flag/publish', methods=('POST',))
-@authorize(ODPScope.COLLECTION_FLAG_PUBLISH)
-@api.wrapper
+@api.client(ODPScope.COLLECTION_FLAG_PUBLISH)
 def flag_publish(id):
     api.post(f'/collection/{id}/flag', dict(
         flag_id=ODPFlag.COLLECTION_PUBLISH,
@@ -92,8 +85,7 @@ def flag_publish(id):
 
 
 @bp.route('/<id>/unflag/publish', methods=('POST',))
-@authorize(ODPScope.COLLECTION_FLAG_PUBLISH)
-@api.wrapper
+@api.client(ODPScope.COLLECTION_FLAG_PUBLISH)
 def unflag_publish(id):
     api.delete(f'/collection/{id}/flag/{ODPFlag.COLLECTION_PUBLISH}')
     flash(f'{ODPFlag.COLLECTION_PUBLISH} flag has been removed.', category='success')

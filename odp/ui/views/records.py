@@ -5,7 +5,6 @@ from flask_login import current_user
 
 from odp import ODPScope, ODPTag
 from odp.ui import api
-from odp.ui.auth import authorize
 from odp.ui.forms import RecordForm, RecordTagQCForm
 from odp.ui.views import utils
 
@@ -13,16 +12,14 @@ bp = Blueprint('records', __name__)
 
 
 @bp.route('/')
-@authorize(ODPScope.RECORD_READ)
-@api.wrapper
+@api.client(ODPScope.RECORD_READ)
 def index():
     records = api.get('/record/')
     return render_template('record_list.html', records=records)
 
 
 @bp.route('/<id>')
-@authorize(ODPScope.RECORD_READ)
-@api.wrapper
+@api.client(ODPScope.RECORD_READ)
 def view(id):
     record = api.get(f'/record/{id}')
     qc_tags = [tag for tag in record['tags'] if tag['tag_id'] == ODPTag.RECORD_QC]
@@ -32,8 +29,7 @@ def view(id):
 
 
 @bp.route('/new', methods=('GET', 'POST'))
-@authorize(ODPScope.RECORD_CREATE)
-@api.wrapper
+@api.client(ODPScope.RECORD_CREATE)
 def create():
     form = RecordForm(request.form)
     utils.populate_collection_choices(form.collection_id, include_none=True)
@@ -54,8 +50,7 @@ def create():
 
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
-@authorize(ODPScope.RECORD_MANAGE)
-@api.wrapper
+@api.client(ODPScope.RECORD_MANAGE)
 def edit(id):
     record = api.get(f'/record/{id}')
 
@@ -78,8 +73,7 @@ def edit(id):
 
 
 @bp.route('/<id>/delete', methods=('POST',))
-@authorize(ODPScope.RECORD_MANAGE)
-@api.wrapper
+@api.client(ODPScope.RECORD_MANAGE)
 def delete(id):
     api.delete(f'/record/{id}')
     flash(f'Record {id} has been deleted.', category='success')
@@ -87,8 +81,7 @@ def delete(id):
 
 
 @bp.route('/<id>/tag/qc', methods=('GET', 'POST'))
-@authorize(ODPScope.RECORD_TAG_QC)
-@api.wrapper
+@api.client(ODPScope.RECORD_TAG_QC)
 def tag_qc(id):
     record = api.get(f'/record/{id}')
 
@@ -119,8 +112,7 @@ def tag_qc(id):
 
 
 @bp.route('/<id>/untag/qc', methods=('POST',))
-@authorize(ODPScope.RECORD_TAG_QC)
-@api.wrapper
+@api.client(ODPScope.RECORD_TAG_QC)
 def untag_qc(id):
     api.delete(f'/record/{id}/tag/{ODPTag.RECORD_QC}')
     flash(f'{ODPTag.RECORD_QC} tag has been removed.', category='success')

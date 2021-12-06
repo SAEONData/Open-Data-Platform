@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from odp import ODPScope
 from odp.ui import api
-from odp.ui.auth import authorize
 from odp.ui.forms import ProjectForm
 from odp.ui.views import utils
 
@@ -10,24 +9,21 @@ bp = Blueprint('projects', __name__)
 
 
 @bp.route('/')
-@authorize(ODPScope.PROJECT_READ)
-@api.wrapper
+@api.client(ODPScope.PROJECT_READ)
 def index():
     projects = api.get('/project/')
     return render_template('project_list.html', projects=projects)
 
 
 @bp.route('/<id>')
-@authorize(ODPScope.PROJECT_READ)
-@api.wrapper
+@api.client(ODPScope.PROJECT_READ)
 def view(id):
     project = api.get(f'/project/{id}')
     return render_template('project_view.html', project=project)
 
 
 @bp.route('/new', methods=('GET', 'POST'))
-@authorize(ODPScope.PROJECT_ADMIN)
-@api.wrapper
+@api.client(ODPScope.PROJECT_ADMIN)
 def create():
     form = ProjectForm(request.form)
     utils.populate_collection_choices(form.collection_ids)
@@ -45,8 +41,7 @@ def create():
 
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
-@authorize(ODPScope.PROJECT_ADMIN)
-@api.wrapper
+@api.client(ODPScope.PROJECT_ADMIN)
 def edit(id):
     project = api.get(f'/project/{id}')
 
@@ -72,8 +67,7 @@ def edit(id):
 
 
 @bp.route('/<id>/delete', methods=('POST',))
-@authorize(ODPScope.PROJECT_ADMIN)
-@api.wrapper
+@api.client(ODPScope.PROJECT_ADMIN)
 def delete(id):
     api.delete(f'/project/{id}')
     flash(f'Project {id} has been deleted.', category='success')

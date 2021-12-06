@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from odp import ODPScope
 from odp.ui import api
-from odp.ui.auth import authorize
 from odp.ui.forms import UserForm
 from odp.ui.views import utils
 
@@ -10,24 +9,21 @@ bp = Blueprint('users', __name__)
 
 
 @bp.route('/')
-@authorize(ODPScope.USER_READ)
-@api.wrapper
+@api.client(ODPScope.USER_READ)
 def index():
     users = api.get('/user/')
     return render_template('user_list.html', users=users)
 
 
 @bp.route('/<id>')
-@authorize(ODPScope.USER_READ)
-@api.wrapper
+@api.client(ODPScope.USER_READ)
 def view(id):
     user = api.get(f'/user/{id}')
     return render_template('user_view.html', user=user)
 
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
-@authorize(ODPScope.USER_ADMIN)
-@api.wrapper
+@api.client(ODPScope.USER_ADMIN)
 def edit(id):
     user = api.get(f'/user/{id}')
 
@@ -53,8 +49,7 @@ def edit(id):
 
 
 @bp.route('/<id>/delete', methods=('POST',))
-@authorize(ODPScope.USER_ADMIN)
-@api.wrapper
+@api.client(ODPScope.USER_ADMIN)
 def delete(id):
     api.delete(f'/user/{id}')
     flash(f'User {id} has been deleted.', category='success')

@@ -1,10 +1,13 @@
 from functools import wraps
 
 from authlib.integrations.base_client.errors import OAuthError
-from flask import flash, url_for, redirect, request, abort
+from flask import flash, url_for, redirect, request, abort, g
+from flask_login import current_user
 from requests import RequestException
 
+from odp import ODPScope
 from odp.config import config
+from odp.lib.auth import get_user_auth
 from odp.ui.auth import oauth
 
 
@@ -55,17 +58,30 @@ def _request(method, path, data, params):
         raise ODPAPIError(401, str(e)) from e
 
 
-def wrapper(f):
-    """View decorator providing API error handling."""
+def client(scope: ODPScope):
+    """Decorator that configures a view as an API client with `scope`
+    access, providing client-side authorization and API error handling."""
 
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except ODPAPIError as e:
-            return _handle_error(e)
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                flash('Please log in to access that page.')
+                return redirect(url_for('home.index'))
 
-    return decorated_function
+            g.user_auth = get_user_auth(current_user.id, config.ODP.UI.CLIENT_ID)
+            if scope not in g.user_auth.scopes:
+                flash('You do not have permission to access that page.', category='warning')
+                return redirect(request.referrer)
+
+            try:
+                return f(*args, **kwargs)
+            except ODPAPIError as e:
+                return _handle_error(e)
+
+        return decorated_function
+
+    return decorator
 
 
 def _handle_error(e: ODPAPIError):

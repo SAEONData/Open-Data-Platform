@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from odp import ODPScope
 from odp.ui import api
-from odp.ui.auth import authorize
 from odp.ui.forms import ClientForm
 from odp.ui.views import utils
 
@@ -10,24 +9,21 @@ bp = Blueprint('clients', __name__)
 
 
 @bp.route('/')
-@authorize(ODPScope.CLIENT_READ)
-@api.wrapper
+@api.client(ODPScope.CLIENT_READ)
 def index():
     clients = api.get('/client/')
     return render_template('client_list.html', clients=clients)
 
 
 @bp.route('/<id>')
-@authorize(ODPScope.CLIENT_READ)
-@api.wrapper
+@api.client(ODPScope.CLIENT_READ)
 def view(id):
     client = api.get(f'/client/{id}')
     return render_template('client_view.html', client=client)
 
 
 @bp.route('/new', methods=('GET', 'POST'))
-@authorize(ODPScope.CLIENT_ADMIN)
-@api.wrapper
+@api.client(ODPScope.CLIENT_ADMIN)
 def create():
     form = ClientForm(request.form)
     utils.populate_provider_choices(form.provider_id, include_none=True)
@@ -47,8 +43,7 @@ def create():
 
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
-@authorize(ODPScope.CLIENT_ADMIN)
-@api.wrapper
+@api.client(ODPScope.CLIENT_ADMIN)
 def edit(id):
     client = api.get(f'/client/{id}')
 
@@ -76,8 +71,7 @@ def edit(id):
 
 
 @bp.route('/<id>/delete', methods=('POST',))
-@authorize(ODPScope.CLIENT_ADMIN)
-@api.wrapper
+@api.client(ODPScope.CLIENT_ADMIN)
 def delete(id):
     api.delete(f'/client/{id}')
     flash(f'Client {id} has been deleted.', category='success')
