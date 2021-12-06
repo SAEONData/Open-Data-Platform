@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta, timezone
 from random import randint
 
@@ -7,7 +8,8 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Collection, CollectionFlag, CollectionFlagAudit, Scope
-from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding
+from odp.lib.formats import DOI_REGEX
+from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding, assert_unprocessable
 from test.factories import CollectionFactory, ProjectFactory, ProviderFactory, FlagFactory, SchemaFactory
 
 
@@ -108,6 +110,14 @@ def assert_json_flag_result(response, json, collection_flag):
     assert json['user_name'] is None
     assert json['data'] == collection_flag['data']
     assert datetime.now(timezone.utc) - timedelta(seconds=120) < datetime.fromisoformat(json['timestamp']) < datetime.now(timezone.utc)
+
+
+def assert_doi_result(response, collection):
+    assert response.status_code == 200
+    assert re.match(DOI_REGEX, doi := response.json()) is not None
+    prefix, _, suffix = doi.rpartition('.')
+    assert prefix == f'10.15493/{collection.doi_key}'
+    assert re.match(r'^\d{8}$', suffix) is not None
 
 
 @pytest.mark.parametrize('scopes, authorized', [
@@ -384,4 +394,42 @@ def test_flag_collection(api, collection_batch, scopes, authorized):
         assert_forbidden(r)
         assert_db_flag_state(collection_id, None)
         assert_flag_audit_log()
+    assert_db_state(collection_batch)
+
+
+@pytest.mark.parametrize('scopes, authorized', [
+    ([ODPScope.COLLECTION_READ], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.COLLECTION_READ), False),
+])
+def test_get_new_doi(api, collection_batch, scopes, authorized):
+    r = api(scopes).get(f'/collection/{(collection := collection_batch[2]).id}/doi/new')
+    if authorized:
+        if collection.doi_key:
+            assert_doi_result(r, collection)
+        else:
+            assert_unprocessable(r, 'The collection does not have a DOI key')
+    else:
+        assert_forbidden(r)
+    assert_db_state(collection_batch)
+
+
+@pytest.mark.parametrize('scopes, matching_provider, authorized', [
+    ([ODPScope.COLLECTION_READ], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes, False, False),
+    (all_scopes_excluding(ODPScope.COLLECTION_READ), True, False),
+])
+def test_get_new_doi_with_provider_specific_api_client(api, collection_batch, scopes, matching_provider, authorized):
+    api_client_provider = collection_batch[2].provider if matching_provider else collection_batch[1].provider
+    r = api(scopes, api_client_provider).get(f'/collection/{(collection := collection_batch[2]).id}/doi/new')
+    if authorized:
+        if collection.doi_key:
+            assert_doi_result(r, collection)
+        else:
+            assert_unprocessable(r, 'The collection does not have a DOI key')
+    else:
+        assert_forbidden(r)
     assert_db_state(collection_batch)

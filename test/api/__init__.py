@@ -20,3 +20,8 @@ def assert_forbidden(response):
 def assert_method_not_allowed(response):
     assert response.status_code == 405
     assert response.json() == {'detail': 'Method Not Allowed'}
+
+
+def assert_unprocessable(response, message):
+    assert response.status_code == 422
+    assert response.json() == {'detail': message}

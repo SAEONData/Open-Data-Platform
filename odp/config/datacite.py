@@ -21,7 +21,6 @@ class DataciteConfig(BaseConfig):
 
     USERNAME: str    # DataCite account username
     PASSWORD: str    # DataCite account password
-    DOI_PREFIX: str  # the DOI prefix associated with our DataCite account
     DOI_LANDING_PAGE_BASE_URL: AnyHttpUrl  # base URL for DOI back-links
 
     _subconfig = {

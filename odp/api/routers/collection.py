@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from random import randint
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -6,7 +7,7 @@ from jschon import URI, JSONSchema, JSON
 from sqlalchemy import select, func
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp import ODPScope
+from odp import ODPScope, DOI_PREFIX
 from odp.api.lib import Pager, Paging, Authorize, Authorized, schema_catalog
 from odp.api.models import CollectionModelIn, CollectionModel, CollectionSort, CollectionTagModel, CollectionTagModelIn, CollectionFlagModel, CollectionFlagModelIn
 from odp.db import Session
@@ -375,3 +376,29 @@ async def unflag_collection(
         _collection_id=collection_flag.collection_id,
         _flag_id=collection_flag.flag_id,
     ).save()
+
+
+@router.get(
+    '/{collection_id}/doi/new',
+    response_model=str,
+)
+async def get_new_doi(
+        collection_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_READ)),
+):
+    if not (collection := Session.get(Collection, collection_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.provider_ids != '*' and collection.provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not (doi_key := collection.doi_key):
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'The collection does not have a DOI key')
+
+    while True:
+        num = randint(0, 99999999)
+        doi = f'{DOI_PREFIX}/{doi_key}.{num:08}'
+        if Session.execute(select(Record).where(Record.doi == doi)).first() is None:
+            break
+
+    return doi

@@ -2,6 +2,8 @@ from enum import Enum
 
 __version__ = '2.0.0'
 
+DOI_PREFIX = 10.15493
+
 
 class ODPScope(str, Enum):
     # catalogue
