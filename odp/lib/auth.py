@@ -5,18 +5,14 @@ from odp.db import Session
 from odp.db.models import User, Client
 from odp.lib import exceptions as x
 
+Permissions = Dict[str, Union[Literal['*'], List[str]]]
+"""The effective set of permissions for a user or a client. A dictionary of
+scope ids (OAuth2 scope identifiers), where the value for each id is either:
 
-@dataclass
-class Authorization:
-    """An Authorization object represents the effective set of permissions
-    for a user or a client. It consists of a dictionary of scope ids (OAuth2
-    scope identifiers), where the value for each id is either:
-
-    - '*' if the scope is applicable across all relevant platform entities; or
-    - a set of provider ids to which the scope's usage is limited (implemented
-      as a list for JSON serialization)
-    """
-    scopes: Dict[str, Union[Literal['*'], List[str]]]
+- '*' if the scope is applicable across all relevant platform entities; or
+- a set of provider ids to which the scope's usage is limited (implemented
+  as a list for JSON serialization)
+"""
 
 
 @dataclass
@@ -29,20 +25,20 @@ class UserInfo:
     roles: List[str]
 
 
-def get_client_auth(client_id: str) -> Authorization:
-    """Return client authorization info."""
+def get_client_permissions(client_id: str) -> Permissions:
+    """Return effective client permissions."""
     client = Session.get(Client, client_id)
     if not client:
         raise x.ODPClientNotFound
 
-    return Authorization(
-        scopes={scope.id: '*' if not client.provider else [client.provider_id]
-                for scope in client.scopes}
-    )
+    return {
+        scope.id: '*' if not client.provider else [client.provider_id]
+        for scope in client.scopes
+    }
 
 
-def get_user_auth(user_id: str, client_id: str) -> Authorization:
-    """Return user authorization info, which may be linked with
+def get_user_permissions(user_id: str, client_id: str) -> Permissions:
+    """Return effective user permissions, which may be linked with
     a user's access token for a given client application."""
     user = Session.get(User, user_id)
     if not user:
@@ -79,9 +75,7 @@ def get_user_auth(user_id: str, client_id: str) -> Authorization:
         for scope, providers in provider_scopes.items()
     }
 
-    return Authorization(
-        scopes={scope: '*' for scope in platform_scopes} | provider_scopes
-    )
+    return {scope: '*' for scope in platform_scopes} | provider_scopes
 
 
 def get_user_info(user_id: str, client_id: str) -> UserInfo:

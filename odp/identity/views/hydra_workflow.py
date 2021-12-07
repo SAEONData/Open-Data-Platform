@@ -9,7 +9,7 @@ from odp.config import config
 from odp.identity import hydra_admin
 from odp.identity.views import hydra_error_page, encode_token
 from odp.lib import exceptions as x
-from odp.lib.auth import get_user_auth, get_user_info
+from odp.lib.auth import get_user_permissions, get_user_info
 
 bp = Blueprint('hydra', __name__)
 
@@ -81,18 +81,18 @@ def consent():
         user_id = consent_request['subject']
         client_id = consent_request['client']['client_id']
         try:
-            user_auth = get_user_auth(user_id, client_id)
+            user_permissions = get_user_permissions(user_id, client_id)
             user_info = get_user_info(user_id, client_id)
 
-            grant_scopes = [
-                requested_scope for requested_scope in consent_request['requested_scope']
-                if requested_scope not in ODPScope.__members__.values()
-                or requested_scope in user_auth.scopes
+            grant_scope = [
+                requested_scope_id for requested_scope_id in consent_request['requested_scope']
+                if requested_scope_id in user_permissions
+                or requested_scope_id not in ODPScope.__members__.values()
             ]
             consent_params = {
-                'grant_scope': grant_scopes,
+                'grant_scope': grant_scope,
                 'grant_audience': consent_request['requested_access_token_audience'],
-                'access_token_data': asdict(user_auth),
+                'access_token_data': user_permissions,
                 'id_token_data': asdict(user_info),
             }
             redirect_to = hydra_admin.accept_consent_request(challenge, **consent_params)

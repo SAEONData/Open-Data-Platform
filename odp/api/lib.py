@@ -13,7 +13,7 @@ from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_422
 
 from odp import ODPScope
 from odp.config import config
-from odp.lib.auth import get_client_auth, get_user_auth
+from odp.lib.auth import get_client_permissions, get_user_permissions
 
 schema_catalog = create_catalog('2020-12')
 schema_catalog.add_directory(URI('https://odp.saeon.ac.za/schema/'), Path(__file__).parent.parent.parent / 'schema')
@@ -58,23 +58,23 @@ class Authorize(OAuth2):
         # if sub == client_id it's an API call from a client,
         # using a client credentials grant
         if token.sub == token.client_id:
-            client_auth = get_client_auth(token.client_id)
+            client_permissions = get_client_permissions(token.client_id)
             try:
                 return Authorized(
                     client_id=token.client_id,
                     user_id=None,
-                    provider_ids=client_auth.scopes[self.scope_id]
+                    provider_ids=client_permissions[self.scope_id]
                 )
             except KeyError:
                 raise HTTPException(HTTP_403_FORBIDDEN)
 
         # user-initiated API call
-        user_auth = get_user_auth(token.sub, token.client_id)
+        user_permissions = get_user_permissions(token.sub, token.client_id)
         try:
             return Authorized(
                 client_id=token.client_id,
                 user_id=token.sub,
-                provider_ids=user_auth.scopes[self.scope_id]
+                provider_ids=user_permissions[self.scope_id]
             )
         except KeyError:
             raise HTTPException(HTTP_403_FORBIDDEN)

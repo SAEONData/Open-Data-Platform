@@ -7,7 +7,7 @@ from requests import RequestException
 
 from odp import ODPScope
 from odp.config import config
-from odp.lib.auth import get_user_auth
+from odp.lib.auth import get_user_permissions
 from odp.ui.auth import oauth
 
 
@@ -69,8 +69,8 @@ def client(scope: ODPScope):
                 flash('Please log in to access that page.')
                 return redirect(url_for('home.index'))
 
-            g.user_auth = get_user_auth(current_user.id, config.ODP.UI.CLIENT_ID)
-            if scope not in g.user_auth.scopes:
+            g.user_permissions = get_user_permissions(current_user.id, config.ODP.UI.CLIENT_ID)
+            if scope not in g.user_permissions:
                 flash('You do not have permission to access that page.', category='warning')
                 return redirect(request.referrer)
 

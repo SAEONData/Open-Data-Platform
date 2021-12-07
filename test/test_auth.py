@@ -1,18 +1,18 @@
-from odp.lib.auth import get_user_auth, get_client_auth, Authorization, get_user_info, UserInfo
+from odp.lib.auth import get_user_permissions, get_client_permissions, Permissions, get_user_info, UserInfo
 from test.factories import ScopeFactory, ClientFactory, RoleFactory, UserFactory
 
 
-def assert_compare(expected: Authorization, actual: Authorization):
+def assert_compare(expected: Permissions, actual: Permissions):
     if expected == actual:
         return
 
-    expected.scopes = {
+    expected = {
         scope_id: set(provider_ids) if provider_ids != '*' else '*'
-        for scope_id, provider_ids in expected.scopes.items()
+        for scope_id, provider_ids in expected.items()
     }
-    actual.scopes = {
+    actual = {
         scope_id: set(provider_ids) if provider_ids != '*' else '*'
-        for scope_id, provider_ids in actual.scopes.items()
+        for scope_id, provider_ids in actual.items()
     }
     assert expected == actual
 
@@ -24,20 +24,20 @@ def test_platform_roles():
     role2 = RoleFactory(scopes=scopes[5:])
     user = UserFactory(roles=(role1, role2))
 
-    actual_user_auth = get_user_auth(user.id, client.id)
-    expected_user_auth = Authorization(scopes={
+    actual_user_perm = get_user_permissions(user.id, client.id)
+    expected_user_perm = {
         scope.id: '*'
         for n, scope in enumerate(scopes)
         if n in (1, 2, 5, 6)
-    })
-    assert_compare(expected_user_auth, actual_user_auth)
+    }
+    assert_compare(expected_user_perm, actual_user_perm)
 
-    actual_client_auth = get_client_auth(client.id)
-    expected_client_auth = Authorization(scopes={
+    actual_client_perm = get_client_permissions(client.id)
+    expected_client_perm = {
         scope.id: '*'
         for scope in scopes[1:7]
-    })
-    assert_compare(expected_client_auth, actual_client_auth)
+    }
+    assert_compare(expected_client_perm, actual_client_perm)
 
 
 def test_provider_roles():
@@ -47,8 +47,8 @@ def test_provider_roles():
     role2 = RoleFactory(scopes=scopes[3:], is_provider_role=True)
     user = UserFactory(roles=(role1, role2))
 
-    actual_user_auth = get_user_auth(user.id, client.id)
-    expected_user_auth = Authorization(scopes={
+    actual_user_perm = get_user_permissions(user.id, client.id)
+    expected_user_perm = {
         scope.id: [role1.provider_id]
         for n, scope in enumerate(scopes)
         if n in (1, 2)
@@ -60,15 +60,15 @@ def test_provider_roles():
         scope.id: [role2.provider_id]
         for n, scope in enumerate(scopes)
         if n in (5, 6)
-    })
-    assert_compare(expected_user_auth, actual_user_auth)
+    }
+    assert_compare(expected_user_perm, actual_user_perm)
 
-    actual_client_auth = get_client_auth(client.id)
-    expected_client_auth = Authorization(scopes={
+    actual_client_perm = get_client_permissions(client.id)
+    expected_client_perm = {
         scope.id: '*'
         for scope in scopes[1:7]
-    })
-    assert_compare(expected_client_auth, actual_client_auth)
+    }
+    assert_compare(expected_client_perm, actual_client_perm)
 
 
 def test_platform_provider_role_mix():
@@ -79,8 +79,8 @@ def test_platform_provider_role_mix():
     role3 = RoleFactory(scopes=scopes[5:], is_provider_role=True)
     user = UserFactory(roles=(role1, role2, role3))
 
-    actual_user_auth = get_user_auth(user.id, client.id)
-    expected_user_auth = Authorization(scopes={
+    actual_user_perm = get_user_permissions(user.id, client.id)
+    expected_user_perm = {
         scope.id: '*'
         for n, scope in enumerate(scopes)
         if n in (1, 2, 3)
@@ -92,15 +92,15 @@ def test_platform_provider_role_mix():
         scope.id: [role2.provider_id, role3.provider_id]
         for n, scope in enumerate(scopes)
         if n in (5, 6)
-    })
-    assert_compare(expected_user_auth, actual_user_auth)
+    }
+    assert_compare(expected_user_perm, actual_user_perm)
 
-    actual_client_auth = get_client_auth(client.id)
-    expected_client_auth = Authorization(scopes={
+    actual_client_perm = get_client_permissions(client.id)
+    expected_client_perm = {
         scope.id: '*'
         for scope in scopes[1:7]
-    })
-    assert_compare(expected_client_auth, actual_client_auth)
+    }
+    assert_compare(expected_client_perm, actual_client_perm)
 
 
 def test_provider_client():
@@ -110,20 +110,20 @@ def test_provider_client():
     role2 = RoleFactory(scopes=scopes[5:])
     user = UserFactory(roles=(role1, role2))
 
-    actual_user_auth = get_user_auth(user.id, client.id)
-    expected_user_auth = Authorization(scopes={
+    actual_user_perm = get_user_permissions(user.id, client.id)
+    expected_user_perm = {
         scope.id: [client.provider_id]
         for n, scope in enumerate(scopes)
         if n in (1, 2, 5, 6)
-    })
-    assert_compare(expected_user_auth, actual_user_auth)
+    }
+    assert_compare(expected_user_perm, actual_user_perm)
 
-    actual_client_auth = get_client_auth(client.id)
-    expected_client_auth = Authorization(scopes={
+    actual_client_perm = get_client_permissions(client.id)
+    expected_client_perm = {
         scope.id: [client.provider_id]
         for scope in scopes[1:7]
-    })
-    assert_compare(expected_client_auth, actual_client_auth)
+    }
+    assert_compare(expected_client_perm, actual_client_perm)
 
 
 def test_provider_client_platform_provider_role_mix():
@@ -134,20 +134,20 @@ def test_provider_client_platform_provider_role_mix():
     role3 = RoleFactory(scopes=scopes[5:], provider=client.provider)
     user = UserFactory(roles=(role1, role2, role3))
 
-    actual_user_auth = get_user_auth(user.id, client.id)
-    expected_user_auth = Authorization(scopes={
+    actual_user_perm = get_user_permissions(user.id, client.id)
+    expected_user_perm = {
         scope.id: [client.provider_id]
         for n, scope in enumerate(scopes)
         if n in (1, 2, 5, 6)
-    })
-    assert_compare(expected_user_auth, actual_user_auth)
+    }
+    assert_compare(expected_user_perm, actual_user_perm)
 
-    actual_client_auth = get_client_auth(client.id)
-    expected_client_auth = Authorization(scopes={
+    actual_client_perm = get_client_permissions(client.id)
+    expected_client_perm = {
         scope.id: [client.provider_id]
         for scope in scopes[1:7]
-    })
-    assert_compare(expected_client_auth, actual_client_auth)
+    }
+    assert_compare(expected_client_perm, actual_client_perm)
 
 
 def test_user_info():
