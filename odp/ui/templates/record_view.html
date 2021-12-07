@@ -52,12 +52,12 @@
         </div>
         <div id="metadata" class="tab-pane fade" role="tabpanel">
             <pre class="m-3">
-                {{- record.metadata|tojson -}}
+                {{- record.metadata|format_json -}}
             </pre>
         </div>
         <div id="validity" class="tab-pane fade" role="tabpanel">
             <pre class="m-3">
-                {{- record.validity|tojson -}}
+                {{- record.validity|format_json -}}
             </pre>
         </div>
         <div id="tag-qc" class="tab-pane fade" role="tabpanel">

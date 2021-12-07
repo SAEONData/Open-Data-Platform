@@ -35,8 +35,7 @@ def init_app(app: Flask):
     app.register_blueprint(catalogues.bp, url_prefix='/catalogues')
 
     @app.template_filter()
-    def tojson(obj):
-        """Replaces the Jinja built-in tojson filter."""
+    def format_json(obj):
         return json.dumps(obj, indent=4, ensure_ascii=False)
 
     @app.template_filter()

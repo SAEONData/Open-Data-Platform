@@ -10,5 +10,33 @@
 
 {% block content %}
     {% from 'macros.html' import render_form %}
+    {% if not record or not record.doi %}
+        <button id="new-doi" class="btn btn-outline-info btn-action">
+            New DOI
+        </button>
+    {% endif %}
     {{ render_form(form, record, ['metadata']) }}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $(function() {
+            $("#new-doi").bind("click", function() {
+                if (!$("#collection_id").val()) {
+                    alert("Please select a collection.");
+                    return;
+                }
+                $.getJSON($SCRIPT_ROOT + "/collections/" + $("#collection_id").val() + "/doi/new",
+                    function(result) {
+                        if (result.doi) {
+                            $("#doi").val(result.doi);
+                        } else if (result.detail) {
+                            alert(result.detail);
+                        }
+                    }
+                );
+            });
+        });
+    </script>
 {% endblock %}

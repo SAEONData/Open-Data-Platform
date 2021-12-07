@@ -92,3 +92,12 @@ def unflag_publish(id):
     api.delete(f'/collection/{id}/flag/{ODPFlag.COLLECTION_PUBLISH}')
     flash(f'{ODPFlag.COLLECTION_PUBLISH} flag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/doi/new')
+# no @api.client because ajax
+def get_new_doi(id):
+    try:
+        return {'doi': api.get(f'/collection/{id}/doi/new')}
+    except api.ODPAPIError as e:
+        return e.error_detail
