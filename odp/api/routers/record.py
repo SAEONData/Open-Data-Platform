@@ -231,6 +231,9 @@ async def update_record(
     ).first() is not None:
         raise HTTPException(HTTP_409_CONFLICT)
 
+    if record.doi is not None and record.doi != record_in.doi:
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'The DOI cannot be changed or removed')
+
     if (
         record.doi != record_in.doi or
         record.sid != record_in.sid or
