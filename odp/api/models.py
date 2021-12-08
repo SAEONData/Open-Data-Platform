@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Dict, Any
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, root_validator
 
 from odp.lib.formats import DOI_REGEX, SID_REGEX
 
@@ -181,6 +181,16 @@ class RecordModelIn(BaseModel):
             raise ValueError("The secondary ID cannot be a DOI")
 
         return sid
+
+    @root_validator
+    def set_metadata_doi(cls, values):
+        """Copy the DOI into the metadata post-validation."""
+        if doi := values['doi']:
+            values['metadata']['doi'] = doi
+        else:
+            values['metadata'].pop('doi', None)
+
+        return values
 
 
 class RecordSort(str, Enum):
