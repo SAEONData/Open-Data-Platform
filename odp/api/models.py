@@ -185,10 +185,13 @@ class RecordModelIn(BaseModel):
     @root_validator
     def set_metadata_doi(cls, values):
         """Copy the DOI into the metadata post-validation."""
-        if doi := values['doi']:
-            values['metadata']['doi'] = doi
-        else:
-            values['metadata'].pop('doi', None)
+        try:
+            if doi := values['doi']:
+                values['metadata']['doi'] = doi
+            else:
+                values['metadata'].pop('doi', None)
+        except KeyError:
+            pass  # field validation failed
 
         return values
 
