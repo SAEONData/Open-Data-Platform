@@ -164,7 +164,7 @@ class RecordFactory(ODPModelFactory):
 
     doi = factory.Sequence(lambda n: f'10.5555/test-{n}')
     sid = factory.Sequence(lambda n: f'test-{n}' if randint(0, 1) else None)
-    metadata_ = {}
+    metadata_ = factory.LazyAttribute(lambda record: {'doi': record.doi})
     validity = {}
     collection = factory.SubFactory(CollectionFactory)
     schema = factory.SubFactory(SchemaFactory, type='metadata')

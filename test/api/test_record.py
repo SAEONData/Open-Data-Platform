@@ -270,7 +270,8 @@ def test_create_record_with_provider_specific_api_client(api, record_batch, scop
 def test_update_record(api, record_batch, scopes, authorized):
     modified_record_batch = record_batch.copy()
     modified_record_batch[2] = (record := record_build(
-        id=record_batch[2].id
+        id=record_batch[2].id,
+        doi=record_batch[2].doi,
     ))
     r = api(scopes).put(f'/record/{record.id}', json=dict(
         doi=record.doi,
@@ -301,6 +302,7 @@ def test_update_record_with_provider_specific_api_client(api, record_batch, scop
     modified_record_batch = record_batch.copy()
     modified_record_batch[2] = (record := record_build(
         id=record_batch[2].id,
+        doi=record_batch[2].doi,
         collection=record_batch[2].collection,
     ))
     r = api(scopes, api_client_provider).put(f'/record/{record.id}', json=dict(
