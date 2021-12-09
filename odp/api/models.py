@@ -8,6 +8,32 @@ from pydantic import BaseModel, Field, validator, root_validator
 from odp.lib.formats import DOI_REGEX, SID_REGEX
 
 
+class FlagInstanceModel(BaseModel):
+    flag_id: str
+    user_id: Optional[str]
+    user_name: Optional[str]
+    data: Dict[str, Any]
+    timestamp: datetime
+
+
+class FlagInstanceModelIn(BaseModel):
+    flag_id: str
+    data: Dict[str, Any]
+
+
+class TagInstanceModel(BaseModel):
+    tag_id: str
+    user_id: Optional[str]
+    user_name: Optional[str]
+    data: Dict[str, Any]
+    timestamp: datetime
+
+
+class TagInstanceModelIn(BaseModel):
+    tag_id: str
+    data: Dict[str, Any]
+
+
 class CatalogueModel(BaseModel):
     id: str
     schema_id: str
@@ -31,32 +57,6 @@ class ClientSort(str, Enum):
     NAME = 'name'
 
 
-class CollectionFlagModel(BaseModel):
-    flag_id: str
-    user_id: Optional[str]
-    user_name: Optional[str]
-    data: Dict[str, Any]
-    timestamp: datetime
-
-
-class CollectionFlagModelIn(BaseModel):
-    flag_id: str
-    data: Dict[str, Any]
-
-
-class CollectionTagModel(BaseModel):
-    tag_id: str
-    user_id: Optional[str]
-    user_name: Optional[str]
-    data: Dict[str, Any]
-    timestamp: datetime
-
-
-class CollectionTagModelIn(BaseModel):
-    tag_id: str
-    data: Dict[str, Any]
-
-
 class CollectionModel(BaseModel):
     id: str
     name: str
@@ -64,8 +64,8 @@ class CollectionModel(BaseModel):
     provider_id: str
     project_ids: List[str]
     record_count: int
-    flags: List[CollectionFlagModel]
-    tags: List[CollectionTagModel]
+    flags: List[FlagInstanceModel]
+    tags: List[TagInstanceModel]
 
 
 class CollectionModelIn(BaseModel):
@@ -123,32 +123,6 @@ class ProviderSort(str, Enum):
     NAME = 'name'
 
 
-class RecordFlagModel(BaseModel):
-    flag_id: str
-    user_id: Optional[str]
-    user_name: Optional[str]
-    data: Dict[str, Any]
-    timestamp: datetime
-
-
-class RecordFlagModelIn(BaseModel):
-    flag_id: str
-    data: Dict[str, Any]
-
-
-class RecordTagModel(BaseModel):
-    tag_id: str
-    user_id: Optional[str]
-    user_name: Optional[str]
-    data: Dict[str, Any]
-    timestamp: datetime
-
-
-class RecordTagModelIn(BaseModel):
-    tag_id: str
-    data: Dict[str, Any]
-
-
 class RecordModel(BaseModel):
     id: str
     doi: Optional[str]
@@ -158,8 +132,8 @@ class RecordModel(BaseModel):
     metadata: Dict[str, Any]
     validity: Dict[str, Any]
     timestamp: datetime
-    flags: List[RecordFlagModel]
-    tags: List[RecordTagModel]
+    flags: List[FlagInstanceModel]
+    tags: List[TagInstanceModel]
 
 
 class RecordModelIn(BaseModel):

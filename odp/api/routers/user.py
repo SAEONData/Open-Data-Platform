@@ -5,7 +5,8 @@ from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND
 
 from odp import ODPScope
-from odp.api.lib import Pager, Paging, Authorize
+from odp.api.lib.auth import Authorize
+from odp.api.lib.paging import Pager, Paging
 from odp.api.models import UserModelIn, UserModel, UserSort
 from odp.db import Session
 from odp.db.models import User, Role

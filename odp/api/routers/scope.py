@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import select
 
 from odp import ODPScope
-from odp.api.lib import Pager, Paging, Authorize
+from odp.api.lib.auth import Authorize
+from odp.api.lib.paging import Pager, Paging
 from odp.api.models import ScopeModel, ScopeSort
 from odp.db import Session
 from odp.db.models import Scope

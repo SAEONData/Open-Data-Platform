@@ -2,66 +2,20 @@ from datetime import datetime, timezone
 from random import randint
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from jschon import URI, JSONSchema, JSON
+from fastapi import APIRouter, Depends, HTTPException
+from jschon import JSONSchema, JSON
 from sqlalchemy import select, func
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope, DOI_PREFIX
-from odp.api.lib import Pager, Paging, Authorize, Authorized, schema_catalog
-from odp.api.models import CollectionModelIn, CollectionModel, CollectionSort, CollectionTagModel, CollectionTagModelIn, CollectionFlagModel, CollectionFlagModelIn
+from odp.api.lib.auth import Authorize, Authorized, FlagAuthorize, TagAuthorize, UnflagAuthorize, UntagAuthorize
+from odp.api.lib.paging import Pager, Paging
+from odp.api.lib.schema import get_flag_schema, get_tag_schema
+from odp.api.models import CollectionModelIn, CollectionModel, CollectionSort, TagInstanceModel, TagInstanceModelIn, FlagInstanceModel, FlagInstanceModelIn
 from odp.db import Session
-from odp.db.models import Collection, Record, Tag, CollectionTag, CollectionTagAudit, AuditCommand, Schema, SchemaType, Flag, CollectionFlag, CollectionFlagAudit
+from odp.db.models import Collection, Record, CollectionTag, CollectionTagAudit, AuditCommand, CollectionFlag, CollectionFlagAudit
 
 router = APIRouter()
-
-
-async def get_flag_schema(collection_flag_in: CollectionFlagModelIn) -> JSONSchema:
-    if not (flag := Session.get(Flag, collection_flag_in.flag_id)):
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
-
-    schema = Session.get(Schema, (flag.schema_id, SchemaType.flag))
-    return schema_catalog.get_schema(URI(schema.uri))
-
-
-async def authorize_flag(collection_flag_in: CollectionFlagModelIn, request: Request) -> Authorized:
-    if not (flag := Session.get(Flag, collection_flag_in.flag_id)):
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
-
-    authorizer = Authorize(ODPScope(flag.scope_id))
-    return await authorizer(request)
-
-
-async def authorize_unflag(flag_id: str, request: Request) -> Authorized:
-    if not (flag := Session.get(Flag, flag_id)):
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
-
-    authorizer = Authorize(ODPScope(flag.scope_id))
-    return await authorizer(request)
-
-
-async def get_tag_schema(collection_tag_in: CollectionTagModelIn) -> JSONSchema:
-    if not (tag := Session.get(Tag, collection_tag_in.tag_id)):
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
-
-    schema = Session.get(Schema, (tag.schema_id, SchemaType.tag))
-    return schema_catalog.get_schema(URI(schema.uri))
-
-
-async def authorize_tag(collection_tag_in: CollectionTagModelIn, request: Request) -> Authorized:
-    if not (tag := Session.get(Tag, collection_tag_in.tag_id)):
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
-
-    authorizer = Authorize(ODPScope(tag.scope_id))
-    return await authorizer(request)
-
-
-async def authorize_untag(tag_id: str, request: Request) -> Authorized:
-    if not (tag := Session.get(Tag, tag_id)):
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
-
-    authorizer = Authorize(ODPScope(tag.scope_id))
-    return await authorizer(request)
 
 
 def output_collection_model(result) -> CollectionModel:
@@ -83,8 +37,8 @@ def output_collection_model(result) -> CollectionModel:
     )
 
 
-def output_collection_flag_model(collection_flag: CollectionFlag) -> CollectionFlagModel:
-    return CollectionFlagModel(
+def output_collection_flag_model(collection_flag: CollectionFlag) -> FlagInstanceModel:
+    return FlagInstanceModel(
         flag_id=collection_flag.flag_id,
         user_id=collection_flag.user_id,
         user_name=collection_flag.user.name if collection_flag.user_id else None,
@@ -93,8 +47,8 @@ def output_collection_flag_model(collection_flag: CollectionFlag) -> CollectionF
     )
 
 
-def output_collection_tag_model(collection_tag: CollectionTag) -> CollectionTagModel:
-    return CollectionTagModel(
+def output_collection_tag_model(collection_tag: CollectionTag) -> TagInstanceModel:
+    return TagInstanceModel(
         tag_id=collection_tag.tag_id,
         user_id=collection_tag.user_id,
         user_name=collection_tag.user.name if collection_tag.user_id else None,
@@ -213,13 +167,13 @@ async def delete_collection(
 
 @router.post(
     '/{collection_id}/tag',
-    response_model=CollectionTagModel,
+    response_model=TagInstanceModel,
 )
 async def tag_collection(
         collection_id: str,
-        collection_tag_in: CollectionTagModelIn,
+        tag_instance_in: TagInstanceModelIn,
         tag_schema: JSONSchema = Depends(get_tag_schema),
-        auth: Authorized = Depends(authorize_tag),
+        auth: Authorized = Depends(TagAuthorize()),
 ):
     if not (collection := Session.get(Collection, collection_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -230,24 +184,24 @@ async def tag_collection(
     if collection_tag := Session.execute(
         select(CollectionTag).
         where(CollectionTag.collection_id == collection_id).
-        where(CollectionTag.tag_id == collection_tag_in.tag_id).
+        where(CollectionTag.tag_id == tag_instance_in.tag_id).
         where(CollectionTag.user_id == auth.user_id)
     ).scalar_one_or_none():
         command = AuditCommand.update
     else:
         collection_tag = CollectionTag(
             collection_id=collection_id,
-            tag_id=collection_tag_in.tag_id,
+            tag_id=tag_instance_in.tag_id,
             user_id=auth.user_id,
         )
         command = AuditCommand.insert
 
-    if collection_tag.data != collection_tag_in.data:
-        validity = tag_schema.evaluate(JSON(collection_tag_in.data)).output('detailed')
+    if collection_tag.data != tag_instance_in.data:
+        validity = tag_schema.evaluate(JSON(tag_instance_in.data)).output('detailed')
         if not validity['valid']:
             raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, validity)
 
-        collection_tag.data = collection_tag_in.data
+        collection_tag.data = tag_instance_in.data
         collection_tag.timestamp = (timestamp := datetime.now(timezone.utc))
         collection_tag.save()
 
@@ -271,7 +225,7 @@ async def tag_collection(
 async def untag_collection(
         collection_id: str,
         tag_id: str,
-        auth: Authorized = Depends(authorize_untag),
+        auth: Authorized = Depends(UntagAuthorize()),
 ):
     if not (collection := Session.get(Collection, collection_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -302,13 +256,13 @@ async def untag_collection(
 
 @router.post(
     '/{collection_id}/flag',
-    response_model=CollectionFlagModel,
+    response_model=FlagInstanceModel,
 )
 async def flag_collection(
         collection_id: str,
-        collection_flag_in: CollectionFlagModelIn,
+        flag_instance_in: FlagInstanceModelIn,
         flag_schema: JSONSchema = Depends(get_flag_schema),
-        auth: Authorized = Depends(authorize_flag),
+        auth: Authorized = Depends(FlagAuthorize()),
 ):
     if not (collection := Session.get(Collection, collection_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -316,22 +270,22 @@ async def flag_collection(
     if auth.provider_ids != '*' and collection.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if collection_flag := Session.get(CollectionFlag, (collection_id, collection_flag_in.flag_id)):
+    if collection_flag := Session.get(CollectionFlag, (collection_id, flag_instance_in.flag_id)):
         command = AuditCommand.update
     else:
         collection_flag = CollectionFlag(
             collection_id=collection_id,
-            flag_id=collection_flag_in.flag_id,
+            flag_id=flag_instance_in.flag_id,
         )
         command = AuditCommand.insert
 
-    if collection_flag.data != collection_flag_in.data:
-        validity = flag_schema.evaluate(JSON(collection_flag_in.data)).output('detailed')
+    if collection_flag.data != flag_instance_in.data:
+        validity = flag_schema.evaluate(JSON(flag_instance_in.data)).output('detailed')
         if not validity['valid']:
             raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, validity)
 
         collection_flag.user_id = auth.user_id
-        collection_flag.data = collection_flag_in.data
+        collection_flag.data = flag_instance_in.data
         collection_flag.timestamp = (timestamp := datetime.now(timezone.utc))
         collection_flag.save()
 
@@ -355,7 +309,7 @@ async def flag_collection(
 async def unflag_collection(
         collection_id: str,
         flag_id: str,
-        auth: Authorized = Depends(authorize_unflag),
+        auth: Authorized = Depends(UnflagAuthorize()),
 ):
     if not (collection := Session.get(Collection, collection_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
