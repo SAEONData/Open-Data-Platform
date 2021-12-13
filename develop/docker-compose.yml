@@ -38,6 +38,8 @@ services:
       - LOG_LEAK_SENSITIVE_VALUES=true
       - SERVE_PUBLIC_CORS_ENABLED=true
       - SERVE_PUBLIC_CORS_ALLOWED_HEADERS=Authorization,Content-Type,X-Requested-With
+      # uncomment for short-lived access tokens
+      #- TTL_ACCESS_TOKEN=1m
     depends_on:
       - hydra-db
       - hydra-migrate

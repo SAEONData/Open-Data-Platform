@@ -30,7 +30,7 @@ def init_app(app: Flask):
     )
     oauth.init_app(app, cache, fetch_token, update_token)
     oauth.register(
-        name='hydra',
+        name=config.ODP.UI.CLIENT_ID,
         access_token_url=f'{(hydra_url := config.HYDRA.PUBLIC.URL)}/oauth2/token',
         authorize_url=f'{hydra_url}/oauth2/auth',
         userinfo_endpoint=f'{hydra_url}/userinfo',
@@ -40,19 +40,21 @@ def init_app(app: Flask):
     )
 
 
-def fetch_token(hydra_name):
-    return Session.get(OAuth2Token, current_user.id).dict()
+def fetch_token(client_id):
+    return Session.get(OAuth2Token, (client_id, current_user.id)).dict()
 
 
-def update_token(hydra_name, token, refresh_token=None, access_token=None):
+def update_token(client_id, token, refresh_token=None, access_token=None):
     if refresh_token:
         token_model = Session.execute(
             select(OAuth2Token).
+            where(OAuth2Token.client_id == client_id).
             where(OAuth2Token.refresh_token == refresh_token)
         ).scalar_one()
     elif access_token:
         token_model = Session.execute(
             select(OAuth2Token).
+            where(OAuth2Token.client_id == client_id).
             where(OAuth2Token.access_token == access_token)
         ).scalar_one()
     else:

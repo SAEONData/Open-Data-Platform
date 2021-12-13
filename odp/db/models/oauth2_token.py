@@ -1,16 +1,15 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
 
 from odp.db import Base
 
 
 class OAuth2Token(Base):
-    """OAuth2 token storage for the ODP UI."""
+    """OAuth2 token storage for client applications."""
 
     __tablename__ = 'oauth2_token'
 
+    client_id = Column(String, ForeignKey('client.id', ondelete='CASCADE'), primary_key=True)
     user_id = Column(String, ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
-    user = relationship('User')
 
     token_type = Column(String)
     access_token = Column(String)

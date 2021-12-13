@@ -10,6 +10,9 @@ from odp.config import config
 from odp.lib.auth import get_user_permissions
 from odp.ui.auth import oauth
 
+_api_url = config.ODP.UI.API_URL
+_client_id = config.ODP.UI.CLIENT_ID
+
 
 class ODPAPIError(Exception):
     def __init__(self, status_code, error_detail):
@@ -35,9 +38,9 @@ def delete(path, **params):
 
 def _request(method, path, data, params):
     try:
-        r = oauth.hydra.request(
+        r = getattr(oauth, _client_id).request(
             method,
-            config.ODP.UI.API_URL + path,
+            _api_url + path,
             json=data,
             params=params,
         )
@@ -72,7 +75,7 @@ def client(scope: ODPScope):
                 flash('Please log in to access that page.')
                 return redirect(url_for('home.index'))
 
-            g.user_permissions = get_user_permissions(current_user.id, config.ODP.UI.CLIENT_ID)
+            g.user_permissions = get_user_permissions(current_user.id, _client_id)
             if scope not in g.user_permissions:
                 flash('You do not have permission to access that page.', category='warning')
                 return redirect(request.referrer)

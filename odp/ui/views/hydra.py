@@ -11,28 +11,34 @@ from odp.ui.auth import oauth
 
 bp = Blueprint('hydra', __name__)
 
+_client_id = config.ODP.UI.CLIENT_ID
+
+
+def _client():
+    return getattr(oauth, _client_id)
+
 
 @bp.route('/signup')
 def signup():
     redirect_uri = url_for('.logged_in', _external=True)
-    return oauth.hydra.authorize_redirect(redirect_uri, mode='signup')
+    return _client().authorize_redirect(redirect_uri, mode='signup')
 
 
 @bp.route('/login')
 def login():
     redirect_uri = url_for('.logged_in', _external=True)
-    return oauth.hydra.authorize_redirect(redirect_uri, mode='login')
+    return _client().authorize_redirect(redirect_uri, mode='login')
 
 
 @bp.route('/logged_in')
 def logged_in():
     try:
-        token = oauth.hydra.authorize_access_token()
-        userinfo = oauth.hydra.userinfo()
+        token = _client().authorize_access_token()
+        userinfo = _client().userinfo()
         user_id = userinfo['sub']
 
-        if not (token_model := Session.get(OAuth2Token, user_id)):
-            token_model = OAuth2Token(user_id=user_id)
+        if not (token_model := Session.get(OAuth2Token, (_client_id, user_id))):
+            token_model = OAuth2Token(client_id=_client_id, user_id=user_id)
 
         token_model.token_type = token.get('token_type')
         token_model.access_token = token.get('access_token')
@@ -52,7 +58,7 @@ def logged_in():
 
 @bp.route('/logout')
 def logout():
-    token = oauth.fetch_token(oauth.hydra.client_id)
+    token = oauth.fetch_token(_client_id)
     state_val = secrets.token_urlsafe()
     oauth.cache.set(_state_key(), state_val, ex=10)
     url = f'{config.HYDRA.PUBLIC.URL}/oauth2/sessions/logout' \
@@ -72,4 +78,4 @@ def logged_out():
 
 
 def _state_key():
-    return f'{__name__}.{oauth.hydra.client_id}.{current_user.id}.state'
+    return f'{__name__}.{_client_id}.{current_user.id}.state'
