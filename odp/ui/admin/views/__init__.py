@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 
 from flask import Flask
 
-from odp.ui.views import (
+from odp.ui.admin.views import (
     home,
     hydra,
     projects,

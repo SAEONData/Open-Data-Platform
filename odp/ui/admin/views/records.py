@@ -5,8 +5,8 @@ from flask_login import current_user
 
 from odp import ODPScope, ODPTag
 from odp.ui import api
-from odp.ui.forms import RecordForm, RecordTagQCForm
-from odp.ui.views import utils
+from odp.ui.admin.forms import RecordForm, RecordTagQCForm
+from odp.ui.admin.views import utils
 
 bp = Blueprint('records', __name__)
 
