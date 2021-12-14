@@ -8,7 +8,7 @@ from requests import RequestException
 from odp import ODPScope
 from odp.config import config
 from odp.lib.auth import get_user_permissions
-from odp.ui.auth import oauth
+from odp.ui.auth import oauth2
 
 _api_url = config.ODP.UI.API_URL
 _client_id = config.ODP.UI.CLIENT_ID
@@ -38,7 +38,7 @@ def delete(path, **params):
 
 def _request(method, path, data, params):
     try:
-        r = getattr(oauth, _client_id).request(
+        r = oauth2.request(
             method,
             _api_url + path,
             json=data,
