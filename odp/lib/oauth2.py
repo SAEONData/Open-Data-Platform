@@ -11,8 +11,8 @@ from odp.db.models import OAuth2Token, User
 
 
 class FlaskOAuth2Client:
-    def __init__(
-            self,
+    def init_app(
+            self, app,
             hydra_url: str,
             client_id: str,
             client_secret: str,
@@ -31,8 +31,6 @@ class FlaskOAuth2Client:
             client_secret=client_secret,
             client_kwargs={'scope': ' '.join(scope)},
         )
-
-    def init_app(self, app):
         self.oauth.init_app(app)
 
     def login_redirect(self, redirect_uri, **kwargs):
