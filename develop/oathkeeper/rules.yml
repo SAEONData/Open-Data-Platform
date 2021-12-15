@@ -1,0 +1,14 @@
+- id: thredds
+  upstream:
+    url: http://dap.saeon.ac.za/
+  match:
+    url: http://dap.localhost:4455/thredds/<.*>
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: allow
+  mutators:
+    - handler: noop
+  errors:
+    - handler: redirect

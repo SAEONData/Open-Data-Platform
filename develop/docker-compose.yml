@@ -73,3 +73,11 @@ services:
     ports:
       - "1379:6379"
     restart: always
+
+  oathkeeper:
+    container_name: DEV-oathkeeper
+    build:
+      context: oathkeeper
+    command: serve --config /config.yml
+    network_mode: host
+    restart: always

@@ -36,7 +36,7 @@ Add the project root to the Python path:
     export PYTHONPATH=..
 
 ### Identity Service
-    FLASK_APP=odp.identity.app flask run --port=2019 --host=localhost
+    FLASK_APP=odp.identity.app flask run --port=2019
 
 ### ODP API
     uvicorn odp.api:app --port 2020

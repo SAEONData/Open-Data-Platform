@@ -1,0 +1,44 @@
+serve:
+  proxy:
+    port: 4455
+  api:
+    port: 4456
+  prometheus:
+    port: 4457
+    host: localhost
+    metrics_path: /metrics
+
+access_rules:
+  repositories:
+    - file:///rules.yml
+
+authenticators:
+  cookie_session:
+    enabled: true
+    config:
+      check_session_url: http://dap.localhost:2022/session/check
+      preserve_path: true
+      only: [ session ]
+
+authorizers:
+  allow:
+    enabled: true
+
+mutators:
+  noop:
+    enabled: true
+
+errors:
+  handlers:
+    redirect:
+      enabled: true
+      config:
+        to: http://dap.localhost:2022/
+        when:
+          - error: [ unauthorized ]
+            request:
+              header:
+                accept: [ text/* ]
+
+log:
+  leak_sensitive_values: true
