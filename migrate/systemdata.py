@@ -31,7 +31,9 @@ from odp.db.models import Scope, Role, Client, User, UserRole
 
 ODP_ADMIN_ROLE = 'ODP:Admin'
 ODP_UI_CLIENT_ID = os.getenv('ODP_UI_CLIENT_ID')
-ODP_UI_CLIENT_NAME = 'The Open Data Platform Web UI'
+ODP_UI_CLIENT_NAME = 'The ODP Admin Interface'
+ODP_DAP_CLIENT_ID = os.getenv('ODP_DAP_CLIENT_ID')
+ODP_DAP_CLIENT_NAME = 'SAEON Data Access Portal'
 
 
 def create_schema():
@@ -76,6 +78,13 @@ def sync_ui_client():
     client.save()
 
 
+def sync_dap_client():
+    """Create a client for the Data Access Portal if it does not exist."""
+    client = Session.get(Client, ODP_DAP_CLIENT_ID) or Client(id=ODP_DAP_CLIENT_ID)
+    client.name = ODP_DAP_CLIENT_NAME,
+    client.save()
+
+
 def create_admin_user():
     """Create an admin user if one is not found."""
     if not Session.execute(
@@ -112,5 +121,6 @@ if __name__ == '__main__':
         sync_system_scopes()
         sync_admin_role()
         sync_ui_client()
+        sync_dap_client()
         create_admin_user()
     print('Done.')

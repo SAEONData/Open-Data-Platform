@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>SAEON ODP</title>
+    <title>
+        {% block web_title %}
+        {% endblock %}
+    </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="icon" href="{{ url_for('static', filename='nrf-favicon.ico') }}">
@@ -14,7 +17,8 @@
         <div class="container-fluid">
             <div class="navbar-nav text-start">
                 <a class="navbar-brand" href="{{ url_for('home.index') }}">
-                    SAEON | Open Data Platform
+                    {% block nav_title %}
+                    {% endblock %}
                 </a>
                 {% if current_user.is_authenticated %}
                     <span class="navbar-text mt-1">Welcome, {{ current_user.name }}</span>
@@ -22,11 +26,8 @@
             </div>
             {% if current_user.is_authenticated %}
                 <div class="flex-grow-1 mx-5 mt-1">
-                    {% from 'macros.html' import nav_menu %}
-                    {{ nav_menu(request.blueprint,
-                        ('projects', 'collections', 'schemas', 'catalogues', 'roles'),
-                        ('providers', 'records', 'tags', 'clients', 'users'),
-                    ) }}
+                    {% block nav_menu %}
+                    {% endblock %}
                 </div>
                 <div class="navbar-nav text-end mx-5 mt-1">
                     <span class="navbar-text">{{ current_user.email }}</span>
@@ -66,10 +67,6 @@
 </div>
 {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-5aErhPlUPVujIxg3wvJGdWNAWqZqWCtvxACYX4XfSa0=" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <script>
-        $SCRIPT_ROOT = {{ request.script_root|tojson }};
-    </script>
 {% endblock %}
 </body>
 </html>

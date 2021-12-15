@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    Welcome to the SAEON Data Access Portal!
+{% endblock %}
+
+{% block content %}
+    {% if not current_user.is_authenticated %}
+        <p>Please <a href="{{ url_for('hydra.login') }}">log in</a> to continue.</p>
+    {% endif %}
+{% endblock %}

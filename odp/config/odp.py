@@ -77,6 +77,13 @@ class ODPPublishConfig(BaseConfig):
     BATCH_SIZE: int
 
 
+class ODPDAPConfig(BaseConfig, OAuth2ClientConfigMixin):
+    class Config:
+        env_prefix = 'ODP_DAP_'
+
+    FLASK_KEY: str  # Flask secret key
+
+
 class ODPConfig(BaseConfig):
     class Config:
         env_prefix = 'ODP_'
@@ -91,4 +98,5 @@ class ODPConfig(BaseConfig):
         'IDENTITY': ODPIdentityConfig,
         'MAIL': ODPMailConfig,
         'PUBLISH': ODPPublishConfig,
+        'DAP': ODPDAPConfig,
     }

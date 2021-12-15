@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+
+{% block web_title %}
+    {% block nav_title %}
+        SAEON | Open Data Platform
+    {% endblock %}
+{% endblock %}
+
+{% block nav_menu %}
+    {% from 'macros.html' import nav_menu %}
+    {{ nav_menu(request.blueprint,
+        ('projects', 'collections', 'schemas', 'catalogues', 'roles'),
+        ('providers', 'records', 'tags', 'clients', 'users'),
+    ) }}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script>
+        $SCRIPT_ROOT = {{ request.script_root|tojson }};
+    </script>
+{% endblock %}

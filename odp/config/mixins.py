@@ -19,4 +19,4 @@ class DBConfigMixin(BaseSettings):
 class OAuth2ClientConfigMixin(BaseSettings):
     CLIENT_ID: str
     CLIENT_SECRET: str
-    SCOPE: List[str] = ['openid']
+    SCOPE: List[str] = ['openid', 'offline']
