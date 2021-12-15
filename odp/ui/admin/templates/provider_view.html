@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    Provider: {{ provider.name }}
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Provider: {{ provider.name }}
+    {% endblock %}
 {% endblock %}
 
 {% block content %}

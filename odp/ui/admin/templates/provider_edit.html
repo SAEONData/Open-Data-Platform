@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    {% if provider %}
-        Provider: {{ provider.name }}
-    {% else %}
-        Create Provider
-    {% endif %}
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        {% if provider %}
+            Provider: {{ provider.name }}
+        {% else %}
+            Create Provider
+        {% endif %}
+    {% endblock %}
 {% endblock %}
 
 {% block content %}

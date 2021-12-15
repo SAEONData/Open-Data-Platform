@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    Record: {{ record.doi or record.sid }}
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Record: {{ record.doi or record.sid }}
+    {% endblock %}
 {% endblock %}
 
 {% block content %}

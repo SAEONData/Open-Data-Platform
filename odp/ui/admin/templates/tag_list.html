@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    Tags
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Tags
+    {% endblock %}
 {% endblock %}
 
 {% block content %}

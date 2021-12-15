@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    {% if collection %}
-        Collection: {{ collection.name }}
-    {% else %}
-        Create Collection
-    {% endif %}
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        {% if collection %}
+            Collection: {{ collection.name }}
+        {% else %}
+            Create Collection
+        {% endif %}
+    {% endblock %}
 {% endblock %}
 
 {% block content %}

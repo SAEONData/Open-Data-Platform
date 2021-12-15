@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    Roles
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Roles
+    {% endblock %}
 {% endblock %}
 
 {% block content %}

@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    {% if client %}
-        Client: {{ client.name }}
-    {% else %}
-        Create Client
-    {% endif %}
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        {% if client %}
+            Client: {{ client.name }}
+        {% else %}
+            Create Client
+        {% endif %}
+    {% endblock %}
 {% endblock %}
 
 {% block content %}

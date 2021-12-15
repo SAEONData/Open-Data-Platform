@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    Client: {{ client.name }}
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Client: {{ client.name }}
+    {% endblock %}
 {% endblock %}
 
 {% block content %}

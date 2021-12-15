@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    Collections
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Collections
+    {% endblock %}
 {% endblock %}
 
 {% block content %}

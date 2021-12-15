@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    {% if role %}
-        Role: {{ role.id }}
-    {% else %}
-        Create Role
-    {% endif %}
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        {% if role %}
+            Role: {{ role.id }}
+        {% else %}
+            Create Role
+        {% endif %}
+    {% endblock %}
 {% endblock %}
 
 {% block content %}

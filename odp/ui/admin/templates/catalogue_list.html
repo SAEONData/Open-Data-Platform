@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    Catalogues
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Catalogues
+    {% endblock %}
 {% endblock %}
 
 {% block content %}

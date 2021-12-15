@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 
-{% block heading %}
-    {% if project %}
-        Project: {{ project.name }}
-    {% else %}
-        Create Project
-    {% endif %}
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        {% if project %}
+            Project: {{ project.name }}
+        {% else %}
+            Create Project
+        {% endif %}
+    {% endblock %}
 {% endblock %}
 
 {% block content %}
