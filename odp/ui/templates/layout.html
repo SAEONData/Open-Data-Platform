@@ -13,7 +13,7 @@
 </head>
 <body>
 <div class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-dark bg-dark p-3">
+    <nav class="navbar navbar-dark {% block navbar_bg %}{% endblock %} p-3">
         <div class="container-fluid">
             <div class="navbar-nav text-start">
                 <a class="navbar-brand" href="{{ url_for('home.index') }}">

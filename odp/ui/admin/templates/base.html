@@ -6,6 +6,10 @@
     {% endblock %}
 {% endblock %}
 
+{% block navbar_bg %}
+    bg-dark
+{% endblock %}
+
 {% block nav_menu %}
     {% from 'macros.html' import nav_menu %}
     {{ nav_menu(request.blueprint,
