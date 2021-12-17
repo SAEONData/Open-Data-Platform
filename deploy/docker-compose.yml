@@ -105,6 +105,7 @@ services:
       - ODP_UI_PUBLIC_FLASK_KEY
       - ODP_UI_PUBLIC_CLIENT_ID
       - ODP_UI_PUBLIC_CLIENT_SECRET
+      - ODP_UI_PUBLIC_THREDDS_URL=${ODP_PUBLIC_URL}/thredds/
       - ODP_DB_HOST
       - ODP_DB_NAME
       - ODP_DB_USER
