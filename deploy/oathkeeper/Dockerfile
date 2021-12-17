@@ -1,0 +1,7 @@
+ARG OATHKEEPER_IMAGE
+FROM ${OATHKEEPER_IMAGE}
+
+ARG ODP_UI_PUBLIC_URL
+COPY config.yml rules.yml ./
+RUN sed -i "s/ODP_UI_PUBLIC_URL/${ODP_UI_PUBLIC_URL}/" config.yml
+RUN sed -i "s/ODP_UI_PUBLIC_URL/${ODP_UI_PUBLIC_URL}/" rules.yml

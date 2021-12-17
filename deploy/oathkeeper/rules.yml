@@ -1,0 +1,14 @@
+- id: thredds
+  upstream:
+    url: http://dap.saeon.ac.za/
+  match:
+    url: ODP_UI_PUBLIC_URL/thredds/<.*>
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: allow
+  mutators:
+    - handler: noop
+  errors:
+    - handler: redirect

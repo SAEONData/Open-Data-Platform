@@ -91,6 +91,31 @@ services:
       - PYTHONUNBUFFERED=1
     restart: always
 
+  odp-ui-public:
+    container_name: odp-ui-public
+    build:
+      context: ..
+      dockerfile: deploy/odp-ui-public/Dockerfile
+      args:
+        - CA_CERT_URL
+    network_mode: host
+    environment:
+      - ODP_ENV
+      - FLASK_ENV=${ODP_ENV}
+      - ODP_UI_PUBLIC_FLASK_KEY
+      - ODP_UI_PUBLIC_CLIENT_ID
+      - ODP_UI_PUBLIC_CLIENT_SECRET
+      - ODP_DB_HOST
+      - ODP_DB_NAME
+      - ODP_DB_USER
+      - ODP_DB_PASS
+      - HYDRA_PUBLIC_URL
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
+      - TZ
+      - PYTHONUNBUFFERED=1
+    restart: always
+
   hydra:
     container_name: hydra
     image: ${HYDRA_IMAGE}
@@ -122,5 +147,16 @@ services:
   redis:
     container_name: redis
     image: redis:6
+    network_mode: host
+    restart: always
+
+  oathkeeper:
+    container_name: oathkeeper
+    build:
+      context: oathkeeper
+      args:
+        - OATHKEEPER_IMAGE
+        - ODP_UI_PUBLIC_URL
+    command: serve --config /config.yml
     network_mode: host
     restart: always
