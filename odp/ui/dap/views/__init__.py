@@ -1,7 +1,7 @@
 from flask import Flask
 
-from odp.ui.dap.views import session
-from odp.ui.views import hydra, home
+from odp.ui.dap.views import home, session
+from odp.ui.views import hydra
 
 
 def init_app(app: Flask):

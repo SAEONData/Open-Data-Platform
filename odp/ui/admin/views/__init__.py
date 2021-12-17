@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 from flask import Flask
 
 from odp.ui.admin.views import (
+    home,
     projects,
     providers,
     collections,
@@ -16,7 +17,7 @@ from odp.ui.admin.views import (
     clients,
     catalogues,
 )
-from odp.ui.views import hydra, home
+from odp.ui.views import hydra
 
 
 def init_app(app: Flask):

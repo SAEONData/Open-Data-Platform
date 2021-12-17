@@ -81,7 +81,8 @@ class ODPDAPConfig(BaseConfig, OAuth2ClientConfigMixin):
     class Config:
         env_prefix = 'ODP_DAP_'
 
-    FLASK_KEY: str  # Flask secret key
+    FLASK_KEY: str           # Flask secret key
+    THREDDS_URL: AnyHttpUrl  # proxy URL for the THREDDS server
 
 
 class ODPConfig(BaseConfig):

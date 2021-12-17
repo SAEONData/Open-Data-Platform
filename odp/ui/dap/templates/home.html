@@ -1,11 +1,30 @@
 {% extends 'base.html' %}
 
 {% block heading %}
-    Welcome to the SAEON Data Access Portal!
+    {% if current_user.is_authenticated %}
+        SAEON Data Servers
+    {% else %}
+        Welcome to the SAEON Data Access Portal!
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-    {% if not current_user.is_authenticated %}
+    {% if current_user.is_authenticated %}
+        <div class="d-flex justify-content-evenly">
+            <div class="card">
+                <a href="{{ thredds_url }}">
+                    <img src="{{ url_for('static', filename='thredds_tds-400x400.png') }}" class="card-img-top">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title">THREDDS Data Server</h5>
+                    <p class="card-text">Browse SAEON's THREDDS catalog.</p>
+                    <div class="d-grid">
+                        <a href="{{ thredds_url }}" class="btn btn-primary">Go</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
         <p>Please <a href="{{ url_for('hydra.login') }}">log in</a> to continue.</p>
     {% endif %}
 {% endblock %}
