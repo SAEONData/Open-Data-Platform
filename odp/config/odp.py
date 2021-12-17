@@ -46,9 +46,18 @@ class ODPUIAdminConfig(BaseConfig, OAuth2ClientConfigMixin):
     API_URL: AnyHttpUrl  # URL of the ODP API
 
 
+class ODPUIPublicConfig(BaseConfig, OAuth2ClientConfigMixin):
+    class Config:
+        env_prefix = 'ODP_UI_PUBLIC_'
+
+    FLASK_KEY: str           # Flask secret key
+    THREDDS_URL: AnyHttpUrl  # proxy URL for the THREDDS server
+
+
 class ODPUIConfig(BaseConfig):
     _subconfig = {
         'ADMIN': ODPUIAdminConfig,
+        'PUBLIC': ODPUIPublicConfig,
     }
 
 
@@ -83,14 +92,6 @@ class ODPPublishConfig(BaseConfig):
     BATCH_SIZE: int
 
 
-class ODPDAPConfig(BaseConfig, OAuth2ClientConfigMixin):
-    class Config:
-        env_prefix = 'ODP_DAP_'
-
-    FLASK_KEY: str           # Flask secret key
-    THREDDS_URL: AnyHttpUrl  # proxy URL for the THREDDS server
-
-
 class ODPConfig(BaseConfig):
     class Config:
         env_prefix = 'ODP_'
@@ -105,5 +106,4 @@ class ODPConfig(BaseConfig):
         'IDENTITY': ODPIdentityConfig,
         'MAIL': ODPMailConfig,
         'PUBLISH': ODPPublishConfig,
-        'DAP': ODPDAPConfig,
     }

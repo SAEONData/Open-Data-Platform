@@ -1,6 +1,6 @@
 from flask import Flask
 
-from odp.ui.dap.views import home, session
+from odp.ui.public.views import home, session
 from odp.ui.views import hydra
 
 

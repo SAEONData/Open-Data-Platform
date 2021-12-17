@@ -7,4 +7,4 @@ bp = Blueprint('home', __name__)
 
 @bp.route('/')
 def index():
-    return render_template('home.html', thredds_url=config.ODP.DAP.THREDDS_URL)
+    return render_template('home.html', thredds_url=config.ODP.UI.PUBLIC.THREDDS_URL)

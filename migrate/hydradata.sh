@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# This script (re)creates OAuth2 clients for the ODP Admin and
-# Data Access Portal UIs. It should be run from the ../deploy or
-# ../develop directory, as applicable.
+# This script (re)creates OAuth2 clients for the ODP admin and
+# public UIs. It should be run from the ../deploy or ../develop
+# directory, as applicable.
 
 source .env
 
@@ -10,9 +10,9 @@ echo 'Deleting existing OAuth2 clients...'
 docker run -it --rm --network host -e HYDRA_ADMIN_URL=${HYDRA_ADMIN_URL} ${HYDRA_IMAGE} \
   clients delete --skip-tls-verify ${ODP_UI_ADMIN_CLIENT_ID}
 docker run -it --rm --network host -e HYDRA_ADMIN_URL=${HYDRA_ADMIN_URL} ${HYDRA_IMAGE} \
-  clients delete --skip-tls-verify ${ODP_DAP_CLIENT_ID}
+  clients delete --skip-tls-verify ${ODP_UI_PUBLIC_CLIENT_ID}
 
-echo 'Creating an OAuth2 client for the ODP UI...'
+echo 'Creating an OAuth2 client for the ODP admin UI...'
 docker run -it --rm --network host -e HYDRA_ADMIN_URL=${HYDRA_ADMIN_URL} ${HYDRA_IMAGE} \
   clients create --skip-tls-verify \
     --id ${ODP_UI_ADMIN_CLIENT_ID} \
@@ -23,15 +23,15 @@ docker run -it --rm --network host -e HYDRA_ADMIN_URL=${HYDRA_ADMIN_URL} ${HYDRA
     --callbacks ${ODP_UI_ADMIN_URL}/oauth2/logged_in \
     --post-logout-callbacks ${ODP_UI_ADMIN_URL}/oauth2/logged_out
 
-echo 'Creating an OAuth2 client for the Data Access Portal...'
+echo 'Creating an OAuth2 client for the ODP public UI...'
 docker run -it --rm --network host -e HYDRA_ADMIN_URL=${HYDRA_ADMIN_URL} ${HYDRA_IMAGE} \
   clients create --skip-tls-verify \
-    --id ${ODP_DAP_CLIENT_ID} \
-    --secret ${ODP_DAP_CLIENT_SECRET} \
+    --id ${ODP_UI_PUBLIC_CLIENT_ID} \
+    --secret ${ODP_UI_PUBLIC_CLIENT_SECRET} \
     --grant-types authorization_code,refresh_token \
     --response-types code \
     --scope openid,offline \
-    --callbacks ${ODP_DAP_URL}/oauth2/logged_in \
-    --post-logout-callbacks ${ODP_DAP_URL}/oauth2/logged_out
+    --callbacks ${ODP_UI_PUBLIC_URL}/oauth2/logged_in \
+    --post-logout-callbacks ${ODP_UI_PUBLIC_URL}/oauth2/logged_out
 
 echo 'Done.'

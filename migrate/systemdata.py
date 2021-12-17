@@ -31,9 +31,9 @@ from odp.db.models import Scope, Role, Client, User, UserRole
 
 ODP_ADMIN_ROLE = 'ODP:Admin'
 ODP_UI_ADMIN_CLIENT_ID = os.getenv('ODP_UI_ADMIN_CLIENT_ID')
-ODP_UI_ADMIN_CLIENT_NAME = 'The ODP Admin Interface'
-ODP_DAP_CLIENT_ID = os.getenv('ODP_DAP_CLIENT_ID')
-ODP_DAP_CLIENT_NAME = 'SAEON Data Access Portal'
+ODP_UI_ADMIN_CLIENT_NAME = 'ODP Admin UI'
+ODP_UI_PUBLIC_CLIENT_ID = os.getenv('ODP_UI_PUBLIC_CLIENT_ID')
+ODP_UI_PUBLIC_CLIENT_NAME = 'ODP Public UI'
 
 
 def create_schema():
@@ -78,10 +78,10 @@ def sync_admin_client():
     client.save()
 
 
-def sync_dap_client():
-    """Create a client for the Data Access Portal if it does not exist."""
-    client = Session.get(Client, ODP_DAP_CLIENT_ID) or Client(id=ODP_DAP_CLIENT_ID)
-    client.name = ODP_DAP_CLIENT_NAME,
+def sync_public_client():
+    """Create a client for the ODP Public UI if it does not exist."""
+    client = Session.get(Client, ODP_UI_PUBLIC_CLIENT_ID) or Client(id=ODP_UI_PUBLIC_CLIENT_ID)
+    client.name = ODP_UI_PUBLIC_CLIENT_NAME,
     client.save()
 
 
@@ -121,6 +121,6 @@ if __name__ == '__main__':
         sync_system_scopes()
         sync_admin_role()
         sync_admin_client()
-        sync_dap_client()
+        sync_public_client()
         create_admin_user()
     print('Done.')
