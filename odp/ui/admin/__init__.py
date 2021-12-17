@@ -15,11 +15,11 @@ def create_app():
     """
     app = Flask(__name__)
     app.config.update(
-        SECRET_KEY=config.ODP.UI.FLASK_KEY,
-        CLIENT_ID=config.ODP.UI.CLIENT_ID,
-        CLIENT_SECRET=config.ODP.UI.CLIENT_SECRET,
+        SECRET_KEY=config.ODP.UI.ADMIN.FLASK_KEY,
+        CLIENT_ID=config.ODP.UI.ADMIN.CLIENT_ID,
+        CLIENT_SECRET=config.ODP.UI.ADMIN.CLIENT_SECRET,
         CLIENT_SCOPE=['openid', 'offline'] + [s.value for s in ODPScope],
-        API_URL=config.ODP.UI.API_URL,
+        API_URL=config.ODP.UI.ADMIN.API_URL,
     )
 
     ui_dir = Path(__file__).parent.parent

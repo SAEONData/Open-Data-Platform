@@ -30,8 +30,8 @@ from odp.db import engine, Session, Base
 from odp.db.models import Scope, Role, Client, User, UserRole
 
 ODP_ADMIN_ROLE = 'ODP:Admin'
-ODP_UI_CLIENT_ID = os.getenv('ODP_UI_CLIENT_ID')
-ODP_UI_CLIENT_NAME = 'The ODP Admin Interface'
+ODP_UI_ADMIN_CLIENT_ID = os.getenv('ODP_UI_ADMIN_CLIENT_ID')
+ODP_UI_ADMIN_CLIENT_NAME = 'The ODP Admin Interface'
 ODP_DAP_CLIENT_ID = os.getenv('ODP_DAP_CLIENT_ID')
 ODP_DAP_CLIENT_NAME = 'SAEON Data Access Portal'
 
@@ -69,11 +69,11 @@ def sync_admin_role():
     role.save()
 
 
-def sync_ui_client():
-    """Create a client for the ODP UI if it does not exist,
+def sync_admin_client():
+    """Create a client for the ODP Admin UI if it does not exist,
     and synchronize its scopes with the system."""
-    client = Session.get(Client, ODP_UI_CLIENT_ID) or Client(id=ODP_UI_CLIENT_ID)
-    client.name = ODP_UI_CLIENT_NAME,
+    client = Session.get(Client, ODP_UI_ADMIN_CLIENT_ID) or Client(id=ODP_UI_ADMIN_CLIENT_ID)
+    client.name = ODP_UI_ADMIN_CLIENT_NAME,
     client.scopes = [Session.get(Scope, s.value) for s in ODPScope]
     client.save()
 
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     with Session.begin():
         sync_system_scopes()
         sync_admin_role()
-        sync_ui_client()
+        sync_admin_client()
         sync_dap_client()
         create_admin_user()
     print('Done.')

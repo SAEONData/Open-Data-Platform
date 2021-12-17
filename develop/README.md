@@ -42,7 +42,7 @@ Add the project root to the Python path:
     uvicorn odp.api:app --port 2020
 
 ### ODP Admin UI
-    FLASK_APP=odp.ui.admin flask run --port=2021 --host=odp.localhost
+    FLASK_APP=odp.ui.admin flask run --port=2021 --host=odp-admin.localhost
 
 ### Data Access Portal
     FLASK_APP=odp.ui.dap flask run --port=2022 --host=dap.localhost
