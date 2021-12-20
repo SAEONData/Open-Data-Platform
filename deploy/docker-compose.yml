@@ -105,7 +105,8 @@ services:
       - ODP_UI_PUBLIC_FLASK_KEY
       - ODP_UI_PUBLIC_CLIENT_ID
       - ODP_UI_PUBLIC_CLIENT_SECRET
-      - ODP_UI_PUBLIC_THREDDS_URL=${ODP_PUBLIC_URL}/thredds/
+      - ODP_UI_PUBLIC_THREDDS_URL
+      - ODP_UI_PUBLIC_SERVER_NAME=${ODP_PUBLIC_DOMAIN}
       - ODP_DB_HOST
       - ODP_DB_NAME
       - ODP_DB_USER
@@ -156,8 +157,10 @@ services:
     build:
       context: oathkeeper
       args:
-        - OATHKEEPER_IMAGE
+        - CA_CERT_URL
         - ODP_UI_PUBLIC_URL
+        - ODP_UI_PUBLIC_THREDDS_URL
+        - ODP_PUBLIC_DOMAIN
     command: serve --config /config.yml
     network_mode: host
     restart: always

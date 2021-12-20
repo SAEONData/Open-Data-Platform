@@ -21,6 +21,9 @@ def create_app():
         'BOOTSTRAP_SERVE_LOCAL': True,
         'BOOTSTRAP_BOOTSWATCH_THEME': 'spacelab',
         'BOOTSTRAP_BTN_SIZE': 'block',
+        'SESSION_COOKIE_NAME': 'idsession',  # avoid conflict with public UI session cookie on same domain
+        'SESSION_COOKIE_SECURE': True,
+        'SESSION_COOKIE_SAMESITE': 'Strict',
     })
 
     db.init_app(app)

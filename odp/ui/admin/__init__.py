@@ -2,6 +2,7 @@ from pathlib import Path
 
 from flask import Flask
 from jinja2 import ChoiceLoader, FileSystemLoader
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from odp import ODPScope
 from odp.config import config
@@ -16,6 +17,8 @@ def create_app():
     app = Flask(__name__)
     app.config.update(
         SECRET_KEY=config.ODP.UI.ADMIN.FLASK_KEY,
+        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_SAMESITE='Lax',
         CLIENT_ID=config.ODP.UI.ADMIN.CLIENT_ID,
         CLIENT_SECRET=config.ODP.UI.ADMIN.CLIENT_SECRET,
         CLIENT_SCOPE=['openid', 'offline'] + [s.value for s in ODPScope],
@@ -33,5 +36,8 @@ def create_app():
     auth.init_app(app)
     views.init_app(app)
     forms.init_app(app)
+
+    # trust the X-Forwarded-* headers set by the proxy server
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_prefix=1)
 
     return app
