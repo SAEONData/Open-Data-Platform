@@ -23,7 +23,7 @@ def create_app():
         'BOOTSTRAP_BTN_SIZE': 'block',
         'SESSION_COOKIE_NAME': 'idsession',  # avoid conflict with public UI session cookie on same domain
         'SESSION_COOKIE_SECURE': True,
-        'SESSION_COOKIE_SAMESITE': 'Strict',
+        'SESSION_COOKIE_SAMESITE': 'Lax',
     })
 
     db.init_app(app)
