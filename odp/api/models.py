@@ -87,11 +87,6 @@ class ProjectModel(BaseModel):
     collection_ids: List[str]
 
 
-class ProjectSort(str, Enum):
-    ID = 'id'
-    NAME = 'name'
-
-
 class ProviderModel(BaseModel):
     id: str
     name: str

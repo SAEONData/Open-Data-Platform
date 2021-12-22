@@ -1,13 +1,11 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize
-from odp.api.lib.paging import Pager, Paging
-from odp.api.models import ProjectModel, ProjectSort
+from odp.api.lib.paging import Page, Paginator
+from odp.api.models import ProjectModel
 from odp.db import Session
 from odp.db.models import Project, Collection
 
@@ -16,29 +14,20 @@ router = APIRouter()
 
 @router.get(
     '/',
-    response_model=List[ProjectModel],
+    response_model=Page[ProjectModel],
     dependencies=[Depends(Authorize(ODPScope.PROJECT_READ))],
 )
 async def list_projects(
-        pager: Pager = Depends(Paging(ProjectSort)),
+        paginator: Paginator = Depends(),
 ):
-    stmt = (
-        select(Project).
-        order_by(getattr(Project, pager.sort)).
-        offset(pager.skip).
-        limit(pager.limit)
-    )
-
-    projects = [
-        ProjectModel(
+    return paginator.paginate(
+        select(Project),
+        lambda row: ProjectModel(
             id=row.Project.id,
             name=row.Project.name,
             collection_ids=[collection.id for collection in row.Project.collections],
         )
-        for row in Session.execute(stmt)
-    ]
-
-    return projects
+    )
 
 
 @router.get(

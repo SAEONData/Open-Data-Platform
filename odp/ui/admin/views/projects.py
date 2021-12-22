@@ -12,7 +12,7 @@ bp = Blueprint('projects', __name__)
 @api.client(ODPScope.PROJECT_READ)
 def index():
     projects = api.get('/project/')
-    return render_template('project_list.html', projects=projects)
+    return render_template('project_list.html', projects=projects['items'])
 
 
 @bp.route('/<id>')
