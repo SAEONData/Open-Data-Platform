@@ -5,8 +5,7 @@ from sqlalchemy import select
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize
-from odp.api.lib.paging import Pager, Paging
-from odp.api.models import ScopeModel, ScopeSort
+from odp.api.models import ScopeModel
 from odp.db import Session
 from odp.db.models import Scope
 
@@ -18,14 +17,10 @@ router = APIRouter()
     response_model=List[ScopeModel],
     dependencies=[Depends(Authorize(ODPScope.SCOPE_READ))],
 )
-async def list_scopes(
-        pager: Pager = Depends(Paging(ScopeSort)),
-):
+async def list_scopes():
     stmt = (
         select(Scope).
-        order_by(getattr(Scope, pager.sort)).
-        offset(pager.skip).
-        limit(pager.limit)
+        order_by(Scope.id)
     )
 
     scopes = [

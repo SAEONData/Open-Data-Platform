@@ -41,20 +41,11 @@ class CatalogueModel(BaseModel):
     schema_: Dict[str, Any]
 
 
-class CatalogueSort(str, Enum):
-    ID = 'id'
-
-
 class ClientModel(BaseModel):
     id: str
     name: str
     scope_ids: List[str]
     provider_id: Optional[str]
-
-
-class ClientSort(str, Enum):
-    ID = 'id'
-    NAME = 'name'
 
 
 class CollectionModel(BaseModel):
@@ -88,10 +79,6 @@ class FlagModel(BaseModel):
     schema_id: str
     schema_uri: str
     schema_: Dict[str, Any]
-
-
-class FlagSort(str, Enum):
-    ID = 'id'
 
 
 class ProjectModel(BaseModel):
@@ -181,10 +168,6 @@ class RoleModel(BaseModel):
     provider_id: Optional[str]
 
 
-class RoleSort(str, Enum):
-    ID = 'id'
-
-
 class SchemaModel(BaseModel):
     id: str
     type: str
@@ -192,17 +175,8 @@ class SchemaModel(BaseModel):
     schema_: Dict[str, Any]
 
 
-class SchemaSort(str, Enum):
-    ID = 'id'
-    TYPE = 'type'
-
-
 class ScopeModel(BaseModel):
     id: str
-
-
-class ScopeSort(str, Enum):
-    ID = 'id'
 
 
 class TagModel(BaseModel):
@@ -212,10 +186,6 @@ class TagModel(BaseModel):
     schema_id: str
     schema_uri: str
     schema_: Dict[str, Any]
-
-
-class TagSort(str, Enum):
-    ID = 'id'
 
 
 class UserModel(BaseModel):

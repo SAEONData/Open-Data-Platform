@@ -7,9 +7,8 @@ from starlette.status import HTTP_404_NOT_FOUND
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize
-from odp.api.lib.paging import Pager, Paging
 from odp.api.lib.schema import schema_catalog
-from odp.api.models import FlagModel, FlagSort
+from odp.api.models import FlagModel
 from odp.db import Session
 from odp.db.models import Flag
 
@@ -21,14 +20,10 @@ router = APIRouter()
     response_model=List[FlagModel],
     dependencies=[Depends(Authorize(ODPScope.FLAG_READ))],
 )
-async def list_flags(
-        pager: Pager = Depends(Paging(FlagSort)),
-):
+async def list_flags():
     stmt = (
         select(Flag).
-        order_by(getattr(Flag, pager.sort)).
-        offset(pager.skip).
-        limit(pager.limit)
+        order_by(Flag.id)
     )
 
     flags = [

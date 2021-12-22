@@ -6,8 +6,7 @@ from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FOR
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize, Authorized
-from odp.api.lib.paging import Pager, Paging
-from odp.api.models import RoleModel, RoleSort
+from odp.api.models import RoleModel
 from odp.db import Session
 from odp.db.models import Role, Scope
 
@@ -19,14 +18,11 @@ router = APIRouter()
     response_model=List[RoleModel],
 )
 async def list_roles(
-        pager: Pager = Depends(Paging(RoleSort)),
         auth: Authorized = Depends(Authorize(ODPScope.ROLE_READ)),
 ):
     stmt = (
         select(Role).
-        order_by(getattr(Role, pager.sort)).
-        offset(pager.skip).
-        limit(pager.limit)
+        order_by(Role.id)
     )
     if auth.provider_ids != '*':
         stmt = stmt.where(Role.provider_id.in_(auth.provider_ids))

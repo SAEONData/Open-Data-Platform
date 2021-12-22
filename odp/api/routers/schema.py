@@ -7,9 +7,8 @@ from starlette.status import HTTP_404_NOT_FOUND
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize
-from odp.api.lib.paging import Pager, Paging
 from odp.api.lib.schema import schema_catalog
-from odp.api.models import SchemaModel, SchemaSort
+from odp.api.models import SchemaModel
 from odp.db import Session
 from odp.db.models import Schema, SchemaType
 
@@ -23,13 +22,10 @@ router = APIRouter()
 )
 async def list_schemas(
         schema_type: SchemaType = None,
-        pager: Pager = Depends(Paging(SchemaSort)),
 ):
     stmt = (
         select(Schema).
-        order_by(getattr(Schema, pager.sort)).
-        offset(pager.skip).
-        limit(pager.limit)
+        order_by(Schema.id)
     )
     if schema_type:
         stmt = stmt.where(Schema.type == schema_type)
