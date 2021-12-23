@@ -22,8 +22,13 @@ def index():
 @api.client(ODPScope.RECORD_READ)
 def view(id):
     record = api.get(f'/record/{id}')
-    qc_tags = [tag for tag in record['tags'] if tag['tag_id'] == ODPTag.RECORD_QC]
-    has_user_qc_tag = any(tag for tag in qc_tags if tag['user_id'] == current_user.id)
+    qc_tags = {
+        'items': (items := [tag for tag in record['tags'] if tag['tag_id'] == ODPTag.RECORD_QC]),
+        'total': len(items),
+        'page': 1,
+        'pages': 1,
+    }
+    has_user_qc_tag = any(tag for tag in items if tag['user_id'] == current_user.id)
     return render_template('record_view.html', record=record, qc_tags=qc_tags,
                            has_user_qc_tag=has_user_qc_tag)
 

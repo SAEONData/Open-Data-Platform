@@ -45,7 +45,7 @@
                 {% elif prop == 'Timestamp' %}
                     {{ record.timestamp|timestamp }}
                 {% elif prop == 'Quality Control' %}
-                    {% for qc_tag in qc_tags %}
+                    {% for qc_tag in qc_tags['items'] %}
                         {{ qc_tag.data.pass_|replace('True', 'Passed')|replace('False', 'Failed') }}
                         by {{ obj_link('users', qc_tag.user_id, qc_tag.user_name) }}<br/>
                     {% endfor %}
