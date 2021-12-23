@@ -1,11 +1,10 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize, Authorized
+from odp.api.lib.paging import Page, Paginator
 from odp.api.models import RoleModel
 from odp.db import Session
 from odp.db.models import Role, Scope
@@ -15,28 +14,24 @@ router = APIRouter()
 
 @router.get(
     '/',
-    response_model=List[RoleModel],
+    response_model=Page[RoleModel],
 )
 async def list_roles(
         auth: Authorized = Depends(Authorize(ODPScope.ROLE_READ)),
+        paginator: Paginator = Depends(),
 ):
-    stmt = (
-        select(Role).
-        order_by(Role.id)
-    )
+    stmt = select(Role)
     if auth.provider_ids != '*':
         stmt = stmt.where(Role.provider_id.in_(auth.provider_ids))
 
-    roles = [
-        RoleModel(
+    return paginator.paginate(
+        stmt,
+        lambda row: RoleModel(
             id=row.Role.id,
             scope_ids=[scope.id for scope in row.Role.scopes],
             provider_id=row.Role.provider_id,
         )
-        for row in Session.execute(stmt)
-    ]
-
-    return roles
+    )
 
 
 @router.get(

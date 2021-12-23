@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from math import ceil
 from typing import Generic, TypeVar, List, Callable
 
 from fastapi import HTTPException, Query
@@ -10,7 +11,7 @@ from sqlalchemy.exc import CompileError
 from sqlalchemy.sql import Select
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp.db import Session
+from odp.db import Session, Base
 
 
 @dataclass
@@ -41,7 +42,7 @@ class Page(GenericModel, Generic[ModelT]):
     items: List[ModelT]
     total: int
     page: int
-    size: int
+    pages: int
 
 
 class Paginator:
@@ -59,6 +60,7 @@ class Paginator:
             self,
             query: Select,
             item_factory: Callable[[Row], ModelT],
+            sort_model: Base = None,
     ) -> Page[ModelT]:
         total = Session.execute(
             select(func.count()).
@@ -66,20 +68,21 @@ class Paginator:
         ).scalar_one()
 
         try:
+            sort_col = getattr(sort_model, self.sort) if sort_model else self.sort
             items = [
                 item_factory(row) for row in Session.execute(
                     query.
-                    order_by(self.sort).
+                    order_by(sort_col).
                     offset(self.size * (self.page - 1)).
                     limit(self.size)
                 )
             ]
-        except CompileError:
+        except (AttributeError, CompileError):
             raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid sort column')
 
         return Page(
             items=items,
             total=total,
             page=self.page,
-            size=self.size,
+            pages=ceil(total / self.size),
         )

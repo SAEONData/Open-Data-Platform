@@ -1,13 +1,11 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize
-from odp.api.lib.paging import Pager, Paging
-from odp.api.models import UserModelIn, UserModel, UserSort
+from odp.api.lib.paging import Page, Paginator
+from odp.api.models import UserModelIn, UserModel
 from odp.db import Session
 from odp.db.models import User, Role
 
@@ -16,21 +14,15 @@ router = APIRouter()
 
 @router.get(
     '/',
-    response_model=List[UserModel],
+    response_model=Page[UserModel],
     dependencies=[Depends(Authorize(ODPScope.USER_READ))],
 )
 async def list_users(
-        pager: Pager = Depends(Paging(UserSort)),
+        paginator: Paginator = Depends(),
 ):
-    stmt = (
-        select(User).
-        order_by(getattr(User, pager.sort)).
-        offset(pager.skip).
-        limit(pager.limit)
-    )
-
-    users = [
-        UserModel(
+    return paginator.paginate(
+        select(User),
+        lambda row: UserModel(
             id=row.User.id,
             email=row.User.email,
             active=row.User.active,
@@ -39,10 +31,7 @@ async def list_users(
             picture=row.User.picture,
             role_ids=[role.id for role in row.User.roles],
         )
-        for row in Session.execute(stmt)
-    ]
-
-    return users
+    )
 
 
 @router.get(

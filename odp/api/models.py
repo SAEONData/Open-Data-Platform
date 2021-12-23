@@ -1,6 +1,5 @@
 import re
 from datetime import datetime
-from enum import Enum
 from typing import List, Optional, Dict, Any
 
 from pydantic import BaseModel, Field, validator, root_validator
@@ -66,12 +65,6 @@ class CollectionModelIn(BaseModel):
     provider_id: str
 
 
-class CollectionSort(str, Enum):
-    ID = 'id'
-    NAME = 'name'
-    PROVIDER_ID = 'provider_id'
-
-
 class FlagModel(BaseModel):
     id: str
     public: bool
@@ -98,11 +91,6 @@ class ProviderModel(BaseModel):
 class ProviderModelIn(BaseModel):
     id: str
     name: str
-
-
-class ProviderSort(str, Enum):
-    ID = 'id'
-    NAME = 'name'
 
 
 class RecordModel(BaseModel):
@@ -152,11 +140,6 @@ class RecordModelIn(BaseModel):
         return values
 
 
-class RecordSort(str, Enum):
-    DOI = 'doi'
-    SID = 'sid'
-
-
 class RoleModel(BaseModel):
     id: str
     scope_ids: List[str]
@@ -197,8 +180,3 @@ class UserModelIn(BaseModel):
     id: str
     active: bool
     role_ids: List[str]
-
-
-class UserSort(str, Enum):
-    NAME = 'name'
-    EMAIL = 'email'

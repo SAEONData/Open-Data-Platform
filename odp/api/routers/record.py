@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from jschon import JSONSchema, JSON
@@ -8,9 +7,9 @@ from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FOR
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize, Authorized, FlagAuthorize, UnflagAuthorize, TagAuthorize, UntagAuthorize
-from odp.api.lib.paging import Pager, Paging
+from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_metadata_schema, get_flag_schema, get_tag_schema
-from odp.api.models import RecordModel, RecordModelIn, RecordSort, TagInstanceModel, TagInstanceModelIn, FlagInstanceModel, FlagInstanceModelIn
+from odp.api.models import RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn, FlagInstanceModel, FlagInstanceModelIn
 from odp.db import Session
 from odp.db.models import Record, Collection, SchemaType, RecordAudit, AuditCommand, RecordTag, RecordTagAudit, RecordFlag, RecordFlagAudit
 
@@ -60,28 +59,23 @@ def output_record_tag_model(record_tag: RecordTag) -> TagInstanceModel:
 
 @router.get(
     '/',
-    response_model=List[RecordModel],
+    response_model=Page[RecordModel],
 )
 async def list_records(
-        pager: Pager = Depends(Paging(RecordSort)),
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
+        paginator: Paginator = Depends(),
 ):
     stmt = (
         select(Record).
-        join(Collection).
-        order_by(getattr(Record, pager.sort)).
-        offset(pager.skip).
-        limit(pager.limit)
+        join(Collection)
     )
     if auth.provider_ids != '*':
         stmt = stmt.where(Collection.provider_id.in_(auth.provider_ids))
 
-    records = [
-        output_record_model(row.Record)
-        for row in Session.execute(stmt)
-    ]
-
-    return records
+    return paginator.paginate(
+        stmt,
+        lambda row: output_record_model(row.Record),
+    )
 
 
 @router.get(

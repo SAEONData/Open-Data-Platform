@@ -33,10 +33,12 @@ def assert_json_result(response, json, catalogue):
 
 def assert_json_results(response, json, catalogues):
     """Verify that the API result list matches the given catalogue batch."""
-    json.sort(key=lambda j: j['id'])
+    items = json['items']
+    assert json['total'] == len(items) == len(catalogues)
+    items.sort(key=lambda i: i['id'])
     catalogues.sort(key=lambda c: c.id)
     for n, catalogue in enumerate(catalogues):
-        assert_json_result(response, json[n], catalogue)
+        assert_json_result(response, items[n], catalogue)
 
 
 @pytest.mark.parametrize('scopes, authorized', [

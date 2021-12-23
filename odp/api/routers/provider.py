@@ -1,13 +1,11 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize, Authorized
-from odp.api.lib.paging import Pager, Paging
-from odp.api.models import ProviderModelIn, ProviderModel, ProviderSort
+from odp.api.lib.paging import Page, Paginator
+from odp.api.models import ProviderModelIn, ProviderModel
 from odp.db import Session
 from odp.db.models import Provider
 
@@ -16,33 +14,26 @@ router = APIRouter()
 
 @router.get(
     '/',
-    response_model=List[ProviderModel],
+    response_model=Page[ProviderModel],
 )
 async def list_providers(
-        pager: Pager = Depends(Paging(ProviderSort)),
         auth: Authorized = Depends(Authorize(ODPScope.PROVIDER_READ)),
+        paginator: Paginator = Depends(),
 ):
-    stmt = (
-        select(Provider).
-        order_by(getattr(Provider, pager.sort)).
-        offset(pager.skip).
-        limit(pager.limit)
-    )
+    stmt = select(Provider)
     if auth.provider_ids != '*':
         stmt = stmt.where(Provider.id.in_(auth.provider_ids))
 
-    providers = [
-        ProviderModel(
+    return paginator.paginate(
+        stmt,
+        lambda row: ProviderModel(
             id=row.Provider.id,
             name=row.Provider.name,
             collection_ids=[collection.id for collection in row.Provider.collections],
             client_ids=[client.id for client in row.Provider.clients],
             role_ids=[role.id for role in row.Provider.roles],
         )
-        for row in Session.execute(stmt)
-    ]
-
-    return providers
+    )
 
 
 @router.get(

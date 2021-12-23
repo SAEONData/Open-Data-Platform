@@ -56,11 +56,12 @@ def assert_json_result(response, json, client):
 
 def assert_json_results(response, json, clients):
     """Verify that the API result list matches the given client batch."""
-    json = [j for j in json if j['id'] != 'odp.test']
-    json.sort(key=lambda j: j['id'])
+    items = [j for j in json['items'] if j['id'] != 'odp.test']
+    assert json['total'] - 1 == len(items) == len(clients)
+    items.sort(key=lambda i: i['id'])
     clients.sort(key=lambda c: c.id)
     for n, client in enumerate(clients):
-        assert_json_result(response, json[n], client)
+        assert_json_result(response, items[n], client)
 
 
 @pytest.mark.parametrize('scopes, authorized', [

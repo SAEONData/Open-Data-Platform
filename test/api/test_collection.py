@@ -96,10 +96,12 @@ def assert_json_collection_result(response, json, collection):
 
 def assert_json_collection_results(response, json, collections):
     """Verify that the API result list matches the given collection batch."""
-    json.sort(key=lambda j: j['id'])
+    items = json['items']
+    assert json['total'] == len(items) == len(collections)
+    items.sort(key=lambda i: i['id'])
     collections.sort(key=lambda c: c.id)
     for n, collection in enumerate(collections):
-        assert_json_collection_result(response, json[n], collection)
+        assert_json_collection_result(response, items[n], collection)
 
 
 def assert_json_flag_result(response, json, collection_flag):

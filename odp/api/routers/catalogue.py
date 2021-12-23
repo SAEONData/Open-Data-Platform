@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException
 from jschon import URI
 from sqlalchemy import select
@@ -7,6 +5,7 @@ from starlette.status import HTTP_404_NOT_FOUND
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize
+from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import schema_catalog
 from odp.api.models import CatalogueModel
 from odp.db import Session
@@ -17,26 +16,21 @@ router = APIRouter()
 
 @router.get(
     '/',
-    response_model=List[CatalogueModel],
+    response_model=Page[CatalogueModel],
     dependencies=[Depends(Authorize(ODPScope.CATALOGUE_READ))],
 )
-async def list_catalogues():
-    stmt = (
-        select(Catalogue).
-        order_by(Catalogue.id)
-    )
-
-    catalogues = [
-        CatalogueModel(
+async def list_catalogues(
+        paginator: Paginator = Depends(),
+):
+    return paginator.paginate(
+        select(Catalogue),
+        lambda row: CatalogueModel(
             id=row.Catalogue.id,
             schema_id=row.Catalogue.schema_id,
             schema_uri=row.Catalogue.schema.uri,
             schema_=schema_catalog.get_schema(URI(row.Catalogue.schema.uri)).value,
         )
-        for row in Session.execute(stmt)
-    ]
-
-    return catalogues
+    )
 
 
 @router.get(

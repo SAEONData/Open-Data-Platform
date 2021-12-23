@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 from random import randint
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from jschon import JSONSchema, JSON
@@ -9,9 +8,9 @@ from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FOR
 
 from odp import ODPScope, DOI_PREFIX
 from odp.api.lib.auth import Authorize, Authorized, FlagAuthorize, TagAuthorize, UnflagAuthorize, UntagAuthorize
-from odp.api.lib.paging import Pager, Paging
+from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_flag_schema, get_tag_schema
-from odp.api.models import CollectionModelIn, CollectionModel, CollectionSort, TagInstanceModel, TagInstanceModelIn, FlagInstanceModel, FlagInstanceModelIn
+from odp.api.models import CollectionModelIn, CollectionModel, TagInstanceModel, TagInstanceModelIn, FlagInstanceModel, FlagInstanceModelIn
 from odp.db import Session
 from odp.db.models import Collection, Record, CollectionTag, CollectionTagAudit, AuditCommand, CollectionFlag, CollectionFlagAudit
 
@@ -59,29 +58,25 @@ def output_collection_tag_model(collection_tag: CollectionTag) -> TagInstanceMod
 
 @router.get(
     '/',
-    response_model=List[CollectionModel],
+    response_model=Page[CollectionModel],
 )
 async def list_collections(
-        pager: Pager = Depends(Paging(CollectionSort)),
         auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_READ)),
+        paginator: Paginator = Depends(),
 ):
     stmt = (
         select(Collection, func.count(Record.id)).
         outerjoin(Record).
-        group_by(Collection).
-        order_by(getattr(Collection, pager.sort)).
-        offset(pager.skip).
-        limit(pager.limit)
+        group_by(Collection)
     )
     if auth.provider_ids != '*':
         stmt = stmt.where(Collection.provider_id.in_(auth.provider_ids))
 
-    collections = [
-        output_collection_model(row)
-        for row in Session.execute(stmt)
-    ]
-
-    return collections
+    return paginator.paginate(
+        stmt,
+        lambda row: output_collection_model(row),
+        Collection,
+    )
 
 
 @router.get(

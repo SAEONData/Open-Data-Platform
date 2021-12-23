@@ -34,10 +34,12 @@ def assert_json_result(response, json, scope):
 
 def assert_json_results(response, json, scopes):
     """Verify that the API result list matches the given scope batch."""
-    json.sort(key=lambda j: j['id'])
+    items = json['items']
+    assert json['total'] == len(items) == len(scopes)
+    items.sort(key=lambda i: i['id'])
     scopes.sort(key=lambda p: p.id)
     for n, scope in enumerate(scopes):
-        assert_json_result(response, json[n], scope)
+        assert_json_result(response, items[n], scope)
 
 
 @pytest.mark.parametrize('scopes, authorized', [

@@ -34,8 +34,8 @@
     {% endwith %}
 {% endmacro %}
 
-{% macro render_table(objects) %}
-{# Render a list of objects in a table.
+{% macro render_table(result) %}
+{# Render a paginated list result in a table.
     To disable automatic id column rendering, pass kwarg hide_id=True.
     Example usage:
         {% call(project) render_table(projects, 'Name', 'Collections') %}
@@ -55,7 +55,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for obj in objects %}
+            {% for obj in result['items'] %}
                 <tr>
                     {% if not kwargs.get('hide_id') %}
                         <th scope="row">{{ obj_link('', obj.id) }}</th>
@@ -67,6 +67,9 @@
             {% endfor %}
         </tbody>
     </table>
+    <div class="mt-4">
+        {{ result.total }} items found. Page {{ result.page }} of {{ result.pages }}.
+    </div>
 {% endmacro %}
 
 {% macro render_buttons(obj, create=False, edit=False, delete=False, custom=[]) %}

@@ -37,10 +37,12 @@ def assert_json_result(response, json, schema):
 
 def assert_json_results(response, json, schemas):
     """Verify that the API result list matches the given schema batch."""
-    json.sort(key=lambda j: j['id'])
+    items = json['items']
+    assert json['total'] == len(items) == len(schemas)
+    items.sort(key=lambda i: i['id'])
     schemas.sort(key=lambda s: s.id)
     for n, schema in enumerate(schemas):
-        assert_json_result(response, json[n], schema)
+        assert_json_result(response, items[n], schema)
 
 
 @pytest.mark.parametrize('scopes, authorized', [

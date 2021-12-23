@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException
 from jschon import URI
 from sqlalchemy import select
@@ -7,6 +5,7 @@ from starlette.status import HTTP_404_NOT_FOUND
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize
+from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import schema_catalog
 from odp.api.models import FlagModel
 from odp.db import Session
@@ -17,17 +16,15 @@ router = APIRouter()
 
 @router.get(
     '/',
-    response_model=List[FlagModel],
+    response_model=Page[FlagModel],
     dependencies=[Depends(Authorize(ODPScope.FLAG_READ))],
 )
-async def list_flags():
-    stmt = (
-        select(Flag).
-        order_by(Flag.id)
-    )
-
-    flags = [
-        FlagModel(
+async def list_flags(
+        paginator: Paginator = Depends(),
+):
+    return paginator.paginate(
+        select(Flag),
+        lambda row: FlagModel(
             id=row.Flag.id,
             public=row.Flag.public,
             scope_id=row.Flag.scope_id,
@@ -35,10 +32,7 @@ async def list_flags():
             schema_uri=row.Flag.schema.uri,
             schema_=schema_catalog.get_schema(URI(row.Flag.schema.uri)).value,
         )
-        for row in Session.execute(stmt)
-    ]
-
-    return flags
+    )
 
 
 @router.get(
