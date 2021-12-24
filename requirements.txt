@@ -8,8 +8,10 @@ alembic==1.7.5
     # via -r requirements.in
 anyio==3.4.0
     # via starlette
-argon2-cffi==21.1.0
+argon2-cffi==21.3.0
     # via -r requirements.in
+argon2-cffi-bindings==21.2.0
+    # via argon2-cffi
 asgiref==3.4.1
     # via uvicorn
 attrs==21.2.0
@@ -24,9 +26,9 @@ certifi==2021.10.8
     # via requests
 cffi==1.15.0
     # via
-    #   argon2-cffi
+    #   argon2-cffi-bindings
     #   cryptography
-charset-normalizer==2.0.8
+charset-normalizer==2.0.9
     # via requests
 click==8.0.3
     # via
@@ -34,7 +36,7 @@ click==8.0.3
     #   uvicorn
 coverage==6.2
     # via -r requirements.in
-cryptography==36.0.0
+cryptography==36.0.1
     # via authlib
 deprecated==1.2.13
     # via redis
@@ -44,9 +46,9 @@ email-validator==1.1.3
     # via -r requirements.in
 factory-boy==3.2.1
     # via -r requirements.in
-faker==9.9.0
+faker==10.0.0
     # via factory-boy
-fastapi==0.70.0
+fastapi==0.70.1
     # via -r requirements.in
 flask==2.0.2
     # via
@@ -133,12 +135,12 @@ six==1.16.0
     #   sqlalchemy-utils
 sniffio==1.2.0
     # via anyio
-sqlalchemy==1.4.27
+sqlalchemy==1.4.29
     # via
     #   -r requirements.in
     #   alembic
     #   sqlalchemy-utils
-sqlalchemy-utils==0.37.9
+sqlalchemy-utils==0.38.1
     # via -r requirements.in
 starlette==0.16.0
     # via fastapi
@@ -152,13 +154,13 @@ urllib3==1.26.7
     # via
     #   ory-hydra-client
     #   requests
-uvicorn==0.15.0
+uvicorn==0.16.0
     # via -r requirements.in
 werkzeug==2.0.2
     # via flask
 wrapt==1.13.3
     # via deprecated
-wtforms==3.0.0
+wtforms==3.0.1
     # via
     #   -r requirements.in
     #   flask-wtf
