@@ -874,7 +874,7 @@
                                                     "properties": {
                                                         "downloadURL": {"type": "string", "source": "linkage"},
                                                         "archive": {"type": "boolean", "const": true},
-                                                        "archiveFormats": {
+                                                        "archivedFormats": {
                                                             "type": "array",
                                                             "source": "applicationProfile",
                                                             "converter": "string-to-array"
