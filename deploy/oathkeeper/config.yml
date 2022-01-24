@@ -16,7 +16,7 @@ authenticators:
   cookie_session:
     enabled: true
     config:
-      check_session_url: ODP_UI_PUBLIC_URL/session/check
+      check_session_url: ODP_UI_DAP_URL/session/check
       preserve_path: true
       only: [ session ]
 
@@ -33,7 +33,7 @@ errors:
     redirect:
       enabled: true
       config:
-        to: ODP_UI_PUBLIC_URL/
+        to: ODP_UI_DAP_URL/
         when:
           - error: [ unauthorized ]
             request:

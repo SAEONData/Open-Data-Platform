@@ -46,9 +46,9 @@ class ODPUIAdminConfig(BaseConfig, OAuth2ClientConfigMixin):
     API_URL: AnyHttpUrl  # URL of the ODP API
 
 
-class ODPUIPublicConfig(BaseConfig, OAuth2ClientConfigMixin):
+class ODPUIDAPConfig(BaseConfig, OAuth2ClientConfigMixin):
     class Config:
-        env_prefix = 'ODP_UI_PUBLIC_'
+        env_prefix = 'ODP_UI_DAP_'
 
     FLASK_KEY: str           # Flask secret key
     SERVER_NAME: str = None  # public domain name
@@ -58,7 +58,7 @@ class ODPUIPublicConfig(BaseConfig, OAuth2ClientConfigMixin):
 class ODPUIConfig(BaseConfig):
     _subconfig = {
         'ADMIN': ODPUIAdminConfig,
-        'PUBLIC': ODPUIPublicConfig,
+        'DAP': ODPUIDAPConfig,
     }
 
 

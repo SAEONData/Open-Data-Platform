@@ -2,7 +2,7 @@
   upstream:
     url: http://dap.saeon.ac.za/
   match:
-    url: http://data.ODP_PUBLIC_DOMAIN/thredds/<.*>
+    url: http://proxy.ODP_DAP_DOMAIN/thredds/<.*>
     methods: [GET]
   authenticators:
     - handler: cookie_session

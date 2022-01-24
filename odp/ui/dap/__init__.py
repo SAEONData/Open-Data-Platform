@@ -5,8 +5,8 @@ from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from odp.config import config
-from odp.ui import db, auth
-from odp.ui.public import views
+from odp.ui import auth, db
+from odp.ui.dap import views
 
 
 def create_app():
@@ -15,18 +15,18 @@ def create_app():
     """
     app = Flask(__name__)
     app.config.update(
-        SECRET_KEY=config.ODP.UI.PUBLIC.FLASK_KEY,
-        SERVER_NAME=config.ODP.UI.PUBLIC.SERVER_NAME,
+        SECRET_KEY=config.ODP.UI.DAP.FLASK_KEY,
+        SERVER_NAME=config.ODP.UI.DAP.SERVER_NAME,
         SESSION_COOKIE_SECURE=True,
         SESSION_COOKIE_SAMESITE='Lax',
-        CLIENT_ID=config.ODP.UI.PUBLIC.CLIENT_ID,
-        CLIENT_SECRET=config.ODP.UI.PUBLIC.CLIENT_SECRET,
-        CLIENT_SCOPE=config.ODP.UI.PUBLIC.SCOPE,
+        CLIENT_ID=config.ODP.UI.DAP.CLIENT_ID,
+        CLIENT_SECRET=config.ODP.UI.DAP.CLIENT_SECRET,
+        CLIENT_SCOPE=config.ODP.UI.DAP.SCOPE,
     )
 
     ui_dir = Path(__file__).parent.parent
     app.jinja_loader = ChoiceLoader([
-        FileSystemLoader(ui_dir / 'public' / 'templates'),
+        FileSystemLoader(ui_dir / 'dap' / 'templates'),
         FileSystemLoader(ui_dir / 'templates'),
     ])
     app.static_folder = ui_dir / 'static'

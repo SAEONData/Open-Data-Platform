@@ -2,7 +2,7 @@
   upstream:
     url: http://dap.saeon.ac.za/
   match:
-    url: http://odp.localhost:4455/thredds/<.*>
+    url: http://dap.localhost:4455/thredds/<.*>
     methods: [GET]
   authenticators:
     - handler: cookie_session
