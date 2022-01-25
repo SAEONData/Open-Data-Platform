@@ -1,288 +1,7 @@
 {
     "$id":"https://odp.saeon.ac.za/schema/metadata/datacite4-saeon",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-
     "type": "object",
-    "required": [
-        "creators",
-        "titles",
-        "publisher",
-        "publicationYear",
-        "subjects",
-        "dates",
-        "types",
-        "rightsList",
-        "descriptions",
-        "schemaVersion"
-    ],
-    "additionalProperties": false,
-
-    "$defs": {
-        "nameType": {
-            "type": "string",
-            "enum": [
-                "Organizational",
-                "Personal"
-            ]
-        },
-        "nameIdentifiers": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "nameIdentifier": {"type": "string"},
-                    "nameIdentifierScheme": {"type": "string"},
-                    "schemeURI": {"type": "string", "format": "uri"}
-                },
-                "additionalProperties": false,
-                "required": ["nameIdentifier", "nameIdentifierScheme"]
-            },
-            "uniqueItems": true
-        },
-        "affiliation": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "affiliation": {"type": "string"},
-                    "affiliationIdentifier": {"type": "string"},
-                    "affiliationIdentifierScheme": {"type": "string"},
-                    "schemeURI": {"type": "string", "format": "uri"}
-                },
-                "additionalProperties": false,
-                "required": ["affiliation"],
-                "dependencies": {
-                    "affiliationIdentifier": ["affiliationIdentifierScheme"]
-                }
-            },
-            "uniqueItems": true
-        },
-        "titleType": {
-            "type": "string",
-            "enum": [
-                "AlternativeTitle",
-                "Subtitle",
-                "TranslatedTitle",
-                "Other"
-            ]
-        },
-        "contributorType": {
-            "type": "string",
-            "enum": [
-                "ContactPerson",
-                "DataCollector",
-                "DataCurator",
-                "DataManager",
-                "Distributor",
-                "Editor",
-                "HostingInstitution",
-                "Producer",
-                "ProjectLeader",
-                "ProjectManager",
-                "ProjectMember",
-                "RegistrationAgency",
-                "RegistrationAuthority",
-                "RelatedPerson",
-                "Researcher",
-                "ResearchGroup",
-                "RightsHolder",
-                "Sponsor",
-                "Supervisor",
-                "WorkPackageLeader",
-                "Other"
-            ]
-        },
-        "date": {
-            "type": "string",
-            "anyOf": [
-                {"format": "year"},
-                {"format": "yearmonth"},
-                {"format": "date"},
-                {"format": "datetime"},
-                {"format": "year-range"},
-                {"format": "yearmonth-range"},
-                {"format": "date-range"},
-                {"format": "datetime-range"}
-            ]
-        },
-        "dateType": {
-            "type": "string",
-            "enum": [
-                "Accepted",
-                "Available",
-                "Copyrighted",
-                "Collected",
-                "Created",
-                "Issued",
-                "Submitted",
-                "Updated",
-                "Valid",
-                "Withdrawn",
-                "Other"
-            ]
-        },
-        "resourceTypeGeneral": {
-            "type": "string",
-            "enum": [
-                "Audiovisual",
-                "Collection",
-                "DataPaper",
-                "Dataset",
-                "Event",
-                "Image",
-                "InteractiveResource",
-                "Model",
-                "PhysicalObject",
-                "Service",
-                "Software",
-                "Sound",
-                "Text",
-                "Workflow",
-                "Other"
-            ]
-        },
-        "relatedIdentifierType": {
-            "type": "string",
-            "enum": [
-                "ARK",
-                "arXiv",
-                "bibcode",
-                "DOI",
-                "EAN13",
-                "EISSN",
-                "Handle",
-                "IGSN",
-                "ISBN",
-                "ISSN",
-                "ISTC",
-                "LISSN",
-                "LSID",
-                "PMID",
-                "PURL",
-                "UPC",
-                "URL",
-                "URN",
-                "w3id"
-            ]
-        },
-        "relationType": {
-            "type": "string",
-            "enum": [
-                "IsCitedBy",
-                "Cites",
-                "IsSupplementTo",
-                "IsSupplementedBy",
-                "IsContinuedBy",
-                "Continues",
-                "IsDescribedBy",
-                "Describes",
-                "HasMetadata",
-                "IsMetadataFor",
-                "HasVersion",
-                "IsVersionOf",
-                "IsNewVersionOf",
-                "IsPreviousVersionOf",
-                "IsPartOf",
-                "HasPart",
-                "IsReferencedBy",
-                "References",
-                "IsDocumentedBy",
-                "Documents",
-                "IsCompiledBy",
-                "Compiles",
-                "IsVariantFormOf",
-                "IsOriginalFormOf",
-                "IsIdenticalTo",
-                "IsReviewedBy",
-                "Reviews",
-                "IsDerivedFrom",
-                "IsSourceOf",
-                "IsRequiredBy",
-                "Requires",
-                "IsObsoletedBy",
-                "Obsoletes"
-            ]
-        },
-        "descriptionType": {
-            "type": "string",
-            "enum": [
-                "Abstract",
-                "Methods",
-                "SeriesInformation",
-                "TableOfContents",
-                "TechnicalInfo",
-                "Other"
-            ]
-        },
-        "geoLocationPoint": {
-            "type": "object",
-            "properties": {
-                "pointLongitude": {"$ref": "#/$defs/longitude"},
-                "pointLatitude": {"$ref": "#/$defs/latitude"}
-            },
-            "additionalProperties": false,
-            "required": ["pointLongitude", "pointLatitude"]
-        },
-        "longitude": {
-            "type": "number",
-            "minimum": -180,
-            "maximum": 180
-        },
-        "latitude": {
-            "type": "number",
-            "minimum": -90,
-            "maximum": 90
-        },
-        "funderIdentifierType": {
-            "type": "string",
-            "enum": [
-                "ISNI",
-                "GRID",
-                "Crossref Funder ID",
-                "ROR",
-                "Other"
-            ]
-        },
-        "linkedResourceType": {
-            "type": "string",
-            "enum": [
-                "Information",
-                "OfflineAccess",
-                "ConditionalAccess",
-                "Query",
-                "Metadata",
-                "Ethics",
-                "QualityAssessment"
-            ]
-        },
-        "serverType": {
-            "type": "string",
-            "enum": [
-                "GeoServer",
-                "Esri",
-                "THREDDS"
-            ]
-        },
-        "fileDownload": {
-            "type": "object",
-            "properties": {
-                "downloadURL": {"type": "string", "format": "uri"},
-                "fileFormat": {"type": "string"},
-                "fileName": {"type": "string"},
-                "fileSize": {"type": "integer"},
-                "fileChecksum": {"type": "string"},
-                "checksumAlgorithm": {"type": "string"},
-                "archive": {"type": "boolean"},
-                "archivedFormats": {"type": "array", "items": {"type": "string"}}
-            },
-            "required": ["downloadURL"],
-            "dependencies": {
-                "fileChecksum": ["checksumAlgorithm"]
-            },
-            "additionalProperties": false
-        }
-    },
-
     "properties": {
         "doi": {
             "type": "string",
@@ -594,6 +313,284 @@
         },
         "fileIdentifier": {
             "type": "string"
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "creators",
+        "titles",
+        "publisher",
+        "publicationYear",
+        "subjects",
+        "dates",
+        "types",
+        "rightsList",
+        "descriptions",
+        "schemaVersion"
+    ],
+    "$defs": {
+        "nameType": {
+            "type": "string",
+            "enum": [
+                "Organizational",
+                "Personal"
+            ]
+        },
+        "nameIdentifiers": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "nameIdentifier": {"type": "string"},
+                    "nameIdentifierScheme": {"type": "string"},
+                    "schemeURI": {"type": "string", "format": "uri"}
+                },
+                "additionalProperties": false,
+                "required": ["nameIdentifier", "nameIdentifierScheme"]
+            },
+            "uniqueItems": true
+        },
+        "affiliation": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "affiliation": {"type": "string"},
+                    "affiliationIdentifier": {"type": "string"},
+                    "affiliationIdentifierScheme": {"type": "string"},
+                    "schemeURI": {"type": "string", "format": "uri"}
+                },
+                "additionalProperties": false,
+                "required": ["affiliation"],
+                "dependencies": {
+                    "affiliationIdentifier": ["affiliationIdentifierScheme"]
+                }
+            },
+            "uniqueItems": true
+        },
+        "titleType": {
+            "type": "string",
+            "enum": [
+                "AlternativeTitle",
+                "Subtitle",
+                "TranslatedTitle",
+                "Other"
+            ]
+        },
+        "contributorType": {
+            "type": "string",
+            "enum": [
+                "ContactPerson",
+                "DataCollector",
+                "DataCurator",
+                "DataManager",
+                "Distributor",
+                "Editor",
+                "HostingInstitution",
+                "Producer",
+                "ProjectLeader",
+                "ProjectManager",
+                "ProjectMember",
+                "RegistrationAgency",
+                "RegistrationAuthority",
+                "RelatedPerson",
+                "Researcher",
+                "ResearchGroup",
+                "RightsHolder",
+                "Sponsor",
+                "Supervisor",
+                "WorkPackageLeader",
+                "Other"
+            ]
+        },
+        "date": {
+            "type": "string",
+            "anyOf": [
+                {"format": "year"},
+                {"format": "yearmonth"},
+                {"format": "date"},
+                {"format": "datetime"},
+                {"format": "year-range"},
+                {"format": "yearmonth-range"},
+                {"format": "date-range"},
+                {"format": "datetime-range"}
+            ]
+        },
+        "dateType": {
+            "type": "string",
+            "enum": [
+                "Accepted",
+                "Available",
+                "Copyrighted",
+                "Collected",
+                "Created",
+                "Issued",
+                "Submitted",
+                "Updated",
+                "Valid",
+                "Withdrawn",
+                "Other"
+            ]
+        },
+        "resourceTypeGeneral": {
+            "type": "string",
+            "enum": [
+                "Audiovisual",
+                "Collection",
+                "DataPaper",
+                "Dataset",
+                "Event",
+                "Image",
+                "InteractiveResource",
+                "Model",
+                "PhysicalObject",
+                "Service",
+                "Software",
+                "Sound",
+                "Text",
+                "Workflow",
+                "Other"
+            ]
+        },
+        "relatedIdentifierType": {
+            "type": "string",
+            "enum": [
+                "ARK",
+                "arXiv",
+                "bibcode",
+                "DOI",
+                "EAN13",
+                "EISSN",
+                "Handle",
+                "IGSN",
+                "ISBN",
+                "ISSN",
+                "ISTC",
+                "LISSN",
+                "LSID",
+                "PMID",
+                "PURL",
+                "UPC",
+                "URL",
+                "URN",
+                "w3id"
+            ]
+        },
+        "relationType": {
+            "type": "string",
+            "enum": [
+                "IsCitedBy",
+                "Cites",
+                "IsSupplementTo",
+                "IsSupplementedBy",
+                "IsContinuedBy",
+                "Continues",
+                "IsDescribedBy",
+                "Describes",
+                "HasMetadata",
+                "IsMetadataFor",
+                "HasVersion",
+                "IsVersionOf",
+                "IsNewVersionOf",
+                "IsPreviousVersionOf",
+                "IsPartOf",
+                "HasPart",
+                "IsReferencedBy",
+                "References",
+                "IsDocumentedBy",
+                "Documents",
+                "IsCompiledBy",
+                "Compiles",
+                "IsVariantFormOf",
+                "IsOriginalFormOf",
+                "IsIdenticalTo",
+                "IsReviewedBy",
+                "Reviews",
+                "IsDerivedFrom",
+                "IsSourceOf",
+                "IsRequiredBy",
+                "Requires",
+                "IsObsoletedBy",
+                "Obsoletes"
+            ]
+        },
+        "descriptionType": {
+            "type": "string",
+            "enum": [
+                "Abstract",
+                "Methods",
+                "SeriesInformation",
+                "TableOfContents",
+                "TechnicalInfo",
+                "Other"
+            ]
+        },
+        "geoLocationPoint": {
+            "type": "object",
+            "properties": {
+                "pointLongitude": {"$ref": "#/$defs/longitude"},
+                "pointLatitude": {"$ref": "#/$defs/latitude"}
+            },
+            "additionalProperties": false,
+            "required": ["pointLongitude", "pointLatitude"]
+        },
+        "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+        },
+        "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+        },
+        "funderIdentifierType": {
+            "type": "string",
+            "enum": [
+                "ISNI",
+                "GRID",
+                "Crossref Funder ID",
+                "ROR",
+                "Other"
+            ]
+        },
+        "linkedResourceType": {
+            "type": "string",
+            "enum": [
+                "Information",
+                "OfflineAccess",
+                "ConditionalAccess",
+                "Query",
+                "Metadata",
+                "Ethics",
+                "QualityAssessment"
+            ]
+        },
+        "serverType": {
+            "type": "string",
+            "enum": [
+                "GeoServer",
+                "Esri",
+                "THREDDS"
+            ]
+        },
+        "fileDownload": {
+            "type": "object",
+            "properties": {
+                "downloadURL": {"type": "string", "format": "uri"},
+                "fileFormat": {"type": "string"},
+                "fileName": {"type": "string"},
+                "fileSize": {"type": "integer"},
+                "fileChecksum": {"type": "string"},
+                "checksumAlgorithm": {"type": "string"},
+                "archive": {"type": "boolean"},
+                "archivedFormats": {"type": "array", "items": {"type": "string"}}
+            },
+            "required": ["downloadURL"],
+            "dependencies": {
+                "fileChecksum": ["checksumAlgorithm"]
+            },
+            "additionalProperties": false
         }
     }
 }

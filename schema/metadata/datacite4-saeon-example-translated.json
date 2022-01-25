@@ -1,0 +1,221 @@
+{
+    "doi": "10.15493/example-saeon-iso19115",
+    "titles": [
+        {"title": "Example Metadata Record: ISO19115 - SAEON Profile"}
+    ],
+    "publicationYear": 2020,
+    "publisher": "Reef Community",
+    "creators": [
+        {
+            "name": "Ophelia the Octopus",
+            "nameIdentifiers": [
+                {
+                    "nameIdentifier": "https://orcid.org/0000-0001-2345-6789",
+                    "nameIdentifierScheme": "https://orcid.org",
+                    "schemeURI": "https://orcid.org"
+                }
+            ],
+            "affiliation": [
+                {
+                    "affiliation": "The Octopus's Garden\nUnder The Sea"
+                }
+            ]
+        }
+    ],
+    "contributors": [
+        {
+            "name": "Leroy the Limpet",
+            "affiliation": [
+                {
+                    "affiliation": "Rock Pool Inc\nLand-Sea Interface Consultant\nIntertidal Zone, Seashore Business Park"
+                }
+            ],
+            "contributorType": "ContactPerson"
+        }
+    ],
+    "geoLocations": [
+        {
+            "geoLocationPolygons": [
+                {
+                    "polygonPoints": [
+                        {"pointLongitude": 18.19, "pointLatitude": -34.01},
+                        {"pointLongitude": 18.27, "pointLatitude": -34.08},
+                        {"pointLongitude": 18.24, "pointLatitude": -34.18},
+                        {"pointLongitude": 18.11, "pointLatitude": -34.15},
+                        {"pointLongitude": 18.19, "pointLatitude": -34.01}
+                    ]
+                },
+                {
+                    "polygonPoints": [
+                        {"pointLongitude": 17.93, "pointLatitude": -34.3},
+                        {"pointLongitude": 18.05, "pointLatitude": -34.22},
+                        {"pointLongitude": 18.06, "pointLatitude": -34.39},
+                        {"pointLongitude": 17.93, "pointLatitude": -34.3}
+                    ]
+                }
+            ],
+            "geoLocationPlace": "Somewhere off the Atlantic coast of Cape Town",
+            "geoLocationBox": {
+                "westBoundLongitude": 17.9,
+                "northBoundLatitude": -34.0,
+                "eastBoundLongitude": 18.3,
+                "southBoundLatitude": -34.4
+            }
+        }
+    ],
+    "subjects": [
+        {
+            "subjectScheme": "SANS1878 Dataset Topic Category",
+            "subject": "oceans"
+        },
+        {
+            "subjectScheme": "SANS1878 Dataset Topic Category",
+            "subject": "society"
+        },
+        {
+            "subjectScheme": "SANS1878 keywordType place",
+            "subject": "underwater"
+        },
+        {
+            "subjectScheme": "SANS1878 keywordType stratum",
+            "subject": "seabed"
+        },
+        {
+            "subjectScheme": "SANS1878 keywordType theme",
+            "subject": "joy"
+        },
+        {
+            "subjectScheme": "SANS1878 Status",
+            "subject": "completed"
+        },
+        {
+            "subjectScheme": "SANS1878 Status",
+            "subject": "historicalArchive"
+        },
+        {
+            "subjectScheme": "SANS1878 Reference System",
+            "subject": "EPSG 4148"
+        },
+        {
+            "subjectScheme": "SANS1878 Spatial Representation Type",
+            "subject": "image"
+        },
+        {
+            "subjectScheme": "SANS1878 Spatial Representation Type",
+            "subject": "stereoModel"
+        },
+        {
+            "subjectScheme": "SANS1878 Vertical Extent: minimumValue",
+            "subject": "-50"
+        },
+        {
+            "subjectScheme": "SANS1878 Vertical Extent: maximumValue",
+            "subject": "-10"
+        },
+        {
+            "subjectScheme": "SANS1878 Vertical Extent: unitOfMeasure",
+            "subject": "m"
+        },
+        {
+            "subjectScheme": "SANS1878 Vertical Extent: verticalDatum",
+            "subject": "Metres below sea level"
+        },
+        {
+            "subjectScheme": "SANS1878 Constraint",
+            "subject": "otherRestrictions"
+        },
+        {
+            "subjectScheme": "SANS1878 Security Classification",
+            "subject": "secret"
+        },
+        {
+            "subjectScheme": "SANS1878 Constraint",
+            "subject": "license"
+        },
+        {
+            "subjectScheme": "SANS1878 Constraint",
+            "subject": "intellectualPropertyRights"
+        },
+        {
+            "subjectScheme": "SANS1878 Use Limitation",
+            "subject": "Not to be used by landlubbers."
+        }
+    ],
+    "dates": [
+        {
+            "date": "2019-11-01T00:00:00+02:00/2019-12-01T00:00:00+02:00",
+            "dateType": "Valid"
+        },
+        {
+            "date": "2020-10-29T12:34:56+02:00",
+            "dateType": "Issued"
+        }
+    ],
+    "descriptions": [
+        {
+            "descriptionType": "Abstract",
+            "description": "Concerning things that'd like to be under the sea, in an octopus's garden, in the shade."
+        },
+        {
+            "descriptionType": "Methods",
+            "description": "The study was conducted using a tentacles-on approach."
+        },
+        {
+            "descriptionType": "Other",
+            "description": "To see if we would be warm, below the storm, in our little hideaway beneath the waves."
+        }
+    ],
+    "formats": [
+        "ZIP",
+        "JPEG",
+        "HTML 5"
+    ],
+    "immutableResource": {
+        "resourceName": "The Data",
+        "resourceDownload": {
+            "downloadURL": "https://example.com/octopus_garden.zip",
+            "archivedFormats": [
+                "shp",
+                "nc",
+                "csv"
+            ],
+            "archive": true
+        }
+    },
+    "linkedResources": [
+        {
+            "resourceName": "The Picture",
+            "resourceURL": "https://images.genius.com/8fa8b8afd1e7142232b9627901967dcf.550x400x1.jpg",
+            "linkedResourceType": "Information"
+        },
+        {
+            "resourceName": "The Song",
+            "resourceURL": "https://genius.com/The-beatles-octopuss-garden-lyrics",
+            "linkedResourceType": "Information"
+        }
+    ],
+    "identifiers": [
+        {
+            "identifier": "000006",
+            "identifierType": "AccessionID"
+        }
+    ],
+    "relatedIdentifiers": [
+        {
+            "relatedIdentifier": "https://images.rapgenius.com/a69f8be10aa6228ba1a64e427b3bce28.900x643x1.jpg",
+            "relatedIdentifierType": "URL",
+            "relationType": "IsVariantFormOf"
+        }
+    ],
+    "types": {
+        "resourceType": "dataset",
+        "resourceTypeGeneral": "Dataset"
+    },
+    "rightsList": [
+        {
+            "rightsURI": "https://creativecommons.org/licenses/by/4.0/",
+            "rights": "Attribution 4.0 International (CC BY 4.0)"
+        }
+    ],
+    "schemaVersion": "http://datacite.org/schema/kernel-4"
+}
