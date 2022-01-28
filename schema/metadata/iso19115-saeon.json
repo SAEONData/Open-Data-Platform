@@ -110,7 +110,7 @@
                                 "affiliation": {
                                     "t9nArray": {
                                         "t9nObject": {
-                                            "affiliation": {"t9nSource": ["0/organizationName", "0/positionName", "0/contactInfo"], "t9nJoin": "\n"}
+                                            "affiliation": {"t9nConcat": ["0/organizationName", "0/positionName", "0/contactInfo"], "t9nSep": "\n"}
                                         }
                                     }
                                 }
@@ -140,7 +140,7 @@
                                 "affiliation": {
                                     "t9nArray": {
                                         "t9nObject": {
-                                            "affiliation": {"t9nSource": ["0/organizationName", "0/positionName", "0/contactInfo"], "t9nJoin": "\n"}
+                                            "affiliation": {"t9nConcat": ["0/organizationName", "0/positionName", "0/contactInfo"], "t9nSep": "\n"}
                                         }
                                     }
                                 },
@@ -243,13 +243,15 @@
                                         }
                                     },
                                     "geoLocationPolygons": {
-                                        "t9nArray":{
+                                        "t9nSource": "0/boundingPolygon",
+                                        "t9nArray": {
                                             "t9nObject": {
                                                 "polygonPoints": {
+                                                    "t9nSource": "0/polygon",
                                                     "t9nArray": {
                                                         "t9nObject": {
-                                                            "pointLongitude": {"t9nSource": "0/boundingPolygon/0/polygon/0/longitude"},
-                                                            "pointLatitude": {"t9nSource": "0/boundingPolygon/0/polygon/0/latitude"}
+                                                            "pointLongitude": {"t9nSource": "0/longitude"},
+                                                            "pointLatitude": {"t9nSource": "0/latitude"}
                                                         }
                                                     }
                                                 }
@@ -259,49 +261,7 @@
                                 }
                             }
                         }
-                    ],
-                    "mapTo": {
-                        "target": "/geoLocations/-",
-                        "value": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "geoLocationPlace": {"type": "string", "source": "geographicIdentifier"},
-                                    "geoLocationBox": {
-                                        "type": "object",
-                                        "source": "boundingBox",
-                                        "properties": {
-                                            "westBoundLongitude": {"type": "number", "source": "westBoundLongitude"},
-                                            "eastBoundLongitude": {"type": "number", "source": "eastBoundLongitude"},
-                                            "southBoundLatitude": {"type": "number", "source": "southBoundLatitude"},
-                                            "northBoundLatitude": {"type": "number", "source": "northBoundLatitude"}
-                                        }
-                                    },
-                                    "geoLocationPolygons": {
-                                        "type": "array",
-                                        "source": "boundingPolygon",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "polygonPoints": {
-                                                    "type": "array",
-                                                    "source": "polygon",
-                                                    "items": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "pointLongitude": {"type": "number", "source": "longitude"},
-                                                            "pointLatitude": {"type": "number", "source": "latitude"}
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    ]
                 },
                 "verticalElement": {
                     "type": "object",
@@ -384,7 +344,7 @@
                             "t9nTarget": "/dates",
                             "t9nArray": {
                                 "t9nObject": {
-                                    "date": {"t9nSource": ["0/startTime", "0/endTime"], "t9nJoin": "/"},
+                                    "date": {"t9nConcat": ["0/startTime", "0/endTime"], "t9nSep": "/"},
                                     "dateType": {"t9nConst": "Valid"}
                                 }
                             }
@@ -456,10 +416,7 @@
                 {
                     "t9nScheme": "datacite4-saeon",
                     "t9nTarget": "/formats",
-                    "t9nArray": {
-                        "t9nSource": ["0/formatName", "0/formatVersion"],
-                        "t9nJoin": " "
-                    }
+                    "t9nArray": {"t9nConcat": ["0/formatName", "0/formatVersion"], "t9nSep": " "}
                 }
             ]
         },
@@ -495,7 +452,7 @@
                     "t9nTarget": "/subjects",
                     "t9nArray": {
                         "t9nObject": {
-                            "subject": {"t9nSource": ["0/codeSpace", "0/version"], "t9nJoin": " "},
+                            "subject": {"t9nConcat": ["0/codeSpace", "0/version"], "t9nSep": " "},
                             "subjectScheme": {"t9nConst": "SANS1878 Reference System"}
                         }
                     }
@@ -520,131 +477,93 @@
         "onlineResources": {
             "type": "array",
             "items": {
-                "allOf": [
-                    {"$ref": "#/$defs/onlineResource"},
+                "$ref": "#/$defs/onlineResource",
+                "required": ["description"],
+                "translations": [
                     {
-                        "required": ["description"],
-                        "oneOf": [
-                            {
-                                "$comment": "case 1: Download link with an (optional) application profile specifying a single file type",
-                                "if": {
-                                    "properties": {
-                                        "description": {"const": "download"},
-                                        "applicationProfile": {"pattern": "^\\w+$"}
-                                    }
-                                },
-                                "then": {
-                                    "mapTo": {
-                                        "target": "/immutableResource",
-                                        "value": {
-                                            "type": "object",
-                                            "properties": {
-                                                "resourceName": {"type": "string", "source": "name"},
-                                                "resourceDownload": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "downloadURL": {"type": "string", "source": "linkage"},
-                                                        "fileFormat": {"type": "string", "source": "applicationProfile"}
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "else": false
-                            },
-                            {
-                                "$comment": "case 2: Download link with an application profile that specifies a list of file types, implying an archive",
-                                "if": {
-                                    "properties": {
-                                        "description": {"const": "download"},
-                                        "applicationProfile": {"pattern": "^\\[\\s*\\w+\\s*(,\\s*\\w+\\s*)*]$"}
-                                    },
-                                    "required": ["applicationProfile"]
-                                },
-                                "then": {
-                                    "mapTo": {
-                                        "target": "/immutableResource",
-                                        "value": {
-                                            "type": "object",
-                                            "properties": {
-                                                "resourceName": {"type": "string", "source": "name"},
-                                                "resourceDownload": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "downloadURL": {"type": "string", "source": "linkage"},
-                                                        "archive": {"type": "boolean", "const": true},
-                                                        "archivedFormats": {
-                                                            "type": "array",
-                                                            "source": "applicationProfile",
-                                                            "converter": "string-to-array"
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "else": false
-                            },
-                            {
-                                "$comment": "case 3: Query link with an (optional) application profile constrained to the serverType vocabulary",
-                                "if": {
-                                    "properties": {
-                                        "description": {"const": "search"},
-                                        "applicationProfile": {"enum": ["GeoServer", "Esri", "THREDDS"]}
-                                    }
-                                },
-                                "then": {
-                                    "mapTo": {
-                                        "target": "/linkedResources/-",
-                                        "value": {
-                                            "type": "object",
-                                            "properties": {
-                                                "resourceURL": {"type": "string", "source": "linkage"},
-                                                "resourceName": {"type": "string", "source": "name"},
-                                                "linkedResourceType": {"type": "string", "const": "Query"},
-                                                "serverType": {
-                                                    "type": "string",
-                                                    "source": "applicationProfile"
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "else": false
-                            },
-                            {
-                                "$comment": "case 4: Other supported types of linked resource",
-                                "if": {
-                                    "properties": {
-                                        "description": {"enum": ["information", "offlineAccess", "order"]}
-                                    }
-                                },
-                                "then": {
-                                    "mapTo": {
-                                        "target": "/linkedResources/-",
-                                        "value": {
-                                            "type": "object",
-                                            "properties": {
-                                                "resourceURL": {"type": "string", "source": "linkage"},
-                                                "resourceName": {"type": "string", "source": "name"},
-                                                "linkedResourceType": {
-                                                    "type": "string",
-                                                    "source": "description",
-                                                    "converter": {
-                                                        "information": "Information",
-                                                        "offlineAccess": "OfflineAccess",
-                                                        "order": "ConditionalAccess"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "else": false
+                        "$comment": "case 1: Download link with an (optional) application profile specifying a single file type",
+                        "t9nScheme": "datacite4-saeon",
+                        "t9nTarget": "/immutableResource",
+                        "t9nCondition": {
+                            "properties": {
+                                "description": {"const": "download"},
+                                "applicationProfile": {"pattern": "^\\w+$"}
                             }
-                        ]
+                        },
+                        "t9nObject": {
+                            "resourceName": {"t9nSource": "0/name"},
+                            "resourceDownload": {
+                                "t9nObject": {
+                                    "downloadURL": {"t9nSource": "0/linkage"},
+                                    "fileFormat": {"t9nSource": "0/applicationProfile"}
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "$comment": "case 2: Download link with an application profile that specifies a list of file types, implying an archive",
+                        "t9nScheme": "datacite4-saeon",
+                        "t9nTarget": "/immutableResource",
+                        "t9nCondition": {
+                            "properties": {
+                                "description": {"const": "download"},
+                                "applicationProfile": {"pattern": "^\\[\\s*\\w+\\s*(,\\s*\\w+\\s*)*]$"}
+                            },
+                            "required": ["applicationProfile"]
+                        },
+                        "t9nObject": {
+                            "resourceName": {"t9nSource": "0/name"},
+                            "resourceDownload": {
+                                "t9nObject": {
+                                    "downloadURL": {"t9nSource": "0/linkage"},
+                                    "archive": {"t9nConst": true},
+                                    "archivedFormats": {"t9nSource": "0/applicationProfile", "t9nFilter": "string-to-array"}
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "$comment": "case 3: Query link with an (optional) application profile constrained to the serverType vocabulary",
+                        "t9nScheme": "datacite4-saeon",
+                        "t9nTarget": "/linkedResources",
+                        "t9nCondition": {
+                            "properties": {
+                                "description": {"const": "search"},
+                                "applicationProfile": {"enum": ["GeoServer", "Esri", "THREDDS"]}
+                            }
+                        },
+                        "t9nArray": {
+                            "t9nObject": {
+                                "resourceURL": {"t9nSource": "0/linkage"},
+                                "resourceName": {"t9nSource": "0/name"},
+                                "linkedResourceType": {"t9nConst": "Query"},
+                                "serverType": {"t9nSource": "0/applicationProfile"}
+                            }
+                        }
+                    },
+                    {
+                        "$comment": "case 4: Other supported types of linked resource",
+                        "t9nScheme": "datacite4-saeon",
+                        "t9nTarget": "/linkedResources",
+                        "t9nCondition": {
+                            "properties": {
+                                "description": {"enum": ["information", "offlineAccess", "order"]}
+                            }
+                        },
+                        "t9nArray": {
+                            "t9nObject": {
+                                "resourceURL": {"t9nSource": "0/linkage"},
+                                "resourceName": {"t9nSource": "0/name"},
+                                "linkedResourceType": {
+                                    "t9nSource": "0/description",
+                                    "t9nFilter": {
+                                        "information": "Information",
+                                        "offlineAccess": "OfflineAccess",
+                                        "order": "ConditionalAccess"
+                                    }
+                                }
+                            }
+                        }
                     }
                 ]
             },
