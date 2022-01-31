@@ -1,7 +1,11 @@
+import re
+from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
 from fastapi import HTTPException
 from jschon import JSONSchema, LocalSource, URI, create_catalog
+from jschon.translation import translation_filter
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp.api.models import FlagInstanceModelIn, RecordModelIn, TagInstanceModelIn
@@ -36,3 +40,26 @@ async def get_metadata_schema(record_in: RecordModelIn) -> JSONSchema:
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid schema id')
 
     return schema_catalog.get_schema(URI(schema.uri))
+
+
+@translation_filter('date-to-year')
+def date_to_year(date: str) -> int:
+    return datetime.strptime(date, '%Y-%m-%d').year
+
+
+@translation_filter('base-url')
+def base_url(url: str) -> str:
+    u = urlparse(url)
+    return f'{u.scheme}://{u.netloc}'
+
+
+@translation_filter('split-archived-formats')
+def split_archived_formats(value: str) -> list:
+    """Filter for translating /onlineResources/n/applicationProfile (datacite4-saeon)
+    to /immutableResource/resourceDownload/archivedFormats (iso19115-saeon).
+
+    e.g. given "[shp, shx, dbf]", return ["shp", "shx", "dbf"]
+    """
+    if not re.match("^\\[\\s*\\w+\\s*(,\\s*\\w+\\s*)*]$", value):
+        raise ValueError('Invalid input for split-archived-formats filter')
+    return [item.strip() for item in value[1:-1].split(',')]
