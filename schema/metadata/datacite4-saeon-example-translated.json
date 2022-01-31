@@ -65,46 +65,6 @@
     ],
     "subjects": [
         {
-            "subjectScheme": "SANS1878 Dataset Topic Category",
-            "subject": "oceans"
-        },
-        {
-            "subjectScheme": "SANS1878 Dataset Topic Category",
-            "subject": "society"
-        },
-        {
-            "subjectScheme": "SANS1878 keywordType place",
-            "subject": "underwater"
-        },
-        {
-            "subjectScheme": "SANS1878 keywordType stratum",
-            "subject": "seabed"
-        },
-        {
-            "subjectScheme": "SANS1878 keywordType theme",
-            "subject": "joy"
-        },
-        {
-            "subjectScheme": "SANS1878 Status",
-            "subject": "completed"
-        },
-        {
-            "subjectScheme": "SANS1878 Status",
-            "subject": "historicalArchive"
-        },
-        {
-            "subjectScheme": "SANS1878 Reference System",
-            "subject": "EPSG 4148"
-        },
-        {
-            "subjectScheme": "SANS1878 Spatial Representation Type",
-            "subject": "image"
-        },
-        {
-            "subjectScheme": "SANS1878 Spatial Representation Type",
-            "subject": "stereoModel"
-        },
-        {
             "subjectScheme": "SANS1878 Vertical Extent: minimumValue",
             "subject": "-50"
         },
@@ -121,12 +81,52 @@
             "subject": "Metres below sea level"
         },
         {
-            "subjectScheme": "SANS1878 Constraint",
-            "subject": "otherRestrictions"
+            "subjectScheme": "SANS1878 Dataset Topic Category",
+            "subject": "oceans"
         },
         {
-            "subjectScheme": "SANS1878 Security Classification",
-            "subject": "secret"
+            "subjectScheme": "SANS1878 Dataset Topic Category",
+            "subject": "society"
+        },
+        {
+            "subjectScheme": "SANS1878 Spatial Representation Type",
+            "subject": "image"
+        },
+        {
+            "subjectScheme": "SANS1878 Spatial Representation Type",
+            "subject": "stereoModel"
+        },
+        {
+            "subjectScheme": "SANS1878 Reference System",
+            "subject": "EPSG 4148"
+        },
+        {
+            "subjectScheme": "SANS1878 Status",
+            "subject": "completed"
+        },
+        {
+            "subjectScheme": "SANS1878 Status",
+            "subject": "historicalArchive"
+        },
+        {
+            "subjectScheme": "SANS1878 keywordType place",
+            "subject": "underwater"
+        },
+        {
+            "subjectScheme": "SANS1878 keywordType stratum",
+            "subject": "seabed"
+        },
+        {
+            "subjectScheme": "SANS1878 keywordType theme",
+            "subject": "joy"
+        },
+        {
+            "subjectScheme": "SANS1878 Use Limitation",
+            "subject": "Not to be used by landlubbers."
+        },
+        {
+            "subjectScheme": "SANS1878 Constraint",
+            "subject": "otherRestrictions"
         },
         {
             "subjectScheme": "SANS1878 Constraint",
@@ -137,8 +137,8 @@
             "subject": "intellectualPropertyRights"
         },
         {
-            "subjectScheme": "SANS1878 Use Limitation",
-            "subject": "Not to be used by landlubbers."
+            "subjectScheme": "SANS1878 Security Classification",
+            "subject": "secret"
         }
     ],
     "dates": [

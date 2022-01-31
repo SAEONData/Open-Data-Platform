@@ -517,7 +517,7 @@
                                 "t9nObject": {
                                     "downloadURL": {"t9nSource": "0/linkage"},
                                     "archive": {"t9nConst": true},
-                                    "archivedFormats": {"t9nSource": "0/applicationProfile", "t9nFilter": "string-to-array"}
+                                    "archivedFormats": {"t9nSource": "0/applicationProfile", "t9nFilter": "split-archived-formats"}
                                 }
                             }
                         }
