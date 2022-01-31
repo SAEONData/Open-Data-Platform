@@ -1,15 +1,18 @@
 from pathlib import Path
 
 from fastapi import HTTPException
-from jschon import create_catalog, URI, JSONSchema
+from jschon import JSONSchema, LocalSource, URI, create_catalog
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp.api.models import FlagInstanceModelIn, TagInstanceModelIn, RecordModelIn
+from odp.api.models import FlagInstanceModelIn, RecordModelIn, TagInstanceModelIn
 from odp.db import Session
 from odp.db.models import Flag, Schema, SchemaType, Tag
 
-schema_catalog = create_catalog('2020-12')
-schema_catalog.add_directory(URI('https://odp.saeon.ac.za/schema/'), Path(__file__).parent.parent.parent.parent / 'schema')
+schema_catalog = create_catalog('2020-12', 'translation')
+schema_catalog.add_uri_source(
+    URI('https://odp.saeon.ac.za/schema/'),
+    LocalSource(Path(__file__).parent.parent.parent.parent / 'schema', suffix='.json'),
+)
 
 
 async def get_flag_schema(flag_instance_in: FlagInstanceModelIn) -> JSONSchema:
