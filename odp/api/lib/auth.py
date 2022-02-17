@@ -1,25 +1,20 @@
 from dataclasses import dataclass
-from typing import Optional, Union, Set, Literal
+from typing import Literal, Optional, Set, Union
 
 from fastapi import HTTPException
-from fastapi.openapi.models import OAuth2, OAuthFlows, OAuthFlowClientCredentials
+from fastapi.openapi.models import OAuth2, OAuthFlowClientCredentials, OAuthFlows
 from fastapi.security.base import SecurityBase
 from fastapi.security.utils import get_authorization_scheme_param
-from ory_hydra_client import ApiClient, Configuration
-from ory_hydra_client.api.admin_api import AdminApi
-from ory_hydra_client.model.o_auth2_token_introspection import OAuth2TokenIntrospection
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
+from odp.api.lib import hydra
 from odp.api.models import FlagInstanceModelIn, TagInstanceModelIn
-from odp.config import config
 from odp.db import Session
 from odp.db.models import Flag, Tag
 from odp.lib.auth import get_client_permissions, get_user_permissions
-
-_hydra_admin_api = AdminApi(ApiClient(Configuration(config.HYDRA.ADMIN.URL)))
-_hydra_public_url = config.HYDRA.PUBLIC.URL
+from odp.lib.hydra import OAuth2TokenIntrospection
 
 
 @dataclass
@@ -38,9 +33,8 @@ def _authorize_request(request: Request, required_scope_id: str) -> Authorized:
             headers={'WWW-Authenticate': 'Bearer'},
         )
 
-    token: OAuth2TokenIntrospection = _hydra_admin_api.introspect_o_auth2_token(
-        token=access_token,
-        scope=required_scope_id,
+    token: OAuth2TokenIntrospection = hydra.admin_api.introspect_token(
+        access_token, [required_scope_id],
     )
     if not token.active:
         raise HTTPException(HTTP_403_FORBIDDEN)
@@ -76,7 +70,7 @@ class BaseAuthorize(SecurityBase):
         # OpenAPI docs / Swagger auth
         self.scheme_name = 'ODP API Authorization'
         self.model = OAuth2(flows=OAuthFlows(clientCredentials=OAuthFlowClientCredentials(
-            tokenUrl=f'{_hydra_public_url}/oauth2/token',
+            tokenUrl=f'{hydra.public_url}/oauth2/token',
             scopes={s.value: s.value for s in ODPScope},
         )))
 
