@@ -8,10 +8,6 @@ import pathlib
 import sys
 
 from dotenv import load_dotenv
-from ory_hydra_client import ApiClient, Configuration
-from ory_hydra_client.api.admin_api import AdminApi, OAuth2Client
-from ory_hydra_client.exceptions import ApiException
-from ory_hydra_client.model.string_slice_pipe_delimiter import StringSlicePipeDelimiter as StringArray
 
 rootdir = pathlib.Path(__file__).parent.parent
 sys.path.append(str(rootdir))
@@ -22,10 +18,11 @@ load_dotenv(dotenv_path)
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Scope, Client
+from odp.lib.hydra import HydraAdminAPI
 
 ODP_CLI_CLIENT_ID = os.getenv('ODP_CLI_CLIENT_ID')
 ODP_CLI_CLIENT_SECRET = os.getenv('ODP_CLI_CLIENT_SECRET')
-ODP_CLI_CLIENT_NAME = 'Swagger / Scripting Client'
+ODP_CLI_CLIENT_NAME = 'Swagger UI / Scripting Client'
 HYDRA_ADMIN_URL = os.getenv('HYDRA_ADMIN_URL')
 
 if __name__ == '__main__':
@@ -36,23 +33,12 @@ if __name__ == '__main__':
         client.scopes = [Session.get(Scope, s.value) for s in ODPScope]
         client.save()
 
-        hydra_admin_api = AdminApi(ApiClient(Configuration(HYDRA_ADMIN_URL)))
-        oauth2_client = OAuth2Client(
+        hydra_admin_api = HydraAdminAPI(HYDRA_ADMIN_URL)
+        hydra_admin_api.create_or_update_client_credentials_client(
             client_id=ODP_CLI_CLIENT_ID,
             client_name=ODP_CLI_CLIENT_NAME,
             client_secret=ODP_CLI_CLIENT_SECRET,
-            scope=' '.join(s.value for s in ODPScope),
-            grant_types=StringArray(['client_credentials']),
-            response_types=StringArray([]),
-            redirect_uris=StringArray([]),
-            contacts=StringArray([]),
+            allowed_scope_ids=[s.value for s in ODPScope],
         )
-        try:
-            hydra_admin_api.create_o_auth2_client(body=oauth2_client)
-        except ApiException as e:
-            if e.status == 409:
-                hydra_admin_api.update_o_auth2_client(id=ODP_CLI_CLIENT_ID, body=oauth2_client)
-            else:
-                raise
 
     print('Done.')
