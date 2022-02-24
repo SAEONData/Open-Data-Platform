@@ -22,12 +22,12 @@ def client_batch():
     ]
 
 
-def client_build(provider=None, **id):
+def client_build(scopes=None, provider=None, **id):
     """Build and return an uncommitted Client instance.
     Referenced scopes and/or provider are however committed."""
     return ClientFactory.build(
         **id,
-        scopes=ScopeFactory.create_batch(randint(0, 3)),
+        scopes=scopes if scopes is not None else ScopeFactory.create_batch(randint(0, 3)),
         provider=provider or (provider := ProviderFactory() if randint(0, 1) else None),
         provider_id=provider.id if provider else None,
     )
@@ -37,8 +37,11 @@ def scope_ids(client):
     return tuple(scope.id for scope in client.scopes)
 
 
-def assert_db_state(clients):
+def assert_db_state(clients, exclude_scope=False):
     """Verify that the DB client table contains the given client batch."""
+    if exclude_scope:
+        for client in clients:
+            client.scopes = []
     Session.expire_all()
     result = Session.execute(select(Client).where(Client.id != 'odp.test')).scalars().all()
     assert set((row.id, row.name, scope_ids(row), row.provider_id) for row in result) \
@@ -140,12 +143,11 @@ def test_create_client(api, client_batch, scopes, authorized):
     r = api(scopes).post('/client/', json=dict(
         id=client.id,
         name=client.name,
-        scope_ids=scope_ids(client),
         provider_id=client.provider_id,
     ))
     if authorized:
         assert_empty_result(r)
-        assert_db_state(modified_client_batch)
+        assert_db_state(modified_client_batch, exclude_scope=True)
     else:
         assert_forbidden(r)
         assert_db_state(client_batch)
@@ -167,12 +169,11 @@ def test_create_client_with_provider_specific_api_client(api, client_batch, scop
     r = api(scopes, api_client_provider).post('/client/', json=dict(
         id=client.id,
         name=client.name,
-        scope_ids=scope_ids(client),
         provider_id=client.provider_id,
     ))
     if authorized:
         assert_empty_result(r)
-        assert_db_state(modified_client_batch)
+        assert_db_state(modified_client_batch, exclude_scope=True)
     else:
         assert_forbidden(r)
         assert_db_state(client_batch)
@@ -186,11 +187,13 @@ def test_create_client_with_provider_specific_api_client(api, client_batch, scop
 ])
 def test_update_client(api, client_batch, scopes, authorized):
     modified_client_batch = client_batch.copy()
-    modified_client_batch[2] = (client := client_build(id=client_batch[2].id))
+    modified_client_batch[2] = (client := client_build(
+        id=client_batch[2].id,
+        scopes=client_batch[2].scopes,
+    ))
     r = api(scopes).put('/client/', json=dict(
         id=client.id,
         name=client.name,
-        scope_ids=scope_ids(client),
         provider_id=client.provider_id,
     ))
     if authorized:
@@ -214,12 +217,12 @@ def test_update_client_with_provider_specific_api_client(api, client_batch, scop
     modified_client_batch = client_batch.copy()
     modified_client_batch[2] = (client := client_build(
         id=client_batch[2].id,
+        scopes=client_batch[2].scopes,
         provider=client_batch[2].provider,
     ))
     r = api(scopes, api_client_provider).put('/client/', json=dict(
         id=client.id,
         name=client.name,
-        scope_ids=scope_ids(client),
         provider_id=client.provider_id,
     ))
     if authorized:
