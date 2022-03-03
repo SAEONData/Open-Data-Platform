@@ -9,7 +9,7 @@ from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
-from odp.api.lib import hydra
+from odp.api.lib.hydra import hydra_admin_api, hydra_public_url
 from odp.api.models import FlagInstanceModelIn, TagInstanceModelIn
 from odp.db import Session
 from odp.db.models import Flag, Tag
@@ -33,7 +33,7 @@ def _authorize_request(request: Request, required_scope_id: str) -> Authorized:
             headers={'WWW-Authenticate': 'Bearer'},
         )
 
-    token: OAuth2TokenIntrospection = hydra.admin_api.introspect_token(
+    token: OAuth2TokenIntrospection = hydra_admin_api.introspect_token(
         access_token, [required_scope_id],
     )
     if not token.active:
@@ -70,7 +70,7 @@ class BaseAuthorize(SecurityBase):
         # OpenAPI docs / Swagger auth
         self.scheme_name = 'ODP API Authorization'
         self.model = OAuth2(flows=OAuthFlows(clientCredentials=OAuthFlowClientCredentials(
-            tokenUrl=f'{hydra.public_url}/oauth2/token',
+            tokenUrl=f'{hydra_public_url}/oauth2/token',
             scopes={s.value: s.value for s in ODPScope},
         )))
 
