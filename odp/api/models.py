@@ -1,11 +1,10 @@
 import re
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import List, Optional, Dict, Any
 
-from pydantic import AnyHttpUrl, BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, validator, root_validator
 
 from odp.lib.formats import DOI_REGEX, SID_REGEX
-# from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
 
 
 class FlagInstanceModel(BaseModel):
@@ -46,25 +45,6 @@ class ClientModel(BaseModel):
     name: str
     scope_ids: List[str]
     provider_id: Optional[str]
-    # grant_types: List[GrantType]
-    # response_types: List[ResponseType]
-    # redirect_uris: List[AnyHttpUrl]
-    # post_logout_redirect_uris: List[AnyHttpUrl]
-    # token_endpoint_auth_method: TokenEndpointAuthMethod
-    # allowed_cors_origins: List[AnyHttpUrl]
-
-
-class ClientModelIn(BaseModel):
-    id: str
-    name: str
-    # secret: str
-    provider_id: Optional[str]
-    # grant_types: List[GrantType]
-    # response_types: List[ResponseType]
-    # redirect_uris: List[AnyHttpUrl]
-    # post_logout_redirect_uris: List[AnyHttpUrl]
-    # token_endpoint_auth_method: TokenEndpointAuthMethod
-    # allowed_cors_origins: List[AnyHttpUrl]
 
 
 class CollectionModel(BaseModel):
