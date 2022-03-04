@@ -95,8 +95,7 @@ class ClientFactory(ODPModelFactory):
         model = Client
         exclude = ('is_provider_client',)
 
-    id = factory.LazyAttribute(id_from_name)
-    name = factory.Sequence(lambda n: f'{fake.catch_phrase()}.{n}')
+    id = factory.Sequence(lambda n: f'{fake.catch_phrase()}.{n}')
 
     is_provider_client = False
     provider = factory.Maybe(

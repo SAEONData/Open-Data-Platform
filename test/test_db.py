@@ -65,14 +65,14 @@ def test_create_catalogue():
 def test_create_client():
     client = ClientFactory()
     result = Session.execute(select(Client)).scalar_one()
-    assert (result.id, result.name, result.provider_id) == (client.id, client.name, None)
+    assert (result.id, result.provider_id) == (client.id, None)
 
 
 def test_create_client_with_provider():
     client = ClientFactory(is_provider_client=True)
     result = Session.execute(select(Client, Provider).join(Provider)).one()
-    assert (result.Client.id, result.Client.name, result.Client.provider_id, result.Provider.name) \
-           == (client.id, client.name, client.provider.id, client.provider.name)
+    assert (result.Client.id, result.Client.provider_id, result.Provider.name) \
+           == (client.id, client.provider.id, client.provider.name)
 
 
 def test_create_client_with_scopes():
