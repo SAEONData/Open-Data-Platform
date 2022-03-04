@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
@@ -7,8 +7,11 @@ from odp.db.models.client_scope import ClientScope
 
 
 class Client(Base):
-    """Client application config. The associated scopes
-    represent the set of permissions granted to the client.
+    """A client application, linked by id with an OAuth2 client
+    configuration on Hydra.
+
+    The associated scopes represent the set of permissions granted
+    to the client.
 
     If a client is linked to a provider, then its scopes apply
     only to entities that are associated with that provider.
@@ -17,7 +20,6 @@ class Client(Base):
     __tablename__ = 'client'
 
     id = Column(String, primary_key=True)
-    name = Column(String, unique=True, nullable=False)
 
     provider_id = Column(String, ForeignKey('provider.id', ondelete='CASCADE'))
     provider = relationship('Provider')
@@ -28,4 +30,4 @@ class Client(Base):
     scopes = association_proxy('client_scopes', 'scope', creator=lambda s: ClientScope(scope=s))
 
     def __repr__(self):
-        return self._repr('id', 'name', 'provider_id')
+        return self._repr('id', 'provider_id')

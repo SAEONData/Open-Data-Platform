@@ -6,7 +6,8 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from odp import ODPScope
 from odp.config import config
-from odp.ui import db, auth
+from odp.lib.hydra import HydraScope
+from odp.ui import auth, db
 from odp.ui.admin import forms, views
 
 
@@ -21,7 +22,7 @@ def create_app():
         SESSION_COOKIE_SAMESITE='Lax',
         CLIENT_ID=config.ODP.UI.ADMIN.CLIENT_ID,
         CLIENT_SECRET=config.ODP.UI.ADMIN.CLIENT_SECRET,
-        CLIENT_SCOPE=['openid', 'offline'] + [s.value for s in ODPScope],
+        CLIENT_SCOPE=[HydraScope.OPENID, HydraScope.OFFLINE_ACCESS] + [s.value for s in ODPScope],
         API_URL=config.ODP.UI.ADMIN.API_URL,
     )
 

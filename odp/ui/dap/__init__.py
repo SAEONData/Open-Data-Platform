@@ -5,6 +5,7 @@ from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from odp.config import config
+from odp.lib.hydra import HydraScope
 from odp.ui import auth, db
 from odp.ui.dap import views
 
@@ -21,7 +22,7 @@ def create_app():
         SESSION_COOKIE_SAMESITE='Lax',
         CLIENT_ID=config.ODP.UI.DAP.CLIENT_ID,
         CLIENT_SECRET=config.ODP.UI.DAP.CLIENT_SECRET,
-        CLIENT_SCOPE=config.ODP.UI.DAP.SCOPE,
+        CLIENT_SCOPE=[HydraScope.OPENID, HydraScope.OFFLINE_ACCESS],
     )
 
     ui_dir = Path(__file__).parent.parent

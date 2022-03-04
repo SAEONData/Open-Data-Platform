@@ -27,7 +27,6 @@ Finally, run the following commands to initialize platform data:
 
     ../migrate/systemdata.py
     ../migrate/saeondata.py
-    ../migrate/hydradata.sh
 
 ## Running ODP services locally
 Activate your Python virtual environment and `cd` to the `develop` directory.
