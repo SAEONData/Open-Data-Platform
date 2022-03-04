@@ -32,26 +32,6 @@ from odp.lib.hydra import HydraAdminAPI, GrantType, HydraScope, ResponseType
 
 ODP_ADMIN_ROLE = 'ODP:Admin'
 
-ODP_UI_ADMIN_CLIENT_ID = os.getenv('ODP_UI_ADMIN_CLIENT_ID')
-ODP_UI_ADMIN_CLIENT_SECRET = os.getenv('ODP_UI_ADMIN_CLIENT_SECRET')
-ODP_UI_ADMIN_CLIENT_NAME = 'ODP Admin UI'
-ODP_UI_ADMIN_LOGGED_IN_URL = os.getenv('ODP_UI_ADMIN_URL') + '/oauth2/logged_in'
-ODP_UI_ADMIN_LOGGED_OUT_URL = os.getenv('ODP_UI_ADMIN_URL') + '/oauth2/logged_out'
-
-ODP_UI_DAP_CLIENT_ID = os.getenv('ODP_UI_DAP_CLIENT_ID')
-ODP_UI_DAP_CLIENT_SECRET = os.getenv('ODP_UI_DAP_CLIENT_SECRET')
-ODP_UI_DAP_CLIENT_NAME = 'ODP Data Access Portal'
-ODP_UI_DAP_LOGGED_IN_URL = os.getenv('ODP_UI_DAP_URL') + '/oauth2/logged_in'
-ODP_UI_DAP_LOGGED_OUT_URL = os.getenv('ODP_UI_DAP_URL') + '/oauth2/logged_out'
-
-ODP_CLI_CLIENT_ID = os.getenv('ODP_CLI_CLIENT_ID')
-ODP_CLI_CLIENT_SECRET = os.getenv('ODP_CLI_CLIENT_SECRET')
-ODP_CLI_CLIENT_NAME = 'Swagger UI / Scripting Client'
-
-HYDRA_ADMIN_URL = os.getenv('HYDRA_ADMIN_URL')
-
-hydra_admin_api = HydraAdminAPI(HYDRA_ADMIN_URL)
-
 
 def create_schema():
     """Create the ODP database schema.
@@ -170,6 +150,25 @@ def create_admin_user():
 
 if __name__ == '__main__':
     print('Initializing static system data...')
+
+    ODP_UI_ADMIN_CLIENT_ID = os.getenv('ODP_UI_ADMIN_CLIENT_ID')
+    ODP_UI_ADMIN_CLIENT_SECRET = os.getenv('ODP_UI_ADMIN_CLIENT_SECRET')
+    ODP_UI_ADMIN_CLIENT_NAME = 'ODP Admin UI'
+    ODP_UI_ADMIN_LOGGED_IN_URL = os.getenv('ODP_UI_ADMIN_URL') + '/oauth2/logged_in'
+    ODP_UI_ADMIN_LOGGED_OUT_URL = os.getenv('ODP_UI_ADMIN_URL') + '/oauth2/logged_out'
+
+    ODP_UI_DAP_CLIENT_ID = os.getenv('ODP_UI_DAP_CLIENT_ID')
+    ODP_UI_DAP_CLIENT_SECRET = os.getenv('ODP_UI_DAP_CLIENT_SECRET')
+    ODP_UI_DAP_CLIENT_NAME = 'ODP Data Access Portal'
+    ODP_UI_DAP_LOGGED_IN_URL = os.getenv('ODP_UI_DAP_URL') + '/oauth2/logged_in'
+    ODP_UI_DAP_LOGGED_OUT_URL = os.getenv('ODP_UI_DAP_URL') + '/oauth2/logged_out'
+
+    ODP_CLI_CLIENT_ID = os.getenv('ODP_CLI_CLIENT_ID')
+    ODP_CLI_CLIENT_SECRET = os.getenv('ODP_CLI_CLIENT_SECRET')
+    ODP_CLI_CLIENT_NAME = 'Swagger UI / Scripting Client'
+
+    hydra_admin_api = HydraAdminAPI(os.getenv('HYDRA_ADMIN_URL'))
+
     create_schema()
     with Session.begin():
         sync_system_scopes()
@@ -178,4 +177,5 @@ if __name__ == '__main__':
         sync_dap_client()
         sync_cli_client()
         create_admin_user()
+
     print('Done.')
