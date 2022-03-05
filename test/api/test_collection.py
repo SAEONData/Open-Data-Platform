@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import Collection, CollectionFlag, CollectionFlagAudit, Scope
+from odp.db.models import Collection, CollectionFlag, CollectionFlagAudit, Scope, ScopeType
 from odp.lib.formats import DOI_REGEX
 from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding, assert_unprocessable
 from test.factories import CollectionFactory, ProjectFactory, ProviderFactory, FlagFactory, SchemaFactory
@@ -334,7 +334,11 @@ def test_flag_collection(api, collection_batch, scopes, authorized):
     client = api(scopes)
     FlagFactory(
         id='collection-publish',
-        scope=Session.get(Scope, ODPScope.COLLECTION_FLAG_PUBLISH) or Scope(id=ODPScope.COLLECTION_FLAG_PUBLISH),
+        scope=Session.get(
+            Scope, (ODPScope.COLLECTION_FLAG_PUBLISH, ScopeType.odp)
+        ) or Scope(
+            id=ODPScope.COLLECTION_FLAG_PUBLISH, type=ScopeType.odp
+        ),
         schema=SchemaFactory(
             type='flag',
             uri='https://odp.saeon.ac.za/schema/flag/generic',

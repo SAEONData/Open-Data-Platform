@@ -6,7 +6,7 @@ from sqlalchemy import select
 
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import Record, RecordAudit, Scope, RecordTag, RecordTagAudit
+from odp.db.models import Record, RecordAudit, Scope, RecordTag, RecordTagAudit, ScopeType
 from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding
 from test.factories import RecordFactory, CollectionFactory, SchemaFactory, TagFactory
 
@@ -376,7 +376,11 @@ def test_tag_record(api, record_batch, scopes, authorized):
     client = api(scopes)
     TagFactory(
         id='record-qc',
-        scope=Session.get(Scope, ODPScope.RECORD_TAG_QC) or Scope(id=ODPScope.RECORD_TAG_QC),
+        scope=Session.get(
+            Scope, (ODPScope.RECORD_TAG_QC, ScopeType.odp)
+        ) or Scope(
+            id=ODPScope.RECORD_TAG_QC, type=ScopeType.odp
+        ),
         schema=SchemaFactory(
             type='tag',
             uri='https://odp.saeon.ac.za/schema/tag/record-qc',
