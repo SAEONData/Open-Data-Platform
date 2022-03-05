@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN
+from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize, Authorized
@@ -10,6 +10,14 @@ from odp.db import Session
 from odp.db.models import Client, Scope
 
 router = APIRouter()
+
+
+def select_scopes(client_in: ClientModel) -> list[Scope]:
+    # silently ignore unknown scope ids
+    return Session.execute(
+        select(Scope).
+        where(Scope.id.in_(client_in.scope_ids))
+    ).scalars().all()
 
 
 @router.get(
@@ -28,7 +36,7 @@ async def list_clients(
         stmt,
         lambda row: ClientModel(
             id=row.Client.id,
-            name=row.Client.name,
+            name='',
             scope_ids=[scope.id for scope in row.Client.scopes],
             provider_id=row.Client.provider_id,
         )
@@ -51,7 +59,7 @@ async def get_client(
 
     return ClientModel(
         id=client.id,
-        name=client.name,
+        name='',
         scope_ids=[scope.id for scope in client.scopes],
         provider_id=client.provider_id,
     )
@@ -72,11 +80,7 @@ async def create_client(
 
     client = Client(
         id=client_in.id,
-        name=client_in.name,
-        scopes=[
-            Session.get(Scope, scope_id)
-            for scope_id in client_in.scope_ids
-        ],
+        scopes=select_scopes(client_in),
         provider_id=client_in.provider_id,
     )
     client.save()
@@ -95,11 +99,7 @@ async def update_client(
     if not (client := Session.get(Client, client_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    client.name = client_in.name
-    client.scopes = [
-        Session.get(Scope, scope_id)
-        for scope_id in client_in.scope_ids
-    ]
+    client.scopes = select_scopes(client_in)
     client.provider_id = client_in.provider_id,
     client.save()
 

@@ -41,15 +41,14 @@ def assert_db_state(clients):
     """Verify that the DB client table contains the given client batch."""
     Session.expire_all()
     result = Session.execute(select(Client).where(Client.id != 'odp.test')).scalars().all()
-    assert set((row.id, row.name, scope_ids(row), row.provider_id) for row in result) \
-           == set((client.id, client.name, scope_ids(client), client.provider_id) for client in clients)
+    assert set((row.id, scope_ids(row), row.provider_id) for row in result) \
+           == set((client.id, scope_ids(client), client.provider_id) for client in clients)
 
 
 def assert_json_result(response, json, client):
     """Verify that the API result matches the given client object."""
     assert response.status_code == 200
     assert json['id'] == client.id
-    assert json['name'] == client.name
     assert json['provider_id'] == client.provider_id
     assert tuple(json['scope_ids']) == scope_ids(client)
 
@@ -139,7 +138,7 @@ def test_create_client(api, client_batch, scopes, authorized):
     modified_client_batch = client_batch + [client := client_build()]
     r = api(scopes).post('/client/', json=dict(
         id=client.id,
-        name=client.name,
+        name='',
         scope_ids=scope_ids(client),
         provider_id=client.provider_id,
     ))
@@ -166,7 +165,7 @@ def test_create_client_with_provider_specific_api_client(api, client_batch, scop
     )]
     r = api(scopes, api_client_provider).post('/client/', json=dict(
         id=client.id,
-        name=client.name,
+        name='',
         scope_ids=scope_ids(client),
         provider_id=client.provider_id,
     ))
@@ -189,7 +188,7 @@ def test_update_client(api, client_batch, scopes, authorized):
     modified_client_batch[2] = (client := client_build(id=client_batch[2].id))
     r = api(scopes).put('/client/', json=dict(
         id=client.id,
-        name=client.name,
+        name='',
         scope_ids=scope_ids(client),
         provider_id=client.provider_id,
     ))
@@ -218,7 +217,7 @@ def test_update_client_with_provider_specific_api_client(api, client_batch, scop
     ))
     r = api(scopes, api_client_provider).put('/client/', json=dict(
         id=client.id,
-        name=client.name,
+        name='',
         scope_ids=scope_ids(client),
         provider_id=client.provider_id,
     ))
