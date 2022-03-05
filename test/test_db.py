@@ -3,38 +3,10 @@ from sqlalchemy import select
 import migrate.systemdata
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import (
-    Catalogue,
-    Client,
-    ClientScope,
-    Collection,
-    Flag,
-    Project,
-    ProjectCollection,
-    Provider,
-    Record,
-    Role,
-    RoleScope,
-    Schema,
-    Scope,
-    Tag,
-    User,
-    UserRole,
-)
-from test.factories import (
-    CatalogueFactory,
-    ClientFactory,
-    CollectionFactory,
-    FlagFactory,
-    ProjectFactory,
-    ProviderFactory,
-    RecordFactory,
-    RoleFactory,
-    SchemaFactory,
-    ScopeFactory,
-    TagFactory,
-    UserFactory,
-)
+from odp.db.models import (Catalogue, Client, ClientScope, Collection, Flag, Project, ProjectCollection, Provider, Record, Role, RoleScope, Schema,
+                           Scope, ScopeType, Tag, User, UserRole)
+from test.factories import (CatalogueFactory, ClientFactory, CollectionFactory, FlagFactory, ProjectFactory, ProviderFactory, RecordFactory,
+                            RoleFactory, SchemaFactory, ScopeFactory, TagFactory, UserFactory)
 
 
 def test_db_setup():
@@ -43,7 +15,8 @@ def test_db_setup():
     result = Session.execute(select(Scope)).scalars()
     assert [row.id for row in result] == [s.value for s in ODPScope]
 
-    ScopeFactory()  # create an arbitrary (external) scope, not for the sysadmin
+    # create a batch of arbitrary scopes, which should not be assigned to the sysadmin
+    ScopeFactory.create_batch(5)
 
     migrate.systemdata.sync_admin_role()
     Session.commit()
@@ -51,8 +24,8 @@ def test_db_setup():
     assert (result.id, result.provider_id) == (migrate.systemdata.ODP_ADMIN_ROLE, None)
 
     result = Session.execute(select(RoleScope)).scalars()
-    assert [(row.role_id, row.scope_id) for row in result] \
-           == [(migrate.systemdata.ODP_ADMIN_ROLE, s.value) for s in ODPScope]
+    assert [(row.role_id, row.scope_id, row.scope_type) for row in result] \
+           == [(migrate.systemdata.ODP_ADMIN_ROLE, s.value, ScopeType.odp) for s in ODPScope]
 
 
 def test_create_catalogue():
@@ -79,8 +52,8 @@ def test_create_client_with_scopes():
     scopes = ScopeFactory.create_batch(5)
     client = ClientFactory(scopes=scopes)
     result = Session.execute(select(ClientScope)).scalars()
-    assert [(row.client_id, row.scope_id) for row in result] \
-           == [(client.id, scope.id) for scope in scopes]
+    assert [(row.client_id, row.scope_id, row.scope_type) for row in result] \
+           == [(client.id, scope.id, scope.type) for scope in scopes]
 
 
 def test_create_collection():
@@ -93,8 +66,8 @@ def test_create_collection():
 def test_create_flag():
     flag = FlagFactory()
     result = Session.execute(select(Flag, Scope).join(Scope)).one()
-    assert (result.Flag.id, result.Flag.public, result.Flag.schema_id, result.Flag.scope_id) \
-           == (flag.id, flag.public, flag.schema_id, flag.scope.id)
+    assert (result.Flag.id, result.Flag.public, result.Flag.schema_id, result.Flag.scope_id, result.Flag.scope_type) \
+           == (flag.id, flag.public, flag.schema_id, flag.scope.id, ScopeType.odp)
 
 
 def test_create_project():
@@ -138,11 +111,11 @@ def test_create_role_with_provider():
 
 
 def test_create_role_with_scopes():
-    scopes = ScopeFactory.create_batch(5, type='odp')
+    scopes = ScopeFactory.create_batch(5, type='odp') + ScopeFactory.create_batch(5, type='client')
     role = RoleFactory(scopes=scopes)
     result = Session.execute(select(RoleScope)).scalars()
-    assert [(row.role_id, row.scope_id) for row in result] \
-           == [(role.id, scope.id) for scope in scopes]
+    assert [(row.role_id, row.scope_id, row.scope_type) for row in result] \
+           == [(role.id, scope.id, scope.type) for scope in scopes]
 
 
 def test_create_schema():
@@ -154,14 +127,14 @@ def test_create_schema():
 def test_create_scope():
     scope = ScopeFactory()
     result = Session.execute(select(Scope)).scalar_one()
-    assert result.id == scope.id
+    assert (result.id, result.type) == (scope.id, scope.type)
 
 
 def test_create_tag():
     tag = TagFactory()
     result = Session.execute(select(Tag, Scope).join(Scope)).one()
-    assert (result.Tag.id, result.Tag.public, result.Tag.schema_id, result.Tag.scope_id) \
-           == (tag.id, tag.public, tag.schema_id, tag.scope.id)
+    assert (result.Tag.id, result.Tag.public, result.Tag.schema_id, result.Tag.scope_id, result.Tag.scope_type) \
+           == (tag.id, tag.public, tag.schema_id, tag.scope.id, ScopeType.odp)
 
 
 def test_create_user():
