@@ -19,6 +19,6 @@ from .role_scope import RoleScope
 from .schema import Schema
 from .scope import Scope
 from .tag import Tag
-from .types import SchemaType, AuditCommand
+from .types import AuditCommand, SchemaType, ScopeType
 from .user import User
 from .user_role import UserRole

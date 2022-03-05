@@ -138,7 +138,7 @@ def test_create_role_with_provider():
 
 
 def test_create_role_with_scopes():
-    scopes = ScopeFactory.create_batch(5)
+    scopes = ScopeFactory.create_batch(5, type='odp')
     role = RoleFactory(scopes=scopes)
     result = Session.execute(select(RoleScope)).scalars()
     assert [(row.role_id, row.scope_id) for row in result] \

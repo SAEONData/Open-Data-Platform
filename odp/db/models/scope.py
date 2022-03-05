@@ -1,8 +1,9 @@
-from sqlalchemy import Column, String
+from sqlalchemy import Column, Enum, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
+from odp.db.models.types import ScopeType
 
 
 class Scope(Base):
@@ -10,7 +11,8 @@ class Scope(Base):
 
     __tablename__ = 'scope'
 
-    id = Column(String, primary_key=True)
+    id = Column(String, primary_key=True, unique=True)
+    type = Column(Enum(ScopeType), primary_key=True)
 
     # view of associated roles via many-to-many role_scope relation
     scope_roles = relationship('RoleScope', viewonly=True)

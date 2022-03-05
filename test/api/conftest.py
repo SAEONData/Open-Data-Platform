@@ -11,7 +11,6 @@ def api():
     def scoped_client(scopes, provider=None):
         ClientFactory(
             id='odp.test',
-            name='ODP Test Client',
             scopes=[ScopeFactory(id=s.value) for s in scopes],
             provider=provider,
         )

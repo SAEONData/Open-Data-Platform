@@ -18,7 +18,7 @@ def assert_compare(expected: Permissions, actual: Permissions):
 
 
 def test_platform_roles():
-    scopes = ScopeFactory.create_batch(8)
+    scopes = ScopeFactory.create_batch(8, type='odp')
     client = ClientFactory(scopes=scopes[1:7])
     role1 = RoleFactory(scopes=scopes[:3])
     role2 = RoleFactory(scopes=scopes[5:])
@@ -41,7 +41,7 @@ def test_platform_roles():
 
 
 def test_provider_roles():
-    scopes = ScopeFactory.create_batch(8)
+    scopes = ScopeFactory.create_batch(8, type='odp')
     client = ClientFactory(scopes=scopes[1:7])
     role1 = RoleFactory(scopes=scopes[:5], is_provider_role=True)
     role2 = RoleFactory(scopes=scopes[3:], is_provider_role=True)
@@ -72,7 +72,7 @@ def test_provider_roles():
 
 
 def test_platform_provider_role_mix():
-    scopes = ScopeFactory.create_batch(8)
+    scopes = ScopeFactory.create_batch(8, type='odp')
     client = ClientFactory(scopes=scopes[1:7])
     role1 = RoleFactory(scopes=scopes[:4])
     role2 = RoleFactory(scopes=scopes[3:], is_provider_role=True)
@@ -104,7 +104,7 @@ def test_platform_provider_role_mix():
 
 
 def test_provider_client():
-    scopes = ScopeFactory.create_batch(8)
+    scopes = ScopeFactory.create_batch(8, type='odp')
     client = ClientFactory(scopes=scopes[1:7], is_provider_client=True)
     role1 = RoleFactory(scopes=scopes[:3])
     role2 = RoleFactory(scopes=scopes[5:])
@@ -127,7 +127,7 @@ def test_provider_client():
 
 
 def test_provider_client_platform_provider_role_mix():
-    scopes = ScopeFactory.create_batch(8)
+    scopes = ScopeFactory.create_batch(8, type='odp')
     client = ClientFactory(scopes=scopes[1:7], is_provider_client=True)
     role1 = RoleFactory(scopes=scopes[:3])
     role2 = RoleFactory(scopes=scopes[3:5], is_provider_role=True)

@@ -63,6 +63,7 @@ class ScopeFactory(ODPModelFactory):
         model = Scope
 
     id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
+    type = factory.LazyFunction(lambda: choice(('odp', 'oauth', 'client')))
 
 
 class SchemaFactory(ODPModelFactory):
@@ -70,7 +71,7 @@ class SchemaFactory(ODPModelFactory):
         model = Schema
 
     id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
-    type = factory.LazyFunction(lambda: choice(('catalogue', 'metadata', 'tag')))
+    type = factory.LazyFunction(lambda: choice(('catalogue', 'metadata', 'flag', 'tag')))
     uri = factory.LazyAttribute(schema_uri_from_type)
 
 
@@ -137,7 +138,7 @@ class FlagFactory(ODPModelFactory):
 
     id = factory.LazyAttribute(lambda flag: f'flag-{flag.scope.id}')
     public = factory.LazyFunction(lambda: randint(0, 1))
-    scope = factory.SubFactory(ScopeFactory)
+    scope = factory.SubFactory(ScopeFactory, type='odp')
     schema = factory.SubFactory(SchemaFactory, type='flag')
 
 
@@ -199,7 +200,7 @@ class TagFactory(ODPModelFactory):
 
     id = factory.LazyAttribute(lambda tag: f'tag-{tag.scope.id}')
     public = factory.LazyFunction(lambda: randint(0, 1))
-    scope = factory.SubFactory(ScopeFactory)
+    scope = factory.SubFactory(ScopeFactory, type='odp')
     schema = factory.SubFactory(SchemaFactory, type='tag')
 
 
