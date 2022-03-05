@@ -22,5 +22,6 @@ async def list_scopes(
         select(Scope),
         lambda row: ScopeModel(
             id=row.Scope.id,
+            type=row.Scope.type,
         )
     )

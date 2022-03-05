@@ -11,7 +11,7 @@ def api():
     def scoped_client(scopes, provider=None):
         ClientFactory(
             id='odp.test',
-            scopes=[ScopeFactory(id=s.value) for s in scopes],
+            scopes=[ScopeFactory(id=s.value, type='odp') for s in scopes],
             provider=provider,
         )
         token = OAuth2Session(

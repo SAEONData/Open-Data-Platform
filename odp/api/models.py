@@ -155,6 +155,7 @@ class SchemaModel(BaseModel):
 
 class ScopeModel(BaseModel):
     id: str
+    type: str
 
 
 class TagModel(BaseModel):
