@@ -7,9 +7,18 @@ from odp.api.lib.auth import Authorize, Authorized
 from odp.api.lib.paging import Page, Paginator
 from odp.api.models import RoleModel
 from odp.db import Session
-from odp.db.models import Role, Scope
+from odp.db.models import Role, Scope, ScopeType
 
 router = APIRouter()
+
+
+def select_scopes(role_in: RoleModel) -> list[Scope]:
+    # silently ignore unknown or standard scope ids
+    return Session.execute(
+        select(Scope).
+        where(Scope.id.in_(role_in.scope_ids)).
+        where(Scope.type.in_((ScopeType.odp, ScopeType.client)))
+    ).scalars().all()
 
 
 @router.get(
@@ -70,10 +79,7 @@ async def create_role(
 
     role = Role(
         id=role_in.id,
-        scopes=[
-            Session.get(Scope, scope_id)
-            for scope_id in role_in.scope_ids
-        ],
+        scopes=select_scopes(role_in),
         provider_id=role_in.provider_id,
     )
     role.save()
@@ -92,10 +98,7 @@ async def update_role(
     if not (role := Session.get(Role, role_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    role.scopes = [
-        Session.get(Scope, scope_id)
-        for scope_id in role_in.scope_ids
-    ]
+    role.scopes = select_scopes(role_in)
     role.provider_id = role_in.provider_id,
     role.save()
 

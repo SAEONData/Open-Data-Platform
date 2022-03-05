@@ -1,4 +1,4 @@
-from random import randint
+from random import choice, randint
 
 import pytest
 from sqlalchemy import select
@@ -6,8 +6,8 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Role
-from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding
-from test.factories import RoleFactory, ScopeFactory, ProviderFactory
+from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
+from test.factories import ProviderFactory, RoleFactory, ScopeFactory
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def role_batch():
     """Create and commit a batch of Role instances."""
     return [
         RoleFactory(
-            scopes=ScopeFactory.create_batch(randint(0, 3)),
+            scopes=ScopeFactory.create_batch(randint(0, 3), type=choice(('odp', 'client'))),
             is_provider_role=n in (1, 2) or randint(0, 1),
         )
         for n in range(randint(3, 5))
@@ -27,14 +27,14 @@ def role_build(provider=None, **id):
     Referenced scopes and/or provider are however committed."""
     return RoleFactory.build(
         **id,
-        scopes=ScopeFactory.create_batch(randint(0, 3)),
+        scopes=ScopeFactory.create_batch(randint(0, 3), type=choice(('odp', 'client'))),
         provider=provider or (provider := ProviderFactory() if randint(0, 1) else None),
         provider_id=provider.id if provider else None,
     )
 
 
 def scope_ids(role):
-    return tuple(scope.id for scope in role.scopes)
+    return tuple(sorted(scope.id for scope in role.scopes))
 
 
 def assert_db_state(roles):
@@ -50,7 +50,7 @@ def assert_json_result(response, json, role):
     assert response.status_code == 200
     assert json['id'] == role.id
     assert json['provider_id'] == role.provider_id
-    assert tuple(json['scope_ids']) == scope_ids(role)
+    assert tuple(sorted(json['scope_ids'])) == scope_ids(role)
 
 
 def assert_json_results(response, json, roles):
