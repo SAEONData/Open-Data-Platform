@@ -20,8 +20,8 @@ def assert_db_state(flags):
     """Verify that the DB flag table contains the given flag batch."""
     Session.expire_all()
     result = Session.execute(select(Flag)).scalars().all()
-    assert set((row.id, row.public, row.scope_id, row.schema_id, row.schema_type) for row in result) \
-           == set((flag.id, flag.public, flag.scope_id, flag.schema_id, flag.schema_type) for flag in flags)
+    assert set((row.id, row.public, row.scope_id, row.scope_type, row.schema_id, row.schema_type) for row in result) \
+           == set((flag.id, flag.public, flag.scope_id, flag.scope_type, flag.schema_id, flag.schema_type) for flag in flags)
 
 
 def assert_json_result(response, json, flag):
@@ -31,6 +31,8 @@ def assert_json_result(response, json, flag):
     assert json['public'] == flag.public
     assert json['scope_id'] == flag.scope_id
     assert json['schema_id'] == flag.schema_id
+    assert json['schema_uri'] == flag.schema.uri
+    assert json['schema_']['$id'] == flag.schema.uri
 
 
 def assert_json_results(response, json, flags):
