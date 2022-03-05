@@ -34,7 +34,7 @@ def client_build(provider=None, **id):
 
 
 def scope_ids(client):
-    return tuple(scope.id for scope in client.scopes)
+    return tuple(sorted(scope.id for scope in client.scopes))
 
 
 def assert_db_state(clients):
@@ -50,7 +50,7 @@ def assert_json_result(response, json, client):
     assert response.status_code == 200
     assert json['id'] == client.id
     assert json['provider_id'] == client.provider_id
-    assert tuple(json['scope_ids']) == scope_ids(client)
+    assert tuple(sorted(json['scope_ids'])) == scope_ids(client)
 
 
 def assert_json_results(response, json, clients):
