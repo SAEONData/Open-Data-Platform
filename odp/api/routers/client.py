@@ -1,23 +1,65 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
+from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
 from odp.api.lib.auth import Authorize, Authorized
+from odp.api.lib.hydra import hydra_admin_api
 from odp.api.lib.paging import Page, Paginator
-from odp.api.models import ClientModel
+from odp.api.models import ClientModel, ClientModelIn
 from odp.db import Session
 from odp.db.models import Client, Scope
 
 router = APIRouter()
 
 
-def select_scopes(client_in: ClientModel) -> list[Scope]:
-    # silently ignore unknown scope ids
-    return Session.execute(
-        select(Scope).
-        where(Scope.id.in_(client_in.scope_ids))
-    ).scalars().all()
+def output_client_model(client: Client) -> ClientModel:
+    hydra_client = hydra_admin_api.get_client(client.id)
+    return ClientModel(
+        id=client.id,
+        name=hydra_client.name,
+        scope_ids=[scope.id for scope in client.scopes],
+        provider_id=client.provider_id,
+        grant_types=hydra_client.grant_types,
+        response_types=hydra_client.response_types,
+        redirect_uris=hydra_client.redirect_uris,
+        post_logout_redirect_uris=hydra_client.post_logout_redirect_uris,
+        token_endpoint_auth_method=hydra_client.token_endpoint_auth_method,
+        allowed_cors_origins=hydra_client.allowed_cors_origins,
+    )
+
+
+def select_scopes(client_in: ClientModelIn) -> list[Scope]:
+    scopes = []
+    unknowns = []
+    for scope_id in client_in.scope_ids:
+        if scope := Session.execute(
+            select(Scope).
+            where(Scope.id == scope_id)
+        ).scalar_one_or_none():
+            scopes += [scope]
+        else:
+            unknowns += [scope_id]
+
+    if unknowns:
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, f'Unsupported scope(s): {", ".join(unknowns)}')
+
+    return scopes
+
+
+def create_or_update_hydra_client(client_in: ClientModelIn) -> None:
+    hydra_admin_api.create_or_update_client(
+        id=client_in.id,
+        name=client_in.name,
+        secret=client_in.secret,
+        scope_ids=client_in.scope_ids,
+        grant_types=client_in.grant_types,
+        response_types=client_in.response_types,
+        redirect_uris=client_in.redirect_uris,
+        post_logout_redirect_uris=client_in.post_logout_redirect_uris,
+        token_endpoint_auth_method=client_in.token_endpoint_auth_method,
+        allowed_cors_origins=client_in.allowed_cors_origins,
+    )
 
 
 @router.get(
@@ -34,12 +76,7 @@ async def list_clients(
 
     return paginator.paginate(
         stmt,
-        lambda row: ClientModel(
-            id=row.Client.id,
-            name='',
-            scope_ids=[scope.id for scope in row.Client.scopes],
-            provider_id=row.Client.provider_id,
-        )
+        lambda row: output_client_model(row.Client),
     )
 
 
@@ -57,19 +94,14 @@ async def get_client(
     if auth.provider_ids != '*' and client.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    return ClientModel(
-        id=client.id,
-        name='',
-        scope_ids=[scope.id for scope in client.scopes],
-        provider_id=client.provider_id,
-    )
+    return output_client_model(client)
 
 
 @router.post(
     '/',
 )
 async def create_client(
-        client_in: ClientModel,
+        client_in: ClientModelIn,
         auth: Authorized = Depends(Authorize(ODPScope.CLIENT_ADMIN)),
 ):
     if auth.provider_ids != '*' and client_in.provider_id not in auth.provider_ids:
@@ -78,19 +110,23 @@ async def create_client(
     if Session.get(Client, client_in.id):
         raise HTTPException(HTTP_409_CONFLICT)
 
+    if client_in.secret is None:
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Client secret must be provided on create')
+
     client = Client(
         id=client_in.id,
         scopes=select_scopes(client_in),
         provider_id=client_in.provider_id,
     )
     client.save()
+    create_or_update_hydra_client(client_in)
 
 
 @router.put(
     '/',
 )
 async def update_client(
-        client_in: ClientModel,
+        client_in: ClientModelIn,
         auth: Authorized = Depends(Authorize(ODPScope.CLIENT_ADMIN)),
 ):
     if auth.provider_ids != '*' and client_in.provider_id not in auth.provider_ids:
@@ -102,6 +138,7 @@ async def update_client(
     client.scopes = select_scopes(client_in)
     client.provider_id = client_in.provider_id,
     client.save()
+    create_or_update_hydra_client(client_in)
 
 
 @router.delete(
@@ -118,3 +155,4 @@ async def delete_client(
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     client.delete()
+    hydra_admin_api.delete_client(client_id)

@@ -6,20 +6,41 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Client
-from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding
-from test.factories import ClientFactory, ScopeFactory, ProviderFactory
+from odp.lib.hydra import TokenEndpointAuthMethod
+from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
+from test.factories import ClientFactory, ProviderFactory, ScopeFactory, fake
 
 
 @pytest.fixture
-def client_batch():
-    """Create and commit a batch of Client instances."""
-    return [
-        ClientFactory(
-            scopes=ScopeFactory.create_batch(randint(0, 3)),
+def client_batch(hydra_admin_api):
+    """Create and commit a batch of Client instances, and create
+    an OAuth2 client config on Hydra for each."""
+    clients = []
+    for n in range(randint(3, 5)):
+        clients += [client := ClientFactory(
+            scopes=(scopes := ScopeFactory.create_batch(randint(1, 3))),
             is_provider_client=n in (1, 2) or randint(0, 1),
+        )]
+        hydra_admin_api.create_or_update_client(
+            client.id,
+            name=fake.catch_phrase(),
+            secret=fake.password(),
+            scope_ids=[s.id for s in scopes],
+            grant_types=[],
         )
-        for n in range(randint(3, 5))
-    ]
+
+    return clients
+
+
+@pytest.fixture(autouse=True)
+def delete_hydra_clients(hydra_admin_api):
+    """Delete Hydra client configs after each test."""
+    try:
+        yield
+    finally:
+        for hydra_client in hydra_admin_api.list_clients():
+            if hydra_client.id != 'odp.test':
+                hydra_admin_api.delete_client(hydra_client.id)
 
 
 def client_build(provider=None, **id):
@@ -27,7 +48,7 @@ def client_build(provider=None, **id):
     Referenced scopes and/or provider are however committed."""
     return ClientFactory.build(
         **id,
-        scopes=ScopeFactory.create_batch(randint(0, 3)),
+        scopes=ScopeFactory.create_batch(randint(1, 3)),
         provider=provider or (provider := ProviderFactory() if randint(0, 1) else None),
         provider_id=provider.id if provider else None,
     )
@@ -46,7 +67,10 @@ def assert_db_state(clients):
 
 
 def assert_json_result(response, json, client):
-    """Verify that the API result matches the given client object."""
+    """Verify that the API result matches the given client object.
+
+    TODO: test Hydra client config values
+    """
     assert response.status_code == 200
     assert json['id'] == client.id
     assert json['provider_id'] == client.provider_id
@@ -138,9 +162,16 @@ def test_create_client(api, client_batch, scopes, authorized):
     modified_client_batch = client_batch + [client := client_build()]
     r = api(scopes).post('/client/', json=dict(
         id=client.id,
-        name='',
+        name=fake.catch_phrase(),
+        secret=fake.password(),
         scope_ids=scope_ids(client),
         provider_id=client.provider_id,
+        grant_types=[],
+        response_types=[],
+        redirect_uris=[],
+        post_logout_redirect_uris=[],
+        token_endpoint_auth_method=TokenEndpointAuthMethod.CLIENT_SECRET_BASIC,
+        allowed_cors_origins=[],
     ))
     if authorized:
         assert_empty_result(r)
@@ -165,9 +196,16 @@ def test_create_client_with_provider_specific_api_client(api, client_batch, scop
     )]
     r = api(scopes, api_client_provider).post('/client/', json=dict(
         id=client.id,
-        name='',
+        name=fake.catch_phrase(),
+        secret=fake.password(),
         scope_ids=scope_ids(client),
         provider_id=client.provider_id,
+        grant_types=[],
+        response_types=[],
+        redirect_uris=[],
+        post_logout_redirect_uris=[],
+        token_endpoint_auth_method=TokenEndpointAuthMethod.CLIENT_SECRET_BASIC,
+        allowed_cors_origins=[],
     ))
     if authorized:
         assert_empty_result(r)
@@ -188,9 +226,16 @@ def test_update_client(api, client_batch, scopes, authorized):
     modified_client_batch[2] = (client := client_build(id=client_batch[2].id))
     r = api(scopes).put('/client/', json=dict(
         id=client.id,
-        name='',
+        name=fake.catch_phrase(),
+        secret=fake.password(),
         scope_ids=scope_ids(client),
         provider_id=client.provider_id,
+        grant_types=[],
+        response_types=[],
+        redirect_uris=[],
+        post_logout_redirect_uris=[],
+        token_endpoint_auth_method=TokenEndpointAuthMethod.CLIENT_SECRET_BASIC,
+        allowed_cors_origins=[],
     ))
     if authorized:
         assert_empty_result(r)
@@ -217,9 +262,16 @@ def test_update_client_with_provider_specific_api_client(api, client_batch, scop
     ))
     r = api(scopes, api_client_provider).put('/client/', json=dict(
         id=client.id,
-        name='',
+        name=fake.catch_phrase(),
+        secret=fake.password(),
         scope_ids=scope_ids(client),
         provider_id=client.provider_id,
+        grant_types=[],
+        response_types=[],
+        redirect_uris=[],
+        post_logout_redirect_uris=[],
+        token_endpoint_auth_method=TokenEndpointAuthMethod.CLIENT_SECRET_BASIC,
+        allowed_cors_origins=[],
     ))
     if authorized:
         assert_empty_result(r)
