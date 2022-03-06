@@ -14,18 +14,7 @@ rootdir = pathlib.Path(__file__).parent.parent
 sys.path.append(str(rootdir))
 
 from odp.db import Session
-from odp.db.models import (
-    Catalogue,
-    Collection,
-    Flag,
-    Project,
-    Provider,
-    Role,
-    Schema,
-    SchemaType,
-    Scope,
-    Tag,
-)
+from odp.db.models import Catalogue, Collection, Flag, Project, Provider, Role, Schema, SchemaType, Scope, ScopeType, Tag
 
 datadir = pathlib.Path(__file__).parent / 'saeondata'
 
@@ -51,6 +40,7 @@ def create_flags():
         flag = Session.get(Flag, flag_id) or Flag(id=flag_id)
         flag.public = flag_spec['public']
         flag.scope_id = flag_spec['scope_id']
+        flag.scope_type = ScopeType.odp
         flag.schema_id = flag_spec['schema_id']
         flag.schema_type = SchemaType.flag
         flag.save()
@@ -65,6 +55,7 @@ def create_tags():
         tag = Session.get(Tag, tag_id) or Tag(id=tag_id)
         tag.public = tag_spec['public']
         tag.scope_id = tag_spec['scope_id']
+        tag.scope_type = ScopeType.odp
         tag.schema_id = tag_spec['schema_id']
         tag.schema_type = SchemaType.tag
         tag.save()
@@ -77,7 +68,7 @@ def create_roles():
 
     for role_id, role_spec in role_data.items():
         role = Session.get(Role, role_id) or Role(id=role_id)
-        role.scopes = [Session.get(Scope, scope_id) for scope_id in role_spec['scopes']]
+        role.scopes = [Session.get(Scope, (scope_id, ScopeType.odp)) for scope_id in role_spec['scopes']]
         role.save()
 
 
