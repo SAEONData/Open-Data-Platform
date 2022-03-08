@@ -130,7 +130,7 @@ class RecordModelIn(BaseModel):
             if not values['doi'] and not sid:
                 raise ValueError("Secondary ID is mandatory if a DOI is not provided")
         except KeyError:
-            pass  # doi validation failed
+            pass  # ignore: doi validation already failed
 
         if sid and re.match(DOI_REGEX, sid):
             raise ValueError("The secondary ID cannot be a DOI")
@@ -146,7 +146,7 @@ class RecordModelIn(BaseModel):
             else:
                 values['metadata'].pop('doi', None)
         except KeyError:
-            pass  # field validation failed
+            pass  # ignore: doi and/or metadata field validation already failed
 
         return values
 
