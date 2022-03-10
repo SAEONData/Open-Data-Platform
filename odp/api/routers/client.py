@@ -3,11 +3,11 @@ from sqlalchemy import select
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
-from odp.api.lib.auth import Authorize, Authorized, hydra_admin_api
+from odp.api.lib.auth import Authorize, Authorized, hydra_admin_api, select_scopes
 from odp.api.lib.paging import Page, Paginator
 from odp.api.models import ClientModel, ClientModelIn
 from odp.db import Session
-from odp.db.models import Client, Scope
+from odp.db.models import Client
 
 router = APIRouter()
 
@@ -26,24 +26,6 @@ def output_client_model(client: Client) -> ClientModel:
         token_endpoint_auth_method=hydra_client.token_endpoint_auth_method,
         allowed_cors_origins=hydra_client.allowed_cors_origins,
     )
-
-
-def select_scopes(client_in: ClientModelIn) -> list[Scope]:
-    scopes = []
-    unknowns = []
-    for scope_id in client_in.scope_ids:
-        if scope := Session.execute(
-            select(Scope).
-            where(Scope.id == scope_id)
-        ).scalar_one_or_none():
-            scopes += [scope]
-        else:
-            unknowns += [scope_id]
-
-    if unknowns:
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, f'Unsupported scope(s): {", ".join(unknowns)}')
-
-    return scopes
 
 
 def create_or_update_hydra_client(client_in: ClientModelIn) -> None:
@@ -114,7 +96,7 @@ async def create_client(
 
     client = Client(
         id=client_in.id,
-        scopes=select_scopes(client_in),
+        scopes=select_scopes(client_in.scope_ids),
         provider_id=client_in.provider_id,
     )
     client.save()
@@ -134,7 +116,7 @@ async def update_client(
     if not (client := Session.get(Client, client_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    client.scopes = select_scopes(client_in)
+    client.scopes = select_scopes(client_in.scope_ids)
     client.provider_id = client_in.provider_id,
     client.save()
     create_or_update_hydra_client(client_in)

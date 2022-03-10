@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from fastapi.openapi.models import OAuth2, OAuthFlowClientCredentials, OAuthFlows
 from fastapi.security.base import SecurityBase
 from fastapi.security.utils import get_authorization_scheme_param
+from sqlalchemy import select
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -12,7 +13,7 @@ from odp import ODPScope
 from odp.api.models import FlagInstanceModelIn, TagInstanceModelIn
 from odp.config import config
 from odp.db import Session
-from odp.db.models import Flag, Tag
+from odp.db.models import Flag, Scope, ScopeType, Tag
 from odp.lib.auth import get_client_permissions, get_user_permissions
 from odp.lib.hydra import HydraAdminAPI, OAuth2TokenIntrospection
 
@@ -117,3 +118,27 @@ class UntagAuthorize(BaseAuthorize):
             raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
 
         return _authorize_request(request, tag.scope_id)
+
+
+def select_scopes(
+        scope_ids: list[str],
+        scope_types: list[ScopeType] = None,
+) -> list[Scope]:
+    """Select Scope objects given a list of ids,
+    optionally constrained to the given types."""
+    scopes = []
+    invalid_ids = []
+    for scope_id in scope_ids:
+        stmt = select(Scope).where(Scope.id == scope_id)
+        if scope_types is not None:
+            stmt = stmt.where(Scope.type.in_(scope_types))
+
+        if scope := Session.execute(stmt).scalar_one_or_none():
+            scopes += [scope]
+        else:
+            invalid_ids += [scope_id]
+
+    if invalid_ids:
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, f'Scope(s) not allowed: {", ".join(invalid_ids)}')
+
+    return scopes
