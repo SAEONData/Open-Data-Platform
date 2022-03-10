@@ -9,12 +9,15 @@ from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
-from odp.api.lib.hydra import hydra_admin_api, hydra_public_url
 from odp.api.models import FlagInstanceModelIn, TagInstanceModelIn
+from odp.config import config
 from odp.db import Session
 from odp.db.models import Flag, Tag
 from odp.lib.auth import get_client_permissions, get_user_permissions
-from odp.lib.hydra import OAuth2TokenIntrospection
+from odp.lib.hydra import HydraAdminAPI, OAuth2TokenIntrospection
+
+hydra_admin_api = HydraAdminAPI(config.HYDRA.ADMIN.URL)
+hydra_public_url = config.HYDRA.PUBLIC.URL
 
 
 @dataclass
