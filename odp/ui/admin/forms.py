@@ -1,20 +1,13 @@
 import json
 
 from flask import Flask, session
-from wtforms import (
-    Form,
-    StringField,
-    SelectField,
-    BooleanField,
-    SelectMultipleField,
-    TextAreaField,
-    ValidationError,
-)
+from wtforms import BooleanField, Form, RadioField, SelectField, SelectMultipleField, StringField, TextAreaField, ValidationError
 from wtforms.csrf.session import SessionCSRF
 from wtforms.validators import input_required, length, regexp
 from wtforms.widgets import CheckboxInput, ListWidget
 
 from odp.lib.formats import DOI_REGEX, SID_REGEX
+from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
 
 
 def init_app(app: Flask):
@@ -41,6 +34,11 @@ class MultiCheckboxField(SelectMultipleField):
     option_widget = CheckboxInput()
 
 
+class StringListField(TextAreaField):
+    def process_data(self, value):
+        self.data = '\n'.join(value) if value is not None else None
+
+
 class BaseForm(Form):
     class Meta:
         csrf = True
@@ -60,12 +58,45 @@ class ClientForm(BaseForm):
         label='Client name',
         validators=[input_required(), length(min=2)],
     )
+    secret = StringField(
+        label='Client secret',
+    )
     provider_id = SelectField(
         label='Provider',
     )
     scope_ids = MultiCheckboxField(
         label='Scope',
     )
+    grant_types = MultiCheckboxField(
+        label='Grant types',
+        choices=[(gt.value, gt.value) for gt in GrantType],
+    )
+    response_types = MultiCheckboxField(
+        label='Response types',
+        choices=[(rt.value, rt.value) for rt in ResponseType],
+    )
+    redirect_uris = StringListField(
+        label='Redirect URIs',
+    )
+    post_logout_redirect_uris = StringListField(
+        label='Post-logout redirect URIs',
+    )
+    token_endpoint_auth_method = RadioField(
+        label='Token endpoint auth method',
+        choices=[(tm.value, tm.value) for tm in TokenEndpointAuthMethod],
+        default=TokenEndpointAuthMethod.CLIENT_SECRET_BASIC.value,
+    )
+    allowed_cors_origins = StringListField(
+        label='Allowed CORS origins',
+    )
+
+    def validate_secret(self, field):
+        if field.data and len(field.data) < 6:
+            raise ValidationError('Client secret must be at least 6 characters long.')
+
+    def validate_scope_ids(self, field):
+        if not field.data:
+            raise ValidationError('At least one scope must be selected.')
 
 
 class CollectionForm(BaseForm):

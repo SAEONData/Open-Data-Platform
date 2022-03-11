@@ -29,11 +29,12 @@ def populate_schema_choices(field, schema_type):
     ]
 
 
-def populate_scope_choices(field):
+def populate_scope_choices(field, scope_types=None):
     scopes = api.get('/scope/')['items']
     field.choices = [
         (scope['id'], scope['id'])
         for scope in scopes
+        if scope_types is None or scope['type'] in scope_types
     ]
 
 

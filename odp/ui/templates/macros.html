@@ -170,19 +170,22 @@
             {% set classes = ['form-control'] %}
             {% if field.type == 'JSONTextField' %}
                 {% set classes = classes + ['font-monospace'] %}
-            {% elif field.type == 'MultiCheckboxField' %}
+            {% elif field.type in ('MultiCheckboxField', 'RadioField') %}
                 {% set classes = classes + ['list-unstyled'] %}
             {% endif %}
             {% if field.errors %}
                 {% set classes = classes + ['is-invalid'] %}
             {% endif %}
             {{ field(class=classes|join(' '), spellcheck='false') }}
-            {% for error in field.errors %}
-                <div class="invalid-feedback">
-                    {{ error }}
-                </div>
-            {% endfor %}
         {% endif %}
+        {% if field.description %}
+            <div class="form-text">{{ field.description }}</div>
+        {% endif %}
+        {% for error in field.errors %}
+            <div class="invalid-feedback">
+                {{ error }}
+            </div>
+        {% endfor %}
     </div>
 {% endmacro %}
 

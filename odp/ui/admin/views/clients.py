@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from wtforms.validators import data_required
 
 from odp import ODPScope
 from odp.ui import api
@@ -26,6 +27,7 @@ def view(id):
 @api.client(ODPScope.CLIENT_ADMIN)
 def create():
     form = ClientForm(request.form)
+    form.secret.validators = [data_required()]
     utils.populate_provider_choices(form.provider_id, include_none=True)
     utils.populate_scope_choices(form.scope_ids)
 
@@ -33,8 +35,15 @@ def create():
         api.post('/client/', dict(
             id=(id := form.id.data),
             name=form.name.data,
+            secret=form.secret.data,
             provider_id=form.provider_id.data or None,
             scope_ids=form.scope_ids.data,
+            grant_types=form.grant_types.data,
+            response_types=form.response_types.data,
+            redirect_uris=form.redirect_uris.data.split(),
+            post_logout_redirect_uris=form.post_logout_redirect_uris.data.split(),
+            token_endpoint_auth_method=form.token_endpoint_auth_method.data,
+            allowed_cors_origins=form.allowed_cors_origins.data.split(),
         ))
         flash(f'Client {id} has been created.', category='success')
         return redirect(url_for('.view', id=id))
@@ -54,6 +63,7 @@ def edit(id):
     else:
         form = ClientForm(data=client)
 
+    form.secret.description = 'Client secret will remain unchanged if left blank.'
     utils.populate_provider_choices(form.provider_id, include_none=True)
     utils.populate_scope_choices(form.scope_ids)
 
@@ -61,8 +71,15 @@ def edit(id):
         api.put('/client/', dict(
             id=id,
             name=form.name.data,
+            secret=form.secret.data or None,
             provider_id=form.provider_id.data or None,
             scope_ids=form.scope_ids.data,
+            grant_types=form.grant_types.data,
+            response_types=form.response_types.data,
+            redirect_uris=form.redirect_uris.data.split(),
+            post_logout_redirect_uris=form.post_logout_redirect_uris.data.split(),
+            token_endpoint_auth_method=form.token_endpoint_auth_method.data,
+            allowed_cors_origins=form.allowed_cors_origins.data.split(),
         ))
         flash(f'Client {id} has been updated.', category='success')
         return redirect(url_for('.view', id=id))
