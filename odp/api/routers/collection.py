@@ -75,7 +75,7 @@ async def list_collections(
     return paginator.paginate(
         stmt,
         lambda row: output_collection_model(row),
-        Collection,
+        sort_model=Collection,
     )
 
 

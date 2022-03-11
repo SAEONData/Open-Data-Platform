@@ -4,7 +4,7 @@ from typing import Callable, Generic, List, TypeVar
 from fastapi import HTTPException, Query
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.engine import Row
 from sqlalchemy.exc import CompileError
 from sqlalchemy.sql import Select
@@ -37,7 +37,9 @@ class Paginator:
             self,
             query: Select,
             item_factory: Callable[[Row], ModelT],
+            *,
             sort_model: Base = None,
+            custom_sort: str = None,
     ) -> Page[ModelT]:
         total = Session.execute(
             select(func.count()).
@@ -45,7 +47,13 @@ class Paginator:
         ).scalar_one()
 
         try:
-            sort_col = getattr(sort_model, self.sort) if sort_model else self.sort
+            if sort_model:
+                sort_col = getattr(sort_model, self.sort)
+            elif custom_sort:
+                sort_col = text(custom_sort)
+            else:
+                sort_col = self.sort
+
             items = [
                 item_factory(row) for row in Session.execute(
                     query.
