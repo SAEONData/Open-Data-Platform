@@ -27,7 +27,7 @@ def view(id):
 def create():
     form = RoleForm(request.form)
     utils.populate_provider_choices(form.provider_id, include_none=True)
-    utils.populate_scope_choices(form.scope_ids)
+    utils.populate_scope_choices(form.scope_ids, ('odp', 'client'))
 
     if request.method == 'POST' and form.validate():
         api.post('/role/', dict(
@@ -54,7 +54,7 @@ def edit(id):
         form = RoleForm(data=role)
 
     utils.populate_provider_choices(form.provider_id, include_none=True)
-    utils.populate_scope_choices(form.scope_ids)
+    utils.populate_scope_choices(form.scope_ids, ('odp', 'client'))
 
     if request.method == 'POST' and form.validate():
         api.put('/role/', dict(
