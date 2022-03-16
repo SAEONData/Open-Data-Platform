@@ -13,7 +13,7 @@ services:
 
   odp-client:
     container_name: TEST-odp-client
-    image: oryd/hydra:v1.10.6
+    image: ${HYDRA_IMAGE}
     command: >
       clients create
         --id odp.test
@@ -28,7 +28,7 @@ services:
 
   hydra:
     container_name: TEST-hydra
-    image: oryd/hydra:v1.10.6
+    image: ${HYDRA_IMAGE}
     command: serve all --dangerous-force-http
     ports:
       - "7444:4444"
@@ -52,7 +52,7 @@ services:
 
   hydra-migrate:
     container_name: TEST-hydra-migrate
-    image: oryd/hydra:v1.10.6
+    image: ${HYDRA_IMAGE}
     command: migrate sql -e --yes
     environment:
       - DSN=postgres://hydra_user:pass@hydra-db:5432/hydra_db?sslmode=disable

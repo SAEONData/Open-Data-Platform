@@ -149,10 +149,10 @@ class HydraAdminAPI:
 
         oauth2_client = OAuth2Client(**kwargs)
         try:
-            self._api.create_o_auth2_client(body=oauth2_client)
+            self._api.create_o_auth2_client(oauth2_client)
         except ApiException as e:
             if e.status == 409:
-                self._api.update_o_auth2_client(id=id, body=oauth2_client)
+                self._api.update_o_auth2_client(id, oauth2_client)
             else:
                 raise  # todo: raise our own exception class here
 
