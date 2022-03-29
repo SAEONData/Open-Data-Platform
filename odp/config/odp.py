@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Union, Literal
+from typing import List, Literal
 
 from pydantic import AnyHttpUrl, constr
 
@@ -35,7 +35,7 @@ class ODPAPIConfig(BaseConfig):
     PATH_PREFIX: constr(regex=r'^(/\w+)*$') = ''
 
     # (optional) JSON-encoded list of allowed CORS origins; `["*"]` to allow any origin
-    ALLOW_ORIGINS: List[Union[Literal['*'], AnyHttpUrl]] = []
+    ALLOW_ORIGINS: List[Literal['*'] | AnyHttpUrl] = []
 
 
 class ODPUIAdminConfig(BaseConfig, OAuth2ClientConfigMixin):

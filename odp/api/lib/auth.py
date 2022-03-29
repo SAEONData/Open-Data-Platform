@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal, Optional, Set, Union
+from typing import Literal, Optional, Set
 
 from fastapi import HTTPException
 from fastapi.openapi.models import OAuth2, OAuthFlowClientCredentials, OAuthFlows
@@ -25,7 +25,7 @@ hydra_public_url = config.HYDRA.PUBLIC.URL
 class Authorized:
     client_id: str
     user_id: Optional[str]
-    provider_ids: Union[Set[str], Literal['*']]
+    provider_ids: Set[str] | Literal['*']
 
 
 def _authorize_request(request: Request, required_scope_id: str) -> Authorized:

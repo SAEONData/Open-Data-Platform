@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Union, Type
+from typing import Dict, Type
 
 from pydantic import BaseSettings
 
@@ -28,7 +28,7 @@ class BaseConfig(BaseSettings):
     shell commands/scripts.
     """
 
-    _subconfig: Dict[str, Union[Type[BaseConfig], BaseConfig]] = {}
+    _subconfig: Dict[str, Type[BaseConfig] | BaseConfig] = {}
 
     def __getattr__(self, name) -> BaseConfig:
         if name in self._subconfig:

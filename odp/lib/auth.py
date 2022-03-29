@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import Union, Literal, Dict, Optional, List
+from typing import Dict, List, Literal, Optional
 
 from odp.db import Session
-from odp.db.models import User, Client
+from odp.db.models import Client, User
 from odp.lib import exceptions as x
 
-Permissions = Dict[str, Union[Literal['*'], List[str]]]
+Permissions = Dict[str, Literal['*'] | List[str]]
 """The effective set of permissions for a user or a client. A dictionary of
 scope ids (OAuth2 scope identifiers), where the value for each id is either:
 
