@@ -1,17 +1,17 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
-from jschon import JSONSchema, JSON
+from jschon import JSON, JSONSchema
 from sqlalchemy import select
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
-from odp.api.lib.auth import Authorize, Authorized, FlagAuthorize, UnflagAuthorize, TagAuthorize, UntagAuthorize
+from odp.api.lib.auth import Authorize, Authorized, FlagAuthorize, TagAuthorize, UnflagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
-from odp.api.lib.schema import get_metadata_schema, get_flag_schema, get_tag_schema
-from odp.api.models import RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn, FlagInstanceModel, FlagInstanceModelIn
+from odp.api.lib.schema import get_flag_schema, get_metadata_schema, get_tag_schema
+from odp.api.models import FlagInstanceModel, FlagInstanceModelIn, RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
-from odp.db.models import Record, Collection, SchemaType, RecordAudit, AuditCommand, RecordTag, RecordTagAudit, RecordFlag, RecordFlagAudit
+from odp.db.models import AuditCommand, Collection, Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag, RecordTagAudit, SchemaType
 
 router = APIRouter()
 
@@ -150,17 +150,23 @@ async def create_record(
     '/{record_id}',
     response_model=RecordModel,
 )
-async def update_record(
+async def set_record(
         record_id: str,
         record_in: RecordModelIn,
         metadata_schema: JSONSchema = Depends(get_metadata_schema),
-        auth: Authorized = Depends(Authorize(ODPScope.RECORD_MANAGE)),
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_ADMIN)),
 ):
-    if not (record := Session.get(Record, record_id)):
-        raise HTTPException(HTTP_404_NOT_FOUND)
+    create = False
+    record = Session.get(Record, record_id)
+    if not record:
+        create = True
+        record = Record(id=record_id)
 
-    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
-        raise HTTPException(HTTP_403_FORBIDDEN)
+    if auth.provider_ids != '*':
+        if not create and record.collection.provider_id not in auth.provider_ids:
+            raise HTTPException(HTTP_403_FORBIDDEN)
+        if (collection := Session.get(Collection, record_in.collection_id)) and collection.provider_id not in auth.provider_ids:
+            raise HTTPException(HTTP_403_FORBIDDEN)
 
     if Session.execute(
         select(Record).
@@ -176,6 +182,7 @@ async def update_record(
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'The DOI cannot be changed or removed')
 
     if (
+        create or
         record.doi != record_in.doi or
         record.sid != record_in.sid or
         record.collection_id != record_in.collection_id or
@@ -195,7 +202,7 @@ async def update_record(
         RecordAudit(
             client_id=auth.client_id,
             user_id=auth.user_id,
-            command=AuditCommand.update,
+            command=AuditCommand.insert if create else AuditCommand.update,
             timestamp=timestamp,
             _id=record.id,
             _doi=record.doi,
@@ -213,7 +220,7 @@ async def update_record(
 )
 async def delete_record(
         record_id: str,
-        auth: Authorized = Depends(Authorize(ODPScope.RECORD_MANAGE)),
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_ADMIN)),
 ):
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)

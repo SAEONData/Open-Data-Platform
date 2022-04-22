@@ -26,7 +26,7 @@ SAEON:Curator:
     - odp.provider:admin
     - odp.provider:read
     - odp.record:create
-    - odp.record:manage
+    - odp.record:admin
     - odp.record:read
     - odp.record_tag:qc
     - odp.role:read

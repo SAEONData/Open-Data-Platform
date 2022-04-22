@@ -55,7 +55,7 @@ def create():
 
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
-@api.client(ODPScope.RECORD_MANAGE)
+@api.client(ODPScope.RECORD_ADMIN)
 def edit(id):
     record = api.get(f'/record/{id}')
 
@@ -78,7 +78,7 @@ def edit(id):
 
 
 @bp.route('/<id>/delete', methods=('POST',))
-@api.client(ODPScope.RECORD_MANAGE)
+@api.client(ODPScope.RECORD_ADMIN)
 def delete(id):
     api.delete(f'/record/{id}')
     flash(f'Record {id} has been deleted.', category='success')
