@@ -11,7 +11,8 @@ bp = Blueprint('roles', __name__)
 @bp.route('/')
 @api.client(ODPScope.ROLE_READ)
 def index():
-    roles = api.get('/role/')
+    page = request.args.get('page', 1)
+    roles = api.get(f'/role/?page={page}')
     return render_template('role_list.html', roles=roles)
 
 

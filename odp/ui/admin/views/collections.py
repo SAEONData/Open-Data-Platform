@@ -11,7 +11,8 @@ bp = Blueprint('collections', __name__)
 @bp.route('/')
 @api.client(ODPScope.COLLECTION_READ)
 def index():
-    collections = api.get('/collection/')
+    page = request.args.get('page', 1)
+    collections = api.get(f'/collection/?page={page}')
     return render_template('collection_list.html', collections=collections)
 
 

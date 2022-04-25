@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 
 from odp import ODPScope
 from odp.ui import api
@@ -9,7 +9,8 @@ bp = Blueprint('catalogues', __name__)
 @bp.route('/')
 @api.client(ODPScope.CATALOGUE_READ)
 def index():
-    catalogues = api.get('/catalogue/')
+    page = request.args.get('page', 1)
+    catalogues = api.get(f'/catalogue/?page={page}')
     return render_template('catalogue_list.html', catalogues=catalogues)
 
 

@@ -67,8 +67,39 @@
             {% endfor %}
         </tbody>
     </table>
-    <div class="mt-4">
-        {{ result.total }} items found. Page {{ result.page }} of {{ result.pages }}.
+    <div class="d-flex justify-content-between mt-4">
+        <span class="mt-1">
+            {{ result.total }} items found.
+        </span>
+        {% if result.pages > 1 %}
+            <div>
+                {% if result.page <= 1 %}
+                    {% set prev_disabled = 'disabled' %}
+                {% else %}
+                    {% set prev_disabled = '' %}
+                {% endif %}
+                <a href="{{ url_for('.index') }}" title="first" class="btn btn-outline-dark {{ prev_disabled }}">
+                    <<
+                </a>
+                <a href="{{ url_for('.index', page=result.page - 1) }}" title="previous" class="btn btn-outline-dark {{ prev_disabled }}">
+                    <
+                </a>
+                {% if result.page >= result.pages %}
+                    {% set next_disabled = 'disabled' %}
+                {% else %}
+                    {% set next_disabled = '' %}
+                {% endif %}
+                <a href="{{ url_for('.index', page=result.page + 1) }}" title="next" class="btn btn-outline-dark {{ next_disabled }}">
+                    >
+                </a>
+                <a href="{{ url_for('.index', page=result.pages) }}" title="last" class="btn btn-outline-dark {{ next_disabled }}">
+                    >>
+                </a>
+            </div>
+        {% endif %}
+        <span class="mt-1">
+            Page {{ result.page }} of {{ result.pages }}.
+        </span>
     </div>
 {% endmacro %}
 

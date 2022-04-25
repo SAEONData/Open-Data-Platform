@@ -11,7 +11,8 @@ bp = Blueprint('users', __name__)
 @bp.route('/')
 @api.client(ODPScope.USER_READ)
 def index():
-    users = api.get('/user/')
+    page = request.args.get('page', 1)
+    users = api.get(f'/user/?page={page}')
     return render_template('user_list.html', users=users)
 
 

@@ -11,7 +11,8 @@ bp = Blueprint('projects', __name__)
 @bp.route('/')
 @api.client(ODPScope.PROJECT_READ)
 def index():
-    projects = api.get('/project/')
+    page = request.args.get('page', 1)
+    projects = api.get(f'/project/?page={page}')
     return render_template('project_list.html', projects=projects)
 
 

@@ -10,7 +10,8 @@ bp = Blueprint('providers', __name__)
 @bp.route('/')
 @api.client(ODPScope.PROVIDER_READ)
 def index():
-    providers = api.get('/provider/')
+    page = request.args.get('page', 1)
+    providers = api.get(f'/provider/?page={page}')
     return render_template('provider_list.html', providers=providers)
 
 

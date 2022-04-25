@@ -1,6 +1,6 @@
 import json
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 
 from odp import ODPScope, ODPTag
@@ -14,7 +14,8 @@ bp = Blueprint('records', __name__)
 @bp.route('/')
 @api.client(ODPScope.RECORD_READ)
 def index():
-    records = api.get('/record/')
+    page = request.args.get('page', 1)
+    records = api.get(f'/record/?page={page}')
     return render_template('record_list.html', records=records)
 
 
