@@ -10,9 +10,15 @@
 {% block content %}
     {% from 'macros.html' import render_table, render_buttons, obj_link %}
     {{ render_buttons(create=True) }}
-    {% call(record) render_table(records, 'DOI', 'SID', 'Collection', 'Schema', 'Valid', hide_id=True) %}
-        <th scope="row">{{ obj_link('records', record.id, record.doi or '') }}</th>
-        <th scope="row">{{ obj_link('records', record.id, record.sid or '') }}</th>
+    {% call(record) render_table(records, 'Identifier', 'Title', 'Collection', 'Schema', 'Valid', hide_id=True) %}
+        <th scope="row">{{ obj_link('records', record.id, record.doi or record.sid) }}</th>
+        <td>
+            {% if record.schema_id == 'DataCite4-SAEON' %}
+                {{ record.metadata.titles[0].title }}
+            {% elif record.schema_id == 'ISO19115-SAEON' %}
+                {{ record.metadata.title }}
+            {% endif %}
+        </td>
         <td>{{ obj_link('collections', record.collection_id) }}</td>
         <td>{{ obj_link('schemas', record.schema_id) }}</td>
         <td>{{ '&#9989;'|safe if record.validity.valid else '&#10060;'|safe }}</td>
