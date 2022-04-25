@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from jschon import JSON, JSONSchema
@@ -55,6 +56,13 @@ def output_record_tag_model(record_tag: RecordTag) -> TagInstanceModel:
         data=record_tag.data,
         timestamp=record_tag.timestamp,
     )
+
+
+def get_validity(metadata: dict[str, Any], schema: JSONSchema) -> Any:
+    if (result := schema.evaluate(JSON(metadata))).valid:
+        return result.output('flag')
+
+    return result.output('detailed')
 
 
 @router.get(
@@ -125,7 +133,7 @@ async def create_record(
         schema_id=record_in.schema_id,
         schema_type=SchemaType.metadata,
         metadata_=record_in.metadata,
-        validity=metadata_schema.evaluate(JSON(record_in.metadata)).output('detailed'),
+        validity=get_validity(record_in.metadata, metadata_schema),
         timestamp=(timestamp := datetime.now(timezone.utc)),
     )
     record.save()
@@ -195,7 +203,7 @@ async def set_record(
         record.schema_id = record_in.schema_id
         record.schema_type = SchemaType.metadata
         record.metadata_ = record_in.metadata
-        record.validity = metadata_schema.evaluate(JSON(record_in.metadata)).output('detailed')
+        record.validity = get_validity(record_in.metadata, metadata_schema)
         record.timestamp = (timestamp := datetime.now(timezone.utc))
         record.save()
 
