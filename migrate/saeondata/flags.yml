@@ -2,3 +2,8 @@ Collection-Publish:
   public: False
   scope_id: odp.collection_flag:publish
   schema_id: Generic-Flag
+
+Record-Migrated:
+  public: False
+  scope_id: odp.record_flag:migrated
+  schema_id: Generic-Flag

@@ -34,6 +34,7 @@ class ODPScope(str, Enum):
     RECORD_ADMIN = 'odp.record:admin'
     RECORD_READ = 'odp.record:read'
     RECORD_TAG_QC = 'odp.record_tag:qc'
+    RECORD_FLAG_MIGRATED = 'odp.record_flag:migrated'
 
     # role
     ROLE_ADMIN = 'odp.role:admin'
