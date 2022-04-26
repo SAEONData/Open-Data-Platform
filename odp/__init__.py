@@ -58,6 +58,9 @@ class ODPFlag(str, Enum):
     # collection
     COLLECTION_PUBLISH = 'Collection-Publish'
 
+    # record
+    RECORD_MIGRATED = 'Record-Migrated'
+
 
 class ODPTag(str, Enum):
     # record

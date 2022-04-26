@@ -33,7 +33,7 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% from 'macros.html' import render_info, render_buttons, obj_link %}
-            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Timestamp', 'Quality Control') %}
+            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Migrated', 'Timestamp', 'Quality Control') %}
                 {% if prop == 'DOI' %}
                     {{ record.doi if record.doi }}
                 {% elif prop == 'SID' %}
@@ -42,6 +42,10 @@
                     {{ obj_link('collections', record.collection_id) }}
                 {% elif prop == 'Schema' %}
                     {{ obj_link('schemas', record.schema_id) }}
+                {% elif prop == 'Migrated' %}
+                    {% if migrated_flag %}
+                        {{ migrated_flag.timestamp|timestamp }} from ODP v1
+                    {% endif %}
                 {% elif prop == 'Timestamp' %}
                     {{ record.timestamp|timestamp }}
                 {% elif prop == 'Quality Control' %}
