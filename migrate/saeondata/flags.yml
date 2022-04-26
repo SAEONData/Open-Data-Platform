@@ -6,4 +6,4 @@ Collection-Publish:
 Record-Migrated:
   public: False
   scope_id: odp.record_flag:migrated
-  schema_id: Generic-Flag
+  schema_id: Record-Migrated

@@ -44,7 +44,8 @@
                     {{ obj_link('schemas', record.schema_id) }}
                 {% elif prop == 'Migrated' %}
                     {% if migrated_flag %}
-                        {{ migrated_flag.timestamp|timestamp }} from ODP v1
+                        {{ migrated_flag.timestamp|timestamp }} from ODP v1 with a status of
+                        {{ 'Published' if migrated_flag.data.published else 'Not Published' }}
                     {% endif %}
                 {% elif prop == 'Timestamp' %}
                     {{ record.timestamp|timestamp }}

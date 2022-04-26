@@ -10,6 +10,10 @@ Record-QC:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/record-qc
 
+Record-Migrated:
+  type: flag
+  uri: https://odp.saeon.ac.za/schema/flag/record-migrated
+
 Generic-Flag:
   type: flag
   uri: https://odp.saeon.ac.za/schema/flag/generic
