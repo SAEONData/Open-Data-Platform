@@ -8,14 +8,36 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_table, render_buttons, obj_link %}
-    {{ render_buttons(create=True) }}
+    {% from 'macros.html' import render_table, render_buttons, render_field, obj_link %}
+    {% call(btn) render_buttons(create=True, custom=['filter']) %}
+        {% if btn == 'filter' %}
+            <a href="#collapse-filter" data-bs-toggle="collapse" class="btn btn-outline-info btn-action">
+                Filter
+            </a>
+        {% endif %}
+    {% endcall %}
+    <div id="collapse-filter" class="container-fluid collapse">
+        <form action="{{ url_for('.index') }}" method="get">
+            <div class="row">
+                {% for field in filter_form if field.id != 'csrf_token' %}
+                    <div class="col">
+                        {{ render_field(field) }}
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-outline-info btn-action">
+                Apply
+            </button>
+        </form>
+    </div>
     {% call(record) render_table(records, 'Identifier', 'Title', 'Collection', 'Schema', 'Valid',
             hide_id=True, filter_=filter_) %}
         <th scope="row">{{ obj_link('records', record.id, record.doi or record.sid) }}</th>
         <td>
             {% if record.schema_id == 'DataCite4-SAEON' %}
-                {{ record.metadata.titles[0].title }}
+                {% if 'titles' in record.metadata %}
+                    {{ record.metadata.titles[0].title }}
+                {% endif %}
             {% elif record.schema_id == 'ISO19115-SAEON' %}
                 {{ record.metadata.title }}
             {% endif %}

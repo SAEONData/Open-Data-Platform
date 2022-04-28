@@ -174,6 +174,12 @@ class RecordForm(BaseForm):
             raise ValidationError('SID is required if there is no DOI.')
 
 
+class RecordFilterForm(BaseForm):
+    collection = MultiCheckboxField(
+        label='Filter by collection(s)',
+    )
+
+
 class RecordTagQCForm(BaseForm):
     pass_ = BooleanField(
         label='Pass',

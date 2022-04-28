@@ -5,7 +5,7 @@ from flask_login import current_user
 
 from odp import ODPFlag, ODPScope, ODPTag
 from odp.ui import api
-from odp.ui.admin.forms import RecordForm, RecordTagQCForm
+from odp.ui.admin.forms import RecordFilterForm, RecordForm, RecordTagQCForm
 from odp.ui.admin.views import utils
 
 bp = Blueprint('records', __name__)
@@ -23,8 +23,11 @@ def index():
         api_filter += f'&collection_id={collection_id}'
         ui_filter += f'&collection={collection_id}'
 
+    filter_form = RecordFilterForm(request.args)
+    utils.populate_collection_choices(filter_form.collection)
+
     records = api.get(f'/record/?page={page}{api_filter}')
-    return render_template('record_list.html', records=records, filter_=ui_filter)
+    return render_template('record_list.html', records=records, filter_=ui_filter, filter_form=filter_form)
 
 
 @bp.route('/<id>')
