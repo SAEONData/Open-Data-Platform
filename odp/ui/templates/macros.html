@@ -37,6 +37,7 @@
 {% macro render_table(result) %}
 {# Render a paginated list result in a table.
     To disable automatic id column rendering, pass kwarg hide_id=True.
+    Filter params can be appended to paging URLs via the kwarg filter_, e.g. filter_='&collection=CSAG&collection=DFFE'
     Example usage:
         {% call(project) render_table(projects, 'Name', 'Collections') %}
             <td>{{ project.name }}</td>
@@ -72,16 +73,17 @@
             {{ result.total }} items found.
         </span>
         {% if result.pages > 1 %}
+            {% set filter_ = kwargs.get('filter_') or '' %}
             <div>
                 {% if result.page <= 1 %}
                     {% set prev_disabled = 'disabled' %}
                 {% else %}
                     {% set prev_disabled = '' %}
                 {% endif %}
-                <a href="{{ url_for('.index') }}" title="first" class="btn btn-outline-dark {{ prev_disabled }}">
+                <a href="{{ url_for('.index', page=1) }}{{ filter_ }}" title="first" class="btn btn-outline-dark {{ prev_disabled }}">
                     <<
                 </a>
-                <a href="{{ url_for('.index', page=result.page - 1) }}" title="previous" class="btn btn-outline-dark {{ prev_disabled }}">
+                <a href="{{ url_for('.index', page=result.page - 1) }}{{ filter_ }}" title="previous" class="btn btn-outline-dark {{ prev_disabled }}">
                     <
                 </a>
                 {% if result.page >= result.pages %}
@@ -89,10 +91,10 @@
                 {% else %}
                     {% set next_disabled = '' %}
                 {% endif %}
-                <a href="{{ url_for('.index', page=result.page + 1) }}" title="next" class="btn btn-outline-dark {{ next_disabled }}">
+                <a href="{{ url_for('.index', page=result.page + 1) }}{{ filter_ }}" title="next" class="btn btn-outline-dark {{ next_disabled }}">
                     >
                 </a>
-                <a href="{{ url_for('.index', page=result.pages) }}" title="last" class="btn btn-outline-dark {{ next_disabled }}">
+                <a href="{{ url_for('.index', page=result.pages) }}{{ filter_ }}" title="last" class="btn btn-outline-dark {{ next_disabled }}">
                     >>
                 </a>
             </div>

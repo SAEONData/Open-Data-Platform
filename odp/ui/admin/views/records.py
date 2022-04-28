@@ -17,12 +17,14 @@ def index():
     page = request.args.get('page', 1)
     collection_ids = request.args.getlist('collection')
 
-    apiurl = f'/record/?page={page}'
+    api_filter = ''
+    ui_filter = ''
     for collection_id in collection_ids:
-        apiurl += f'&collection_id={collection_id}'
+        api_filter += f'&collection_id={collection_id}'
+        ui_filter += f'&collection={collection_id}'
 
-    records = api.get(apiurl)
-    return render_template('record_list.html', records=records)
+    records = api.get(f'/record/?page={page}{api_filter}')
+    return render_template('record_list.html', records=records, filter_=ui_filter)
 
 
 @bp.route('/<id>')

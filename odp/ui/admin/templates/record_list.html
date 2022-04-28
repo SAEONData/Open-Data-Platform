@@ -10,7 +10,8 @@
 {% block content %}
     {% from 'macros.html' import render_table, render_buttons, obj_link %}
     {{ render_buttons(create=True) }}
-    {% call(record) render_table(records, 'Identifier', 'Title', 'Collection', 'Schema', 'Valid', hide_id=True) %}
+    {% call(record) render_table(records, 'Identifier', 'Title', 'Collection', 'Schema', 'Valid',
+            hide_id=True, filter_=filter_) %}
         <th scope="row">{{ obj_link('records', record.id, record.doi or record.sid) }}</th>
         <td>
             {% if record.schema_id == 'DataCite4-SAEON' %}
