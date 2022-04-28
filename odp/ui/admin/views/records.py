@@ -15,7 +15,13 @@ bp = Blueprint('records', __name__)
 @api.client(ODPScope.RECORD_READ)
 def index():
     page = request.args.get('page', 1)
-    records = api.get(f'/record/?page={page}')
+    collection_ids = request.args.getlist('collection')
+
+    apiurl = f'/record/?page={page}'
+    for collection_id in collection_ids:
+        apiurl += f'&collection_id={collection_id}'
+
+    records = api.get(apiurl)
     return render_template('record_list.html', records=records)
 
 

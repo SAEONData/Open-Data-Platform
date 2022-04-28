@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from jschon import JSON, JSONSchema
 from sqlalchemy import select
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
@@ -72,6 +72,7 @@ def get_validity(metadata: dict[str, Any], schema: JSONSchema) -> Any:
 async def list_records(
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
         paginator: Paginator = Depends(),
+        collection_id: list[str] = Query(None),
 ):
     stmt = (
         select(Record).
@@ -79,6 +80,8 @@ async def list_records(
     )
     if auth.provider_ids != '*':
         stmt = stmt.where(Collection.provider_id.in_(auth.provider_ids))
+    if collection_id:
+        stmt = stmt.where(Collection.id.in_(collection_id))
 
     return paginator.paginate(
         stmt,
