@@ -37,7 +37,8 @@ def create_flags():
         flag_data = yaml.safe_load(f)
 
     for flag_id, flag_spec in flag_data.items():
-        flag = Session.get(Flag, flag_id) or Flag(id=flag_id)
+        flag_type = flag_spec['type']
+        flag = Session.get(Flag, (flag_id, flag_type)) or Flag(id=flag_id, type=flag_type)
         flag.public = flag_spec['public']
         flag.scope_id = flag_spec['scope_id']
         flag.scope_type = ScopeType.odp
@@ -52,7 +53,8 @@ def create_tags():
         tag_data = yaml.safe_load(f)
 
     for tag_id, tag_spec in tag_data.items():
-        tag = Session.get(Tag, tag_id) or Tag(id=tag_id)
+        tag_type = tag_spec['type']
+        tag = Session.get(Tag, (tag_id, tag_type)) or Tag(id=tag_id, type=tag_type)
         tag.public = tag_spec['public']
         tag.scope_id = tag_spec['scope_id']
         tag.scope_type = ScopeType.odp
