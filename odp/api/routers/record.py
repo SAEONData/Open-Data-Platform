@@ -12,7 +12,8 @@ from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_flag_schema, get_metadata_schema, get_tag_schema
 from odp.api.models import FlagInstanceModel, FlagInstanceModelIn, RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
-from odp.db.models import AuditCommand, Collection, Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag, RecordTagAudit, SchemaType
+from odp.db.models import (AuditCommand, Collection, FlagType, Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag, RecordTagAudit,
+                           SchemaType, TagType)
 
 router = APIRouter()
 
@@ -277,6 +278,7 @@ async def tag_record(
         record_tag = RecordTag(
             record_id=record_id,
             tag_id=tag_instance_in.tag_id,
+            tag_type=TagType.record,
             user_id=auth.user_id,
         )
         command = AuditCommand.insert
@@ -355,12 +357,13 @@ async def flag_record(
     if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if record_flag := Session.get(RecordFlag, (record_id, flag_instance_in.flag_id)):
+    if record_flag := Session.get(RecordFlag, (record_id, flag_instance_in.flag_id, FlagType.record)):
         command = AuditCommand.update
     else:
         record_flag = RecordFlag(
             record_id=record_id,
             flag_id=flag_instance_in.flag_id,
+            flag_type=FlagType.record,
         )
         command = AuditCommand.insert
 
@@ -402,7 +405,7 @@ async def unflag_record(
     if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if not (record_flag := Session.get(RecordFlag, (record_id, flag_id))):
+    if not (record_flag := Session.get(RecordFlag, (record_id, flag_id, FlagType.record))):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     record_flag.delete()

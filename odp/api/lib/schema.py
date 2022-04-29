@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from fastapi import HTTPException
 from jschon import JSONSchema, LocalSource, URI, create_catalog
 from jschon.translation import translation_filter
+from sqlalchemy import select
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp.api.models import FlagInstanceModelIn, RecordModelIn, TagInstanceModelIn
@@ -20,7 +21,10 @@ schema_catalog.add_uri_source(
 
 
 async def get_flag_schema(flag_instance_in: FlagInstanceModelIn) -> JSONSchema:
-    if not (flag := Session.get(Flag, flag_instance_in.flag_id)):
+    if not (flag := Session.execute(
+            select(Flag).
+            where(Flag.id == flag_instance_in.flag_id)
+    ).scalar_one_or_none()):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
 
     schema = Session.get(Schema, (flag.schema_id, SchemaType.flag))
@@ -28,7 +32,10 @@ async def get_flag_schema(flag_instance_in: FlagInstanceModelIn) -> JSONSchema:
 
 
 async def get_tag_schema(tag_instance_in: TagInstanceModelIn) -> JSONSchema:
-    if not (tag := Session.get(Tag, tag_instance_in.tag_id)):
+    if not (tag := Session.execute(
+            select(Tag).
+            where(Tag.id == tag_instance_in.tag_id)
+    ).scalar_one_or_none()):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
 
     schema = Session.get(Schema, (tag.schema_id, SchemaType.tag))

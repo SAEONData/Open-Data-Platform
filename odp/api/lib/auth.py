@@ -90,7 +90,10 @@ class Authorize(BaseAuthorize):
 
 class FlagAuthorize(BaseAuthorize):
     async def __call__(self, request: Request, flag_instance_in: FlagInstanceModelIn) -> Authorized:
-        if not (flag := Session.get(Flag, flag_instance_in.flag_id)):
+        if not (flag := Session.execute(
+                select(Flag).
+                where(Flag.id == flag_instance_in.flag_id)
+        ).scalar_one_or_none()):
             raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
 
         return _authorize_request(request, flag.scope_id)
@@ -98,7 +101,10 @@ class FlagAuthorize(BaseAuthorize):
 
 class UnflagAuthorize(BaseAuthorize):
     async def __call__(self, request: Request, flag_id: str) -> Authorized:
-        if not (flag := Session.get(Flag, flag_id)):
+        if not (flag := Session.execute(
+                select(Flag).
+                where(Flag.id == flag_id)
+        ).scalar_one_or_none()):
             raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
 
         return _authorize_request(request, flag.scope_id)
@@ -106,7 +112,10 @@ class UnflagAuthorize(BaseAuthorize):
 
 class TagAuthorize(BaseAuthorize):
     async def __call__(self, request: Request, tag_instance_in: TagInstanceModelIn) -> Authorized:
-        if not (tag := Session.get(Tag, tag_instance_in.tag_id)):
+        if not (tag := Session.execute(
+                select(Tag).
+                where(Tag.id == tag_instance_in.tag_id)
+        ).scalar_one_or_none()):
             raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
 
         return _authorize_request(request, tag.scope_id)
@@ -114,7 +123,10 @@ class TagAuthorize(BaseAuthorize):
 
 class UntagAuthorize(BaseAuthorize):
     async def __call__(self, request: Request, tag_id: str) -> Authorized:
-        if not (tag := Session.get(Tag, tag_id)):
+        if not (tag := Session.execute(
+                select(Tag).
+                where(Tag.id == tag_id)
+        ).scalar_one_or_none()):
             raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
 
         return _authorize_request(request, tag.scope_id)
