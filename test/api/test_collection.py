@@ -334,6 +334,7 @@ def test_flag_collection(api, collection_batch, scopes, authorized):
     client = api(scopes)
     FlagFactory(
         id='collection-publish',
+        type='collection',
         scope=Session.get(
             Scope, (ODPScope.COLLECTION_FLAG_PUBLISH, ScopeType.odp)
         ) or Scope(

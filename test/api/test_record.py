@@ -376,6 +376,7 @@ def test_tag_record(api, record_batch, scopes, authorized):
     client = api(scopes)
     TagFactory(
         id='record-qc',
+        type='record',
         scope=Session.get(
             Scope, (ODPScope.RECORD_TAG_QC, ScopeType.odp)
         ) or Scope(
