@@ -6,9 +6,9 @@ from sqlalchemy import select
 
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import Record, RecordAudit, Scope, RecordTag, RecordTagAudit, ScopeType
-from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding
-from test.factories import RecordFactory, CollectionFactory, SchemaFactory, TagFactory
+from odp.db.models import Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag, RecordTagAudit, Scope, ScopeType
+from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
+from test.factories import CollectionFactory, FlagFactory, RecordFactory, SchemaFactory, TagFactory
 
 
 @pytest.fixture
@@ -62,6 +62,20 @@ def assert_db_tag_state(record_id, record_tag):
         assert result is None
 
 
+def assert_db_flag_state(record_id, record_flag):
+    """Verify that the record_flag table contains the given record flag."""
+    Session.expire_all()
+    result = Session.execute(select(RecordFlag)).scalar_one_or_none()
+    if record_flag:
+        assert result.record_id == record_id
+        assert result.flag_id == record_flag['flag_id']
+        assert result.user_id is None
+        assert result.data == record_flag['data']
+        assert datetime.now(timezone.utc) - timedelta(seconds=120) < result.timestamp < datetime.now(timezone.utc)
+    else:
+        assert result is None
+
+
 def assert_audit_log(command, record=None, record_id=None):
     result = Session.execute(select(RecordAudit)).scalar_one_or_none()
     assert result.client_id == 'odp.test'
@@ -109,6 +123,25 @@ def assert_tag_audit_log(*entries):
             assert False
 
 
+def assert_flag_audit_log(*entries):
+    result = Session.execute(select(RecordFlagAudit)).scalars().all()
+    assert len(result) == len(entries)
+    for n, row in enumerate(result):
+        assert row.client_id == 'odp.test'
+        assert row.user_id is None
+        assert row.command == entries[n]['command']
+        assert datetime.now(timezone.utc) - timedelta(seconds=120) < row.timestamp < datetime.now(timezone.utc)
+        assert row._record_id == entries[n]['record_id']
+        assert row._flag_id == entries[n]['record_flag']['flag_id']
+        assert row._user_id is None
+        if row.command in ('insert', 'update'):
+            assert row._data == entries[n]['record_flag']['data']
+        elif row.command == 'delete':
+            assert row._data is None
+        else:
+            assert False
+
+
 def assert_json_record_result(response, json, record):
     """Verify that the API result matches the given record object."""
     assert response.status_code == 200
@@ -127,6 +160,16 @@ def assert_json_tag_result(response, json, record_tag):
     assert json['user_id'] is None
     assert json['user_name'] is None
     assert json['data'] == record_tag['data']
+    assert datetime.now(timezone.utc) - timedelta(seconds=120) < datetime.fromisoformat(json['timestamp']) < datetime.now(timezone.utc)
+
+
+def assert_json_flag_result(response, json, record_flag):
+    """Verify that the API result matches the given record flag dict."""
+    assert response.status_code == 200
+    assert json['flag_id'] == record_flag['flag_id']
+    assert json['user_id'] is None
+    assert json['user_name'] is None
+    assert json['data'] == record_flag['data']
     assert datetime.now(timezone.utc) - timedelta(seconds=120) < datetime.fromisoformat(json['timestamp']) < datetime.now(timezone.utc)
 
 
@@ -450,3 +493,86 @@ def test_tag_record(api, record_batch, scopes, authorized):
         assert_tag_audit_log()
     assert_db_state(record_batch)
     assert_no_audit_log()
+
+
+@pytest.mark.parametrize('scopes, authorized', [
+    ([ODPScope.RECORD_FLAG_MIGRATED], True),
+    ([], False),
+    (all_scopes, True),
+    (all_scopes_excluding(ODPScope.RECORD_FLAG_MIGRATED), False),
+])
+def test_flag_record(api, record_batch, scopes, authorized):
+    client = api(scopes)
+    FlagFactory(
+        id='record-migrated',
+        type='record',
+        scope=Session.get(
+            Scope, (ODPScope.RECORD_FLAG_MIGRATED, ScopeType.odp)
+        ) or Scope(
+            id=ODPScope.RECORD_FLAG_MIGRATED, type=ScopeType.odp
+        ),
+        schema=SchemaFactory(
+            type='flag',
+            uri='https://odp.saeon.ac.za/schema/flag/record-migrated',
+        ),
+    )
+
+    # insert flag
+    r = client.post(
+        f'/record/{(record_id := record_batch[2].id)}/flag',
+        json=(record_flag_v1 := dict(
+            flag_id='record-migrated',
+            data={
+                'published': True,
+                'comment': 'Hello World',
+            },
+        )))
+    if authorized:
+        assert_json_flag_result(r, r.json(), record_flag_v1)
+        assert_db_flag_state(record_id, record_flag_v1)
+        assert_flag_audit_log(
+            dict(command='insert', record_id=record_id, record_flag=record_flag_v1),
+        )
+    else:
+        assert_forbidden(r)
+        assert_db_flag_state(record_id, None)
+        assert_flag_audit_log()
+    assert_db_state(record_batch)
+
+    # update flag
+    r = client.post(
+        f'/record/{record_id}/flag',
+        json=(record_flag_v2 := dict(
+            flag_id='record-migrated',
+            data={
+                'published': False,
+            },
+        )))
+    if authorized:
+        assert_json_flag_result(r, r.json(), record_flag_v2)
+        assert_db_flag_state(record_id, record_flag_v2)
+        assert_flag_audit_log(
+            dict(command='insert', record_id=record_id, record_flag=record_flag_v1),
+            dict(command='update', record_id=record_id, record_flag=record_flag_v2),
+        )
+    else:
+        assert_forbidden(r)
+        assert_db_flag_state(record_id, None)
+        assert_flag_audit_log()
+    assert_db_state(record_batch)
+
+    # delete flag
+    r = client.delete(f'/record/{record_id}/flag/{record_flag_v1["flag_id"]}')
+    if authorized:
+        assert_empty_result(r)
+        assert_db_flag_state(record_id, None)
+        assert_flag_audit_log(
+            dict(command='insert', record_id=record_id, record_flag=record_flag_v1),
+            dict(command='update', record_id=record_id, record_flag=record_flag_v2),
+            dict(command='delete', record_id=record_id, record_flag=record_flag_v2),
+        )
+    else:
+        assert_forbidden(r)
+        assert_db_flag_state(record_id, None)
+        assert_flag_audit_log()
+    assert_db_state(record_batch)
