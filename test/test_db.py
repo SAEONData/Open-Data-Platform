@@ -66,8 +66,8 @@ def test_create_collection():
 def test_create_flag():
     flag = FlagFactory()
     result = Session.execute(select(Flag, Scope).join(Scope)).one()
-    assert (result.Flag.id, result.Flag.public, result.Flag.schema_id, result.Flag.scope_id, result.Flag.scope_type) \
-           == (flag.id, flag.public, flag.schema_id, flag.scope.id, ScopeType.odp)
+    assert (result.Flag.id, result.Flag.type, result.Flag.public, result.Flag.schema_id, result.Flag.scope_id, result.Flag.scope_type) \
+           == (flag.id, flag.type, flag.public, flag.schema_id, flag.scope.id, ScopeType.odp)
 
 
 def test_create_project():
@@ -133,8 +133,8 @@ def test_create_scope():
 def test_create_tag():
     tag = TagFactory()
     result = Session.execute(select(Tag, Scope).join(Scope)).one()
-    assert (result.Tag.id, result.Tag.public, result.Tag.schema_id, result.Tag.scope_id, result.Tag.scope_type) \
-           == (tag.id, tag.public, tag.schema_id, tag.scope.id, ScopeType.odp)
+    assert (result.Tag.id, result.Tag.type, result.Tag.public, result.Tag.schema_id, result.Tag.scope_id, result.Tag.scope_type) \
+           == (tag.id, tag.type, tag.public, tag.schema_id, tag.scope.id, ScopeType.odp)
 
 
 def test_create_user():

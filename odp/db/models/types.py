@@ -20,6 +20,22 @@ class ScopeType(str, Enum):
         return repr(self.value)
 
 
+class FlagType(str, Enum):
+    collection = 'collection'
+    record = 'record'
+
+    def __repr__(self):
+        return repr(self.value)
+
+
+class TagType(str, Enum):
+    collection = 'collection'
+    record = 'record'
+
+    def __repr__(self):
+        return repr(self.value)
+
+
 class AuditCommand(str, Enum):
     insert = 'insert'
     update = 'update'

@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, CheckConstraint, Column, Enum, ForeignKeyConstra
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
-from odp.db.models.types import SchemaType, ScopeType
+from odp.db.models.types import SchemaType, ScopeType, TagType
 
 
 class Tag(Base):
@@ -29,7 +29,8 @@ class Tag(Base):
         ),
     )
 
-    id = Column(String, primary_key=True)
+    id = Column(String, unique=True, primary_key=True)
+    type = Column(Enum(TagType), primary_key=True)
     public = Column(Boolean, nullable=False)
 
     schema_id = Column(String, nullable=False)
@@ -41,4 +42,4 @@ class Tag(Base):
     scope = relationship('Scope')
 
     def __repr__(self):
-        return self._repr('id', 'public', 'schema_id', 'scope_id')
+        return self._repr('id', 'type', 'public', 'schema_id', 'scope_id')

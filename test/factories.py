@@ -1,25 +1,12 @@
 from datetime import datetime, timezone
-from random import randint, choice
+from random import choice, randint
 
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 from faker import Faker
 
 from odp.db import Session
-from odp.db.models import (
-    Catalogue,
-    Client,
-    Collection,
-    Flag,
-    Project,
-    Provider,
-    Record,
-    Role,
-    Schema,
-    Scope,
-    Tag,
-    User,
-)
+from odp.db.models import Catalogue, Client, Collection, Flag, Project, Provider, Record, Role, Schema, Scope, Tag, User
 
 fake = Faker()
 
@@ -39,6 +26,7 @@ def schema_uri_from_type(schema):
     elif schema.type == 'flag':
         return choice((
             'https://odp.saeon.ac.za/schema/flag/generic',
+            'https://odp.saeon.ac.za/schema/flag/record-migrated',
         ))
     elif schema.type == 'tag':
         return choice((
@@ -137,6 +125,7 @@ class FlagFactory(ODPModelFactory):
         model = Flag
 
     id = factory.LazyAttribute(lambda flag: f'flag-{flag.scope.id}')
+    type = factory.LazyFunction(lambda: choice(('collection', 'record')))
     public = factory.LazyFunction(lambda: randint(0, 1))
     scope = factory.SubFactory(ScopeFactory, type='odp')
     schema = factory.SubFactory(SchemaFactory, type='flag')
@@ -199,6 +188,7 @@ class TagFactory(ODPModelFactory):
         model = Tag
 
     id = factory.LazyAttribute(lambda tag: f'tag-{tag.scope.id}')
+    type = factory.LazyFunction(lambda: choice(('collection', 'record')))
     public = factory.LazyFunction(lambda: randint(0, 1))
     scope = factory.SubFactory(ScopeFactory, type='odp')
     schema = factory.SubFactory(SchemaFactory, type='tag')
