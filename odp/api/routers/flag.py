@@ -43,7 +43,12 @@ async def list_flags(
 async def get_flag(
         flag_id: str,
 ):
-    if not (flag := Session.get(Flag, flag_id)):
+    flag = Session.execute(
+        select(Flag).
+        where(Flag.id == flag_id)
+    ).scalar_one_or_none()
+
+    if not flag:
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     return FlagModel(

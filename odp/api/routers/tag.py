@@ -43,7 +43,12 @@ async def list_tags(
 async def get_tag(
         tag_id: str,
 ):
-    if not (tag := Session.get(Tag, tag_id)):
+    tag = Session.execute(
+        select(Tag).
+        where(Tag.id == tag_id)
+    ).scalar_one_or_none()
+
+    if not tag:
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     return TagModel(
