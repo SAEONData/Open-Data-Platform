@@ -19,7 +19,9 @@
         {% elif prop == 'DOI key' %}
             {{ collection.doi_key if collection.doi_key }}
         {% elif prop == 'Records' %}
-            {{ collection.record_count }}
+            <a href="{{ url_for('records.index', collection=collection.id) }}" class="text-decoration-none">
+                {{ collection.record_count }}
+            </a>
         {% elif prop == 'Published' %}
             {% if publish_flag %}
                 {{ publish_flag.timestamp|timestamp }} by {{ obj_link('users', publish_flag.user_id, publish_flag.user_name) }}

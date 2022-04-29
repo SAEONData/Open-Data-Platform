@@ -14,6 +14,10 @@
         <td>{{ collection.name }}</td>
         <td>{{ obj_link('providers', collection.provider_id) }}</td>
         <td>{{ obj_links('projects', collection.project_ids) }}</td>
-        <td>{{ collection.record_count }}</td>
+        <td>
+            <a href="{{ url_for('records.index', collection=collection.id) }}" class="text-decoration-none">
+                {{ collection.record_count }}
+            </a>
+        </td>
     {% endcall %}
 {% endblock %}
