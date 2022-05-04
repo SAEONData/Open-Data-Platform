@@ -14,7 +14,7 @@ rootdir = pathlib.Path(__file__).parent.parent
 sys.path.append(str(rootdir))
 
 from odp.db import Session
-from odp.db.models import Catalogue, Collection, Flag, Project, Provider, Role, Schema, SchemaType, Scope, ScopeType, Tag
+from odp.db.models import Catalogue, Flag, Role, Schema, SchemaType, Scope, ScopeType, Tag
 
 datadir = pathlib.Path(__file__).parent / 'saeondata'
 
@@ -74,36 +74,6 @@ def create_roles():
         role.save()
 
 
-def create_projects():
-    """Create or update project definitions."""
-    with open(datadir / 'projects.yml') as f:
-        project_data = yaml.safe_load(f)
-
-    for project_id, project_spec in project_data.items():
-        project = Session.get(Project, project_id) or Project(id=project_id)
-        project.name = project_spec['name']
-        project.collections = [Session.get(Collection, collection_id) for collection_id in project_spec['collections']]
-        project.save()
-
-
-def create_providers_and_collections():
-    """Create or update providers, collections and project-collection
-    associations."""
-    with open(datadir / 'providers_collections.yml') as f:
-        provider_collection_data = yaml.safe_load(f)
-
-    for provider_id, provider_spec in provider_collection_data.items():
-        provider = Session.get(Provider, provider_id) or Provider(id=provider_id)
-        provider.name = provider_spec['name']
-        provider.save()
-        for collection_id, collection_spec in provider_spec['collections'].items():
-            collection = Session.get(Collection, collection_id) or Collection(id=collection_id)
-            collection.name = collection_spec['name']
-            collection.doi_key = collection_spec.get('doi_key')
-            collection.provider_id = provider_id
-            collection.save()
-
-
 def create_catalogues():
     """Create or update catalogue definitions."""
     with open(datadir / 'catalogues.yml') as f:
@@ -123,7 +93,5 @@ if __name__ == '__main__':
         create_flags()
         create_tags()
         create_roles()
-        create_providers_and_collections()
-        create_projects()
         create_catalogues()
     print('Done.')
