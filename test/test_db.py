@@ -10,7 +10,7 @@ from test.factories import (CatalogueFactory, ClientFactory, CollectionFactory, 
 
 
 def test_db_setup():
-    migrate.systemdata.sync_system_scopes()
+    migrate.systemdata.init_system_scopes()
     Session.commit()
     result = Session.execute(select(Scope)).scalars()
     assert [row.id for row in result] == [s.value for s in ODPScope]
@@ -18,7 +18,7 @@ def test_db_setup():
     # create a batch of arbitrary scopes, which should not be assigned to the sysadmin
     ScopeFactory.create_batch(5)
 
-    migrate.systemdata.sync_admin_role()
+    migrate.systemdata.init_admin_role()
     Session.commit()
     result = Session.execute(select(Role)).scalar_one()
     assert (result.id, result.provider_id) == (migrate.systemdata.ODP_ADMIN_ROLE, None)

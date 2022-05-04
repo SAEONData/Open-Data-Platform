@@ -13,7 +13,7 @@ def database():
     database with an up-to-date ODP schema."""
     create_database(url := config.ODP.DB.URL)
     try:
-        migrate.systemdata.create_schema()
+        migrate.systemdata.create_db_schema()
         yield
     finally:
         drop_database(url)
