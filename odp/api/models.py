@@ -34,7 +34,7 @@ class TagInstanceModelIn(BaseModel):
     data: Dict[str, Any]
 
 
-class CatalogueModel(BaseModel):
+class CatalogModel(BaseModel):
     id: str
     schema_id: str
     schema_uri: str

@@ -28,7 +28,7 @@ load_dotenv(dotenv_path)
 
 from odp import ODPScope
 from odp.db import Base, Session, engine
-from odp.db.models import Catalogue, Client, Flag, Role, Schema, SchemaType, Scope, ScopeType, Tag, User, UserRole
+from odp.db.models import Catalog, Client, Flag, Role, Schema, SchemaType, Scope, ScopeType, Tag, User, UserRole
 from odp.lib.hydra import GrantType, HydraAdminAPI, HydraScope, ResponseType
 
 datadir = pathlib.Path(__file__).parent / 'systemdata'
@@ -219,16 +219,16 @@ def init_roles():
         role.save()
 
 
-def init_catalogues():
-    """Create or update catalogue definitions."""
-    with open(datadir / 'catalogues.yml') as f:
-        catalogue_data = yaml.safe_load(f)
+def init_catalogs():
+    """Create or update catalog definitions."""
+    with open(datadir / 'catalogs.yml') as f:
+        catalog_data = yaml.safe_load(f)
 
-    for catalogue_id, catalogue_spec in catalogue_data.items():
-        catalogue = Session.get(Catalogue, catalogue_id) or Catalogue(id=catalogue_id)
-        catalogue.schema_id = catalogue_spec['schema_id']
-        catalogue.schema_type = SchemaType.catalogue
-        catalogue.save()
+    for catalog_id, catalog_spec in catalog_data.items():
+        catalog = Session.get(Catalog, catalog_id) or Catalog(id=catalog_id)
+        catalog.schema_id = catalog_spec['schema_id']
+        catalog.schema_type = SchemaType.catalog
+        catalog.save()
 
 
 if __name__ == '__main__':
@@ -265,6 +265,6 @@ if __name__ == '__main__':
         init_flags()
         init_tags()
         init_roles()
-        init_catalogues()
+        init_catalogs()
 
     print('Done.')

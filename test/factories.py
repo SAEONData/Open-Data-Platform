@@ -6,7 +6,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from faker import Faker
 
 from odp.db import Session
-from odp.db.models import Catalogue, Client, Collection, Flag, Project, Provider, Record, Role, Schema, Scope, Tag, User
+from odp.db.models import Catalog, Client, Collection, Flag, Project, Provider, Record, Role, Schema, Scope, Tag, User
 
 fake = Faker()
 
@@ -32,9 +32,9 @@ def schema_uri_from_type(schema):
         return choice((
             'https://odp.saeon.ac.za/schema/tag/record-qc',
         ))
-    elif schema.type == 'catalogue':
+    elif schema.type == 'catalog':
         return choice((
-            'https://odp.saeon.ac.za/schema/catalogue/saeon-catalogue',
+            'https://odp.saeon.ac.za/schema/catalog/saeon-catalog',
         ))
     else:
         return fake.uri()
@@ -59,16 +59,16 @@ class SchemaFactory(ODPModelFactory):
         model = Schema
 
     id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
-    type = factory.LazyFunction(lambda: choice(('catalogue', 'metadata', 'flag', 'tag')))
+    type = factory.LazyFunction(lambda: choice(('catalog', 'metadata', 'flag', 'tag')))
     uri = factory.LazyAttribute(schema_uri_from_type)
 
 
-class CatalogueFactory(ODPModelFactory):
+class CatalogFactory(ODPModelFactory):
     class Meta:
-        model = Catalogue
+        model = Catalog
 
     id = factory.Sequence(lambda n: f'{fake.slug()}.{n}')
-    schema = factory.SubFactory(SchemaFactory, type='catalogue')
+    schema = factory.SubFactory(SchemaFactory, type='catalog')
 
 
 class ProviderFactory(ODPModelFactory):

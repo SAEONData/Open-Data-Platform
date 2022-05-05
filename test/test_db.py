@@ -3,9 +3,9 @@ from sqlalchemy import select
 import migrate.systemdata
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import (Catalogue, Client, ClientScope, Collection, Flag, Project, ProjectCollection, Provider, Record, Role, RoleScope, Schema,
+from odp.db.models import (Catalog, Client, ClientScope, Collection, Flag, Project, ProjectCollection, Provider, Record, Role, RoleScope, Schema,
                            Scope, ScopeType, Tag, User, UserRole)
-from test.factories import (CatalogueFactory, ClientFactory, CollectionFactory, FlagFactory, ProjectFactory, ProviderFactory, RecordFactory,
+from test.factories import (CatalogFactory, ClientFactory, CollectionFactory, FlagFactory, ProjectFactory, ProviderFactory, RecordFactory,
                             RoleFactory, SchemaFactory, ScopeFactory, TagFactory, UserFactory)
 
 
@@ -28,11 +28,11 @@ def test_db_setup():
            == [(migrate.systemdata.ODP_ADMIN_ROLE, s.value, ScopeType.odp) for s in ODPScope]
 
 
-def test_create_catalogue():
-    catalogue = CatalogueFactory()
-    result = Session.execute(select(Catalogue, Schema).join(Schema)).one()
-    assert (result.Catalogue.id, result.Catalogue.schema_id, result.Catalogue.schema_type, result.Schema.uri) \
-           == (catalogue.id, catalogue.schema_id, catalogue.schema_type, catalogue.schema.uri)
+def test_create_catalog():
+    catalog = CatalogFactory()
+    result = Session.execute(select(Catalog, Schema).join(Schema)).one()
+    assert (result.Catalog.id, result.Catalog.schema_id, result.Catalog.schema_type, result.Schema.uri) \
+           == (catalog.id, catalog.schema_id, catalog.schema_type, catalog.schema.uri)
 
 
 def test_create_client():

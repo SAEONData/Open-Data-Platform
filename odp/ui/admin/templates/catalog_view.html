@@ -3,7 +3,7 @@
 {% block web_title %}
     {{ super() }} |
     {% block heading %}
-        Catalogue: {{ catalogue.id }}
+        Catalog: {{ catalog.id }}
     {% endblock %}
 {% endblock %}
 
@@ -23,15 +23,15 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% from 'macros.html' import render_info %}
-            {% call(prop) render_info(catalogue, 'Schema URI') %}
+            {% call(prop) render_info(catalog, 'Schema URI') %}
                 {% if prop == 'Schema URI' %}
-                    {{ catalogue.schema_uri }}
+                    {{ catalog.schema_uri }}
                 {% endif %}
             {% endcall %}
         </div>
         <div id="schema" class="tab-pane fade" role="tabpanel">
             <pre class="m-3">
-                {{- catalogue.schema_|format_json -}}
+                {{- catalog.schema_|format_json -}}
             </pre>
         </div>
     </div>

@@ -18,6 +18,6 @@ Generic-Flag:
   type: flag
   uri: https://odp.saeon.ac.za/schema/flag/generic
 
-SAEON-Catalogue:
-  type: catalogue
-  uri: https://odp.saeon.ac.za/schema/catalogue/saeon-catalogue
+SAEON-Catalog:
+  type: catalog
+  uri: https://odp.saeon.ac.za/schema/catalog/saeon-catalog

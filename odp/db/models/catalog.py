@@ -5,20 +5,20 @@ from odp.db import Base
 from odp.db.models.types import SchemaType
 
 
-class Catalogue(Base):
-    """Represents a public catalogue providing access to published
+class Catalog(Base):
+    """Represents a public catalog providing access to published
     digital object records."""
 
-    __tablename__ = 'catalogue'
+    __tablename__ = 'catalog'
 
     __table_args__ = (
         ForeignKeyConstraint(
             ('schema_id', 'schema_type'), ('schema.id', 'schema.type'),
-            name='catalogue_schema_fkey', ondelete='RESTRICT',
+            name='catalog_schema_fkey', ondelete='RESTRICT',
         ),
         CheckConstraint(
-            f"schema_type = '{SchemaType.catalogue}'",
-            name='catalogue_schema_type_check',
+            f"schema_type = '{SchemaType.catalog}'",
+            name='catalog_schema_type_check',
         ),
     )
 

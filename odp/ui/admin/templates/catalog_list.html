@@ -3,11 +3,11 @@
 {% block web_title %}
     {{ super() }} |
     {% block heading %}
-        Catalogues
+        Catalogs
     {% endblock %}
 {% endblock %}
 
 {% block content %}
     {% from 'macros.html' import render_table %}
-    {{ render_table(catalogues) }}
+    {{ render_table(catalogs) }}
 {% endblock %}

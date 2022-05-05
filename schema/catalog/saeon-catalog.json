@@ -1,5 +1,5 @@
 {
-    "$id": "https://odp.saeon.ac.za/schema/catalogue/saeon-catalogue",
+    "$id": "https://odp.saeon.ac.za/schema/catalog/saeon-catalog",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "properties": {

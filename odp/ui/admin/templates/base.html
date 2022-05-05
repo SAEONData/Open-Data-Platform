@@ -15,7 +15,7 @@
 {% block nav_menu %}
     {% from 'macros.html' import nav_menu %}
     {{ nav_menu(request.blueprint,
-        ('projects', 'collections', 'schemas', 'catalogues', 'roles'),
+        ('projects', 'collections', 'schemas', 'catalogs', 'roles'),
         ('providers', 'records', 'tags', 'clients', 'users'),
     ) }}
 {% endblock %}

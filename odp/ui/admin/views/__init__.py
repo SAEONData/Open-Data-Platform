@@ -15,7 +15,7 @@ from odp.ui.admin.views import (
     tags,
     schemas,
     clients,
-    catalogues,
+    catalogs,
 )
 from odp.ui.views import hydra
 
@@ -32,7 +32,7 @@ def init_app(app: Flask):
     app.register_blueprint(tags.bp, url_prefix='/tags')
     app.register_blueprint(schemas.bp, url_prefix='/schemas')
     app.register_blueprint(clients.bp, url_prefix='/clients')
-    app.register_blueprint(catalogues.bp, url_prefix='/catalogues')
+    app.register_blueprint(catalogs.bp, url_prefix='/catalogs')
 
     @app.template_filter()
     def format_json(obj):

@@ -6,8 +6,8 @@ DOI_PREFIX = 10.15493
 
 
 class ODPScope(str, Enum):
-    # catalogue
-    CATALOGUE_READ = 'odp.catalogue:read'
+    # catalog
+    CATALOG_READ = 'odp.catalog:read'
 
     # client
     CLIENT_ADMIN = 'odp.client:admin'

@@ -1,6 +1,6 @@
 SAEON:Staff:
   scopes:
-    - odp.catalogue:read
+    - odp.catalog:read
     - odp.client:read
     - odp.collection:read
     - odp.flag:read
@@ -15,7 +15,7 @@ SAEON:Staff:
 
 SAEON:Curator:
   scopes:
-    - odp.catalogue:read
+    - odp.catalog:read
     - odp.client:read
     - odp.collection:admin
     - odp.collection:read

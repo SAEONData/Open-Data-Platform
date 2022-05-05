@@ -5,7 +5,7 @@ class SchemaType(str, Enum):
     metadata = 'metadata'
     flag = 'flag'
     tag = 'tag'
-    catalogue = 'catalogue'
+    catalog = 'catalog'
 
     def __repr__(self):
         return repr(self.value)

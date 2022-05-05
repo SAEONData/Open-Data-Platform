@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import odp
 from odp.api.routers import (
-    catalogue,
+    catalog,
     client,
     collection,
     flag,
@@ -29,7 +29,7 @@ app = FastAPI(
     redoc_url='/docs',
 )
 
-app.include_router(catalogue.router, prefix='/catalogue', tags=['Catalogue'])
+app.include_router(catalog.router, prefix='/catalog', tags=['Catalog'])
 app.include_router(client.router, prefix='/client', tags=['Client'])
 app.include_router(collection.router, prefix='/collection', tags=['Collection'])
 app.include_router(flag.router, prefix='/flag', tags=['Flag'])
