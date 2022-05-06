@@ -1,6 +1,6 @@
 import json
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask_login import current_user
 
 from odp import ODPFlag, ODPScope, ODPTag
@@ -56,14 +56,18 @@ def view(id):
 
 
 @bp.route('/new', methods=('GET', 'POST'))
-@api.client(ODPScope.RECORD_CREATE)
+@api.client(ODPScope.RECORD_ADMIN, ODPScope.RECORD_WRITE)
 def create():
     form = RecordForm(request.form)
     utils.populate_collection_choices(form.collection_id, include_none=True)
     utils.populate_schema_choices(form.schema_id, 'metadata')
 
     if request.method == 'POST' and form.validate():
-        record = api.post('/record/', dict(
+        api_route = '/record/'
+        if ODPScope.RECORD_ADMIN in g.user_permissions:
+            api_route += 'admin/'
+
+        record = api.post(api_route, dict(
             doi=(doi := form.doi.data) or None,
             sid=(sid := form.sid.data) or None,
             collection_id=form.collection_id.data,
@@ -77,7 +81,7 @@ def create():
 
 
 @bp.route('/<id>/edit', methods=('GET', 'POST'))
-@api.client(ODPScope.RECORD_ADMIN)
+@api.client(ODPScope.RECORD_ADMIN, ODPScope.RECORD_WRITE)
 def edit(id):
     record = api.get(f'/record/{id}')
 
@@ -86,7 +90,11 @@ def edit(id):
     utils.populate_schema_choices(form.schema_id, 'metadata')
 
     if request.method == 'POST' and form.validate():
-        api.put(f'/record/{id}', dict(
+        api_route = '/record/'
+        if ODPScope.RECORD_ADMIN in g.user_permissions:
+            api_route += 'admin/'
+
+        api.put(api_route + id, dict(
             doi=(doi := form.doi.data) or None,
             sid=(sid := form.sid.data) or None,
             collection_id=form.collection_id.data,
@@ -100,9 +108,13 @@ def edit(id):
 
 
 @bp.route('/<id>/delete', methods=('POST',))
-@api.client(ODPScope.RECORD_ADMIN)
+@api.client(ODPScope.RECORD_ADMIN, ODPScope.RECORD_WRITE)
 def delete(id):
-    api.delete(f'/record/{id}')
+    api_route = '/record/'
+    if ODPScope.RECORD_ADMIN in g.user_permissions:
+        api_route += 'admin/'
+
+    api.delete(api_route + id)
     flash(f'Record {id} has been deleted.', category='success')
     return redirect(url_for('.index'))
 

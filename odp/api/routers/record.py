@@ -6,14 +6,14 @@ from jschon import JSON, JSONSchema
 from sqlalchemy import select
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp import ODPScope
+from odp import ODPFlag, ODPScope
 from odp.api.lib.auth import Authorize, Authorized, FlagAuthorize, TagAuthorize, UnflagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_flag_schema, get_metadata_schema, get_tag_schema
 from odp.api.models import FlagInstanceModel, FlagInstanceModelIn, RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
-from odp.db.models import (AuditCommand, Collection, FlagType, Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag, RecordTagAudit,
-                           SchemaType, TagType)
+from odp.db.models import (AuditCommand, Collection, CollectionFlag, FlagType, Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag,
+                           RecordTagAudit, SchemaType, TagType)
 
 router = APIRouter()
 
@@ -114,8 +114,35 @@ async def get_record(
 async def create_record(
         record_in: RecordModelIn,
         metadata_schema: JSONSchema = Depends(get_metadata_schema),
-        auth: Authorized = Depends(Authorize(ODPScope.RECORD_CREATE)),
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_WRITE)),
 ):
+    if Session.execute(
+        select(CollectionFlag).
+        where(CollectionFlag.collection_id == record_in.collection_id).
+        where(CollectionFlag.flag_id == ODPFlag.COLLECTION_ARCHIVE)
+    ).first() is not None:
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'A record cannot be added to an archived collection')
+
+    return _create_record(record_in, metadata_schema, auth)
+
+
+@router.post(
+    '/admin/',
+    response_model=RecordModel,
+)
+async def admin_create_record(
+        record_in: RecordModelIn,
+        metadata_schema: JSONSchema = Depends(get_metadata_schema),
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_ADMIN)),
+):
+    return _create_record(record_in, metadata_schema, auth)
+
+
+def _create_record(
+        record_in: RecordModelIn,
+        metadata_schema: JSONSchema,
+        auth: Authorized,
+) -> RecordModel:
     if (auth.provider_ids != '*'
             and (collection := Session.get(Collection, record_in.collection_id))
             and collection.provider_id not in auth.provider_ids):
@@ -162,7 +189,33 @@ async def create_record(
     '/{record_id}',
     response_model=RecordModel,
 )
-async def set_record(
+async def update_record(
+        record_id: str,
+        record_in: RecordModelIn,
+        metadata_schema: JSONSchema = Depends(get_metadata_schema),
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_WRITE)),
+):
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if Session.execute(
+        select(CollectionFlag).
+        where(CollectionFlag.collection_id == record_in.collection_id).
+        where(CollectionFlag.flag_id.in_((ODPFlag.COLLECTION_ARCHIVE, ODPFlag.COLLECTION_PUBLISH)))
+    ).first() is not None:
+        raise HTTPException(
+            HTTP_422_UNPROCESSABLE_ENTITY,
+            'Cannot update a record belonging to a published or archived collection',
+        )
+
+    return _set_record(False, record, record_in, metadata_schema, auth)
+
+
+@router.put(
+    '/admin/{record_id}',
+    response_model=RecordModel,
+)
+async def admin_set_record(
         record_id: str,
         record_in: RecordModelIn,
         metadata_schema: JSONSchema = Depends(get_metadata_schema),
@@ -174,6 +227,16 @@ async def set_record(
         create = True
         record = Record(id=record_id)
 
+    return _set_record(create, record, record_in, metadata_schema, auth)
+
+
+def _set_record(
+        create: bool,
+        record: Record,
+        record_in: RecordModelIn,
+        metadata_schema: JSONSchema,
+        auth: Authorized,
+) -> RecordModel:
     if auth.provider_ids != '*':
         if not create and record.collection.provider_id not in auth.provider_ids:
             raise HTTPException(HTTP_403_FORBIDDEN)
@@ -183,7 +246,7 @@ async def set_record(
     if Session.execute(
         select(Record).
         where(
-            (Record.id != record_id) &
+            (Record.id != record.id) &
             (((Record.doi != None) & (Record.doi == record_in.doi)) |
              ((Record.sid != None) & (Record.sid == record_in.sid)))
         )
@@ -232,23 +295,53 @@ async def set_record(
 )
 async def delete_record(
         record_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_WRITE)),
+):
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if Session.execute(
+        select(CollectionFlag).
+        where(CollectionFlag.collection_id == record.collection_id).
+        where(CollectionFlag.flag_id.in_((ODPFlag.COLLECTION_ARCHIVE, ODPFlag.COLLECTION_PUBLISH)))
+    ).first() is not None:
+        raise HTTPException(
+            HTTP_422_UNPROCESSABLE_ENTITY,
+            'Cannot delete a record belonging to a published or archived collection',
+        )
+
+    _delete_record(record, auth)
+
+
+@router.delete(
+    '/admin/{record_id}',
+)
+async def admin_delete_record(
+        record_id: str,
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_ADMIN)),
 ):
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
+    _delete_record(record, auth)
+
+
+def _delete_record(
+        record: Record,
+        auth: Authorized,
+) -> None:
     if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
-
-    record.delete()
 
     RecordAudit(
         client_id=auth.client_id,
         user_id=auth.user_id,
         command=AuditCommand.delete,
         timestamp=datetime.now(timezone.utc),
-        _id=record_id,
+        _id=record.id,
     ).save()
+
+    record.delete()
 
 
 @router.post(

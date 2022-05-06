@@ -60,9 +60,10 @@ def _request(method, path, data, params):
         raise ODPAPIError(401, str(e)) from e
 
 
-def client(scope: ODPScope):
-    """Decorator that configures a view as an API client with `scope`
-    access, providing client-side authorization and API error handling."""
+def client(*scope: ODPScope):
+    """Decorator that configures a view as an API client requiring any of
+    the given `scope` for API access. It provides client-side authorization
+    and API error handling."""
 
     def decorator(f):
         @wraps(f)
@@ -72,7 +73,7 @@ def client(scope: ODPScope):
                 return redirect(url_for('home.index'))
 
             g.user_permissions = get_user_permissions(current_user.id, current_app.config['CLIENT_ID'])
-            if scope not in g.user_permissions:
+            if not any(s in g.user_permissions for s in scope):
                 flash('You do not have permission to access that page.', category='warning')
                 return redirect(request.referrer)
 

@@ -251,10 +251,10 @@ def test_get_record_with_provider_specific_api_client(api, record_batch, scopes,
 
 
 @pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.RECORD_CREATE], True),
+    ([ODPScope.RECORD_WRITE], True),
     ([], False),
     (all_scopes, True),
-    (all_scopes_excluding(ODPScope.RECORD_CREATE), False),
+    (all_scopes_excluding(ODPScope.RECORD_WRITE), False),
 ])
 def test_create_record(api, record_batch, scopes, authorized):
     modified_record_batch = record_batch + [record := record_build()]
@@ -277,11 +277,11 @@ def test_create_record(api, record_batch, scopes, authorized):
 
 
 @pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.RECORD_CREATE], True, True),
+    ([ODPScope.RECORD_WRITE], True, True),
     ([], True, False),
     (all_scopes, True, True),
     (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.RECORD_CREATE), True, False),
+    (all_scopes_excluding(ODPScope.RECORD_WRITE), True, False),
 ])
 def test_create_record_with_provider_specific_api_client(api, record_batch, scopes, matching_provider, authorized):
     api_client_provider = record_batch[2].collection.provider if matching_provider else record_batch[1].collection.provider

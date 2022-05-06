@@ -31,9 +31,9 @@ class ODPScope(str, Enum):
     PROVIDER_READ = 'odp.provider:read'
 
     # record
-    RECORD_CREATE = 'odp.record:create'
     RECORD_ADMIN = 'odp.record:admin'
     RECORD_READ = 'odp.record:read'
+    RECORD_WRITE = 'odp.record:write'
     RECORD_TAG_QC = 'odp.record_tag:qc'
     RECORD_FLAG_MIGRATED = 'odp.record_flag:migrated'
 
