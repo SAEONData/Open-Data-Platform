@@ -250,15 +250,20 @@ def test_get_record_with_provider_specific_api_client(api, record_batch, scopes,
     assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.RECORD_WRITE], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.RECORD_WRITE), False),
+@pytest.mark.parametrize('scopes, admin_route, authorized', [
+    ([ODPScope.RECORD_WRITE], False, True),
+    ([], False, False),
+    (all_scopes, False, True),
+    (all_scopes_excluding(ODPScope.RECORD_WRITE), False, False),
+    ([ODPScope.RECORD_ADMIN], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes_excluding(ODPScope.RECORD_ADMIN), True, False),
 ])
-def test_create_record(api, record_batch, scopes, authorized):
+def test_create_record(api, record_batch, scopes, admin_route, authorized):
     modified_record_batch = record_batch + [record := record_build()]
-    r = api(scopes).post('/record/', json=dict(
+    route = '/record/admin/' if admin_route else '/record/'
+    r = api(scopes).post(route, json=dict(
         doi=record.doi,
         sid=record.sid,
         collection_id=record.collection_id,
@@ -276,19 +281,25 @@ def test_create_record(api, record_batch, scopes, authorized):
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.RECORD_WRITE], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.RECORD_WRITE), True, False),
+@pytest.mark.parametrize('scopes, admin_route, matching_provider, authorized', [
+    ([ODPScope.RECORD_WRITE], False, True, True),
+    ([], False, True, False),
+    (all_scopes, False, True, True),
+    (all_scopes, False, False, False),
+    (all_scopes_excluding(ODPScope.RECORD_WRITE), False, True, False),
+    ([ODPScope.RECORD_ADMIN], True, True, True),
+    ([], True, True, False),
+    (all_scopes, True, True, True),
+    (all_scopes, True, False, False),
+    (all_scopes_excluding(ODPScope.RECORD_ADMIN), True, True, False),
 ])
-def test_create_record_with_provider_specific_api_client(api, record_batch, scopes, matching_provider, authorized):
+def test_create_record_with_provider_specific_api_client(api, record_batch, scopes, admin_route, matching_provider, authorized):
     api_client_provider = record_batch[2].collection.provider if matching_provider else record_batch[1].collection.provider
     modified_record_batch = record_batch + [record := record_build(
         collection=record_batch[2].collection
     )]
-    r = api(scopes, api_client_provider).post('/record/', json=dict(
+    route = '/record/admin/' if admin_route else '/record/'
+    r = api(scopes, api_client_provider).post(route, json=dict(
         doi=record.doi,
         sid=record.sid,
         collection_id=record.collection_id,
@@ -306,19 +317,24 @@ def test_create_record_with_provider_specific_api_client(api, record_batch, scop
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.RECORD_WRITE], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.RECORD_WRITE), False),
+@pytest.mark.parametrize('scopes, admin_route, authorized', [
+    ([ODPScope.RECORD_WRITE], False, True),
+    ([], False, False),
+    (all_scopes, False, True),
+    (all_scopes_excluding(ODPScope.RECORD_WRITE), False, False),
+    ([ODPScope.RECORD_ADMIN], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes_excluding(ODPScope.RECORD_ADMIN), True, False),
 ])
-def test_update_record(api, record_batch, scopes, authorized):
+def test_update_record(api, record_batch, scopes, admin_route, authorized):
     modified_record_batch = record_batch.copy()
     modified_record_batch[2] = (record := record_build(
         id=record_batch[2].id,
         doi=record_batch[2].doi,
     ))
-    r = api(scopes).put(f'/record/{record.id}', json=dict(
+    route = '/record/admin/' if admin_route else '/record/'
+    r = api(scopes).put(route + record.id, json=dict(
         doi=record.doi,
         sid=record.sid,
         collection_id=record.collection_id,
@@ -335,14 +351,19 @@ def test_update_record(api, record_batch, scopes, authorized):
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.RECORD_WRITE], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.RECORD_WRITE), True, False),
+@pytest.mark.parametrize('scopes, admin_route, matching_provider, authorized', [
+    ([ODPScope.RECORD_WRITE], False, True, True),
+    ([], False, True, False),
+    (all_scopes, False, True, True),
+    (all_scopes, False, False, False),
+    (all_scopes_excluding(ODPScope.RECORD_WRITE), False, True, False),
+    ([ODPScope.RECORD_ADMIN], True, True, True),
+    ([], True, True, False),
+    (all_scopes, True, True, True),
+    (all_scopes, True, False, False),
+    (all_scopes_excluding(ODPScope.RECORD_ADMIN), True, True, False),
 ])
-def test_update_record_with_provider_specific_api_client(api, record_batch, scopes, matching_provider, authorized):
+def test_update_record_with_provider_specific_api_client(api, record_batch, scopes, admin_route, matching_provider, authorized):
     api_client_provider = record_batch[2].collection.provider if matching_provider else record_batch[1].collection.provider
     modified_record_batch = record_batch.copy()
     modified_record_batch[2] = (record := record_build(
@@ -350,7 +371,8 @@ def test_update_record_with_provider_specific_api_client(api, record_batch, scop
         doi=record_batch[2].doi,
         collection=record_batch[2].collection,
     ))
-    r = api(scopes, api_client_provider).put(f'/record/{record.id}', json=dict(
+    route = '/record/admin/' if admin_route else '/record/'
+    r = api(scopes, api_client_provider).put(route + record.id, json=dict(
         doi=record.doi,
         sid=record.sid,
         collection_id=record.collection_id,
@@ -367,16 +389,21 @@ def test_update_record_with_provider_specific_api_client(api, record_batch, scop
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.RECORD_WRITE], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.RECORD_WRITE), False),
+@pytest.mark.parametrize('scopes, admin_route, authorized', [
+    ([ODPScope.RECORD_WRITE], False, True),
+    ([], False, False),
+    (all_scopes, False, True),
+    (all_scopes_excluding(ODPScope.RECORD_WRITE), False, False),
+    ([ODPScope.RECORD_ADMIN], True, True),
+    ([], True, False),
+    (all_scopes, True, True),
+    (all_scopes_excluding(ODPScope.RECORD_ADMIN), True, False),
 ])
-def test_delete_record(api, record_batch, scopes, authorized):
+def test_delete_record(api, record_batch, scopes, admin_route, authorized):
     modified_record_batch = record_batch.copy()
     del modified_record_batch[2]
-    r = api(scopes).delete(f'/record/{(record_id := record_batch[2].id)}')
+    route = '/record/admin/' if admin_route else '/record/'
+    r = api(scopes).delete(f'{route}{(record_id := record_batch[2].id)}')
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_record_batch)
@@ -387,18 +414,24 @@ def test_delete_record(api, record_batch, scopes, authorized):
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.RECORD_WRITE], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.RECORD_WRITE), True, False),
+@pytest.mark.parametrize('scopes, admin_route, matching_provider, authorized', [
+    ([ODPScope.RECORD_WRITE], False, True, True),
+    ([], False, True, False),
+    (all_scopes, False, True, True),
+    (all_scopes, False, False, False),
+    (all_scopes_excluding(ODPScope.RECORD_WRITE), False, True, False),
+    ([ODPScope.RECORD_ADMIN], True, True, True),
+    ([], True, True, False),
+    (all_scopes, True, True, True),
+    (all_scopes, True, False, False),
+    (all_scopes_excluding(ODPScope.RECORD_ADMIN), True, True, False),
 ])
-def test_delete_record_with_provider_specific_api_client(api, record_batch, scopes, matching_provider, authorized):
+def test_delete_record_with_provider_specific_api_client(api, record_batch, scopes, admin_route, matching_provider, authorized):
     api_client_provider = record_batch[2].collection.provider if matching_provider else record_batch[1].collection.provider
     modified_record_batch = record_batch.copy()
     del modified_record_batch[2]
-    r = api(scopes, api_client_provider).delete(f'/record/{(record_id := record_batch[2].id)}')
+    route = '/record/admin/' if admin_route else '/record/'
+    r = api(scopes, api_client_provider).delete(f'{route}{(record_id := record_batch[2].id)}')
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_record_batch)
