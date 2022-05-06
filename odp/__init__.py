@@ -16,6 +16,7 @@ class ODPScope(str, Enum):
     # collection
     COLLECTION_ADMIN = 'odp.collection:admin'
     COLLECTION_READ = 'odp.collection:read'
+    COLLECTION_FLAG_ARCHIVE = 'odp.collection_flag:archive'
     COLLECTION_FLAG_PUBLISH = 'odp.collection_flag:publish'
 
     # flag
@@ -56,6 +57,7 @@ class ODPScope(str, Enum):
 
 class ODPFlag(str, Enum):
     # collection
+    COLLECTION_ARCHIVE = 'Collection-Archive'
     COLLECTION_PUBLISH = 'Collection-Publish'
 
     # record

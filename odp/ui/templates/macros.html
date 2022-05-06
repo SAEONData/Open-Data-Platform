@@ -121,14 +121,19 @@
             {{ caller(btn) }}
         {% endfor %}
         {% if delete %}
-            <form action="{{ url_for('.delete', id=obj.id) }}" method="post">
-                <button type="submit" class="btn btn-outline-danger btn-action"
-                        onclick="return confirm('Are you sure you want to delete {{ obj.id }}? This cannot be undone!')">
-                    Delete
-                </button>
-            </form>
+            {{ render_button_prompt_form('.delete', obj.id, 'Delete', 'danger',
+                'Are you sure you want to delete %s? This cannot be undone!' % obj.id) }}
         {% endif %}
     </div>
+{% endmacro %}
+
+{% macro render_button_prompt_form(target, obj_id, label, outline_style, message) %}
+    <form action="{{ url_for(target, id=obj_id) }}" method="post">
+        <button type="submit" class="btn btn-outline-{{ outline_style }} btn-action"
+                onclick="return confirm('{{ message }}')">
+            {{ label }}
+        </button>
+    </form>
 {% endmacro %}
 
 {% macro render_info(obj) %}

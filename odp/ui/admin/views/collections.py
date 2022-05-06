@@ -25,7 +25,15 @@ def view(id):
          if flag['flag_id'] == ODPFlag.COLLECTION_PUBLISH),
         None
     )
-    return render_template('collection_view.html', collection=collection, publish_flag=publish_flag)
+    archive_flag = next(
+        (flag for flag in collection['flags']
+         if flag['flag_id'] == ODPFlag.COLLECTION_ARCHIVE),
+        None
+    )
+    return render_template(
+        'collection_view.html', collection=collection,
+        publish_flag=publish_flag, archive_flag=archive_flag,
+    )
 
 
 @bp.route('/new', methods=('GET', 'POST'))
@@ -92,6 +100,25 @@ def flag_publish(id):
 def unflag_publish(id):
     api.delete(f'/collection/{id}/flag/{ODPFlag.COLLECTION_PUBLISH}')
     flash(f'{ODPFlag.COLLECTION_PUBLISH} flag has been removed.', category='success')
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/flag/archive', methods=('POST',))
+@api.client(ODPScope.COLLECTION_FLAG_ARCHIVE)
+def flag_archive(id):
+    api.post(f'/collection/{id}/flag', dict(
+        flag_id=ODPFlag.COLLECTION_ARCHIVE,
+        data={},
+    ))
+    flash(f'{ODPFlag.COLLECTION_ARCHIVE} flag has been set.', category='success')
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/unflag/archive', methods=('POST',))
+@api.client(ODPScope.COLLECTION_FLAG_ARCHIVE)
+def unflag_archive(id):
+    api.delete(f'/collection/{id}/flag/{ODPFlag.COLLECTION_ARCHIVE}')
+    flash(f'{ODPFlag.COLLECTION_ARCHIVE} flag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
 
 

@@ -69,7 +69,7 @@
             </pre>
         </div>
         <div id="tag-qc" class="tab-pane fade" role="tabpanel">
-            {% from 'macros.html' import render_table, obj_link %}
+            {% from 'macros.html' import render_table, render_button_prompt_form, obj_link %}
             {% call(qc_tag) render_table(qc_tags, 'Pass', 'Comment', 'User', 'Timestamp', hide_id=True) %}
                 <td>{{ qc_tag.data.pass_ }}</td>
                 <td>{{ qc_tag.data.comment }}</td>
@@ -81,12 +81,8 @@
                     Tag
                 </a>
                 {% if has_user_qc_tag %}
-                    <form action="{{ url_for('.untag_qc', id=record.id) }}" method="post">
-                        <button type="submit" class="btn btn-outline-warning btn-action"
-                                onclick="return confirm('Are you sure you want to delete your QC tag?')">
-                            Untag
-                        </button>
-                    </form>
+                    {{ render_button_prompt_form('.untag_qc', record.id, 'Untag', 'warning',
+                        'Are you sure you want to delete your QC tag?') }}
                 {% endif %}
             </div>
         </div>

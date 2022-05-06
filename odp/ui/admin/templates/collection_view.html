@@ -8,8 +8,9 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_info, render_buttons, obj_link, obj_links %}
-    {% call(prop) render_info(collection, 'Name', 'Provider', 'Projects', 'DOI key', 'Records', 'Published') %}
+    {% from 'macros.html' import render_info, render_buttons, render_button_prompt_form, obj_link, obj_links %}
+    {% call(prop) render_info(collection, 'Name', 'Provider', 'Projects', 'DOI key', 'Records',
+            'Published', 'Archived') %}
         {% if prop == 'Name' %}
             {{ collection.name }}
         {% elif prop == 'Provider' %}
@@ -26,28 +27,35 @@
             {% if publish_flag %}
                 {{ publish_flag.timestamp|timestamp }} by {{ obj_link('users', publish_flag.user_id, publish_flag.user_name) }}
             {% endif %}
+        {% elif prop == 'Archived' %}
+            {% if archive_flag %}
+                {{ archive_flag.timestamp|timestamp }} by {{ obj_link('users', archive_flag.user_id, archive_flag.user_name) }}
+            {% endif %}
         {% endif %}
     {% endcall %}
     {% if publish_flag %}
-        {% set custom_buttons = ['unpublish'] %}
+        {% set publish_btn = ['unpublish'] %}
     {% else %}
-        {% set custom_buttons = ['publish'] %}
+        {% set publish_btn = ['publish'] %}
     {% endif %}
-    {% call(btn) render_buttons(collection, edit=True, delete=True, custom=custom_buttons) %}
+    {% if archive_flag %}
+        {% set archive_btn = ['unarchive'] %}
+    {% else %}
+        {% set archive_btn = ['archive'] %}
+    {% endif %}
+    {% call(btn) render_buttons(collection, edit=True, delete=True, custom=publish_btn + archive_btn) %}
         {% if btn == 'publish' %}
-            <form action="{{ url_for('.flag_publish', id=collection.id) }}" method="post">
-                <button type="submit" class="btn btn-outline-success btn-action"
-                        onclick="return confirm('Are you sure you want to publish the collection?')">
-                    Publish
-                </button>
-            </form>
+            {{ render_button_prompt_form('.flag_publish', collection.id, 'Publish', 'success',
+                'Are you sure you want to publish the collection?') }}
         {% elif btn == 'unpublish' %}
-            <form action="{{ url_for('.unflag_publish', id=collection.id) }}" method="post">
-                <button type="submit" class="btn btn-outline-warning btn-action"
-                        onclick="return confirm('Are you sure you want to un-publish the collection?')">
-                    Un-publish
-                </button>
-            </form>
+            {{ render_button_prompt_form('.unflag_publish', collection.id, 'Un-publish', 'warning',
+                'Are you sure you want to un-publish the collection?') }}
+        {% elif btn == 'archive' %}
+            {{ render_button_prompt_form('.flag_archive', collection.id, 'Archive', 'warning',
+                'Are you sure you want to archive the collection?') }}
+        {% elif btn == 'unarchive' %}
+            {{ render_button_prompt_form('.unflag_archive', collection.id, 'Un-archive', 'success',
+                'Are you sure you want to un-archive the collection?') }}
         {% endif %}
     {% endcall %}
 {% endblock %}

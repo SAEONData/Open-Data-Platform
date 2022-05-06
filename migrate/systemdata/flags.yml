@@ -4,6 +4,12 @@ Collection-Publish:
   scope_id: odp.collection_flag:publish
   schema_id: Generic-Flag
 
+Collection-Archive:
+  type: collection
+  public: False
+  scope_id: odp.collection_flag:archive
+  schema_id: Generic-Flag
+
 Record-Migrated:
   type: record
   public: False
