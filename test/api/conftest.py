@@ -6,6 +6,7 @@ from starlette.testclient import TestClient
 
 import odp.api
 from odp.lib.hydra import HydraAdminAPI
+from test.api import ProviderAuth
 from test.factories import ClientFactory, ScopeFactory
 
 hydra_admin_url = os.environ['HYDRA_ADMIN_URL']
@@ -42,3 +43,10 @@ def api():
 @pytest.fixture(scope='session')
 def hydra_admin_api():
     return HydraAdminAPI(hydra_admin_url)
+
+
+@pytest.fixture(params=ProviderAuth)
+def provider_auth(request):
+    """Use for parameterizing the three possible logic branches
+    involving provider-specific authorization."""
+    return request.param

@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, timezone
-from enum import Enum
 from random import randint
 
 import pytest
@@ -8,8 +7,8 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag, RecordTagAudit, Scope, ScopeType
-from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
-from test.factories import CollectionFactory, FlagFactory, RecordFactory, SchemaFactory, TagFactory
+from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
+from test.factories import CollectionFactory, FlagFactory, ProviderFactory, RecordFactory, SchemaFactory, TagFactory
 
 
 @pytest.fixture
@@ -184,28 +183,21 @@ def assert_json_record_results(response, json, records):
         assert_json_record_result(response, items[n], record)
 
 
-class TestProvider(Enum):
-    NONE = 0
-    MATCH = 1
-    MISMATCH = 2
-
-
-@pytest.mark.parametrize('scopes, provider_auth', [
-    ([ODPScope.RECORD_READ], TestProvider.NONE),
-    ([ODPScope.RECORD_READ], TestProvider.MATCH),
-    ([], TestProvider.NONE),
-    ([], TestProvider.MATCH),
-    (all_scopes, TestProvider.NONE),
-    (all_scopes, TestProvider.MATCH),
-    (all_scopes_excluding(ODPScope.RECORD_READ), TestProvider.NONE),
-    (all_scopes_excluding(ODPScope.RECORD_READ), TestProvider.MATCH),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.RECORD_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.RECORD_READ),
 ])
 def test_list_records(api, record_batch, scopes, provider_auth):
     authorized = ODPScope.RECORD_READ in scopes
 
-    if provider_auth == TestProvider.MATCH:
+    if provider_auth == ProviderAuth.MATCH:
         api_client_provider = record_batch[2].collection.provider
         expected_result_batch = [record_batch[2]]
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = ProviderFactory()
+        expected_result_batch = []
     else:
         api_client_provider = None
         expected_result_batch = record_batch
@@ -221,27 +213,19 @@ def test_list_records(api, record_batch, scopes, provider_auth):
     assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes, provider_auth', [
-    ([ODPScope.RECORD_READ], TestProvider.NONE),
-    ([ODPScope.RECORD_READ], TestProvider.MATCH),
-    ([ODPScope.RECORD_READ], TestProvider.MISMATCH),
-    ([], TestProvider.NONE),
-    ([], TestProvider.MATCH),
-    ([], TestProvider.MISMATCH),
-    (all_scopes, TestProvider.NONE),
-    (all_scopes, TestProvider.MATCH),
-    (all_scopes, TestProvider.MISMATCH),
-    (all_scopes_excluding(ODPScope.RECORD_READ), TestProvider.NONE),
-    (all_scopes_excluding(ODPScope.RECORD_READ), TestProvider.MATCH),
-    (all_scopes_excluding(ODPScope.RECORD_READ), TestProvider.MISMATCH),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.RECORD_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.RECORD_READ),
 ])
 def test_get_record(api, record_batch, scopes, provider_auth):
     authorized = ODPScope.RECORD_READ in scopes and \
-                 provider_auth in (TestProvider.NONE, TestProvider.MATCH)
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
-    if provider_auth == TestProvider.MATCH:
+    if provider_auth == ProviderAuth.MATCH:
         api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == TestProvider.MISMATCH:
+    elif provider_auth == ProviderAuth.MISMATCH:
         api_client_provider = record_batch[1].collection.provider
     else:
         api_client_provider = None
@@ -257,47 +241,31 @@ def test_get_record(api, record_batch, scopes, provider_auth):
     assert_no_audit_log()
 
 
-@pytest.mark.parametrize('admin_route, scopes, provider_auth', [
-    (False, [ODPScope.RECORD_WRITE], TestProvider.NONE),
-    (False, [ODPScope.RECORD_WRITE], TestProvider.MATCH),
-    (False, [ODPScope.RECORD_WRITE], TestProvider.MISMATCH),
-    (False, [], TestProvider.NONE),
-    (False, [], TestProvider.MATCH),
-    (False, [], TestProvider.MISMATCH),
-    (False, all_scopes, TestProvider.NONE),
-    (False, all_scopes, TestProvider.MATCH),
-    (False, all_scopes, TestProvider.MISMATCH),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.NONE),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.MATCH),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.MISMATCH),
-    (True, [ODPScope.RECORD_ADMIN], TestProvider.NONE),
-    (True, [ODPScope.RECORD_ADMIN], TestProvider.MATCH),
-    (True, [ODPScope.RECORD_ADMIN], TestProvider.MISMATCH),
-    (True, [], TestProvider.NONE),
-    (True, [], TestProvider.MATCH),
-    (True, [], TestProvider.MISMATCH),
-    (True, all_scopes, TestProvider.NONE),
-    (True, all_scopes, TestProvider.MATCH),
-    (True, all_scopes, TestProvider.MISMATCH),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.NONE),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.MATCH),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.MISMATCH),
+@pytest.mark.parametrize('admin_route, scopes', [
+    (False, [ODPScope.RECORD_WRITE]),
+    (False, []),
+    (False, all_scopes),
+    (False, all_scopes_excluding(ODPScope.RECORD_WRITE)),
+    (True, [ODPScope.RECORD_ADMIN]),
+    (True, []),
+    (True, all_scopes),
+    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN)),
 ])
 def test_create_record(api, record_batch, admin_route, scopes, provider_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
                  not admin_route and ODPScope.RECORD_WRITE in scopes
-    authorized = authorized and provider_auth in (TestProvider.NONE, TestProvider.MATCH)
+    authorized = authorized and provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
-    if provider_auth == TestProvider.MATCH:
+    if provider_auth == ProviderAuth.MATCH:
         api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == TestProvider.MISMATCH:
+    elif provider_auth == ProviderAuth.MISMATCH:
         api_client_provider = record_batch[1].collection.provider
     else:
         api_client_provider = None
 
-    if provider_auth in (TestProvider.MATCH, TestProvider.MISMATCH):
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
         new_record_collection = record_batch[2].collection
     else:
         new_record_collection = None  # new collection
@@ -325,47 +293,31 @@ def test_create_record(api, record_batch, admin_route, scopes, provider_auth):
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('admin_route, scopes, provider_auth', [
-    (False, [ODPScope.RECORD_WRITE], TestProvider.NONE),
-    (False, [ODPScope.RECORD_WRITE], TestProvider.MATCH),
-    (False, [ODPScope.RECORD_WRITE], TestProvider.MISMATCH),
-    (False, [], TestProvider.NONE),
-    (False, [], TestProvider.MATCH),
-    (False, [], TestProvider.MISMATCH),
-    (False, all_scopes, TestProvider.NONE),
-    (False, all_scopes, TestProvider.MATCH),
-    (False, all_scopes, TestProvider.MISMATCH),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.NONE),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.MATCH),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.MISMATCH),
-    (True, [ODPScope.RECORD_ADMIN], TestProvider.NONE),
-    (True, [ODPScope.RECORD_ADMIN], TestProvider.MATCH),
-    (True, [ODPScope.RECORD_ADMIN], TestProvider.MISMATCH),
-    (True, [], TestProvider.NONE),
-    (True, [], TestProvider.MATCH),
-    (True, [], TestProvider.MISMATCH),
-    (True, all_scopes, TestProvider.NONE),
-    (True, all_scopes, TestProvider.MATCH),
-    (True, all_scopes, TestProvider.MISMATCH),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.NONE),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.MATCH),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.MISMATCH),
+@pytest.mark.parametrize('admin_route, scopes', [
+    (False, [ODPScope.RECORD_WRITE]),
+    (False, []),
+    (False, all_scopes),
+    (False, all_scopes_excluding(ODPScope.RECORD_WRITE)),
+    (True, [ODPScope.RECORD_ADMIN]),
+    (True, []),
+    (True, all_scopes),
+    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN)),
 ])
 def test_update_record(api, record_batch, admin_route, scopes, provider_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
                  not admin_route and ODPScope.RECORD_WRITE in scopes
-    authorized = authorized and provider_auth in (TestProvider.NONE, TestProvider.MATCH)
+    authorized = authorized and provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
-    if provider_auth == TestProvider.MATCH:
+    if provider_auth == ProviderAuth.MATCH:
         api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == TestProvider.MISMATCH:
+    elif provider_auth == ProviderAuth.MISMATCH:
         api_client_provider = record_batch[1].collection.provider
     else:
         api_client_provider = None
 
-    if provider_auth in (TestProvider.MATCH, TestProvider.MISMATCH):
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
         modified_record_collection = record_batch[2].collection
     else:
         modified_record_collection = None  # new collection
@@ -395,42 +347,26 @@ def test_update_record(api, record_batch, admin_route, scopes, provider_auth):
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('admin_route, scopes, provider_auth', [
-    (False, [ODPScope.RECORD_WRITE], TestProvider.NONE),
-    (False, [ODPScope.RECORD_WRITE], TestProvider.MATCH),
-    (False, [ODPScope.RECORD_WRITE], TestProvider.MISMATCH),
-    (False, [], TestProvider.NONE),
-    (False, [], TestProvider.MATCH),
-    (False, [], TestProvider.MISMATCH),
-    (False, all_scopes, TestProvider.NONE),
-    (False, all_scopes, TestProvider.MATCH),
-    (False, all_scopes, TestProvider.MISMATCH),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.NONE),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.MATCH),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.MISMATCH),
-    (True, [ODPScope.RECORD_ADMIN], TestProvider.NONE),
-    (True, [ODPScope.RECORD_ADMIN], TestProvider.MATCH),
-    (True, [ODPScope.RECORD_ADMIN], TestProvider.MISMATCH),
-    (True, [], TestProvider.NONE),
-    (True, [], TestProvider.MATCH),
-    (True, [], TestProvider.MISMATCH),
-    (True, all_scopes, TestProvider.NONE),
-    (True, all_scopes, TestProvider.MATCH),
-    (True, all_scopes, TestProvider.MISMATCH),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.NONE),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.MATCH),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.MISMATCH),
+@pytest.mark.parametrize('admin_route, scopes', [
+    (False, [ODPScope.RECORD_WRITE]),
+    (False, []),
+    (False, all_scopes),
+    (False, all_scopes_excluding(ODPScope.RECORD_WRITE)),
+    (True, [ODPScope.RECORD_ADMIN]),
+    (True, []),
+    (True, all_scopes),
+    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN)),
 ])
 def test_delete_record(api, record_batch, admin_route, scopes, provider_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
                  not admin_route and ODPScope.RECORD_WRITE in scopes
-    authorized = authorized and provider_auth in (TestProvider.NONE, TestProvider.MATCH)
+    authorized = authorized and provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
-    if provider_auth == TestProvider.MATCH:
+    if provider_auth == ProviderAuth.MATCH:
         api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == TestProvider.MISMATCH:
+    elif provider_auth == ProviderAuth.MISMATCH:
         api_client_provider = record_batch[1].collection.provider
     else:
         api_client_provider = None
@@ -450,27 +386,19 @@ def test_delete_record(api, record_batch, admin_route, scopes, provider_auth):
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes, provider_auth', [
-    ([ODPScope.RECORD_TAG_QC], TestProvider.NONE),
-    ([ODPScope.RECORD_TAG_QC], TestProvider.MATCH),
-    ([ODPScope.RECORD_TAG_QC], TestProvider.MISMATCH),
-    ([], TestProvider.NONE),
-    ([], TestProvider.MATCH),
-    ([], TestProvider.MISMATCH),
-    (all_scopes, TestProvider.NONE),
-    (all_scopes, TestProvider.MATCH),
-    (all_scopes, TestProvider.MISMATCH),
-    (all_scopes_excluding(ODPScope.RECORD_TAG_QC), TestProvider.NONE),
-    (all_scopes_excluding(ODPScope.RECORD_TAG_QC), TestProvider.MATCH),
-    (all_scopes_excluding(ODPScope.RECORD_TAG_QC), TestProvider.MISMATCH),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.RECORD_TAG_QC],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.RECORD_TAG_QC),
 ])
 def test_tag_record(api, record_batch, scopes, provider_auth):
     authorized = ODPScope.RECORD_TAG_QC in scopes and \
-                 provider_auth in (TestProvider.NONE, TestProvider.MATCH)
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
-    if provider_auth == TestProvider.MATCH:
+    if provider_auth == ProviderAuth.MATCH:
         api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == TestProvider.MISMATCH:
+    elif provider_auth == ProviderAuth.MISMATCH:
         api_client_provider = record_batch[1].collection.provider
     else:
         api_client_provider = None
@@ -554,27 +482,19 @@ def test_tag_record(api, record_batch, scopes, provider_auth):
     assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes, provider_auth', [
-    ([ODPScope.RECORD_FLAG_MIGRATED], TestProvider.NONE),
-    ([ODPScope.RECORD_FLAG_MIGRATED], TestProvider.MATCH),
-    ([ODPScope.RECORD_FLAG_MIGRATED], TestProvider.MISMATCH),
-    ([], TestProvider.NONE),
-    ([], TestProvider.MATCH),
-    ([], TestProvider.MISMATCH),
-    (all_scopes, TestProvider.NONE),
-    (all_scopes, TestProvider.MATCH),
-    (all_scopes, TestProvider.MISMATCH),
-    (all_scopes_excluding(ODPScope.RECORD_FLAG_MIGRATED), TestProvider.NONE),
-    (all_scopes_excluding(ODPScope.RECORD_FLAG_MIGRATED), TestProvider.MATCH),
-    (all_scopes_excluding(ODPScope.RECORD_FLAG_MIGRATED), TestProvider.MISMATCH),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.RECORD_FLAG_MIGRATED],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.RECORD_FLAG_MIGRATED),
 ])
 def test_flag_record(api, record_batch, scopes, provider_auth):
     authorized = ODPScope.RECORD_FLAG_MIGRATED in scopes and \
-                 provider_auth in (TestProvider.NONE, TestProvider.MATCH)
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
-    if provider_auth == TestProvider.MATCH:
+    if provider_auth == ProviderAuth.MATCH:
         api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == TestProvider.MISMATCH:
+    elif provider_auth == ProviderAuth.MISMATCH:
         api_client_provider = record_batch[1].collection.provider
     else:
         api_client_provider = None

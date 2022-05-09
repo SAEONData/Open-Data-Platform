@@ -1,4 +1,17 @@
+from enum import Enum
+
 from odp import ODPScope
+
+
+class ProviderAuth(Enum):
+    """API routes that support provider-specific resource authorization
+    may have three possible outcomes (all else being equal) depending on
+    whether the test client is configured with no provider, or with a
+    provider (not) matching the resource provider."""
+    NONE = 0
+    MATCH = 1
+    MISMATCH = 2
+
 
 all_scopes = [s for s in ODPScope]
 
