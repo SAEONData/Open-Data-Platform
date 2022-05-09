@@ -201,106 +201,109 @@ class TestProvider(Enum):
     (all_scopes_excluding(ODPScope.RECORD_READ), TestProvider.MATCH),
 ])
 def test_list_records(api, record_batch, scopes, provider_auth):
-    api_client_provider = record_batch[2].collection.provider \
-        if provider_auth == TestProvider.MATCH \
-        else None
+    authorized = ODPScope.RECORD_READ in scopes
+
+    if provider_auth == TestProvider.MATCH:
+        api_client_provider = record_batch[2].collection.provider
+        expected_result_batch = [record_batch[2]]
+    else:
+        api_client_provider = None
+        expected_result_batch = record_batch
+
     r = api(scopes, api_client_provider).get('/record/')
 
-    if ODPScope.RECORD_READ in scopes:
-        if provider_auth == TestProvider.NONE:
-            assert_json_record_results(r, r.json(), record_batch)
-        else:
-            assert_json_record_results(r, r.json(), [record_batch[2]])
-    else:
-        assert_forbidden(r)
-
-    assert_db_state(record_batch)
-    assert_no_audit_log()
-
-
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.RECORD_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.RECORD_READ), False),
-])
-def test_get_record(api, record_batch, scopes, authorized):
-    r = api(scopes).get(f'/record/{record_batch[2].id}')
     if authorized:
-        assert_json_record_result(r, r.json(), record_batch[2])
+        assert_json_record_results(r, r.json(), expected_result_batch)
     else:
         assert_forbidden(r)
+
     assert_db_state(record_batch)
     assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.RECORD_READ], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.RECORD_READ), True, False),
+@pytest.mark.parametrize('scopes, provider_auth', [
+    ([ODPScope.RECORD_READ], TestProvider.NONE),
+    ([ODPScope.RECORD_READ], TestProvider.MATCH),
+    ([ODPScope.RECORD_READ], TestProvider.MISMATCH),
+    ([], TestProvider.NONE),
+    ([], TestProvider.MATCH),
+    ([], TestProvider.MISMATCH),
+    (all_scopes, TestProvider.NONE),
+    (all_scopes, TestProvider.MATCH),
+    (all_scopes, TestProvider.MISMATCH),
+    (all_scopes_excluding(ODPScope.RECORD_READ), TestProvider.NONE),
+    (all_scopes_excluding(ODPScope.RECORD_READ), TestProvider.MATCH),
+    (all_scopes_excluding(ODPScope.RECORD_READ), TestProvider.MISMATCH),
 ])
-def test_get_record_with_provider_specific_api_client(api, record_batch, scopes, matching_provider, authorized):
-    api_client_provider = record_batch[2].collection.provider if matching_provider else record_batch[1].collection.provider
+def test_get_record(api, record_batch, scopes, provider_auth):
+    authorized = ODPScope.RECORD_READ in scopes and \
+                 provider_auth in (TestProvider.NONE, TestProvider.MATCH)
+
+    if provider_auth == TestProvider.MATCH:
+        api_client_provider = record_batch[2].collection.provider
+    elif provider_auth == TestProvider.MISMATCH:
+        api_client_provider = record_batch[1].collection.provider
+    else:
+        api_client_provider = None
+
     r = api(scopes, api_client_provider).get(f'/record/{record_batch[2].id}')
+
     if authorized:
         assert_json_record_result(r, r.json(), record_batch[2])
     else:
         assert_forbidden(r)
+
     assert_db_state(record_batch)
     assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes, admin_route, authorized', [
-    ([ODPScope.RECORD_WRITE], False, True),
-    ([], False, False),
-    (all_scopes, False, True),
-    (all_scopes_excluding(ODPScope.RECORD_WRITE), False, False),
-    ([ODPScope.RECORD_ADMIN], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes_excluding(ODPScope.RECORD_ADMIN), True, False),
+@pytest.mark.parametrize('admin_route, scopes, provider_auth', [
+    (False, [ODPScope.RECORD_WRITE], TestProvider.NONE),
+    (False, [ODPScope.RECORD_WRITE], TestProvider.MATCH),
+    (False, [ODPScope.RECORD_WRITE], TestProvider.MISMATCH),
+    (False, [], TestProvider.NONE),
+    (False, [], TestProvider.MATCH),
+    (False, [], TestProvider.MISMATCH),
+    (False, all_scopes, TestProvider.NONE),
+    (False, all_scopes, TestProvider.MATCH),
+    (False, all_scopes, TestProvider.MISMATCH),
+    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.NONE),
+    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.MATCH),
+    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), TestProvider.MISMATCH),
+    (True, [ODPScope.RECORD_ADMIN], TestProvider.NONE),
+    (True, [ODPScope.RECORD_ADMIN], TestProvider.MATCH),
+    (True, [ODPScope.RECORD_ADMIN], TestProvider.MISMATCH),
+    (True, [], TestProvider.NONE),
+    (True, [], TestProvider.MATCH),
+    (True, [], TestProvider.MISMATCH),
+    (True, all_scopes, TestProvider.NONE),
+    (True, all_scopes, TestProvider.MATCH),
+    (True, all_scopes, TestProvider.MISMATCH),
+    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.NONE),
+    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.MATCH),
+    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), TestProvider.MISMATCH),
 ])
-def test_create_record(api, record_batch, scopes, admin_route, authorized):
-    modified_record_batch = record_batch + [record := record_build()]
+def test_create_record(api, record_batch, admin_route, scopes, provider_auth):
     route = '/record/admin/' if admin_route else '/record/'
-    r = api(scopes).post(route, json=dict(
-        doi=record.doi,
-        sid=record.sid,
-        collection_id=record.collection_id,
-        schema_id=record.schema_id,
-        metadata=record.metadata_,
-    ))
-    if authorized:
-        record.id = r.json().get('id')
-        assert_json_record_result(r, r.json(), record)
-        assert_db_state(modified_record_batch)
-        assert_audit_log('insert', record)
+
+    authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
+                 not admin_route and ODPScope.RECORD_WRITE in scopes
+    authorized = authorized and provider_auth in (TestProvider.NONE, TestProvider.MATCH)
+
+    if provider_auth == TestProvider.MATCH:
+        api_client_provider = record_batch[2].collection.provider
+    elif provider_auth == TestProvider.MISMATCH:
+        api_client_provider = record_batch[1].collection.provider
     else:
-        assert_forbidden(r)
-        assert_db_state(record_batch)
-        assert_no_audit_log()
+        api_client_provider = None
 
+    if provider_auth in (TestProvider.MATCH, TestProvider.MISMATCH):
+        modified_record_batch = record_batch + [record := record_build(
+            collection=record_batch[2].collection
+        )]
+    else:
+        modified_record_batch = record_batch + [record := record_build()]
 
-@pytest.mark.parametrize('scopes, admin_route, matching_provider, authorized', [
-    ([ODPScope.RECORD_WRITE], False, True, True),
-    ([], False, True, False),
-    (all_scopes, False, True, True),
-    (all_scopes, False, False, False),
-    (all_scopes_excluding(ODPScope.RECORD_WRITE), False, True, False),
-    ([ODPScope.RECORD_ADMIN], True, True, True),
-    ([], True, True, False),
-    (all_scopes, True, True, True),
-    (all_scopes, True, False, False),
-    (all_scopes_excluding(ODPScope.RECORD_ADMIN), True, True, False),
-])
-def test_create_record_with_provider_specific_api_client(api, record_batch, scopes, admin_route, matching_provider, authorized):
-    api_client_provider = record_batch[2].collection.provider if matching_provider else record_batch[1].collection.provider
-    modified_record_batch = record_batch + [record := record_build(
-        collection=record_batch[2].collection
-    )]
-    route = '/record/admin/' if admin_route else '/record/'
     r = api(scopes, api_client_provider).post(route, json=dict(
         doi=record.doi,
         sid=record.sid,
@@ -308,6 +311,7 @@ def test_create_record_with_provider_specific_api_client(api, record_batch, scop
         schema_id=record.schema_id,
         metadata=record.metadata_,
     ))
+
     if authorized:
         record.id = r.json().get('id')
         assert_json_record_result(r, r.json(), record)
