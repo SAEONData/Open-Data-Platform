@@ -7,7 +7,7 @@ from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Client
 from odp.lib.hydra import TokenEndpointAuthMethod
-from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
+from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
 from test.factories import ClientFactory, ProviderFactory, ScopeFactory, fake
 
 
@@ -87,113 +87,88 @@ def assert_json_results(response, json, clients):
         assert_json_result(response, items[n], client)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.CLIENT_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.CLIENT_READ), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.CLIENT_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.CLIENT_READ),
 ])
-def test_list_clients(api, client_batch, scopes, authorized):
-    r = api(scopes).get('/client/')
-    if authorized:
-        assert_json_results(r, r.json(), client_batch)
+def test_list_clients(api, client_batch, scopes, provider_auth):
+    authorized = ODPScope.CLIENT_READ in scopes
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = client_batch[2].provider
+        expected_result_batch = [client_batch[2]]
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = ProviderFactory()
+        expected_result_batch = []
     else:
-        assert_forbidden(r)
-    assert_db_state(client_batch)
+        api_client_provider = None
+        expected_result_batch = client_batch
 
-
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.CLIENT_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.CLIENT_READ), False),
-])
-def test_list_clients_with_provider_specific_api_client(api, client_batch, scopes, authorized):
-    api_client_provider = client_batch[2].provider
-    assert api_client_provider is not None
     r = api(scopes, api_client_provider).get('/client/')
+
     if authorized:
-        assert_json_results(r, r.json(), [client_batch[2]])
+        assert_json_results(r, r.json(), expected_result_batch)
     else:
         assert_forbidden(r)
+
     assert_db_state(client_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.CLIENT_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.CLIENT_READ), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.CLIENT_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.CLIENT_READ),
 ])
-def test_get_client(api, client_batch, scopes, authorized):
-    r = api(scopes).get(f'/client/{client_batch[2].id}')
-    if authorized:
-        assert_json_result(r, r.json(), client_batch[2])
+def test_get_client(api, client_batch, scopes, provider_auth):
+    authorized = ODPScope.CLIENT_READ in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = client_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = client_batch[1].provider
     else:
-        assert_forbidden(r)
-    assert_db_state(client_batch)
+        api_client_provider = None
 
-
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.CLIENT_READ], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.CLIENT_READ), True, False),
-])
-def test_get_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
-    api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider
-    assert api_client_provider is not None
     r = api(scopes, api_client_provider).get(f'/client/{client_batch[2].id}')
+
     if authorized:
         assert_json_result(r, r.json(), client_batch[2])
     else:
         assert_forbidden(r)
+
     assert_db_state(client_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.CLIENT_ADMIN], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.CLIENT_ADMIN],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.CLIENT_ADMIN),
 ])
-def test_create_client(api, client_batch, scopes, authorized):
-    modified_client_batch = client_batch + [client := client_build()]
-    r = api(scopes).post('/client/', json=dict(
-        id=client.id,
-        name=fake.catch_phrase(),
-        secret=fake.password(),
-        scope_ids=scope_ids(client),
-        provider_id=client.provider_id,
-        grant_types=[],
-        response_types=[],
-        redirect_uris=[],
-        post_logout_redirect_uris=[],
-        token_endpoint_auth_method=TokenEndpointAuthMethod.CLIENT_SECRET_BASIC,
-        allowed_cors_origins=[],
-    ))
-    if authorized:
-        assert_empty_result(r)
-        assert_db_state(modified_client_batch)
+def test_create_client(api, client_batch, scopes, provider_auth):
+    authorized = ODPScope.CLIENT_ADMIN in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = client_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = client_batch[1].provider
     else:
-        assert_forbidden(r)
-        assert_db_state(client_batch)
+        api_client_provider = None
 
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        new_client_provider = client_batch[2].provider
+    else:
+        new_client_provider = None
 
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.CLIENT_ADMIN], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), True, False),
-])
-def test_create_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
-    api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider
-    assert api_client_provider is not None
     modified_client_batch = client_batch + [client := client_build(
-        provider=client_batch[2].provider
+        provider=new_client_provider
     )]
+
     r = api(scopes, api_client_provider).post('/client/', json=dict(
         id=client.id,
         name=fake.catch_phrase(),
@@ -207,6 +182,7 @@ def test_create_client_with_provider_specific_api_client(api, client_batch, scop
         token_endpoint_auth_method=TokenEndpointAuthMethod.CLIENT_SECRET_BASIC,
         allowed_cors_origins=[],
     ))
+
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_client_batch)
@@ -215,51 +191,34 @@ def test_create_client_with_provider_specific_api_client(api, client_batch, scop
         assert_db_state(client_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.CLIENT_ADMIN], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.CLIENT_ADMIN],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.CLIENT_ADMIN),
 ])
-def test_update_client(api, client_batch, scopes, authorized):
-    modified_client_batch = client_batch.copy()
-    modified_client_batch[2] = (client := client_build(id=client_batch[2].id))
-    r = api(scopes).put('/client/', json=dict(
-        id=client.id,
-        name=fake.catch_phrase(),
-        secret=fake.password(),
-        scope_ids=scope_ids(client),
-        provider_id=client.provider_id,
-        grant_types=[],
-        response_types=[],
-        redirect_uris=[],
-        post_logout_redirect_uris=[],
-        token_endpoint_auth_method=TokenEndpointAuthMethod.CLIENT_SECRET_BASIC,
-        allowed_cors_origins=[],
-    ))
-    if authorized:
-        assert_empty_result(r)
-        assert_db_state(modified_client_batch)
+def test_update_client(api, client_batch, scopes, provider_auth):
+    authorized = ODPScope.CLIENT_ADMIN in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = client_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = client_batch[1].provider
     else:
-        assert_forbidden(r)
-        assert_db_state(client_batch)
+        api_client_provider = None
 
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        modified_client_provider = client_batch[2].provider
+    else:
+        modified_client_provider = None
 
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.CLIENT_ADMIN], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), True, False),
-])
-def test_update_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
-    api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider
-    assert api_client_provider is not None
     modified_client_batch = client_batch.copy()
     modified_client_batch[2] = (client := client_build(
         id=client_batch[2].id,
-        provider=client_batch[2].provider,
+        provider=modified_client_provider,
     ))
+
     r = api(scopes, api_client_provider).put('/client/', json=dict(
         id=client.id,
         name=fake.catch_phrase(),
@@ -273,6 +232,7 @@ def test_update_client_with_provider_specific_api_client(api, client_batch, scop
         token_endpoint_auth_method=TokenEndpointAuthMethod.CLIENT_SECRET_BASIC,
         allowed_cors_origins=[],
     ))
+
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_client_batch)
@@ -281,37 +241,28 @@ def test_update_client_with_provider_specific_api_client(api, client_batch, scop
         assert_db_state(client_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.CLIENT_ADMIN], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.CLIENT_ADMIN],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.CLIENT_ADMIN),
 ])
-def test_delete_client(api, client_batch, scopes, authorized):
-    modified_client_batch = client_batch.copy()
-    del modified_client_batch[2]
-    r = api(scopes).delete(f'/client/{client_batch[2].id}')
-    if authorized:
-        assert_empty_result(r)
-        assert_db_state(modified_client_batch)
+def test_delete_client(api, client_batch, scopes, provider_auth):
+    authorized = ODPScope.CLIENT_ADMIN in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = client_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = client_batch[1].provider
     else:
-        assert_forbidden(r)
-        assert_db_state(client_batch)
+        api_client_provider = None
 
-
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.CLIENT_ADMIN], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.CLIENT_ADMIN), True, False),
-])
-def test_delete_client_with_provider_specific_api_client(api, client_batch, scopes, matching_provider, authorized):
-    api_client_provider = client_batch[2].provider if matching_provider else client_batch[1].provider
-    assert api_client_provider is not None
     modified_client_batch = client_batch.copy()
     del modified_client_batch[2]
+
     r = api(scopes, api_client_provider).delete(f'/client/{client_batch[2].id}')
+
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_client_batch)
