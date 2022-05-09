@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from enum import Enum
 from random import randint
 
 import pytest
@@ -183,35 +184,36 @@ def assert_json_record_results(response, json, records):
         assert_json_record_result(response, items[n], record)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.RECORD_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.RECORD_READ), False),
-])
-def test_list_records(api, record_batch, scopes, authorized):
-    r = api(scopes).get('/record/')
-    if authorized:
-        assert_json_record_results(r, r.json(), record_batch)
-    else:
-        assert_forbidden(r)
-    assert_db_state(record_batch)
-    assert_no_audit_log()
+class TestProvider(Enum):
+    NONE = 0
+    MATCH = 1
+    MISMATCH = 2
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.RECORD_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.RECORD_READ), False),
+@pytest.mark.parametrize('scopes, provider_auth', [
+    ([ODPScope.RECORD_READ], TestProvider.NONE),
+    ([ODPScope.RECORD_READ], TestProvider.MATCH),
+    ([], TestProvider.NONE),
+    ([], TestProvider.MATCH),
+    (all_scopes, TestProvider.NONE),
+    (all_scopes, TestProvider.MATCH),
+    (all_scopes_excluding(ODPScope.RECORD_READ), TestProvider.NONE),
+    (all_scopes_excluding(ODPScope.RECORD_READ), TestProvider.MATCH),
 ])
-def test_list_records_with_provider_specific_api_client(api, record_batch, scopes, authorized):
-    api_client_provider = record_batch[2].collection.provider
+def test_list_records(api, record_batch, scopes, provider_auth):
+    api_client_provider = record_batch[2].collection.provider \
+        if provider_auth == TestProvider.MATCH \
+        else None
     r = api(scopes, api_client_provider).get('/record/')
-    if authorized:
-        assert_json_record_results(r, r.json(), [record_batch[2]])
+
+    if ODPScope.RECORD_READ in scopes:
+        if provider_auth == TestProvider.NONE:
+            assert_json_record_results(r, r.json(), record_batch)
+        else:
+            assert_json_record_results(r, r.json(), [record_batch[2]])
     else:
         assert_forbidden(r)
+
     assert_db_state(record_batch)
     assert_no_audit_log()
 
