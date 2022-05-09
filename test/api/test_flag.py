@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Flag
-from test.api import assert_forbidden, all_scopes, all_scopes_excluding
+from test.api import all_scopes, all_scopes_excluding, assert_forbidden
 from test.factories import FlagFactory
 
 
@@ -45,13 +45,14 @@ def assert_json_results(response, json, flags):
         assert_json_result(response, items[n], flag)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.FLAG_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.FLAG_READ), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.FLAG_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.FLAG_READ),
 ])
-def test_list_flags(api, flag_batch, scopes, authorized):
+def test_list_flags(api, flag_batch, scopes):
+    authorized = ODPScope.FLAG_READ in scopes
     r = api(scopes).get('/flag/')
     if authorized:
         assert_json_results(r, r.json(), flag_batch)
@@ -60,13 +61,14 @@ def test_list_flags(api, flag_batch, scopes, authorized):
     assert_db_state(flag_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.FLAG_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.FLAG_READ), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.FLAG_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.FLAG_READ),
 ])
-def test_get_flag(api, flag_batch, scopes, authorized):
+def test_get_flag(api, flag_batch, scopes):
+    authorized = ODPScope.FLAG_READ in scopes
     r = api(scopes).get(f'/flag/{flag_batch[2].id}')
     if authorized:
         assert_json_result(r, r.json(), flag_batch[2])

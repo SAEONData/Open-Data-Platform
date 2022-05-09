@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Catalog
-from test.api import assert_forbidden, all_scopes, all_scopes_excluding
+from test.api import all_scopes, all_scopes_excluding, assert_forbidden
 from test.factories import CatalogFactory
 
 
@@ -41,13 +41,14 @@ def assert_json_results(response, json, catalogs):
         assert_json_result(response, items[n], catalog)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.CATALOG_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.CATALOG_READ), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.CATALOG_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.CATALOG_READ),
 ])
-def test_list_catalogs(api, catalog_batch, scopes, authorized):
+def test_list_catalogs(api, catalog_batch, scopes):
+    authorized = ODPScope.CATALOG_READ in scopes
     r = api(scopes).get('/catalog/')
     if authorized:
         assert_json_results(r, r.json(), catalog_batch)
@@ -56,13 +57,14 @@ def test_list_catalogs(api, catalog_batch, scopes, authorized):
     assert_db_state(catalog_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.CATALOG_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.CATALOG_READ), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.CATALOG_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.CATALOG_READ),
 ])
-def test_get_catalog(api, catalog_batch, scopes, authorized):
+def test_get_catalog(api, catalog_batch, scopes):
+    authorized = ODPScope.CATALOG_READ in scopes
     r = api(scopes).get(f'/catalog/{catalog_batch[2].id}')
     if authorized:
         assert_json_result(r, r.json(), catalog_batch[2])

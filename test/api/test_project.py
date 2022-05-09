@@ -6,8 +6,8 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Project
-from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding
-from test.factories import ProjectFactory, CollectionFactory
+from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
+from test.factories import CollectionFactory, ProjectFactory
 
 
 @pytest.fixture
@@ -58,13 +58,14 @@ def assert_json_results(response, json, projects):
         assert_json_result(response, items[n], project)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.PROJECT_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.PROJECT_READ), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.PROJECT_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.PROJECT_READ),
 ])
-def test_list_projects(api, project_batch, scopes, authorized):
+def test_list_projects(api, project_batch, scopes):
+    authorized = ODPScope.PROJECT_READ in scopes
     r = api(scopes).get('/project/')
     if authorized:
         assert_json_results(r, r.json(), project_batch)
@@ -73,13 +74,14 @@ def test_list_projects(api, project_batch, scopes, authorized):
     assert_db_state(project_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.PROJECT_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.PROJECT_READ), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.PROJECT_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.PROJECT_READ),
 ])
-def test_get_project(api, project_batch, scopes, authorized):
+def test_get_project(api, project_batch, scopes):
+    authorized = ODPScope.PROJECT_READ in scopes
     r = api(scopes).get(f'/project/{project_batch[2].id}')
     if authorized:
         assert_json_result(r, r.json(), project_batch[2])
@@ -88,13 +90,14 @@ def test_get_project(api, project_batch, scopes, authorized):
     assert_db_state(project_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.PROJECT_ADMIN], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.PROJECT_ADMIN), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.PROJECT_ADMIN],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.PROJECT_ADMIN),
 ])
-def test_create_project(api, project_batch, scopes, authorized):
+def test_create_project(api, project_batch, scopes):
+    authorized = ODPScope.PROJECT_ADMIN in scopes
     modified_project_batch = project_batch + [project := project_build()]
     r = api(scopes).post('/project/', json=dict(
         id=project.id,
@@ -109,13 +112,14 @@ def test_create_project(api, project_batch, scopes, authorized):
         assert_db_state(project_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.PROJECT_ADMIN], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.PROJECT_ADMIN), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.PROJECT_ADMIN],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.PROJECT_ADMIN),
 ])
-def test_update_project(api, project_batch, scopes, authorized):
+def test_update_project(api, project_batch, scopes):
+    authorized = ODPScope.PROJECT_ADMIN in scopes
     modified_project_batch = project_batch.copy()
     modified_project_batch[2] = (project := project_build(id=project_batch[2].id))
     r = api(scopes).put('/project/', json=dict(
@@ -131,13 +135,14 @@ def test_update_project(api, project_batch, scopes, authorized):
         assert_db_state(project_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.PROJECT_ADMIN], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.PROJECT_ADMIN), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.PROJECT_ADMIN],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.PROJECT_ADMIN),
 ])
-def test_delete_project(api, project_batch, scopes, authorized):
+def test_delete_project(api, project_batch, scopes):
+    authorized = ODPScope.PROJECT_ADMIN in scopes
     modified_project_batch = project_batch.copy()
     del modified_project_batch[2]
     r = api(scopes).delete(f'/project/{project_batch[2].id}')
