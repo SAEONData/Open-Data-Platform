@@ -111,14 +111,6 @@ class CollectionFactory(ODPModelFactory):
     doi_key = factory.LazyFunction(lambda: fake.word() if randint(0, 1) else None)
     provider = factory.SubFactory(ProviderFactory)
 
-    @factory.post_generation
-    def projects(obj, create, projects):
-        if projects:
-            for project in projects:
-                obj.projects.append(project)
-            if create:
-                Session.commit()
-
 
 class FlagFactory(ODPModelFactory):
     class Meta:
