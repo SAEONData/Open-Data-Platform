@@ -9,8 +9,8 @@ from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Collection, CollectionFlag, CollectionFlagAudit, Scope, ScopeType
 from odp.lib.formats import DOI_REGEX
-from test.api import assert_empty_result, assert_forbidden, all_scopes, all_scopes_excluding, assert_unprocessable
-from test.factories import CollectionFactory, ProjectFactory, ProviderFactory, FlagFactory, SchemaFactory
+from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden, assert_unprocessable
+from test.factories import CollectionFactory, FlagFactory, ProjectFactory, ProviderFactory, SchemaFactory
 
 
 @pytest.fixture
@@ -122,109 +122,95 @@ def assert_doi_result(response, collection):
     assert re.match(r'^\d{8}$', suffix) is not None
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.COLLECTION_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.COLLECTION_READ), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.COLLECTION_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.COLLECTION_READ),
 ])
-def test_list_collections(api, collection_batch, scopes, authorized):
-    r = api(scopes).get('/collection/')
-    if authorized:
-        assert_json_collection_results(r, r.json(), collection_batch)
+def test_list_collections(api, collection_batch, scopes, provider_auth):
+    authorized = ODPScope.COLLECTION_READ in scopes
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = collection_batch[2].provider
+        expected_result_batch = [collection_batch[2]]
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = ProviderFactory()
+        expected_result_batch = []
     else:
-        assert_forbidden(r)
-    assert_db_state(collection_batch)
+        api_client_provider = None
+        expected_result_batch = collection_batch
 
-
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.COLLECTION_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.COLLECTION_READ), False),
-])
-def test_list_collections_with_provider_specific_api_client(api, collection_batch, scopes, authorized):
-    api_client_provider = collection_batch[2].provider
     r = api(scopes, api_client_provider).get('/collection/')
+
     if authorized:
-        assert_json_collection_results(r, r.json(), [collection_batch[2]])
+        assert_json_collection_results(r, r.json(), expected_result_batch)
     else:
         assert_forbidden(r)
+
     assert_db_state(collection_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.COLLECTION_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.COLLECTION_READ), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.COLLECTION_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.COLLECTION_READ),
 ])
-def test_get_collection(api, collection_batch, scopes, authorized):
-    r = api(scopes).get(f'/collection/{collection_batch[2].id}')
-    if authorized:
-        assert_json_collection_result(r, r.json(), collection_batch[2])
+def test_get_collection(api, collection_batch, scopes, provider_auth):
+    authorized = ODPScope.COLLECTION_READ in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = collection_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = collection_batch[1].provider
     else:
-        assert_forbidden(r)
-    assert_db_state(collection_batch)
+        api_client_provider = None
 
-
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.COLLECTION_READ], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.COLLECTION_READ), True, False),
-])
-def test_get_collection_with_provider_specific_api_client(api, collection_batch, scopes, matching_provider, authorized):
-    api_client_provider = collection_batch[2].provider if matching_provider else collection_batch[1].provider
     r = api(scopes, api_client_provider).get(f'/collection/{collection_batch[2].id}')
+
     if authorized:
         assert_json_collection_result(r, r.json(), collection_batch[2])
     else:
         assert_forbidden(r)
+
     assert_db_state(collection_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.COLLECTION_ADMIN], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.COLLECTION_ADMIN), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.COLLECTION_ADMIN],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
 ])
-def test_create_collection(api, collection_batch, scopes, authorized):
-    modified_collection_batch = collection_batch + [collection := collection_build()]
-    r = api(scopes).post('/collection/', json=dict(
-        id=collection.id,
-        name=collection.name,
-        doi_key=collection.doi_key,
-        provider_id=collection.provider_id,
-    ))
-    if authorized:
-        assert_empty_result(r)
-        assert_db_state(modified_collection_batch)
+def test_create_collection(api, collection_batch, scopes, provider_auth):
+    authorized = ODPScope.COLLECTION_ADMIN in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = collection_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = collection_batch[1].provider
     else:
-        assert_forbidden(r)
-        assert_db_state(collection_batch)
+        api_client_provider = None
 
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        new_collection_provider = collection_batch[2].provider
+    else:
+        new_collection_provider = None
 
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.COLLECTION_ADMIN], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.COLLECTION_ADMIN), True, False),
-])
-def test_create_collection_with_provider_specific_api_client(api, collection_batch, scopes, matching_provider, authorized):
-    api_client_provider = collection_batch[2].provider if matching_provider else collection_batch[1].provider
     modified_collection_batch = collection_batch + [collection := collection_build(
-        provider=collection_batch[2].provider
+        provider=new_collection_provider
     )]
+
     r = api(scopes, api_client_provider).post('/collection/', json=dict(
         id=collection.id,
         name=collection.name,
         doi_key=collection.doi_key,
         provider_id=collection.provider_id,
     ))
+
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_collection_batch)
@@ -233,51 +219,41 @@ def test_create_collection_with_provider_specific_api_client(api, collection_bat
         assert_db_state(collection_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.COLLECTION_ADMIN], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.COLLECTION_ADMIN), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.COLLECTION_ADMIN],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
 ])
-def test_update_collection(api, collection_batch_no_projects, scopes, authorized):
-    modified_collection_batch = collection_batch_no_projects.copy()
-    modified_collection_batch[2] = (collection := collection_build(
-        id=collection_batch_no_projects[2].id,
-    ))
-    r = api(scopes).put('/collection/', json=dict(
-        id=collection.id,
-        name=collection.name,
-        doi_key=collection.doi_key,
-        provider_id=collection.provider_id,
-    ))
-    if authorized:
-        assert_empty_result(r)
-        assert_db_state(modified_collection_batch)
+def test_update_collection(api, collection_batch_no_projects, scopes, provider_auth):
+    authorized = ODPScope.COLLECTION_ADMIN in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = collection_batch_no_projects[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = collection_batch_no_projects[1].provider
     else:
-        assert_forbidden(r)
-        assert_db_state(collection_batch_no_projects)
+        api_client_provider = None
 
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        modified_collection_provider = collection_batch_no_projects[2].provider
+    else:
+        modified_collection_provider = None
 
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.COLLECTION_ADMIN], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.COLLECTION_ADMIN), True, False),
-])
-def test_update_collection_with_provider_specific_api_client(api, collection_batch_no_projects, scopes, matching_provider, authorized):
-    api_client_provider = collection_batch_no_projects[2].provider if matching_provider else collection_batch_no_projects[1].provider
     modified_collection_batch = collection_batch_no_projects.copy()
     modified_collection_batch[2] = (collection := collection_build(
         id=collection_batch_no_projects[2].id,
-        provider=collection_batch_no_projects[2].provider,
+        provider=modified_collection_provider,
     ))
+
     r = api(scopes, api_client_provider).put('/collection/', json=dict(
         id=collection.id,
         name=collection.name,
         doi_key=collection.doi_key,
         provider_id=collection.provider_id,
     ))
+
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_collection_batch)
@@ -286,36 +262,28 @@ def test_update_collection_with_provider_specific_api_client(api, collection_bat
         assert_db_state(collection_batch_no_projects)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.COLLECTION_ADMIN], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.COLLECTION_ADMIN), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.COLLECTION_ADMIN],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
 ])
-def test_delete_collection(api, collection_batch, scopes, authorized):
-    modified_collection_batch = collection_batch.copy()
-    del modified_collection_batch[2]
-    r = api(scopes).delete(f'/collection/{collection_batch[2].id}')
-    if authorized:
-        assert_empty_result(r)
-        assert_db_state(modified_collection_batch)
+def test_delete_collection(api, collection_batch, scopes, provider_auth):
+    authorized = ODPScope.COLLECTION_ADMIN in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = collection_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = collection_batch[1].provider
     else:
-        assert_forbidden(r)
-        assert_db_state(collection_batch)
+        api_client_provider = None
 
-
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.COLLECTION_ADMIN], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.COLLECTION_ADMIN), True, False),
-])
-def test_delete_collection_with_provider_specific_api_client(api, collection_batch, scopes, matching_provider, authorized):
-    api_client_provider = collection_batch[2].provider if matching_provider else collection_batch[1].provider
     modified_collection_batch = collection_batch.copy()
     del modified_collection_batch[2]
+
     r = api(scopes, api_client_provider).delete(f'/collection/{collection_batch[2].id}')
+
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_collection_batch)
@@ -324,14 +292,24 @@ def test_delete_collection_with_provider_specific_api_client(api, collection_bat
         assert_db_state(collection_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.COLLECTION_FLAG_PUBLISH], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.COLLECTION_FLAG_PUBLISH), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.COLLECTION_FLAG_PUBLISH],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.COLLECTION_FLAG_PUBLISH),
 ])
-def test_flag_collection(api, collection_batch, scopes, authorized):
-    client = api(scopes)
+def test_flag_collection(api, collection_batch, scopes, provider_auth):
+    authorized = ODPScope.COLLECTION_FLAG_PUBLISH in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = collection_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = collection_batch[1].provider
+    else:
+        api_client_provider = None
+
+    client = api(scopes, api_client_provider)
     FlagFactory(
         id='collection-publish',
         type='collection',
@@ -404,34 +382,25 @@ def test_flag_collection(api, collection_batch, scopes, authorized):
     assert_db_state(collection_batch)
 
 
-@pytest.mark.parametrize('scopes, authorized', [
-    ([ODPScope.COLLECTION_READ], True),
-    ([], False),
-    (all_scopes, True),
-    (all_scopes_excluding(ODPScope.COLLECTION_READ), False),
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.COLLECTION_READ],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.COLLECTION_READ),
 ])
-def test_get_new_doi(api, collection_batch, scopes, authorized):
-    r = api(scopes).get(f'/collection/{(collection := collection_batch[2]).id}/doi/new')
-    if authorized:
-        if collection.doi_key:
-            assert_doi_result(r, collection)
-        else:
-            assert_unprocessable(r, 'The collection does not have a DOI key')
+def test_get_new_doi(api, collection_batch, scopes, provider_auth):
+    authorized = ODPScope.COLLECTION_READ in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = collection_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = collection_batch[1].provider
     else:
-        assert_forbidden(r)
-    assert_db_state(collection_batch)
+        api_client_provider = None
 
-
-@pytest.mark.parametrize('scopes, matching_provider, authorized', [
-    ([ODPScope.COLLECTION_READ], True, True),
-    ([], True, False),
-    (all_scopes, True, True),
-    (all_scopes, False, False),
-    (all_scopes_excluding(ODPScope.COLLECTION_READ), True, False),
-])
-def test_get_new_doi_with_provider_specific_api_client(api, collection_batch, scopes, matching_provider, authorized):
-    api_client_provider = collection_batch[2].provider if matching_provider else collection_batch[1].provider
     r = api(scopes, api_client_provider).get(f'/collection/{(collection := collection_batch[2]).id}/doi/new')
+
     if authorized:
         if collection.doi_key:
             assert_doi_result(r, collection)
@@ -439,4 +408,5 @@ def test_get_new_doi_with_provider_specific_api_client(api, collection_batch, sc
             assert_unprocessable(r, 'The collection does not have a DOI key')
     else:
         assert_forbidden(r)
+
     assert_db_state(collection_batch)
