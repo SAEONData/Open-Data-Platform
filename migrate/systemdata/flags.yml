@@ -1,17 +1,17 @@
-Collection-Publish:
+collection-publish:
   type: collection
   public: False
   scope_id: odp.collection_flag:publish
-  schema_id: Generic-Flag
+  schema_id: generic-flag
 
-Collection-Archive:
+collection-archive:
   type: collection
   public: False
   scope_id: odp.collection_flag:archive
-  schema_id: Generic-Flag
+  schema_id: generic-flag
 
-Record-Migrated:
+record-migrated:
   type: record
   public: False
   scope_id: odp.record_flag:migrated
-  schema_id: Record-Migrated
+  schema_id: record-migrated

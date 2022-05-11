@@ -6,7 +6,7 @@ from jschon import JSON, JSONSchema
 from sqlalchemy import select
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp import ODPFlag, ODPScope
+from odp import ODPCollectionFlag, ODPScope
 from odp.api.lib.auth import Authorize, Authorized, FlagAuthorize, TagAuthorize, UnflagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_flag_schema, get_metadata_schema, get_tag_schema
@@ -145,7 +145,7 @@ def _create_record(
     if not ignore_collection_flags and Session.execute(
         select(CollectionFlag).
         where(CollectionFlag.collection_id == record_in.collection_id).
-        where(CollectionFlag.flag_id == ODPFlag.COLLECTION_ARCHIVE)
+        where(CollectionFlag.flag_id == ODPCollectionFlag.ARCHIVE)
     ).first() is not None:
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'A record cannot be added to an archived collection')
 
@@ -202,7 +202,7 @@ async def update_record(
     if Session.execute(
         select(CollectionFlag).
         where(CollectionFlag.collection_id == record_in.collection_id).
-        where(CollectionFlag.flag_id.in_((ODPFlag.COLLECTION_ARCHIVE, ODPFlag.COLLECTION_PUBLISH)))
+        where(CollectionFlag.flag_id.in_((ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH)))
     ).first() is not None:
         raise HTTPException(
             HTTP_422_UNPROCESSABLE_ENTITY,
@@ -304,7 +304,7 @@ async def delete_record(
     if Session.execute(
         select(CollectionFlag).
         where(CollectionFlag.collection_id == record.collection_id).
-        where(CollectionFlag.flag_id.in_((ODPFlag.COLLECTION_ARCHIVE, ODPFlag.COLLECTION_PUBLISH)))
+        where(CollectionFlag.flag_id.in_((ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH)))
     ).first() is not None:
         raise HTTPException(
             HTTP_422_UNPROCESSABLE_ENTITY,

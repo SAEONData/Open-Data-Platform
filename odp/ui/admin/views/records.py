@@ -3,7 +3,7 @@ import json
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask_login import current_user
 
-from odp import ODPFlag, ODPScope, ODPTag
+from odp import ODPRecordFlag, ODPRecordTag, ODPScope
 from odp.ui import api
 from odp.ui.admin.forms import RecordFilterForm, RecordForm, RecordTagQCForm
 from odp.ui.admin.views import utils
@@ -36,11 +36,11 @@ def view(id):
     record = api.get(f'/record/{id}')
     migrated_flag = next(
         (flag for flag in record['flags']
-         if flag['flag_id'] == ODPFlag.RECORD_MIGRATED),
+         if flag['flag_id'] == ODPRecordFlag.MIGRATED),
         None
     )
     qc_tags = {
-        'items': (items := [tag for tag in record['tags'] if tag['tag_id'] == ODPTag.RECORD_QC]),
+        'items': (items := [tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.QC]),
         'total': len(items),
         'page': 1,
         'pages': 1,
@@ -131,20 +131,20 @@ def tag_qc(id):
     else:
         record_tag = next(
             (tag for tag in record['tags']
-             if tag['tag_id'] == ODPTag.RECORD_QC and tag['user_id'] == current_user.id),
+             if tag['tag_id'] == ODPRecordTag.QC and tag['user_id'] == current_user.id),
             None
         )
         form = RecordTagQCForm(data=record_tag['data'] if record_tag else None)
 
     if request.method == 'POST' and form.validate():
         api.post(f'/record/{id}/tag', dict(
-            tag_id=ODPTag.RECORD_QC,
+            tag_id=ODPRecordTag.QC,
             data={
                 'pass_': form.pass_.data,
                 'comment': form.comment.data,
             },
         ))
-        flash(f'{ODPTag.RECORD_QC} tag has been set.', category='success')
+        flash(f'{ODPRecordTag.QC} tag has been set.', category='success')
         return redirect(url_for('.view', id=id))
 
     return render_template('record_tag_qc.html', record=record, form=form)
@@ -153,6 +153,6 @@ def tag_qc(id):
 @bp.route('/<id>/untag/qc', methods=('POST',))
 @api.client(ODPScope.RECORD_TAG_QC)
 def untag_qc(id):
-    api.delete(f'/record/{id}/tag/{ODPTag.RECORD_QC}')
-    flash(f'{ODPTag.RECORD_QC} tag has been removed.', category='success')
+    api.delete(f'/record/{id}/tag/{ODPRecordTag.QC}')
+    flash(f'{ODPRecordTag.QC} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))

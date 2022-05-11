@@ -55,15 +55,14 @@ class ODPScope(str, Enum):
     USER_READ = 'odp.user:read'
 
 
-class ODPFlag(str, Enum):
-    # collection
-    COLLECTION_ARCHIVE = 'Collection-Archive'
-    COLLECTION_PUBLISH = 'Collection-Publish'
-
-    # record
-    RECORD_MIGRATED = 'Record-Migrated'
+class ODPCollectionFlag(str, Enum):
+    ARCHIVE = 'collection-archive'
+    PUBLISH = 'collection-publish'
 
 
-class ODPTag(str, Enum):
-    # record
-    RECORD_QC = 'Record-QC'
+class ODPRecordFlag(str, Enum):
+    MIGRATED = 'record-migrated'
+
+
+class ODPRecordTag(str, Enum):
+    QC = 'record-qc'

@@ -1,6 +1,6 @@
 from enum import Enum
 
-from odp import ODPFlag, ODPScope
+from odp import ODPCollectionFlag, ODPScope
 
 
 class ProviderAuth(Enum):
@@ -14,7 +14,7 @@ class ProviderAuth(Enum):
 
 
 all_scopes = [s for s in ODPScope]
-all_flags = [f for f in ODPFlag]
+all_flags = [f for f in ODPCollectionFlag]
 
 
 def all_scopes_excluding(scope):
@@ -22,7 +22,7 @@ def all_scopes_excluding(scope):
 
 
 def all_flags_excluding(flag):
-    return [f for f in ODPFlag if f != flag]
+    return [f for f in ODPCollectionFlag if f != flag]
 
 
 def assert_empty_result(response):

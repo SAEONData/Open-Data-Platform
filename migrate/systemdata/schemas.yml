@@ -1,23 +1,23 @@
-DataCite4-SAEON:
+datacite4-saeon:
   type: metadata
   uri: https://odp.saeon.ac.za/schema/metadata/datacite4-saeon
 
-ISO19115-SAEON:
+iso19115-saeon:
   type: metadata
   uri: https://odp.saeon.ac.za/schema/metadata/iso19115-saeon
 
-Record-QC:
+record-qc:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/record-qc
 
-Record-Migrated:
+record-migrated:
   type: flag
   uri: https://odp.saeon.ac.za/schema/flag/record-migrated
 
-Generic-Flag:
+generic-flag:
   type: flag
   uri: https://odp.saeon.ac.za/schema/flag/generic
 
-SAEON-Catalog:
+saeon-catalog:
   type: catalog
   uri: https://odp.saeon.ac.za/schema/catalog/saeon-catalog

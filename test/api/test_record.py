@@ -4,7 +4,7 @@ from random import randint
 import pytest
 from sqlalchemy import select
 
-from odp import ODPFlag, ODPScope
+from odp import ODPCollectionFlag, ODPScope
 from odp.db import Session
 from odp.db.models import Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag, RecordTagAudit, Scope, ScopeType
 from test.api import (ProviderAuth, all_flags, all_flags_excluding, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden,
@@ -251,9 +251,9 @@ def test_get_record(api, record_batch, scopes, provider_auth):
 
 @pytest.mark.parametrize('admin_route, scopes, collection_flags', [
     (False, [ODPScope.RECORD_WRITE], []),
-    (False, [ODPScope.RECORD_WRITE], [ODPFlag.COLLECTION_ARCHIVE]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE]),
     (False, [ODPScope.RECORD_WRITE], all_flags),
-    (False, [ODPScope.RECORD_WRITE], all_flags_excluding(ODPFlag.COLLECTION_ARCHIVE)),
+    (False, [ODPScope.RECORD_WRITE], all_flags_excluding(ODPCollectionFlag.ARCHIVE)),
     (False, [], []),
     (False, all_scopes, []),
     (False, all_scopes_excluding(ODPScope.RECORD_WRITE), []),
@@ -296,7 +296,7 @@ def test_create_record(api, record_batch, admin_route, scopes, collection_flags,
     ))
 
     if authorized:
-        if not admin_route and ODPFlag.COLLECTION_ARCHIVE in collection_flags:
+        if not admin_route and ODPCollectionFlag.ARCHIVE in collection_flags:
             assert_unprocessable(r, 'A record cannot be added to an archived collection')
         else:
             record.id = r.json().get('id')
