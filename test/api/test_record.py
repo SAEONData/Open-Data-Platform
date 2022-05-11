@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from random import randint
 
 import pytest
@@ -8,7 +8,7 @@ from odp import ODPCollectionFlag, ODPScope
 from odp.db import Session
 from odp.db.models import Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag, RecordTagAudit, Scope, ScopeType
 from test.api import (ProviderAuth, all_flags, all_flags_excluding, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden,
-                      assert_unprocessable)
+                      assert_new_timestamp, assert_unprocessable)
 from test.factories import CollectionFactory, CollectionFlagFactory, FlagFactory, ProviderFactory, RecordFactory, SchemaFactory, TagFactory
 
 
@@ -50,7 +50,7 @@ def assert_db_state(records):
         assert row.doi == records[n].doi
         assert row.sid == records[n].sid
         assert row.metadata_ == records[n].metadata_
-        assert row.timestamp < records[n].timestamp + timedelta(seconds=120)
+        assert_new_timestamp(row.timestamp)
         assert row.collection_id == records[n].collection_id
         assert row.schema_id == records[n].schema_id
         assert row.schema_type == records[n].schema_type
@@ -65,7 +65,7 @@ def assert_db_tag_state(record_id, record_tag):
         assert result.tag_id == record_tag['tag_id']
         assert result.user_id is None
         assert result.data == record_tag['data']
-        assert datetime.now(timezone.utc) - timedelta(seconds=120) < result.timestamp < datetime.now(timezone.utc)
+        assert_new_timestamp(result.timestamp)
     else:
         assert result is None
 
@@ -79,7 +79,7 @@ def assert_db_flag_state(record_id, record_flag):
         assert result.flag_id == record_flag['flag_id']
         assert result.user_id is None
         assert result.data == record_flag['data']
-        assert datetime.now(timezone.utc) - timedelta(seconds=120) < result.timestamp < datetime.now(timezone.utc)
+        assert_new_timestamp(result.timestamp)
     else:
         assert result is None
 
@@ -89,7 +89,7 @@ def assert_audit_log(command, record=None, record_id=None):
     assert result.client_id == 'odp.test'
     assert result.user_id is None
     assert result.command == command
-    assert datetime.now(timezone.utc) - timedelta(seconds=120) < result.timestamp < datetime.now(timezone.utc)
+    assert_new_timestamp(result.timestamp)
     if command in ('insert', 'update'):
         assert result._id == record.id
         assert result._doi == record.doi
@@ -119,7 +119,7 @@ def assert_tag_audit_log(*entries):
         assert row.client_id == 'odp.test'
         assert row.user_id is None
         assert row.command == entries[n]['command']
-        assert datetime.now(timezone.utc) - timedelta(seconds=120) < row.timestamp < datetime.now(timezone.utc)
+        assert_new_timestamp(row.timestamp)
         assert row._record_id == entries[n]['record_id']
         assert row._tag_id == entries[n]['record_tag']['tag_id']
         assert row._user_id is None
@@ -138,7 +138,7 @@ def assert_flag_audit_log(*entries):
         assert row.client_id == 'odp.test'
         assert row.user_id is None
         assert row.command == entries[n]['command']
-        assert datetime.now(timezone.utc) - timedelta(seconds=120) < row.timestamp < datetime.now(timezone.utc)
+        assert_new_timestamp(row.timestamp)
         assert row._record_id == entries[n]['record_id']
         assert row._flag_id == entries[n]['record_flag']['flag_id']
         assert row._user_id is None
@@ -168,7 +168,7 @@ def assert_json_tag_result(response, json, record_tag):
     assert json['user_id'] is None
     assert json['user_name'] is None
     assert json['data'] == record_tag['data']
-    assert datetime.now(timezone.utc) - timedelta(seconds=120) < datetime.fromisoformat(json['timestamp']) < datetime.now(timezone.utc)
+    assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
 
 
 def assert_json_flag_result(response, json, record_flag):
@@ -178,7 +178,7 @@ def assert_json_flag_result(response, json, record_flag):
     assert json['user_id'] is None
     assert json['user_name'] is None
     assert json['data'] == record_flag['data']
-    assert datetime.now(timezone.utc) - timedelta(seconds=120) < datetime.fromisoformat(json['timestamp']) < datetime.now(timezone.utc)
+    assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
 
 
 def assert_json_record_results(response, json, records):

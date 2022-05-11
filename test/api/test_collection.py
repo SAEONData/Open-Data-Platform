@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from random import randint
 
 import pytest
@@ -9,7 +9,7 @@ from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Collection, CollectionFlag, CollectionFlagAudit, Scope, ScopeType
 from odp.lib.formats import DOI_REGEX
-from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden, assert_unprocessable
+from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden, assert_new_timestamp, assert_unprocessable
 from test.factories import CollectionFactory, FlagFactory, ProjectFactory, ProviderFactory, SchemaFactory
 
 
@@ -60,7 +60,7 @@ def assert_db_flag_state(collection_id, collection_flag):
         assert result.flag_id == collection_flag['flag_id']
         assert result.user_id is None
         assert result.data == collection_flag['data']
-        assert datetime.now(timezone.utc) - timedelta(seconds=120) < result.timestamp < datetime.now(timezone.utc)
+        assert_new_timestamp(result.timestamp)
     else:
         assert result is None
 
@@ -72,7 +72,7 @@ def assert_flag_audit_log(*entries):
         assert row.client_id == 'odp.test'
         assert row.user_id is None
         assert row.command == entries[n]['command']
-        assert datetime.now(timezone.utc) - timedelta(seconds=120) < row.timestamp < datetime.now(timezone.utc)
+        assert_new_timestamp(row.timestamp)
         assert row._collection_id == entries[n]['collection_id']
         assert row._flag_id == entries[n]['collection_flag']['flag_id']
         assert row._user_id is None
@@ -111,7 +111,7 @@ def assert_json_flag_result(response, json, collection_flag):
     assert json['user_id'] is None
     assert json['user_name'] is None
     assert json['data'] == collection_flag['data']
-    assert datetime.now(timezone.utc) - timedelta(seconds=120) < datetime.fromisoformat(json['timestamp']) < datetime.now(timezone.utc)
+    assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
 
 
 def assert_doi_result(response, collection):

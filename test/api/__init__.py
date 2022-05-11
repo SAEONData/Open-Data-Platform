@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 
 from odp import ODPCollectionFlag, ODPScope
@@ -43,3 +44,8 @@ def assert_method_not_allowed(response):
 def assert_unprocessable(response, message):
     assert response.status_code == 422
     assert response.json() == {'detail': message}
+
+
+def assert_new_timestamp(timestamp):
+    # 10 minutes is quite lenient, but handy for debugging
+    assert datetime.now(timezone.utc) - timedelta(seconds=600) < timestamp < datetime.now(timezone.utc)
