@@ -3,10 +3,10 @@ from sqlalchemy import select
 import migrate.systemdata
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import (Catalog, Client, ClientScope, Collection, Flag, Project, ProjectCollection, Provider, Record, Role, RoleScope, Schema,
-                           Scope, ScopeType, Tag, User, UserRole)
-from test.factories import (CatalogFactory, ClientFactory, CollectionFactory, FlagFactory, ProjectFactory, ProviderFactory, RecordFactory,
-                            RoleFactory, SchemaFactory, ScopeFactory, TagFactory, UserFactory)
+from odp.db.models import (Catalog, Client, ClientScope, Collection, CollectionFlag, Flag, Project, ProjectCollection, Provider, Record, Role,
+                           RoleScope, Schema, Scope, ScopeType, Tag, User, UserRole)
+from test.factories import (CatalogFactory, ClientFactory, CollectionFactory, CollectionFlagFactory, FlagFactory, ProjectFactory, ProviderFactory,
+                            RecordFactory, RoleFactory, SchemaFactory, ScopeFactory, TagFactory, UserFactory)
 
 
 def test_db_setup():
@@ -61,6 +61,13 @@ def test_create_collection():
     result = Session.execute(select(Collection, Provider).join(Provider)).one()
     assert (result.Collection.id, result.Collection.name, result.Collection.doi_key, result.Collection.provider_id, result.Provider.name) \
            == (collection.id, collection.name, collection.doi_key, collection.provider.id, collection.provider.name)
+
+
+def test_create_collection_flag():
+    collection_flag = CollectionFlagFactory()
+    result = Session.execute(select(CollectionFlag).join(Collection).join(Flag)).scalar_one()
+    assert (result.collection_id, result.flag_id, result.flag_type, result.user_id, result.data) \
+           == (collection_flag.collection.id, collection_flag.flag.id, 'collection', collection_flag.user.id, collection_flag.data)
 
 
 def test_create_flag():

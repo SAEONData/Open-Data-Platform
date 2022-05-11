@@ -6,7 +6,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from faker import Faker
 
 from odp.db import Session
-from odp.db.models import Catalog, Client, Collection, Flag, Project, Provider, Record, Role, Schema, Scope, Tag, User
+from odp.db.models import Catalog, Client, Collection, CollectionFlag, Flag, Project, Provider, Record, Role, Schema, Scope, Tag, User
 
 fake = Faker()
 
@@ -123,6 +123,36 @@ class FlagFactory(ODPModelFactory):
     schema = factory.SubFactory(SchemaFactory, type='flag')
 
 
+class UserFactory(ODPModelFactory):
+    class Meta:
+        model = User
+
+    id = factory.Faker('uuid4')
+    name = factory.Faker('name')
+    email = factory.Sequence(lambda n: f'{fake.email()}.{n}')
+    active = factory.LazyFunction(lambda: randint(0, 1))
+    verified = factory.LazyFunction(lambda: randint(0, 1))
+
+    @factory.post_generation
+    def roles(obj, create, roles):
+        if roles:
+            for role in roles:
+                obj.roles.append(role)
+            if create:
+                Session.commit()
+
+
+class CollectionFlagFactory(ODPModelFactory):
+    class Meta:
+        model = CollectionFlag
+
+    collection = factory.SubFactory(CollectionFactory)
+    flag = factory.SubFactory(FlagFactory, type='collection')
+    user = factory.SubFactory(UserFactory)
+    data = {}
+    timestamp = factory.LazyFunction(lambda: datetime.now())
+
+
 class ProjectFactory(ODPModelFactory):
     class Meta:
         model = Project
@@ -184,22 +214,3 @@ class TagFactory(ODPModelFactory):
     public = factory.LazyFunction(lambda: randint(0, 1))
     scope = factory.SubFactory(ScopeFactory, type='odp')
     schema = factory.SubFactory(SchemaFactory, type='tag')
-
-
-class UserFactory(ODPModelFactory):
-    class Meta:
-        model = User
-
-    id = factory.Faker('uuid4')
-    name = factory.Faker('name')
-    email = factory.Sequence(lambda n: f'{fake.email()}.{n}')
-    active = factory.LazyFunction(lambda: randint(0, 1))
-    verified = factory.LazyFunction(lambda: randint(0, 1))
-
-    @factory.post_generation
-    def roles(obj, create, roles):
-        if roles:
-            for role in roles:
-                obj.roles.append(role)
-            if create:
-                Session.commit()

@@ -4,11 +4,12 @@ from random import randint
 import pytest
 from sqlalchemy import select
 
-from odp import ODPScope
+from odp import ODPFlag, ODPScope
 from odp.db import Session
 from odp.db.models import Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag, RecordTagAudit, Scope, ScopeType
-from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
-from test.factories import CollectionFactory, FlagFactory, ProviderFactory, RecordFactory, SchemaFactory, TagFactory
+from test.api import (ProviderAuth, all_flags, all_flags_excluding, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden,
+                      assert_unprocessable)
+from test.factories import CollectionFactory, CollectionFlagFactory, FlagFactory, ProviderFactory, RecordFactory, SchemaFactory, TagFactory
 
 
 @pytest.fixture
@@ -17,10 +18,10 @@ def record_batch():
     return [RecordFactory() for _ in range(randint(3, 5))]
 
 
-def record_build(collection=None, **id):
+def record_build(collection=None, collection_flags=None, **id):
     """Build and return an uncommitted Record instance.
     Referenced collection and schema are however committed."""
-    return RecordFactory.build(
+    record = RecordFactory.build(
         **id,
         collection=collection or (collection := CollectionFactory()),
         collection_id=collection.id,
@@ -28,6 +29,13 @@ def record_build(collection=None, **id):
         schema_id=schema.id,
         schema_type=schema.type,
     )
+    if collection_flags:
+        for cf in collection_flags:
+            CollectionFlagFactory(
+                collection=record.collection,
+                flag=FlagFactory(id=cf, type='collection'),
+            )
+    return record
 
 
 def assert_db_state(records):
@@ -241,17 +249,21 @@ def test_get_record(api, record_batch, scopes, provider_auth):
     assert_no_audit_log()
 
 
-@pytest.mark.parametrize('admin_route, scopes', [
-    (False, [ODPScope.RECORD_WRITE]),
-    (False, []),
-    (False, all_scopes),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE)),
-    (True, [ODPScope.RECORD_ADMIN]),
-    (True, []),
-    (True, all_scopes),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN)),
+@pytest.mark.parametrize('admin_route, scopes, collection_flags', [
+    (False, [ODPScope.RECORD_WRITE], []),
+    (False, [ODPScope.RECORD_WRITE], [ODPFlag.COLLECTION_ARCHIVE]),
+    (False, [ODPScope.RECORD_WRITE], all_flags),
+    (False, [ODPScope.RECORD_WRITE], all_flags_excluding(ODPFlag.COLLECTION_ARCHIVE)),
+    (False, [], []),
+    (False, all_scopes, []),
+    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), []),
+    (True, [ODPScope.RECORD_ADMIN], []),
+    (True, [ODPScope.RECORD_ADMIN], all_flags),
+    (True, [], []),
+    (True, all_scopes, []),
+    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
 ])
-def test_create_record(api, record_batch, admin_route, scopes, provider_auth):
+def test_create_record(api, record_batch, admin_route, scopes, collection_flags, provider_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
@@ -271,7 +283,8 @@ def test_create_record(api, record_batch, admin_route, scopes, provider_auth):
         new_record_collection = None  # new collection
 
     modified_record_batch = record_batch + [record := record_build(
-        collection=new_record_collection
+        collection=new_record_collection,
+        collection_flags=collection_flags,
     )]
 
     r = api(scopes, api_client_provider).post(route, json=dict(
@@ -283,10 +296,13 @@ def test_create_record(api, record_batch, admin_route, scopes, provider_auth):
     ))
 
     if authorized:
-        record.id = r.json().get('id')
-        assert_json_record_result(r, r.json(), record)
-        assert_db_state(modified_record_batch)
-        assert_audit_log('insert', record)
+        if not admin_route and ODPFlag.COLLECTION_ARCHIVE in collection_flags:
+            assert_unprocessable(r, 'A record cannot be added to an archived collection')
+        else:
+            record.id = r.json().get('id')
+            assert_json_record_result(r, r.json(), record)
+            assert_db_state(modified_record_batch)
+            assert_audit_log('insert', record)
     else:
         assert_forbidden(r)
         assert_db_state(record_batch)
