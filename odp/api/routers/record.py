@@ -116,13 +116,6 @@ async def create_record(
         metadata_schema: JSONSchema = Depends(get_metadata_schema),
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_WRITE)),
 ):
-    if Session.execute(
-        select(CollectionFlag).
-        where(CollectionFlag.collection_id == record_in.collection_id).
-        where(CollectionFlag.flag_id == ODPFlag.COLLECTION_ARCHIVE)
-    ).first() is not None:
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'A record cannot be added to an archived collection')
-
     return _create_record(record_in, metadata_schema, auth)
 
 
@@ -135,18 +128,26 @@ async def admin_create_record(
         metadata_schema: JSONSchema = Depends(get_metadata_schema),
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_ADMIN)),
 ):
-    return _create_record(record_in, metadata_schema, auth)
+    return _create_record(record_in, metadata_schema, auth, True)
 
 
 def _create_record(
         record_in: RecordModelIn,
         metadata_schema: JSONSchema,
         auth: Authorized,
+        ignore_collection_flags: bool = False,
 ) -> RecordModel:
     if (auth.provider_ids != '*'
             and (collection := Session.get(Collection, record_in.collection_id))
             and collection.provider_id not in auth.provider_ids):
         raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not ignore_collection_flags and Session.execute(
+        select(CollectionFlag).
+        where(CollectionFlag.collection_id == record_in.collection_id).
+        where(CollectionFlag.flag_id == ODPFlag.COLLECTION_ARCHIVE)
+    ).first() is not None:
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'A record cannot be added to an archived collection')
 
     if Session.execute(
         select(Record).
