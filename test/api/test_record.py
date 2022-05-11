@@ -7,7 +7,7 @@ from sqlalchemy import select
 from odp import ODPCollectionFlag, ODPScope
 from odp.db import Session
 from odp.db.models import Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag, RecordTagAudit, Scope, ScopeType
-from test.api import (ProviderAuth, all_flags, all_flags_excluding, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden,
+from test.api import (ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden,
                       assert_new_timestamp, assert_unprocessable)
 from test.factories import CollectionFactory, CollectionFlagFactory, FlagFactory, ProviderFactory, RecordFactory, SchemaFactory, TagFactory
 
@@ -252,13 +252,13 @@ def test_get_record(api, record_batch, scopes, provider_auth):
 @pytest.mark.parametrize('admin_route, scopes, collection_flags', [
     (False, [ODPScope.RECORD_WRITE], []),
     (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE]),
-    (False, [ODPScope.RECORD_WRITE], all_flags),
-    (False, [ODPScope.RECORD_WRITE], all_flags_excluding(ODPCollectionFlag.ARCHIVE)),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
     (False, [], []),
     (False, all_scopes, []),
     (False, all_scopes_excluding(ODPScope.RECORD_WRITE), []),
     (True, [ODPScope.RECORD_ADMIN], []),
-    (True, [ODPScope.RECORD_ADMIN], all_flags),
+    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
     (True, [], []),
     (True, all_scopes, []),
     (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
@@ -309,17 +309,21 @@ def test_create_record(api, record_batch, admin_route, scopes, collection_flags,
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('admin_route, scopes', [
-    (False, [ODPScope.RECORD_WRITE]),
-    (False, []),
-    (False, all_scopes),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE)),
-    (True, [ODPScope.RECORD_ADMIN]),
-    (True, []),
-    (True, all_scopes),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN)),
+@pytest.mark.parametrize('admin_route, scopes, collection_flags', [
+    (False, [ODPScope.RECORD_WRITE], []),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
+    (False, [], []),
+    (False, all_scopes, []),
+    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), []),
+    (True, [ODPScope.RECORD_ADMIN], []),
+    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
+    (True, [], []),
+    (True, all_scopes, []),
+    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
 ])
-def test_update_record(api, record_batch, admin_route, scopes, provider_auth):
+def test_update_record(api, record_batch, admin_route, scopes, collection_flags, provider_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
@@ -343,6 +347,7 @@ def test_update_record(api, record_batch, admin_route, scopes, provider_auth):
         id=record_batch[2].id,
         doi=record_batch[2].doi,
         collection=modified_record_collection,
+        collection_flags=collection_flags,
     ))
 
     r = api(scopes, api_client_provider).put(route + record.id, json=dict(
@@ -354,26 +359,33 @@ def test_update_record(api, record_batch, admin_route, scopes, provider_auth):
     ))
 
     if authorized:
-        assert_json_record_result(r, r.json(), record)
-        assert_db_state(modified_record_batch)
-        assert_audit_log('update', record)
+        if not admin_route and set(collection_flags) & {ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH}:
+            assert_unprocessable(r, 'Cannot update a record belonging to a published or archived collection')
+        else:
+            assert_json_record_result(r, r.json(), record)
+            assert_db_state(modified_record_batch)
+            assert_audit_log('update', record)
     else:
         assert_forbidden(r)
         assert_db_state(record_batch)
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('admin_route, scopes', [
-    (False, [ODPScope.RECORD_WRITE]),
-    (False, []),
-    (False, all_scopes),
-    (False, all_scopes_excluding(ODPScope.RECORD_WRITE)),
-    (True, [ODPScope.RECORD_ADMIN]),
-    (True, []),
-    (True, all_scopes),
-    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN)),
+@pytest.mark.parametrize('admin_route, scopes, collection_flags', [
+    (False, [ODPScope.RECORD_WRITE], []),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
+    (False, [], []),
+    (False, all_scopes, []),
+    (False, all_scopes_excluding(ODPScope.RECORD_WRITE), []),
+    (True, [ODPScope.RECORD_ADMIN], []),
+    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
+    (True, [], []),
+    (True, all_scopes, []),
+    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
 ])
-def test_delete_record(api, record_batch, admin_route, scopes, provider_auth):
+def test_delete_record(api, record_batch, admin_route, scopes, collection_flags, provider_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
@@ -387,15 +399,24 @@ def test_delete_record(api, record_batch, admin_route, scopes, provider_auth):
     else:
         api_client_provider = None
 
+    for cf in collection_flags:
+        CollectionFlagFactory(
+            collection=record_batch[2].collection,
+            flag=FlagFactory(id=cf, type='collection'),
+        )
+
     modified_record_batch = record_batch.copy()
     del modified_record_batch[2]
 
     r = api(scopes, api_client_provider).delete(f'{route}{(record_id := record_batch[2].id)}')
 
     if authorized:
-        assert_empty_result(r)
-        assert_db_state(modified_record_batch)
-        assert_audit_log('delete', record_id=record_id)
+        if not admin_route and set(collection_flags) & {ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH}:
+            assert_unprocessable(r, 'Cannot delete a record belonging to a published or archived collection')
+        else:
+            assert_empty_result(r)
+            assert_db_state(modified_record_batch)
+            assert_audit_log('delete', record_id=record_id)
     else:
         assert_forbidden(r)
         assert_db_state(record_batch)

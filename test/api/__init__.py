@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 
-from odp import ODPCollectionFlag, ODPScope
+from odp import ODPScope
 
 
 class ProviderAuth(Enum):
@@ -15,15 +15,10 @@ class ProviderAuth(Enum):
 
 
 all_scopes = [s for s in ODPScope]
-all_flags = [f for f in ODPCollectionFlag]
 
 
 def all_scopes_excluding(scope):
     return [s for s in ODPScope if s != scope]
-
-
-def all_flags_excluding(flag):
-    return [f for f in ODPCollectionFlag if f != flag]
 
 
 def assert_empty_result(response):
