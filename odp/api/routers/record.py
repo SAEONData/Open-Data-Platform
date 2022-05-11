@@ -199,16 +199,6 @@ async def update_record(
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if Session.execute(
-        select(CollectionFlag).
-        where(CollectionFlag.collection_id == record_in.collection_id).
-        where(CollectionFlag.flag_id.in_((ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH)))
-    ).first() is not None:
-        raise HTTPException(
-            HTTP_422_UNPROCESSABLE_ENTITY,
-            'Cannot update a record belonging to a published or archived collection',
-        )
-
     return _set_record(False, record, record_in, metadata_schema, auth)
 
 
@@ -228,7 +218,7 @@ async def admin_set_record(
         create = True
         record = Record(id=record_id)
 
-    return _set_record(create, record, record_in, metadata_schema, auth)
+    return _set_record(create, record, record_in, metadata_schema, auth, True)
 
 
 def _set_record(
@@ -237,12 +227,23 @@ def _set_record(
         record_in: RecordModelIn,
         metadata_schema: JSONSchema,
         auth: Authorized,
+        ignore_collection_flags: bool = False,
 ) -> RecordModel:
     if auth.provider_ids != '*':
         if not create and record.collection.provider_id not in auth.provider_ids:
             raise HTTPException(HTTP_403_FORBIDDEN)
         if (collection := Session.get(Collection, record_in.collection_id)) and collection.provider_id not in auth.provider_ids:
             raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not ignore_collection_flags and Session.execute(
+        select(CollectionFlag).
+        where(CollectionFlag.collection_id == record_in.collection_id).
+        where(CollectionFlag.flag_id.in_((ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH)))
+    ).first() is not None:
+        raise HTTPException(
+            HTTP_422_UNPROCESSABLE_ENTITY,
+            'Cannot update a record belonging to a published or archived collection',
+        )
 
     if Session.execute(
         select(Record).
@@ -298,20 +299,7 @@ async def delete_record(
         record_id: str,
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_WRITE)),
 ):
-    if not (record := Session.get(Record, record_id)):
-        raise HTTPException(HTTP_404_NOT_FOUND)
-
-    if Session.execute(
-        select(CollectionFlag).
-        where(CollectionFlag.collection_id == record.collection_id).
-        where(CollectionFlag.flag_id.in_((ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH)))
-    ).first() is not None:
-        raise HTTPException(
-            HTTP_422_UNPROCESSABLE_ENTITY,
-            'Cannot delete a record belonging to a published or archived collection',
-        )
-
-    _delete_record(record, auth)
+    _delete_record(record_id, auth)
 
 
 @router.delete(
@@ -321,18 +309,29 @@ async def admin_delete_record(
         record_id: str,
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_ADMIN)),
 ):
-    if not (record := Session.get(Record, record_id)):
-        raise HTTPException(HTTP_404_NOT_FOUND)
-
-    _delete_record(record, auth)
+    _delete_record(record_id, auth, True)
 
 
 def _delete_record(
-        record: Record,
+        record_id: str,
         auth: Authorized,
+        ignore_collection_flags: bool = False,
 ) -> None:
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
     if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not ignore_collection_flags and Session.execute(
+        select(CollectionFlag).
+        where(CollectionFlag.collection_id == record.collection_id).
+        where(CollectionFlag.flag_id.in_((ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH)))
+    ).first() is not None:
+        raise HTTPException(
+            HTTP_422_UNPROCESSABLE_ENTITY,
+            'Cannot delete a record belonging to a published or archived collection',
+        )
 
     RecordAudit(
         client_id=auth.client_id,
