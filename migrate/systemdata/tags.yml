@@ -1,5 +1,27 @@
+collection-publish:
+  type: collection
+  multi: False
+  public: False
+  scope_id: odp.collection_tag:publish
+  schema_id: generic-tag
+
+collection-archive:
+  type: collection
+  multi: False
+  public: False
+  scope_id: odp.collection_tag:archive
+  schema_id: generic-tag
+
+record-migrated:
+  type: record
+  multi: False
+  public: False
+  scope_id: odp.record_tag:migrated
+  schema_id: record-migrated
+
 record-qc:
   type: record
+  multi: True
   public: False
   scope_id: odp.record_tag:qc
   schema_id: record-qc

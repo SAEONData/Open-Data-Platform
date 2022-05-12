@@ -3,7 +3,7 @@ import json
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from flask_login import current_user
 
-from odp import ODPRecordFlag, ODPRecordTag, ODPScope
+from odp import ODPRecordTag, ODPScope
 from odp.ui import api
 from odp.ui.admin.forms import RecordFilterForm, RecordForm, RecordTagQCForm
 from odp.ui.admin.views import utils
@@ -34,11 +34,7 @@ def index():
 @api.client(ODPScope.RECORD_READ)
 def view(id):
     record = api.get(f'/record/{id}')
-    migrated_flag = next(
-        (flag for flag in record['flags']
-         if flag['flag_id'] == ODPRecordFlag.MIGRATED),
-        None
-    )
+    migrated_tag = next((tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.MIGRATED), None)
     qc_tags = {
         'items': (items := [tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.QC]),
         'total': len(items),
@@ -49,7 +45,7 @@ def view(id):
     return render_template(
         'record_view.html',
         record=record,
-        migrated_flag=migrated_flag,
+        migrated_tag=migrated_tag,
         qc_tags=qc_tags,
         has_user_qc_tag=has_user_qc_tag,
     )

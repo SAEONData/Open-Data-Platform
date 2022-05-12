@@ -6,7 +6,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from faker import Faker
 
 from odp.db import Session
-from odp.db.models import Catalog, Client, Collection, CollectionFlag, Flag, Project, Provider, Record, Role, Schema, Scope, Tag, User
+from odp.db.models import Catalog, Client, Collection, CollectionTag, Project, Provider, Record, Role, Schema, Scope, Tag, User
 
 fake = Faker()
 
@@ -23,13 +23,10 @@ def schema_uri_from_type(schema):
             'https://odp.saeon.ac.za/schema/metadata/datacite4-saeon',
             'https://odp.saeon.ac.za/schema/metadata/iso19115-saeon',
         ))
-    elif schema.type == 'flag':
-        return choice((
-            'https://odp.saeon.ac.za/schema/flag/generic',
-            'https://odp.saeon.ac.za/schema/flag/record-migrated',
-        ))
     elif schema.type == 'tag':
         return choice((
+            'https://odp.saeon.ac.za/schema/tag/generic',
+            'https://odp.saeon.ac.za/schema/tag/record-migrated',
             'https://odp.saeon.ac.za/schema/tag/record-qc',
         ))
     elif schema.type == 'catalog':
@@ -59,7 +56,7 @@ class SchemaFactory(ODPModelFactory):
         model = Schema
 
     id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
-    type = factory.LazyFunction(lambda: choice(('catalog', 'metadata', 'flag', 'tag')))
+    type = factory.LazyFunction(lambda: choice(('catalog', 'metadata', 'tag')))
     uri = factory.LazyAttribute(schema_uri_from_type)
 
 
@@ -112,15 +109,15 @@ class CollectionFactory(ODPModelFactory):
     provider = factory.SubFactory(ProviderFactory)
 
 
-class FlagFactory(ODPModelFactory):
+class TagFactory(ODPModelFactory):
     class Meta:
-        model = Flag
+        model = Tag
 
-    id = factory.LazyAttribute(lambda flag: f'flag-{flag.scope.id}')
+    id = factory.LazyAttribute(lambda tag: f'tag-{tag.scope.id}')
     type = factory.LazyFunction(lambda: choice(('collection', 'record')))
     public = factory.LazyFunction(lambda: randint(0, 1))
     scope = factory.SubFactory(ScopeFactory, type='odp')
-    schema = factory.SubFactory(SchemaFactory, type='flag')
+    schema = factory.SubFactory(SchemaFactory, type='tag')
 
 
 class UserFactory(ODPModelFactory):
@@ -142,12 +139,12 @@ class UserFactory(ODPModelFactory):
                 Session.commit()
 
 
-class CollectionFlagFactory(ODPModelFactory):
+class CollectionTagFactory(ODPModelFactory):
     class Meta:
-        model = CollectionFlag
+        model = CollectionTag
 
     collection = factory.SubFactory(CollectionFactory)
-    flag = factory.SubFactory(FlagFactory, type='collection')
+    tag = factory.SubFactory(TagFactory, type='collection')
     user = factory.SubFactory(UserFactory)
     data = {}
     timestamp = factory.LazyFunction(lambda: datetime.now())
@@ -203,14 +200,3 @@ class RoleFactory(ODPModelFactory):
                 obj.scopes.append(scope)
             if create:
                 Session.commit()
-
-
-class TagFactory(ODPModelFactory):
-    class Meta:
-        model = Tag
-
-    id = factory.LazyAttribute(lambda tag: f'tag-{tag.scope.id}')
-    type = factory.LazyFunction(lambda: choice(('collection', 'record')))
-    public = factory.LazyFunction(lambda: randint(0, 1))
-    scope = factory.SubFactory(ScopeFactory, type='odp')
-    schema = factory.SubFactory(SchemaFactory, type='tag')

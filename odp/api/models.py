@@ -8,19 +8,6 @@ from odp.lib.formats import DOI_REGEX, SID_REGEX
 from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
 
 
-class FlagInstanceModel(BaseModel):
-    flag_id: str
-    user_id: Optional[str]
-    user_name: Optional[str]
-    data: Dict[str, Any]
-    timestamp: datetime
-
-
-class FlagInstanceModelIn(BaseModel):
-    flag_id: str
-    data: Dict[str, Any]
-
-
 class TagInstanceModel(BaseModel):
     tag_id: str
     user_id: Optional[str]
@@ -65,7 +52,6 @@ class CollectionModel(BaseModel):
     provider_id: str
     project_ids: List[str]
     record_count: int
-    flags: List[FlagInstanceModel]
     tags: List[TagInstanceModel]
 
 
@@ -74,15 +60,6 @@ class CollectionModelIn(BaseModel):
     name: str
     doi_key: Optional[str]
     provider_id: str
-
-
-class FlagModel(BaseModel):
-    id: str
-    public: bool
-    scope_id: str
-    schema_id: str
-    schema_uri: str
-    schema_: Dict[str, Any]
 
 
 class ProjectModel(BaseModel):
@@ -113,7 +90,6 @@ class RecordModel(BaseModel):
     metadata: Dict[str, Any]
     validity: Dict[str, Any]
     timestamp: datetime
-    flags: List[FlagInstanceModel]
     tags: List[TagInstanceModel]
 
 

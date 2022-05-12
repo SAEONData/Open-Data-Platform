@@ -1,11 +1,9 @@
 {
-    "$id": "https://odp.saeon.ac.za/schema/flag/record-migrated",
+    "$id": "https://odp.saeon.ac.za/schema/tag/generic",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "properties": {
-        "published": {"type": "boolean"},
         "comment": {"type": "string"}
     },
-    "required": ["published"],
     "additionalProperties": false
 }

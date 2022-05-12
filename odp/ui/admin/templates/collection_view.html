@@ -24,37 +24,37 @@
                 {{ collection.record_count }}
             </a>
         {% elif prop == 'Published' %}
-            {% if publish_flag %}
-                {{ publish_flag.timestamp|timestamp }} by {{ obj_link('users', publish_flag.user_id, publish_flag.user_name) }}
+            {% if publish_tag %}
+                {{ publish_tag.timestamp|timestamp }} by {{ obj_link('users', publish_tag.user_id, publish_tag.user_name) }}
             {% endif %}
         {% elif prop == 'Archived' %}
-            {% if archive_flag %}
-                {{ archive_flag.timestamp|timestamp }} by {{ obj_link('users', archive_flag.user_id, archive_flag.user_name) }}
+            {% if archive_tag %}
+                {{ archive_tag.timestamp|timestamp }} by {{ obj_link('users', archive_tag.user_id, archive_tag.user_name) }}
             {% endif %}
         {% endif %}
     {% endcall %}
-    {% if publish_flag %}
+    {% if publish_tag %}
         {% set publish_btn = ['unpublish'] %}
     {% else %}
         {% set publish_btn = ['publish'] %}
     {% endif %}
-    {% if archive_flag %}
+    {% if archive_tag %}
         {% set archive_btn = ['unarchive'] %}
     {% else %}
         {% set archive_btn = ['archive'] %}
     {% endif %}
     {% call(btn) render_buttons(collection, edit=True, delete=True, custom=publish_btn + archive_btn) %}
         {% if btn == 'publish' %}
-            {{ render_button_prompt_form('.flag_publish', collection.id, 'Publish', 'success',
+            {{ render_button_prompt_form('.tag_publish', collection.id, 'Publish', 'success',
                 'Are you sure you want to publish the collection?') }}
         {% elif btn == 'unpublish' %}
-            {{ render_button_prompt_form('.unflag_publish', collection.id, 'Un-publish', 'warning',
+            {{ render_button_prompt_form('.untag_publish', collection.id, 'Un-publish', 'warning',
                 'Are you sure you want to un-publish the collection?') }}
         {% elif btn == 'archive' %}
-            {{ render_button_prompt_form('.flag_archive', collection.id, 'Archive', 'warning',
+            {{ render_button_prompt_form('.tag_archive', collection.id, 'Archive', 'warning',
                 'Are you sure you want to archive the collection?') }}
         {% elif btn == 'unarchive' %}
-            {{ render_button_prompt_form('.unflag_archive', collection.id, 'Un-archive', 'success',
+            {{ render_button_prompt_form('.untag_archive', collection.id, 'Un-archive', 'success',
                 'Are you sure you want to un-archive the collection?') }}
         {% endif %}
     {% endcall %}

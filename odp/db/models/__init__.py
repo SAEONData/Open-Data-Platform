@@ -3,22 +3,19 @@ from .catalogue_record import CatalogueRecord
 from .client import Client
 from .client_scope import ClientScope
 from .collection import Collection
-from .collection_flag import CollectionFlag, CollectionFlagAudit
 from .collection_tag import CollectionTag, CollectionTagAudit
 from .datacite_record import DataciteRecord
-from .flag import Flag
 from .oauth2_token import OAuth2Token
 from .project import Project
 from .project_collection import ProjectCollection
 from .provider import Provider
 from .record import Record, RecordAudit
-from .record_flag import RecordFlag, RecordFlagAudit
 from .record_tag import RecordTag, RecordTagAudit
 from .role import Role
 from .role_scope import RoleScope
 from .schema import Schema
 from .scope import Scope
 from .tag import Tag
-from .types import AuditCommand, FlagType, SchemaType, ScopeType, TagType
+from .types import AuditCommand, SchemaType, ScopeType, TagType
 from .user import User
 from .user_role import UserRole

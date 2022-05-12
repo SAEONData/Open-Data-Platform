@@ -16,11 +16,8 @@ class ODPScope(str, Enum):
     # collection
     COLLECTION_ADMIN = 'odp.collection:admin'
     COLLECTION_READ = 'odp.collection:read'
-    COLLECTION_FLAG_ARCHIVE = 'odp.collection_flag:archive'
-    COLLECTION_FLAG_PUBLISH = 'odp.collection_flag:publish'
-
-    # flag
-    FLAG_READ = 'odp.flag:read'
+    COLLECTION_TAG_ARCHIVE = 'odp.collection_tag:archive'
+    COLLECTION_TAG_PUBLISH = 'odp.collection_tag:publish'
 
     # project
     PROJECT_ADMIN = 'odp.project:admin'
@@ -35,7 +32,7 @@ class ODPScope(str, Enum):
     RECORD_READ = 'odp.record:read'
     RECORD_WRITE = 'odp.record:write'
     RECORD_TAG_QC = 'odp.record_tag:qc'
-    RECORD_FLAG_MIGRATED = 'odp.record_flag:migrated'
+    RECORD_TAG_MIGRATED = 'odp.record_tag:migrated'
 
     # role
     ROLE_ADMIN = 'odp.role:admin'
@@ -55,14 +52,11 @@ class ODPScope(str, Enum):
     USER_READ = 'odp.user:read'
 
 
-class ODPCollectionFlag(str, Enum):
+class ODPCollectionTag(str, Enum):
     ARCHIVE = 'collection-archive'
     PUBLISH = 'collection-publish'
 
 
-class ODPRecordFlag(str, Enum):
-    MIGRATED = 'record-migrated'
-
-
 class ODPRecordTag(str, Enum):
+    MIGRATED = 'record-migrated'
     QC = 'record-qc'

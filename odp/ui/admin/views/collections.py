@@ -1,6 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from odp import ODPCollectionFlag, ODPScope
+from odp import ODPCollectionTag, ODPScope
 from odp.ui import api
 from odp.ui.admin.forms import CollectionForm
 from odp.ui.admin.views import utils
@@ -20,19 +20,19 @@ def index():
 @api.client(ODPScope.COLLECTION_READ)
 def view(id):
     collection = api.get(f'/collection/{id}')
-    publish_flag = next(
-        (flag for flag in collection['flags']
-         if flag['flag_id'] == ODPCollectionFlag.PUBLISH),
+    publish_tag = next(
+        (tag for tag in collection['tags']
+         if tag['tag_id'] == ODPCollectionTag.PUBLISH),
         None
     )
-    archive_flag = next(
-        (flag for flag in collection['flags']
-         if flag['flag_id'] == ODPCollectionFlag.ARCHIVE),
+    archive_tag = next(
+        (tag for tag in collection['tags']
+         if tag['tag_id'] == ODPCollectionTag.ARCHIVE),
         None
     )
     return render_template(
         'collection_view.html', collection=collection,
-        publish_flag=publish_flag, archive_flag=archive_flag,
+        publish_tag=publish_tag, archive_tag=archive_tag,
     )
 
 
@@ -84,41 +84,41 @@ def delete(id):
     return redirect(url_for('.index'))
 
 
-@bp.route('/<id>/flag/publish', methods=('POST',))
-@api.client(ODPScope.COLLECTION_FLAG_PUBLISH)
-def flag_publish(id):
-    api.post(f'/collection/{id}/flag', dict(
-        flag_id=ODPCollectionFlag.PUBLISH,
+@bp.route('/<id>/tag/publish', methods=('POST',))
+@api.client(ODPScope.COLLECTION_TAG_PUBLISH)
+def tag_publish(id):
+    api.post(f'/collection/{id}/tag', dict(
+        tag_id=ODPCollectionTag.PUBLISH,
         data={},
     ))
-    flash(f'{ODPCollectionFlag.PUBLISH} flag has been set.', category='success')
+    flash(f'{ODPCollectionTag.PUBLISH} tag has been set.', category='success')
     return redirect(url_for('.view', id=id))
 
 
-@bp.route('/<id>/unflag/publish', methods=('POST',))
-@api.client(ODPScope.COLLECTION_FLAG_PUBLISH)
-def unflag_publish(id):
-    api.delete(f'/collection/{id}/flag/{ODPCollectionFlag.PUBLISH}')
-    flash(f'{ODPCollectionFlag.PUBLISH} flag has been removed.', category='success')
+@bp.route('/<id>/untag/publish', methods=('POST',))
+@api.client(ODPScope.COLLECTION_TAG_PUBLISH)
+def untag_publish(id):
+    api.delete(f'/collection/{id}/tag/{ODPCollectionTag.PUBLISH}')
+    flash(f'{ODPCollectionTag.PUBLISH} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
 
 
-@bp.route('/<id>/flag/archive', methods=('POST',))
-@api.client(ODPScope.COLLECTION_FLAG_ARCHIVE)
-def flag_archive(id):
-    api.post(f'/collection/{id}/flag', dict(
-        flag_id=ODPCollectionFlag.ARCHIVE,
+@bp.route('/<id>/tag/archive', methods=('POST',))
+@api.client(ODPScope.COLLECTION_TAG_ARCHIVE)
+def tag_archive(id):
+    api.post(f'/collection/{id}/tag', dict(
+        tag_id=ODPCollectionTag.ARCHIVE,
         data={},
     ))
-    flash(f'{ODPCollectionFlag.ARCHIVE} flag has been set.', category='success')
+    flash(f'{ODPCollectionTag.ARCHIVE} tag has been set.', category='success')
     return redirect(url_for('.view', id=id))
 
 
-@bp.route('/<id>/unflag/archive', methods=('POST',))
-@api.client(ODPScope.COLLECTION_FLAG_ARCHIVE)
-def unflag_archive(id):
-    api.delete(f'/collection/{id}/flag/{ODPCollectionFlag.ARCHIVE}')
-    flash(f'{ODPCollectionFlag.ARCHIVE} flag has been removed.', category='success')
+@bp.route('/<id>/untag/archive', methods=('POST',))
+@api.client(ODPScope.COLLECTION_TAG_ARCHIVE)
+def untag_archive(id):
+    api.delete(f'/collection/{id}/tag/{ODPCollectionTag.ARCHIVE}')
+    flash(f'{ODPCollectionTag.ARCHIVE} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
 
 

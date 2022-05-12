@@ -28,7 +28,7 @@ load_dotenv(dotenv_path)
 
 from odp import ODPScope
 from odp.db import Base, Session, engine
-from odp.db.models import Catalog, Client, Flag, Role, Schema, SchemaType, Scope, ScopeType, Tag, User, UserRole
+from odp.db.models import Catalog, Client, Role, Schema, SchemaType, Scope, ScopeType, Tag, User, UserRole
 from odp.lib.hydra import GrantType, HydraAdminAPI, HydraScope, ResponseType
 
 datadir = pathlib.Path(__file__).parent / 'systemdata'
@@ -176,22 +176,6 @@ def init_schemas():
         schema.save()
 
 
-def init_flags():
-    """Create or update flag definitions."""
-    with open(datadir / 'flags.yml') as f:
-        flag_data = yaml.safe_load(f)
-
-    for flag_id, flag_spec in flag_data.items():
-        flag_type = flag_spec['type']
-        flag = Session.get(Flag, (flag_id, flag_type)) or Flag(id=flag_id, type=flag_type)
-        flag.public = flag_spec['public']
-        flag.scope_id = flag_spec['scope_id']
-        flag.scope_type = ScopeType.odp
-        flag.schema_id = flag_spec['schema_id']
-        flag.schema_type = SchemaType.flag
-        flag.save()
-
-
 def init_tags():
     """Create or update tag definitions."""
     with open(datadir / 'tags.yml') as f:
@@ -262,7 +246,6 @@ if __name__ == '__main__':
         init_cli_client()
         init_admin_user()
         init_schemas()
-        init_flags()
         init_tags()
         init_roles()
         init_catalogs()

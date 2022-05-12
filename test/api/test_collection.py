@@ -7,10 +7,10 @@ from sqlalchemy import select
 
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import Collection, CollectionFlag, CollectionFlagAudit, Scope, ScopeType
+from odp.db.models import Collection, CollectionTag, CollectionTagAudit, Scope, ScopeType
 from odp.lib.formats import DOI_REGEX
 from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden, assert_new_timestamp, assert_unprocessable
-from test.factories import CollectionFactory, FlagFactory, ProjectFactory, ProviderFactory, SchemaFactory
+from test.factories import CollectionFactory, ProjectFactory, ProviderFactory, SchemaFactory, TagFactory
 
 
 @pytest.fixture
@@ -51,22 +51,22 @@ def assert_db_state(collections):
            == set((collection.id, collection.name, collection.doi_key, collection.provider_id, project_ids(collection)) for collection in collections)
 
 
-def assert_db_flag_state(collection_id, collection_flag):
-    """Verify that the collection_flag table contains the given collection flag."""
+def assert_db_tag_state(collection_id, collection_tag):
+    """Verify that the collection_tag table contains the given collection tag."""
     Session.expire_all()
-    result = Session.execute(select(CollectionFlag)).scalar_one_or_none()
-    if collection_flag:
+    result = Session.execute(select(CollectionTag)).scalar_one_or_none()
+    if collection_tag:
         assert result.collection_id == collection_id
-        assert result.flag_id == collection_flag['flag_id']
+        assert result.tag_id == collection_tag['tag_id']
         assert result.user_id is None
-        assert result.data == collection_flag['data']
+        assert result.data == collection_tag['data']
         assert_new_timestamp(result.timestamp)
     else:
         assert result is None
 
 
-def assert_flag_audit_log(*entries):
-    result = Session.execute(select(CollectionFlagAudit)).scalars().all()
+def assert_tag_audit_log(*entries):
+    result = Session.execute(select(CollectionTagAudit)).scalars().all()
     assert len(result) == len(entries)
     for n, row in enumerate(result):
         assert row.client_id == 'odp.test'
@@ -74,10 +74,10 @@ def assert_flag_audit_log(*entries):
         assert row.command == entries[n]['command']
         assert_new_timestamp(row.timestamp)
         assert row._collection_id == entries[n]['collection_id']
-        assert row._flag_id == entries[n]['collection_flag']['flag_id']
+        assert row._tag_id == entries[n]['collection_tag']['tag_id']
         assert row._user_id is None
         if row.command in ('insert', 'update'):
-            assert row._data == entries[n]['collection_flag']['data']
+            assert row._data == entries[n]['collection_tag']['data']
         elif row.command == 'delete':
             assert row._data is None
         else:
@@ -104,13 +104,13 @@ def assert_json_collection_results(response, json, collections):
         assert_json_collection_result(response, items[n], collection)
 
 
-def assert_json_flag_result(response, json, collection_flag):
-    """Verify that the API result matches the given collection flag dict."""
+def assert_json_tag_result(response, json, collection_tag):
+    """Verify that the API result matches the given collection tag dict."""
     assert response.status_code == 200
-    assert json['flag_id'] == collection_flag['flag_id']
+    assert json['tag_id'] == collection_tag['tag_id']
     assert json['user_id'] is None
     assert json['user_name'] is None
-    assert json['data'] == collection_flag['data']
+    assert json['data'] == collection_tag['data']
     assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
 
 
@@ -293,13 +293,13 @@ def test_delete_collection(api, collection_batch, scopes, provider_auth):
 
 
 @pytest.mark.parametrize('scopes', [
-    [ODPScope.COLLECTION_FLAG_PUBLISH],
+    [ODPScope.COLLECTION_TAG_PUBLISH],
     [],
     all_scopes,
-    all_scopes_excluding(ODPScope.COLLECTION_FLAG_PUBLISH),
+    all_scopes_excluding(ODPScope.COLLECTION_TAG_PUBLISH),
 ])
-def test_flag_collection(api, collection_batch, scopes, provider_auth):
-    authorized = ODPScope.COLLECTION_FLAG_PUBLISH in scopes and \
+def test_tag_collection(api, collection_batch, scopes, provider_auth):
+    authorized = ODPScope.COLLECTION_TAG_PUBLISH in scopes and \
                  provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
     if provider_auth == ProviderAuth.MATCH:
@@ -310,75 +310,75 @@ def test_flag_collection(api, collection_batch, scopes, provider_auth):
         api_client_provider = None
 
     client = api(scopes, api_client_provider)
-    FlagFactory(
+    TagFactory(
         id='collection-publish',
         type='collection',
         scope=Session.get(
-            Scope, (ODPScope.COLLECTION_FLAG_PUBLISH, ScopeType.odp)
+            Scope, (ODPScope.COLLECTION_TAG_PUBLISH, ScopeType.odp)
         ) or Scope(
-            id=ODPScope.COLLECTION_FLAG_PUBLISH, type=ScopeType.odp
+            id=ODPScope.COLLECTION_TAG_PUBLISH, type=ScopeType.odp
         ),
         schema=SchemaFactory(
-            type='flag',
-            uri='https://odp.saeon.ac.za/schema/flag/generic',
+            type='tag',
+            uri='https://odp.saeon.ac.za/schema/tag/generic',
         ),
     )
 
-    # insert flag
+    # insert tag
     r = client.post(
-        f'/collection/{(collection_id := collection_batch[2].id)}/flag',
-        json=(collection_flag_v1 := dict(
-            flag_id='collection-publish',
+        f'/collection/{(collection_id := collection_batch[2].id)}/tag',
+        json=(collection_tag_v1 := dict(
+            tag_id='collection-publish',
             data={
                 'comment': 'Hello World',
             },
         )))
     if authorized:
-        assert_json_flag_result(r, r.json(), collection_flag_v1)
-        assert_db_flag_state(collection_id, collection_flag_v1)
-        assert_flag_audit_log(
-            dict(command='insert', collection_id=collection_id, collection_flag=collection_flag_v1),
+        assert_json_tag_result(r, r.json(), collection_tag_v1)
+        assert_db_tag_state(collection_id, collection_tag_v1)
+        assert_tag_audit_log(
+            dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_v1),
         )
     else:
         assert_forbidden(r)
-        assert_db_flag_state(collection_id, None)
-        assert_flag_audit_log()
+        assert_db_tag_state(collection_id, None)
+        assert_tag_audit_log()
     assert_db_state(collection_batch)
 
-    # update flag
+    # update tag
     r = client.post(
-        f'/collection/{collection_id}/flag',
-        json=(collection_flag_v2 := dict(
-            flag_id='collection-publish',
+        f'/collection/{collection_id}/tag',
+        json=(collection_tag_v2 := dict(
+            tag_id='collection-publish',
             data={},
         )))
     if authorized:
-        assert_json_flag_result(r, r.json(), collection_flag_v2)
-        assert_db_flag_state(collection_id, collection_flag_v2)
-        assert_flag_audit_log(
-            dict(command='insert', collection_id=collection_id, collection_flag=collection_flag_v1),
-            dict(command='update', collection_id=collection_id, collection_flag=collection_flag_v2),
+        assert_json_tag_result(r, r.json(), collection_tag_v2)
+        assert_db_tag_state(collection_id, collection_tag_v2)
+        assert_tag_audit_log(
+            dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_v1),
+            dict(command='update', collection_id=collection_id, collection_tag=collection_tag_v2),
         )
     else:
         assert_forbidden(r)
-        assert_db_flag_state(collection_id, None)
-        assert_flag_audit_log()
+        assert_db_tag_state(collection_id, None)
+        assert_tag_audit_log()
     assert_db_state(collection_batch)
 
-    # delete flag
-    r = client.delete(f'/collection/{collection_id}/flag/{collection_flag_v1["flag_id"]}')
+    # delete tag
+    r = client.delete(f'/collection/{collection_id}/tag/{collection_tag_v1["tag_id"]}')
     if authorized:
         assert_empty_result(r)
-        assert_db_flag_state(collection_id, None)
-        assert_flag_audit_log(
-            dict(command='insert', collection_id=collection_id, collection_flag=collection_flag_v1),
-            dict(command='update', collection_id=collection_id, collection_flag=collection_flag_v2),
-            dict(command='delete', collection_id=collection_id, collection_flag=collection_flag_v2),
+        assert_db_tag_state(collection_id, None)
+        assert_tag_audit_log(
+            dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_v1),
+            dict(command='update', collection_id=collection_id, collection_tag=collection_tag_v2),
+            dict(command='delete', collection_id=collection_id, collection_tag=collection_tag_v2),
         )
     else:
         assert_forbidden(r)
-        assert_db_flag_state(collection_id, None)
-        assert_flag_audit_log()
+        assert_db_tag_state(collection_id, None)
+        assert_tag_audit_log()
     assert_db_state(collection_batch)
 
 

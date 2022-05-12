@@ -10,10 +10,10 @@ from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
-from odp.api.models import FlagInstanceModelIn, TagInstanceModelIn
+from odp.api.models import TagInstanceModelIn
 from odp.config import config
 from odp.db import Session
-from odp.db.models import Flag, Scope, ScopeType, Tag
+from odp.db.models import Scope, ScopeType, Tag
 from odp.lib.auth import get_client_permissions, get_user_permissions
 from odp.lib.hydra import HydraAdminAPI, OAuth2TokenIntrospection
 
@@ -86,28 +86,6 @@ class Authorize(BaseAuthorize):
 
     async def __call__(self, request: Request) -> Authorized:
         return _authorize_request(request, self.scope_id)
-
-
-class FlagAuthorize(BaseAuthorize):
-    async def __call__(self, request: Request, flag_instance_in: FlagInstanceModelIn) -> Authorized:
-        if not (flag := Session.execute(
-                select(Flag).
-                where(Flag.id == flag_instance_in.flag_id)
-        ).scalar_one_or_none()):
-            raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
-
-        return _authorize_request(request, flag.scope_id)
-
-
-class UnflagAuthorize(BaseAuthorize):
-    async def __call__(self, request: Request, flag_id: str) -> Authorized:
-        if not (flag := Session.execute(
-                select(Flag).
-                where(Flag.id == flag_id)
-        ).scalar_one_or_none()):
-            raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid flag id')
-
-        return _authorize_request(request, flag.scope_id)
 
 
 class TagAuthorize(BaseAuthorize):

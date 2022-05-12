@@ -3,9 +3,9 @@ from sqlalchemy import select
 import migrate.systemdata
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import (Catalog, Client, ClientScope, Collection, CollectionFlag, Flag, Project, ProjectCollection, Provider, Record, Role,
+from odp.db.models import (Catalog, Client, ClientScope, Collection, CollectionTag, Project, ProjectCollection, Provider, Record, Role,
                            RoleScope, Schema, Scope, ScopeType, Tag, User, UserRole)
-from test.factories import (CatalogFactory, ClientFactory, CollectionFactory, CollectionFlagFactory, FlagFactory, ProjectFactory, ProviderFactory,
+from test.factories import (CatalogFactory, ClientFactory, CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory,
                             RecordFactory, RoleFactory, SchemaFactory, ScopeFactory, TagFactory, UserFactory)
 
 
@@ -63,18 +63,11 @@ def test_create_collection():
            == (collection.id, collection.name, collection.doi_key, collection.provider.id, collection.provider.name)
 
 
-def test_create_collection_flag():
-    collection_flag = CollectionFlagFactory()
-    result = Session.execute(select(CollectionFlag).join(Collection).join(Flag)).scalar_one()
-    assert (result.collection_id, result.flag_id, result.flag_type, result.user_id, result.data) \
-           == (collection_flag.collection.id, collection_flag.flag.id, 'collection', collection_flag.user.id, collection_flag.data)
-
-
-def test_create_flag():
-    flag = FlagFactory()
-    result = Session.execute(select(Flag, Scope).join(Scope)).one()
-    assert (result.Flag.id, result.Flag.type, result.Flag.public, result.Flag.schema_id, result.Flag.scope_id, result.Flag.scope_type) \
-           == (flag.id, flag.type, flag.public, flag.schema_id, flag.scope.id, ScopeType.odp)
+def test_create_collection_tag():
+    collection_tag = CollectionTagFactory()
+    result = Session.execute(select(CollectionTag).join(Collection).join(Tag)).scalar_one()
+    assert (result.collection_id, result.tag_id, result.tag_type, result.user_id, result.data) \
+           == (collection_tag.collection.id, collection_tag.tag.id, 'collection', collection_tag.user.id, collection_tag.data)
 
 
 def test_create_project():

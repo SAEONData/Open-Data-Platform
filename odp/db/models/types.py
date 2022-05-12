@@ -3,7 +3,6 @@ from enum import Enum
 
 class SchemaType(str, Enum):
     metadata = 'metadata'
-    flag = 'flag'
     tag = 'tag'
     catalog = 'catalog'
 
@@ -15,14 +14,6 @@ class ScopeType(str, Enum):
     odp = 'odp'
     oauth = 'oauth'
     client = 'client'
-
-    def __repr__(self):
-        return repr(self.value)
-
-
-class FlagType(str, Enum):
-    collection = 'collection'
-    record = 'record'
 
     def __repr__(self):
         return repr(self.value)

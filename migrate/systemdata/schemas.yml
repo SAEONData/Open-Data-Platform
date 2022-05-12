@@ -11,12 +11,12 @@ record-qc:
   uri: https://odp.saeon.ac.za/schema/tag/record-qc
 
 record-migrated:
-  type: flag
-  uri: https://odp.saeon.ac.za/schema/flag/record-migrated
+  type: tag
+  uri: https://odp.saeon.ac.za/schema/tag/record-migrated
 
-generic-flag:
-  type: flag
-  uri: https://odp.saeon.ac.za/schema/flag/generic
+generic-tag:
+  type: tag
+  uri: https://odp.saeon.ac.za/schema/tag/generic
 
 saeon-catalog:
   type: catalog

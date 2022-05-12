@@ -4,12 +4,12 @@ from random import randint
 import pytest
 from sqlalchemy import select
 
-from odp import ODPCollectionFlag, ODPScope
+from odp import ODPCollectionTag, ODPScope
 from odp.db import Session
-from odp.db.models import Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag, RecordTagAudit, Scope, ScopeType
+from odp.db.models import Record, RecordAudit, RecordTag, RecordTagAudit, Scope, ScopeType
 from test.api import (ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden,
                       assert_new_timestamp, assert_unprocessable)
-from test.factories import CollectionFactory, CollectionFlagFactory, FlagFactory, ProviderFactory, RecordFactory, SchemaFactory, TagFactory
+from test.factories import CollectionFactory, CollectionTagFactory, ProviderFactory, RecordFactory, SchemaFactory, TagFactory
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def record_batch():
     return [RecordFactory() for _ in range(randint(3, 5))]
 
 
-def record_build(collection=None, collection_flags=None, **id):
+def record_build(collection=None, collection_tags=None, **id):
     """Build and return an uncommitted Record instance.
     Referenced collection and schema are however committed."""
     record = RecordFactory.build(
@@ -29,11 +29,11 @@ def record_build(collection=None, collection_flags=None, **id):
         schema_id=schema.id,
         schema_type=schema.type,
     )
-    if collection_flags:
-        for cf in collection_flags:
-            CollectionFlagFactory(
+    if collection_tags:
+        for ct in collection_tags:
+            CollectionTagFactory(
                 collection=record.collection,
-                flag=FlagFactory(id=cf, type='collection'),
+                tag=TagFactory(id=ct, type='collection'),
             )
     return record
 
@@ -65,20 +65,6 @@ def assert_db_tag_state(record_id, record_tag):
         assert result.tag_id == record_tag['tag_id']
         assert result.user_id is None
         assert result.data == record_tag['data']
-        assert_new_timestamp(result.timestamp)
-    else:
-        assert result is None
-
-
-def assert_db_flag_state(record_id, record_flag):
-    """Verify that the record_flag table contains the given record flag."""
-    Session.expire_all()
-    result = Session.execute(select(RecordFlag)).scalar_one_or_none()
-    if record_flag:
-        assert result.record_id == record_id
-        assert result.flag_id == record_flag['flag_id']
-        assert result.user_id is None
-        assert result.data == record_flag['data']
         assert_new_timestamp(result.timestamp)
     else:
         assert result is None
@@ -131,25 +117,6 @@ def assert_tag_audit_log(*entries):
             assert False
 
 
-def assert_flag_audit_log(*entries):
-    result = Session.execute(select(RecordFlagAudit)).scalars().all()
-    assert len(result) == len(entries)
-    for n, row in enumerate(result):
-        assert row.client_id == 'odp.test'
-        assert row.user_id is None
-        assert row.command == entries[n]['command']
-        assert_new_timestamp(row.timestamp)
-        assert row._record_id == entries[n]['record_id']
-        assert row._flag_id == entries[n]['record_flag']['flag_id']
-        assert row._user_id is None
-        if row.command in ('insert', 'update'):
-            assert row._data == entries[n]['record_flag']['data']
-        elif row.command == 'delete':
-            assert row._data is None
-        else:
-            assert False
-
-
 def assert_json_record_result(response, json, record):
     """Verify that the API result matches the given record object."""
     assert response.status_code == 200
@@ -168,16 +135,6 @@ def assert_json_tag_result(response, json, record_tag):
     assert json['user_id'] is None
     assert json['user_name'] is None
     assert json['data'] == record_tag['data']
-    assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
-
-
-def assert_json_flag_result(response, json, record_flag):
-    """Verify that the API result matches the given record flag dict."""
-    assert response.status_code == 200
-    assert json['flag_id'] == record_flag['flag_id']
-    assert json['user_id'] is None
-    assert json['user_name'] is None
-    assert json['data'] == record_flag['data']
     assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
 
 
@@ -249,21 +206,21 @@ def test_get_record(api, record_batch, scopes, provider_auth):
     assert_no_audit_log()
 
 
-@pytest.mark.parametrize('admin_route, scopes, collection_flags', [
+@pytest.mark.parametrize('admin_route, scopes, collection_tags', [
     (False, [ODPScope.RECORD_WRITE], []),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.PUBLISH]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
     (False, [], []),
     (False, all_scopes, []),
     (False, all_scopes_excluding(ODPScope.RECORD_WRITE), []),
     (True, [ODPScope.RECORD_ADMIN], []),
-    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
+    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
     (True, [], []),
     (True, all_scopes, []),
     (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
 ])
-def test_create_record(api, record_batch, admin_route, scopes, collection_flags, provider_auth):
+def test_create_record(api, record_batch, admin_route, scopes, collection_tags, provider_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
@@ -284,7 +241,7 @@ def test_create_record(api, record_batch, admin_route, scopes, collection_flags,
 
     modified_record_batch = record_batch + [record := record_build(
         collection=new_record_collection,
-        collection_flags=collection_flags,
+        collection_tags=collection_tags,
     )]
 
     r = api(scopes, api_client_provider).post(route, json=dict(
@@ -296,7 +253,7 @@ def test_create_record(api, record_batch, admin_route, scopes, collection_flags,
     ))
 
     if authorized:
-        if not admin_route and ODPCollectionFlag.ARCHIVE in collection_flags:
+        if not admin_route and ODPCollectionTag.ARCHIVE in collection_tags:
             assert_unprocessable(r, 'A record cannot be added to an archived collection')
         else:
             record.id = r.json().get('id')
@@ -309,21 +266,21 @@ def test_create_record(api, record_batch, admin_route, scopes, collection_flags,
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('admin_route, scopes, collection_flags', [
+@pytest.mark.parametrize('admin_route, scopes, collection_tags', [
     (False, [ODPScope.RECORD_WRITE], []),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.PUBLISH]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
     (False, [], []),
     (False, all_scopes, []),
     (False, all_scopes_excluding(ODPScope.RECORD_WRITE), []),
     (True, [ODPScope.RECORD_ADMIN], []),
-    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
+    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
     (True, [], []),
     (True, all_scopes, []),
     (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
 ])
-def test_update_record(api, record_batch, admin_route, scopes, collection_flags, provider_auth):
+def test_update_record(api, record_batch, admin_route, scopes, collection_tags, provider_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
@@ -347,7 +304,7 @@ def test_update_record(api, record_batch, admin_route, scopes, collection_flags,
         id=record_batch[2].id,
         doi=record_batch[2].doi,
         collection=modified_record_collection,
-        collection_flags=collection_flags,
+        collection_tags=collection_tags,
     ))
 
     r = api(scopes, api_client_provider).put(route + record.id, json=dict(
@@ -359,7 +316,7 @@ def test_update_record(api, record_batch, admin_route, scopes, collection_flags,
     ))
 
     if authorized:
-        if not admin_route and set(collection_flags) & {ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH}:
+        if not admin_route and set(collection_tags) & {ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH}:
             assert_unprocessable(r, 'Cannot update a record belonging to a published or archived collection')
         else:
             assert_json_record_result(r, r.json(), record)
@@ -371,21 +328,21 @@ def test_update_record(api, record_batch, admin_route, scopes, collection_flags,
         assert_no_audit_log()
 
 
-@pytest.mark.parametrize('admin_route, scopes, collection_flags', [
+@pytest.mark.parametrize('admin_route, scopes, collection_tags', [
     (False, [ODPScope.RECORD_WRITE], []),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.PUBLISH]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
     (False, [], []),
     (False, all_scopes, []),
     (False, all_scopes_excluding(ODPScope.RECORD_WRITE), []),
     (True, [ODPScope.RECORD_ADMIN], []),
-    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH]),
+    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
     (True, [], []),
     (True, all_scopes, []),
     (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
 ])
-def test_delete_record(api, record_batch, admin_route, scopes, collection_flags, provider_auth):
+def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, provider_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
@@ -399,10 +356,10 @@ def test_delete_record(api, record_batch, admin_route, scopes, collection_flags,
     else:
         api_client_provider = None
 
-    for cf in collection_flags:
-        CollectionFlagFactory(
+    for ct in collection_tags:
+        CollectionTagFactory(
             collection=record_batch[2].collection,
-            flag=FlagFactory(id=cf, type='collection'),
+            tag=TagFactory(id=ct, type='collection'),
         )
 
     modified_record_batch = record_batch.copy()
@@ -411,7 +368,7 @@ def test_delete_record(api, record_batch, admin_route, scopes, collection_flags,
     r = api(scopes, api_client_provider).delete(f'{route}{(record_id := record_batch[2].id)}')
 
     if authorized:
-        if not admin_route and set(collection_flags) & {ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH}:
+        if not admin_route and set(collection_tags) & {ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH}:
             assert_unprocessable(r, 'Cannot delete a record belonging to a published or archived collection')
         else:
             assert_empty_result(r)
@@ -517,96 +474,3 @@ def test_tag_record(api, record_batch, scopes, provider_auth):
         assert_tag_audit_log()
     assert_db_state(record_batch)
     assert_no_audit_log()
-
-
-@pytest.mark.parametrize('scopes', [
-    [ODPScope.RECORD_FLAG_MIGRATED],
-    [],
-    all_scopes,
-    all_scopes_excluding(ODPScope.RECORD_FLAG_MIGRATED),
-])
-def test_flag_record(api, record_batch, scopes, provider_auth):
-    authorized = ODPScope.RECORD_FLAG_MIGRATED in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
-
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch[1].collection.provider
-    else:
-        api_client_provider = None
-
-    client = api(scopes, api_client_provider)
-    FlagFactory(
-        id='record-migrated',
-        type='record',
-        scope=Session.get(
-            Scope, (ODPScope.RECORD_FLAG_MIGRATED, ScopeType.odp)
-        ) or Scope(
-            id=ODPScope.RECORD_FLAG_MIGRATED, type=ScopeType.odp
-        ),
-        schema=SchemaFactory(
-            type='flag',
-            uri='https://odp.saeon.ac.za/schema/flag/record-migrated',
-        ),
-    )
-
-    # insert flag
-    r = client.post(
-        f'/record/{(record_id := record_batch[2].id)}/flag',
-        json=(record_flag_v1 := dict(
-            flag_id='record-migrated',
-            data={
-                'published': True,
-                'comment': 'Hello World',
-            },
-        )))
-    if authorized:
-        assert_json_flag_result(r, r.json(), record_flag_v1)
-        assert_db_flag_state(record_id, record_flag_v1)
-        assert_flag_audit_log(
-            dict(command='insert', record_id=record_id, record_flag=record_flag_v1),
-        )
-    else:
-        assert_forbidden(r)
-        assert_db_flag_state(record_id, None)
-        assert_flag_audit_log()
-    assert_db_state(record_batch)
-
-    # update flag
-    r = client.post(
-        f'/record/{record_id}/flag',
-        json=(record_flag_v2 := dict(
-            flag_id='record-migrated',
-            data={
-                'published': False,
-            },
-        )))
-    if authorized:
-        assert_json_flag_result(r, r.json(), record_flag_v2)
-        assert_db_flag_state(record_id, record_flag_v2)
-        assert_flag_audit_log(
-            dict(command='insert', record_id=record_id, record_flag=record_flag_v1),
-            dict(command='update', record_id=record_id, record_flag=record_flag_v2),
-        )
-    else:
-        assert_forbidden(r)
-        assert_db_flag_state(record_id, None)
-        assert_flag_audit_log()
-    assert_db_state(record_batch)
-
-    # delete flag
-    r = client.delete(f'/record/{record_id}/flag/{record_flag_v1["flag_id"]}')
-    if authorized:
-        assert_empty_result(r)
-        assert_db_flag_state(record_id, None)
-        assert_flag_audit_log(
-            dict(command='insert', record_id=record_id, record_flag=record_flag_v1),
-            dict(command='update', record_id=record_id, record_flag=record_flag_v2),
-            dict(command='delete', record_id=record_id, record_flag=record_flag_v2),
-        )
-    else:
-        assert_forbidden(r)
-        assert_db_flag_state(record_id, None)
-        assert_flag_audit_log()
-    assert_db_state(record_batch)

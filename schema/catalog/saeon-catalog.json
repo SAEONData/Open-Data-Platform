@@ -10,23 +10,18 @@
             },
             "required": ["valid"]
         },
-        "flags": {
+        "tags": {
             "type": "array",
             "allOf": [
                 {
                     "contains": {
                         "type": "object",
                         "properties": {
-                            "flag_id": {"const": "collection-publish"}
+                            "tag_id": {"const": "collection-publish"}
                         },
-                        "required": ["flag_id"]
+                        "required": ["tag_id"]
                     }
-                }
-            ]
-        },
-        "tags": {
-            "type": "array",
-            "allOf": [
+                },
                 {
                     "contains": {
                         "type": "object",
@@ -46,5 +41,5 @@
             ]
         }
     },
-    "required": ["validity", "flags", "tags"]
+    "required": ["validity", "tags"]
 }

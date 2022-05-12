@@ -6,14 +6,13 @@ from jschon import JSON, JSONSchema
 from sqlalchemy import select
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp import ODPCollectionFlag, ODPScope
-from odp.api.lib.auth import Authorize, Authorized, FlagAuthorize, TagAuthorize, UnflagAuthorize, UntagAuthorize
+from odp import ODPCollectionTag, ODPScope
+from odp.api.lib.auth import Authorize, Authorized, TagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
-from odp.api.lib.schema import get_flag_schema, get_metadata_schema, get_tag_schema
-from odp.api.models import FlagInstanceModel, FlagInstanceModelIn, RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
+from odp.api.lib.schema import get_metadata_schema, get_tag_schema
+from odp.api.models import RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
-from odp.db.models import (AuditCommand, Collection, CollectionFlag, FlagType, Record, RecordAudit, RecordFlag, RecordFlagAudit, RecordTag,
-                           RecordTagAudit, SchemaType, TagType)
+from odp.db.models import AuditCommand, Collection, CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, SchemaType, TagType
 
 router = APIRouter()
 
@@ -28,24 +27,10 @@ def output_record_model(record: Record) -> RecordModel:
         metadata=record.metadata_,
         validity=record.validity,
         timestamp=record.timestamp,
-        flags=[
-            output_record_flag_model(record_flag)
-            for record_flag in record.flags
-        ],
         tags=[
             output_record_tag_model(record_tag)
             for record_tag in record.tags
         ],
-    )
-
-
-def output_record_flag_model(record_flag: RecordFlag) -> FlagInstanceModel:
-    return FlagInstanceModel(
-        flag_id=record_flag.flag_id,
-        user_id=record_flag.user_id,
-        user_name=record_flag.user.name if record_flag.user_id else None,
-        data=record_flag.data,
-        timestamp=record_flag.timestamp,
     )
 
 
@@ -135,17 +120,17 @@ def _create_record(
         record_in: RecordModelIn,
         metadata_schema: JSONSchema,
         auth: Authorized,
-        ignore_collection_flags: bool = False,
+        ignore_collection_tags: bool = False,
 ) -> RecordModel:
     if (auth.provider_ids != '*'
             and (collection := Session.get(Collection, record_in.collection_id))
             and collection.provider_id not in auth.provider_ids):
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if not ignore_collection_flags and Session.execute(
-        select(CollectionFlag).
-        where(CollectionFlag.collection_id == record_in.collection_id).
-        where(CollectionFlag.flag_id == ODPCollectionFlag.ARCHIVE)
+    if not ignore_collection_tags and Session.execute(
+        select(CollectionTag).
+        where(CollectionTag.collection_id == record_in.collection_id).
+        where(CollectionTag.tag_id == ODPCollectionTag.ARCHIVE)
     ).first() is not None:
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'A record cannot be added to an archived collection')
 
@@ -227,7 +212,7 @@ def _set_record(
         record_in: RecordModelIn,
         metadata_schema: JSONSchema,
         auth: Authorized,
-        ignore_collection_flags: bool = False,
+        ignore_collection_tags: bool = False,
 ) -> RecordModel:
     if auth.provider_ids != '*':
         if not create and record.collection.provider_id not in auth.provider_ids:
@@ -235,10 +220,10 @@ def _set_record(
         if (collection := Session.get(Collection, record_in.collection_id)) and collection.provider_id not in auth.provider_ids:
             raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if not ignore_collection_flags and Session.execute(
-        select(CollectionFlag).
-        where(CollectionFlag.collection_id == record_in.collection_id).
-        where(CollectionFlag.flag_id.in_((ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH)))
+    if not ignore_collection_tags and Session.execute(
+        select(CollectionTag).
+        where(CollectionTag.collection_id == record_in.collection_id).
+        where(CollectionTag.tag_id.in_((ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH)))
     ).first() is not None:
         raise HTTPException(
             HTTP_422_UNPROCESSABLE_ENTITY,
@@ -315,7 +300,7 @@ async def admin_delete_record(
 def _delete_record(
         record_id: str,
         auth: Authorized,
-        ignore_collection_flags: bool = False,
+        ignore_collection_tags: bool = False,
 ) -> None:
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -323,10 +308,10 @@ def _delete_record(
     if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if not ignore_collection_flags and Session.execute(
-        select(CollectionFlag).
-        where(CollectionFlag.collection_id == record.collection_id).
-        where(CollectionFlag.flag_id.in_((ODPCollectionFlag.ARCHIVE, ODPCollectionFlag.PUBLISH)))
+    if not ignore_collection_tags and Session.execute(
+        select(CollectionTag).
+        where(CollectionTag.collection_id == record.collection_id).
+        where(CollectionTag.tag_id.in_((ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH)))
     ).first() is not None:
         raise HTTPException(
             HTTP_422_UNPROCESSABLE_ENTITY,
@@ -431,83 +416,4 @@ async def untag_record(
         _record_id=record_tag.record_id,
         _tag_id=record_tag.tag_id,
         _user_id=record_tag.user_id,
-    ).save()
-
-
-@router.post(
-    '/{record_id}/flag',
-    response_model=FlagInstanceModel,
-)
-async def flag_record(
-        record_id: str,
-        flag_instance_in: FlagInstanceModelIn,
-        flag_schema: JSONSchema = Depends(get_flag_schema),
-        auth: Authorized = Depends(FlagAuthorize()),
-):
-    if not (record := Session.get(Record, record_id)):
-        raise HTTPException(HTTP_404_NOT_FOUND)
-
-    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
-        raise HTTPException(HTTP_403_FORBIDDEN)
-
-    if record_flag := Session.get(RecordFlag, (record_id, flag_instance_in.flag_id, FlagType.record)):
-        command = AuditCommand.update
-    else:
-        record_flag = RecordFlag(
-            record_id=record_id,
-            flag_id=flag_instance_in.flag_id,
-            flag_type=FlagType.record,
-        )
-        command = AuditCommand.insert
-
-    if record_flag.data != flag_instance_in.data:
-        validity = flag_schema.evaluate(JSON(flag_instance_in.data)).output('detailed')
-        if not validity['valid']:
-            raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, validity)
-
-        record_flag.user_id = auth.user_id
-        record_flag.data = flag_instance_in.data
-        record_flag.timestamp = (timestamp := datetime.now(timezone.utc))
-        record_flag.save()
-
-        RecordFlagAudit(
-            client_id=auth.client_id,
-            user_id=auth.user_id,
-            command=command,
-            timestamp=timestamp,
-            _record_id=record_flag.record_id,
-            _flag_id=record_flag.flag_id,
-            _user_id=record_flag.user_id,
-            _data=record_flag.data,
-        ).save()
-
-    return output_record_flag_model(record_flag)
-
-
-@router.delete(
-    '/{record_id}/flag/{flag_id}',
-)
-async def unflag_record(
-        record_id: str,
-        flag_id: str,
-        auth: Authorized = Depends(UnflagAuthorize()),
-):
-    if not (record := Session.get(Record, record_id)):
-        raise HTTPException(HTTP_404_NOT_FOUND)
-
-    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
-        raise HTTPException(HTTP_403_FORBIDDEN)
-
-    if not (record_flag := Session.get(RecordFlag, (record_id, flag_id, FlagType.record))):
-        raise HTTPException(HTTP_404_NOT_FOUND)
-
-    record_flag.delete()
-
-    RecordFlagAudit(
-        client_id=auth.client_id,
-        user_id=auth.user_id,
-        command=AuditCommand.delete,
-        timestamp=datetime.now(timezone.utc),
-        _record_id=record_flag.record_id,
-        _flag_id=record_flag.flag_id,
     ).save()

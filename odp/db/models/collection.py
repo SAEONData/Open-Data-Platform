@@ -21,9 +21,6 @@ class Collection(Base):
     collection_projects = relationship('ProjectCollection', viewonly=True)
     projects = association_proxy('collection_projects', 'project')
 
-    # view of associated flags (one-to-many)
-    flags = relationship('CollectionFlag', viewonly=True)
-
     # view of associated tags (one-to-many)
     tags = relationship('CollectionTag', viewonly=True)
 
