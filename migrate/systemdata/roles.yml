@@ -18,6 +18,7 @@ SAEON:Curator:
     - odp.client:read
     - odp.collection:admin
     - odp.collection:read
+    - odp.collection_tag:archive
     - odp.collection_tag:publish
     - odp.project:admin
     - odp.project:read
