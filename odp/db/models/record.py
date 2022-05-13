@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import CheckConstraint, Column, Enum, ForeignKey, ForeignKeyConstraint, Integer, String, TIMESTAMP
+from sqlalchemy import CheckConstraint, Column, Enum, ForeignKey, ForeignKeyConstraint, Identity, Integer, String, TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -57,7 +57,7 @@ class RecordAudit(Base):
 
     __tablename__ = 'record_audit'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, Identity(), primary_key=True)
     client_id = Column(String, nullable=False)
     user_id = Column(String)
     command = Column(Enum(AuditCommand), nullable=False)

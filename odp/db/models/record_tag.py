@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint, Column, Enum, ForeignKey, ForeignKeyConstraint, Integer, String, TIMESTAMP, UniqueConstraint
+from sqlalchemy import CheckConstraint, Column, Enum, ForeignKey, ForeignKeyConstraint, Identity, Integer, String, TIMESTAMP, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -30,7 +30,7 @@ class RecordTag(Base):
         ),
     )
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, Identity(), primary_key=True)
     record_id = Column(String, ForeignKey('record.id', ondelete='CASCADE'), nullable=False)
     tag_id = Column(String, nullable=False)
     tag_type = Column(Enum(TagType), nullable=False)
@@ -49,7 +49,7 @@ class RecordTagAudit(Base):
 
     __tablename__ = 'record_tag_audit'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, Identity(), primary_key=True)
     client_id = Column(String, nullable=False)
     user_id = Column(String)
     command = Column(Enum(AuditCommand), nullable=False)
