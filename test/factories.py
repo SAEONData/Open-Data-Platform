@@ -6,7 +6,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from faker import Faker
 
 from odp.db import Session
-from odp.db.models import Catalog, Client, Collection, CollectionTag, Project, Provider, Record, Role, Schema, Scope, Tag, User
+from odp.db.models import Catalog, Client, Collection, CollectionTag, Project, Provider, Record, RecordTag, Role, Schema, Scope, Tag, User
 
 fake = Faker()
 
@@ -177,6 +177,17 @@ class RecordFactory(ODPModelFactory):
     validity = {}
     collection = factory.SubFactory(CollectionFactory)
     schema = factory.SubFactory(SchemaFactory, type='metadata')
+    timestamp = factory.LazyFunction(lambda: datetime.now(timezone.utc))
+
+
+class RecordTagFactory(ODPModelFactory):
+    class Meta:
+        model = RecordTag
+
+    record = factory.SubFactory(RecordFactory)
+    tag = factory.SubFactory(TagFactory, type='record')
+    user = factory.SubFactory(UserFactory)
+    data = {}
     timestamp = factory.LazyFunction(lambda: datetime.now(timezone.utc))
 
 

@@ -7,9 +7,9 @@ from sqlalchemy import select
 from odp import ODPCollectionTag, ODPScope
 from odp.db import Session
 from odp.db.models import Record, RecordAudit, RecordTag, RecordTagAudit, Scope, ScopeType
-from test.api import (ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden,
-                      assert_new_timestamp, assert_unprocessable)
-from test.factories import CollectionFactory, CollectionTagFactory, ProviderFactory, RecordFactory, SchemaFactory, TagFactory
+from test.api import (ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
+                      assert_unprocessable)
+from test.factories import CollectionFactory, CollectionTagFactory, ProviderFactory, RecordFactory, RecordTagFactory, SchemaFactory, TagFactory
 
 
 @pytest.fixture
@@ -56,18 +56,24 @@ def assert_db_state(records):
         assert row.schema_type == records[n].schema_type
 
 
-def assert_db_tag_state(record_id, record_tag):
-    """Verify that the record_tag table contains the given record tag."""
+def assert_db_tag_state(record_id, *record_tags):
+    """Verify that the record_tag table contains the given record tags."""
     Session.expire_all()
-    result = Session.execute(select(RecordTag)).scalar_one_or_none()
-    if record_tag:
-        assert result.record_id == record_id
-        assert result.tag_id == record_tag['tag_id']
-        assert result.user_id is None
-        assert result.data == record_tag['data']
-        assert_new_timestamp(result.timestamp)
-    else:
-        assert result is None
+    result = Session.execute(select(RecordTag)).scalars().all()
+    assert len(result) == len(record_tags)
+    for n, row in enumerate(result):
+        assert row.record_id == record_id
+        assert_new_timestamp(row.timestamp)
+        try:
+            # record_tags[n] is a dict we posted to the record API
+            assert row.tag_id == record_tags[n]['tag_id']
+            assert row.user_id is None
+            assert row.data == record_tags[n]['data']
+        except TypeError:
+            # record_tags[n] is an object we created with RecordTagFactory
+            assert row.tag_id == record_tags[n].tag_id
+            assert row.user_id == record_tags[n].user_id
+            assert row.data == record_tags[n].data
 
 
 def assert_audit_log(command, record=None, record_id=None):
@@ -429,7 +435,7 @@ def test_tag_record(api, record_batch, scopes, provider_auth):
         )
     else:
         assert_forbidden(r)
-        assert_db_tag_state(record_id, None)
+        assert_db_tag_state(record_id)
         assert_tag_audit_log()
     assert_db_state(record_batch)
     assert_no_audit_log()
@@ -453,7 +459,7 @@ def test_tag_record(api, record_batch, scopes, provider_auth):
         )
     else:
         assert_forbidden(r)
-        assert_db_tag_state(record_id, None)
+        assert_db_tag_state(record_id)
         assert_tag_audit_log()
     assert_db_state(record_batch)
     assert_no_audit_log()
@@ -462,7 +468,7 @@ def test_tag_record(api, record_batch, scopes, provider_auth):
     r = client.delete(f'/record/{record_id}/tag/{record_tag_v1["tag_id"]}')
     if authorized:
         assert_empty_result(r)
-        assert_db_tag_state(record_id, None)
+        assert_db_tag_state(record_id)
         assert_tag_audit_log(
             dict(command='insert', record_id=record_id, record_tag=record_tag_v1),
             dict(command='update', record_id=record_id, record_tag=record_tag_v2),
@@ -470,7 +476,75 @@ def test_tag_record(api, record_batch, scopes, provider_auth):
         )
     else:
         assert_forbidden(r)
-        assert_db_tag_state(record_id, None)
+        assert_db_tag_state(record_id)
         assert_tag_audit_log()
     assert_db_state(record_batch)
     assert_no_audit_log()
+
+
+@pytest.fixture(params=[True, False])
+def flag(request):
+    return request.param
+
+
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.RECORD_TAG_QC],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.RECORD_TAG_QC),
+])
+def test_tag_record_multi(api, record_batch, scopes, provider_auth, flag):
+    authorized = ODPScope.RECORD_TAG_QC in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = record_batch[2].collection.provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = record_batch[1].collection.provider
+    else:
+        api_client_provider = None
+
+    client = api(scopes, api_client_provider)
+
+    record_tag_1 = RecordTagFactory(
+        record=record_batch[2],
+        tag=TagFactory(
+            id='record-qc',
+            type='record',
+            flag=flag,
+            scope=Session.get(
+                Scope, (ODPScope.RECORD_TAG_QC, ScopeType.odp)
+            ) or Scope(
+                id=ODPScope.RECORD_TAG_QC, type=ScopeType.odp
+            ),
+            schema=SchemaFactory(
+                type='tag',
+                uri='https://odp.saeon.ac.za/schema/tag/generic',
+            ),
+        )
+    )
+
+    r = client.post(
+        f'/record/{(record_id := record_batch[2].id)}/tag',
+        json=(record_tag_2 := dict(
+            tag_id='record-qc',
+            data={'comment': 'Second tag instance'},
+        )))
+
+    if authorized:
+        if flag:
+            assert_conflict(r, 'Flag has already been set')
+            assert_db_tag_state(record_id, record_tag_1)
+            assert_tag_audit_log()
+        else:
+            assert_json_tag_result(r, r.json(), record_tag_2)
+            assert_db_tag_state(record_id, record_tag_1, record_tag_2)
+            assert_tag_audit_log(
+                dict(command='insert', record_id=record_id, record_tag=record_tag_2),
+            )
+    else:
+        assert_forbidden(r)
+        assert_db_tag_state(record_id, record_tag_1)
+        assert_tag_audit_log()
+
+    assert_db_state(record_batch)

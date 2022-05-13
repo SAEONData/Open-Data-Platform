@@ -3,10 +3,10 @@ from sqlalchemy import select
 import migrate.systemdata
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import (Catalog, Client, ClientScope, Collection, CollectionTag, Project, ProjectCollection, Provider, Record, Role,
+from odp.db.models import (Catalog, Client, ClientScope, Collection, CollectionTag, Project, ProjectCollection, Provider, Record, RecordTag, Role,
                            RoleScope, Schema, Scope, ScopeType, Tag, User, UserRole)
-from test.factories import (CatalogFactory, ClientFactory, CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory,
-                            RecordFactory, RoleFactory, SchemaFactory, ScopeFactory, TagFactory, UserFactory)
+from test.factories import (CatalogFactory, ClientFactory, CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory, RecordFactory,
+                            RecordTagFactory, RoleFactory, SchemaFactory, ScopeFactory, TagFactory, UserFactory)
 
 
 def test_db_setup():
@@ -95,6 +95,13 @@ def test_create_record():
     result = Session.execute(select(Record)).scalar_one()
     assert (result.id, result.doi, result.sid, result.metadata_, result.validity, result.collection_id, result.schema_id, result.schema_type) \
            == (record.id, record.doi, record.sid, record.metadata_, record.validity, record.collection.id, record.schema.id, record.schema.type)
+
+
+def test_create_record_tag():
+    record_tag = RecordTagFactory()
+    result = Session.execute(select(RecordTag).join(Record).join(Tag)).scalar_one()
+    assert (result.record_id, result.tag_id, result.tag_type, result.user_id, result.data) \
+           == (record_tag.record.id, record_tag.tag.id, 'record', record_tag.user.id, record_tag.data)
 
 
 def test_create_role():

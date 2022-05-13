@@ -12,7 +12,7 @@ from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_metadata_schema, get_tag_schema
 from odp.api.models import RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
-from odp.db.models import AuditCommand, Collection, CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, SchemaType, TagType
+from odp.db.models import AuditCommand, Collection, CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, SchemaType, Tag, TagType
 
 router = APIRouter()
 
@@ -353,6 +353,15 @@ async def tag_record(
     ).scalar_one_or_none():
         command = AuditCommand.update
     else:
+        if Session.get(
+                Tag, (tag_instance_in.tag_id, TagType.record)
+        ).flag and Session.execute(
+                select(RecordTag).
+                where(RecordTag.record_id == record_id).
+                where(RecordTag.tag_id == tag_instance_in.tag_id)
+        ).first() is not None:
+            raise HTTPException(HTTP_409_CONFLICT, 'Flag has already been set')
+
         record_tag = RecordTag(
             record_id=record_id,
             tag_id=tag_instance_in.tag_id,
