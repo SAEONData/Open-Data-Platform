@@ -261,6 +261,8 @@ def test_create_record(api, record_batch, admin_route, scopes, collection_tags, 
     if authorized:
         if not admin_route and ODPCollectionTag.ARCHIVE in collection_tags:
             assert_unprocessable(r, 'A record cannot be added to an archived collection')
+            assert_db_state(record_batch)
+            assert_no_audit_log()
         else:
             record.id = r.json().get('id')
             assert_json_record_result(r, r.json(), record)
@@ -324,6 +326,8 @@ def test_update_record(api, record_batch, admin_route, scopes, collection_tags, 
     if authorized:
         if not admin_route and set(collection_tags) & {ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH}:
             assert_unprocessable(r, 'Cannot update a record belonging to a published or archived collection')
+            assert_db_state(record_batch)
+            assert_no_audit_log()
         else:
             assert_json_record_result(r, r.json(), record)
             assert_db_state(modified_record_batch)
@@ -376,6 +380,8 @@ def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, 
     if authorized:
         if not admin_route and set(collection_tags) & {ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH}:
             assert_unprocessable(r, 'Cannot delete a record belonging to a published or archived collection')
+            assert_db_state(record_batch)
+            assert_no_audit_log()
         else:
             assert_empty_result(r)
             assert_db_state(modified_record_batch)
