@@ -9,8 +9,9 @@ from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Collection, CollectionTag, CollectionTagAudit, Scope, ScopeType
 from odp.lib.formats import DOI_REGEX
-from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden, assert_new_timestamp, assert_unprocessable
-from test.factories import CollectionFactory, ProjectFactory, ProviderFactory, SchemaFactory, TagFactory
+from test.api import (ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
+                      assert_unprocessable)
+from test.factories import CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory, SchemaFactory, TagFactory
 
 
 @pytest.fixture
@@ -51,18 +52,24 @@ def assert_db_state(collections):
            == set((collection.id, collection.name, collection.doi_key, collection.provider_id, project_ids(collection)) for collection in collections)
 
 
-def assert_db_tag_state(collection_id, collection_tag):
-    """Verify that the collection_tag table contains the given collection tag."""
+def assert_db_tag_state(collection_id, *collection_tags):
+    """Verify that the collection_tag table contains the given collection tags."""
     Session.expire_all()
-    result = Session.execute(select(CollectionTag)).scalar_one_or_none()
-    if collection_tag:
-        assert result.collection_id == collection_id
-        assert result.tag_id == collection_tag['tag_id']
-        assert result.user_id is None
-        assert result.data == collection_tag['data']
-        assert_new_timestamp(result.timestamp)
-    else:
-        assert result is None
+    result = Session.execute(select(CollectionTag)).scalars().all()
+    assert len(result) == len(collection_tags)
+    for n, row in enumerate(result):
+        assert row.collection_id == collection_id
+        assert_new_timestamp(row.timestamp)
+        try:
+            # collection_tags[n] is a dict we posted to the collection API
+            assert row.tag_id == collection_tags[n]['tag_id']
+            assert row.user_id is None
+            assert row.data == collection_tags[n]['data']
+        except TypeError:
+            # collection_tags[n] is an object we created with CollectionTagFactory
+            assert row.tag_id == collection_tags[n].tag_id
+            assert row.user_id == collection_tags[n].user_id
+            assert row.data == collection_tags[n].data
 
 
 def assert_tag_audit_log(*entries):
@@ -341,7 +348,7 @@ def test_tag_collection(api, collection_batch, scopes, provider_auth):
         )
     else:
         assert_forbidden(r)
-        assert_db_tag_state(collection_id, None)
+        assert_db_tag_state(collection_id)
         assert_tag_audit_log()
     assert_db_state(collection_batch)
 
@@ -361,7 +368,7 @@ def test_tag_collection(api, collection_batch, scopes, provider_auth):
         )
     else:
         assert_forbidden(r)
-        assert_db_tag_state(collection_id, None)
+        assert_db_tag_state(collection_id)
         assert_tag_audit_log()
     assert_db_state(collection_batch)
 
@@ -369,7 +376,7 @@ def test_tag_collection(api, collection_batch, scopes, provider_auth):
     r = client.delete(f'/collection/{collection_id}/tag/{collection_tag_v1["tag_id"]}')
     if authorized:
         assert_empty_result(r)
-        assert_db_tag_state(collection_id, None)
+        assert_db_tag_state(collection_id)
         assert_tag_audit_log(
             dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_v1),
             dict(command='update', collection_id=collection_id, collection_tag=collection_tag_v2),
@@ -377,7 +384,7 @@ def test_tag_collection(api, collection_batch, scopes, provider_auth):
         )
     else:
         assert_forbidden(r)
-        assert_db_tag_state(collection_id, None)
+        assert_db_tag_state(collection_id)
         assert_tag_audit_log()
     assert_db_state(collection_batch)
 
@@ -408,5 +415,73 @@ def test_get_new_doi(api, collection_batch, scopes, provider_auth):
             assert_unprocessable(r, 'The collection does not have a DOI key')
     else:
         assert_forbidden(r)
+
+    assert_db_state(collection_batch)
+
+
+@pytest.fixture(params=[True, False])
+def flag(request):
+    return request.param
+
+
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.COLLECTION_TAG_PUBLISH],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.COLLECTION_TAG_PUBLISH),
+])
+def test_tag_collection_multi(api, collection_batch, scopes, provider_auth, flag):
+    authorized = ODPScope.COLLECTION_TAG_PUBLISH in scopes and \
+                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = collection_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = collection_batch[1].provider
+    else:
+        api_client_provider = None
+
+    client = api(scopes, api_client_provider)
+
+    collection_tag_1 = CollectionTagFactory(
+        collection=collection_batch[2],
+        tag=TagFactory(
+            id='collection-publish',
+            type='collection',
+            flag=flag,
+            scope=Session.get(
+                Scope, (ODPScope.COLLECTION_TAG_PUBLISH, ScopeType.odp)
+            ) or Scope(
+                id=ODPScope.COLLECTION_TAG_PUBLISH, type=ScopeType.odp
+            ),
+            schema=SchemaFactory(
+                type='tag',
+                uri='https://odp.saeon.ac.za/schema/tag/generic',
+            ),
+        )
+    )
+
+    r = client.post(
+        f'/collection/{(collection_id := collection_batch[2].id)}/tag',
+        json=(collection_tag_2 := dict(
+            tag_id='collection-publish',
+            data={'comment': 'Second tag instance'},
+        )))
+
+    if authorized:
+        if flag:
+            assert_conflict(r, 'Flag has already been set')
+            assert_db_tag_state(collection_id, collection_tag_1)
+            assert_tag_audit_log()
+        else:
+            assert_json_tag_result(r, r.json(), collection_tag_2)
+            assert_db_tag_state(collection_id, collection_tag_1, collection_tag_2)
+            assert_tag_audit_log(
+                dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_2),
+            )
+    else:
+        assert_forbidden(r)
+        assert_db_tag_state(collection_id, collection_tag_1)
+        assert_tag_audit_log()
 
     assert_db_state(collection_batch)

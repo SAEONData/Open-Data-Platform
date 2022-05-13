@@ -148,7 +148,7 @@ class CollectionTagFactory(ODPModelFactory):
     tag = factory.SubFactory(TagFactory, type='collection')
     user = factory.SubFactory(UserFactory)
     data = {}
-    timestamp = factory.LazyFunction(lambda: datetime.now())
+    timestamp = factory.LazyFunction(lambda: datetime.now(timezone.utc))
 
 
 class ProjectFactory(ODPModelFactory):
@@ -177,7 +177,7 @@ class RecordFactory(ODPModelFactory):
     validity = {}
     collection = factory.SubFactory(CollectionFactory)
     schema = factory.SubFactory(SchemaFactory, type='metadata')
-    timestamp = datetime.now(timezone.utc)
+    timestamp = factory.LazyFunction(lambda: datetime.now(timezone.utc))
 
 
 class RoleFactory(ODPModelFactory):

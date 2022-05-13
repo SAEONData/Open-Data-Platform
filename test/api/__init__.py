@@ -36,6 +36,11 @@ def assert_method_not_allowed(response):
     assert response.json() == {'detail': 'Method Not Allowed'}
 
 
+def assert_conflict(response, message):
+    assert response.status_code == 409
+    assert response.json() == {'detail': message}
+
+
 def assert_unprocessable(response, message):
     assert response.status_code == 422
     assert response.json() == {'detail': message}
