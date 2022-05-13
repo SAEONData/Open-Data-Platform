@@ -26,9 +26,12 @@ class _Base:
         Session.delete(self)
         Session.flush()
 
-    def _repr(self, *attrs):
-        params = ', '.join(f'{attr}={getattr(self, attr)!r}' for attr in attrs)
-        return f'{self.__class__.__name__}({params})'
+    def __repr__(self):
+        try:
+            params = ', '.join(f'{attr}={getattr(self, attr)!r}' for attr in getattr(self, '_repr_'))
+            return f'{self.__class__.__name__}({params})'
+        except AttributeError:
+            return object.__repr__(self)
 
 
 Base = declarative_base(cls=_Base)

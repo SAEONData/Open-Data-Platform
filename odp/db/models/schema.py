@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Enum
+from sqlalchemy import Column, Enum, String
 
 from odp.db import Base
 from odp.db.models.types import SchemaType
@@ -13,5 +13,4 @@ class Schema(Base):
     type = Column(Enum(SchemaType), primary_key=True)
     uri = Column(String, nullable=False)
 
-    def __repr__(self):
-        return self._repr('id', 'type', 'uri')
+    _repr_ = 'id', 'type', 'uri'

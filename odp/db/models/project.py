@@ -20,5 +20,4 @@ class Project(Base):
     project_collections = relationship('ProjectCollection', cascade='all, delete-orphan', passive_deletes=True)
     collections = association_proxy('project_collections', 'collection', creator=lambda c: ProjectCollection(collection=c))
 
-    def __repr__(self):
-        return self._repr('id', 'name')
+    _repr_ = 'id', 'name'

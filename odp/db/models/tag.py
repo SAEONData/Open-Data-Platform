@@ -42,5 +42,4 @@ class Tag(Base):
     scope_type = Column(Enum(ScopeType), nullable=False)
     scope = relationship('Scope')
 
-    def __repr__(self):
-        return self._repr('id', 'type', 'flag', 'public', 'schema_id', 'scope_id')
+    _repr_ = 'id', 'type', 'flag', 'public', 'schema_id', 'scope_id'

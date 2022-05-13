@@ -1,11 +1,11 @@
 import uuid
 
-from sqlalchemy import Column, String, ForeignKey, CheckConstraint, Enum, ForeignKeyConstraint, Integer, TIMESTAMP
+from sqlalchemy import CheckConstraint, Column, Enum, ForeignKey, ForeignKeyConstraint, Integer, String, TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
-from odp.db.models.types import SchemaType, AuditCommand
+from odp.db.models.types import AuditCommand, SchemaType
 
 
 class Record(Base):
@@ -49,15 +49,14 @@ class Record(Base):
     # view of associated tags (one-to-many)
     tags = relationship('RecordTag', viewonly=True)
 
-    def __repr__(self):
-        return self._repr('id', 'doi', 'sid', 'collection_id', 'schema_id')
+    _repr_ = 'id', 'doi', 'sid', 'collection_id', 'schema_id'
 
 
 class RecordAudit(Base):
     """Record audit log."""
-    
+
     __tablename__ = 'record_audit'
-    
+
     id = Column(Integer, primary_key=True)
     client_id = Column(String, nullable=False)
     user_id = Column(String)

@@ -29,5 +29,4 @@ class Client(Base):
     client_scopes = relationship('ClientScope', cascade='all, delete-orphan', passive_deletes=True)
     scopes = association_proxy('client_scopes', 'scope', creator=lambda s: ClientScope(scope=s))
 
-    def __repr__(self):
-        return self._repr('id', 'provider_id')
+    _repr_ = 'id', 'provider_id'

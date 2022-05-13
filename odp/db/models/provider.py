@@ -26,5 +26,4 @@ class Provider(Base):
     # view of associated clients (zero-or-one-to-many)
     clients = relationship('Client', viewonly=True)
 
-    def __repr__(self):
-        return self._repr('id', 'name')
+    _repr_ = 'id', 'name'

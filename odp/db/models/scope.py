@@ -22,5 +22,4 @@ class Scope(Base):
     scope_clients = relationship('ClientScope', viewonly=True)
     clients = association_proxy('scope_clients', 'client')
 
-    def __repr__(self):
-        return self._repr('id', 'type')
+    _repr_ = 'id', 'type'

@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, String, Boolean
+from sqlalchemy import Boolean, Column, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
@@ -26,8 +26,7 @@ class User(Base):
     user_roles = relationship('UserRole', cascade='all, delete-orphan', passive_deletes=True)
     roles = association_proxy('user_roles', 'role', creator=lambda r: UserRole(role=r))
 
-    def __repr__(self):
-        return self._repr('id', 'email', 'name', 'active', 'verified')
+    _repr_ = 'id', 'email', 'name', 'active', 'verified'
 
     # region Flask-Login
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Enum, CheckConstraint, ForeignKeyConstraint
+from sqlalchemy import CheckConstraint, Column, Enum, ForeignKeyConstraint, String
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
@@ -28,5 +28,4 @@ class Catalog(Base):
     schema_type = Column(Enum(SchemaType), nullable=False)
     schema = relationship('Schema')
 
-    def __repr__(self):
-        return self._repr('id', 'schema_id')
+    _repr_ = 'id', 'schema_id'

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
@@ -24,5 +24,4 @@ class Collection(Base):
     # view of associated tags (one-to-many)
     tags = relationship('CollectionTag', viewonly=True)
 
-    def __repr__(self):
-        return self._repr('id', 'name', 'doi_key', 'provider_id')
+    _repr_ = 'id', 'name', 'doi_key', 'provider_id'
