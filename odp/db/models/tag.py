@@ -31,7 +31,7 @@ class Tag(Base):
 
     id = Column(String, unique=True, primary_key=True)
     type = Column(Enum(TagType), primary_key=True)
-    multi = Column(Boolean)  # todo nullable=False
+    flag = Column(Boolean, nullable=False)
     public = Column(Boolean, nullable=False)
 
     schema_id = Column(String, nullable=False)
@@ -43,4 +43,4 @@ class Tag(Base):
     scope = relationship('Scope')
 
     def __repr__(self):
-        return self._repr('id', 'type', 'multi', 'public', 'schema_id', 'scope_id')
+        return self._repr('id', 'type', 'flag', 'public', 'schema_id', 'scope_id')

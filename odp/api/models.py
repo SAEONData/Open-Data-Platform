@@ -147,6 +147,7 @@ class ScopeModel(BaseModel):
 
 class TagModel(BaseModel):
     id: str
+    flag: bool
     public: bool
     scope_id: str
     schema_id: str

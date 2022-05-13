@@ -26,6 +26,7 @@ async def list_tags(
         select(Tag),
         lambda row: TagModel(
             id=row.Tag.id,
+            flag=row.Tag.flag,
             public=row.Tag.public,
             scope_id=row.Tag.scope_id,
             schema_id=row.Tag.schema_id,
@@ -53,6 +54,7 @@ async def get_tag(
 
     return TagModel(
         id=tag.id,
+        flag=tag.flag,
         public=tag.public,
         scope_id=tag.scope_id,
         schema_id=tag.schema_id,

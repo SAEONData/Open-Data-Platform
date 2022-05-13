@@ -23,8 +23,10 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% from 'macros.html' import render_info %}
-            {% call(prop) render_info(tag, 'Public', 'Scope', 'Schema URI') %}
-                {% if prop == 'Public' %}
+            {% call(prop) render_info(tag, 'Flag', 'Public', 'Scope', 'Schema URI') %}
+                {% if prop == 'Flag' %}
+                    {{ tag.flag }}
+                {% elif prop == 'Public' %}
                     {{ tag.public }}
                 {% elif prop == 'Scope' %}
                     {{ tag.scope_id }}
