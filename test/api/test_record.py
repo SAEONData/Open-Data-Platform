@@ -6,7 +6,7 @@ from sqlalchemy import select
 
 from odp import ODPCollectionTag, ODPScope
 from odp.db import Session
-from odp.db.models import Record, RecordAudit, RecordTag, RecordTagAudit, Scope, ScopeType
+from odp.db.models import CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, Scope, ScopeType
 from test.api import (ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
                       assert_unprocessable)
 from test.factories import CollectionFactory, CollectionTagFactory, ProviderFactory, RecordFactory, RecordTagFactory, SchemaFactory, TagFactory
@@ -15,6 +15,20 @@ from test.factories import CollectionFactory, CollectionTagFactory, ProviderFact
 @pytest.fixture
 def record_batch():
     """Create and commit a batch of Record instances."""
+    records = []
+    for _ in range(randint(3, 5)):
+        records += [record := RecordFactory()]
+        for _ in range(randint(0, 3)):
+            RecordTagFactory(record=record)
+        for _ in range(randint(0, 3)):
+            CollectionTagFactory(collection=record.collection)
+    return records
+
+
+@pytest.fixture
+def record_batch_no_tags():
+    """Create and commit a batch of Record instances
+    without any tag instances."""
     return [RecordFactory() for _ in range(randint(3, 5))]
 
 
@@ -132,6 +146,23 @@ def assert_json_record_result(response, json, record):
     assert json['collection_id'] == record.collection_id
     assert json['schema_id'] == record.schema_id
     assert json['metadata'] == record.metadata_
+    assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
+
+    json_tags = json['tags']
+    db_tags = Session.execute(
+        select(RecordTag).where(RecordTag.record_id == record.id)
+    ).scalars().all() + Session.execute(
+        select(CollectionTag).where(CollectionTag.collection_id == record.collection_id)
+    ).scalars().all()
+    assert len(json_tags) == len(db_tags)
+    json_tags.sort(key=lambda t: t['tag_id'])
+    db_tags.sort(key=lambda t: t.tag_id)
+    for n, json_tag in enumerate(json_tags):
+        assert json_tag['tag_id'] == db_tags[n].tag_id
+        assert json_tag['user_id'] == db_tags[n].user_id
+        assert json_tag['user_name'] == db_tags[n].user.name
+        assert json_tag['data'] == db_tags[n].data
+        assert_new_timestamp(datetime.fromisoformat(json_tag['timestamp']))
 
 
 def assert_json_tag_result(response, json, record_tag):
@@ -398,14 +429,14 @@ def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, 
     all_scopes,
     all_scopes_excluding(ODPScope.RECORD_TAG_QC),
 ])
-def test_tag_record(api, record_batch, scopes, provider_auth):
+def test_tag_record(api, record_batch_no_tags, scopes, provider_auth):
     authorized = ODPScope.RECORD_TAG_QC in scopes and \
                  provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
     if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch[2].collection.provider
+        api_client_provider = record_batch_no_tags[2].collection.provider
     elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch[1].collection.provider
+        api_client_provider = record_batch_no_tags[1].collection.provider
     else:
         api_client_provider = None
 
@@ -426,7 +457,7 @@ def test_tag_record(api, record_batch, scopes, provider_auth):
 
     # insert tag
     r = client.post(
-        f'/record/{(record_id := record_batch[2].id)}/tag',
+        f'/record/{(record_id := record_batch_no_tags[2].id)}/tag',
         json=(record_tag_v1 := dict(
             tag_id='record-qc',
             data={
@@ -443,7 +474,7 @@ def test_tag_record(api, record_batch, scopes, provider_auth):
         assert_forbidden(r)
         assert_db_tag_state(record_id)
         assert_tag_audit_log()
-    assert_db_state(record_batch)
+    assert_db_state(record_batch_no_tags)
     assert_no_audit_log()
 
     # update tag
@@ -467,7 +498,7 @@ def test_tag_record(api, record_batch, scopes, provider_auth):
         assert_forbidden(r)
         assert_db_tag_state(record_id)
         assert_tag_audit_log()
-    assert_db_state(record_batch)
+    assert_db_state(record_batch_no_tags)
     assert_no_audit_log()
 
     # delete tag
@@ -484,7 +515,7 @@ def test_tag_record(api, record_batch, scopes, provider_auth):
         assert_forbidden(r)
         assert_db_tag_state(record_id)
         assert_tag_audit_log()
-    assert_db_state(record_batch)
+    assert_db_state(record_batch_no_tags)
     assert_no_audit_log()
 
 
@@ -499,21 +530,21 @@ def flag(request):
     all_scopes,
     all_scopes_excluding(ODPScope.RECORD_TAG_QC),
 ])
-def test_tag_record_multi(api, record_batch, scopes, provider_auth, flag):
+def test_tag_record_multi(api, record_batch_no_tags, scopes, provider_auth, flag):
     authorized = ODPScope.RECORD_TAG_QC in scopes and \
                  provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
     if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch[2].collection.provider
+        api_client_provider = record_batch_no_tags[2].collection.provider
     elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch[1].collection.provider
+        api_client_provider = record_batch_no_tags[1].collection.provider
     else:
         api_client_provider = None
 
     client = api(scopes, api_client_provider)
 
     record_tag_1 = RecordTagFactory(
-        record=record_batch[2],
+        record=record_batch_no_tags[2],
         tag=TagFactory(
             id='record-qc',
             type='record',
@@ -531,7 +562,7 @@ def test_tag_record_multi(api, record_batch, scopes, provider_auth, flag):
     )
 
     r = client.post(
-        f'/record/{(record_id := record_batch[2].id)}/tag',
+        f'/record/{(record_id := record_batch_no_tags[2].id)}/tag',
         json=(record_tag_2 := dict(
             tag_id='record-qc',
             data={'comment': 'Second tag instance'},
@@ -553,4 +584,4 @@ def test_tag_record_multi(api, record_batch, scopes, provider_auth, flag):
         assert_db_tag_state(record_id, record_tag_1)
         assert_tag_audit_log()
 
-    assert_db_state(record_batch)
+    assert_db_state(record_batch_no_tags)

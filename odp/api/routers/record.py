@@ -28,19 +28,22 @@ def output_record_model(record: Record) -> RecordModel:
         validity=record.validity,
         timestamp=record.timestamp,
         tags=[
-            output_record_tag_model(record_tag)
-            for record_tag in record.tags
-        ],
+                 output_tag_instance_model(collection_tag)
+                 for collection_tag in record.collection.tags
+             ] + [
+                 output_tag_instance_model(record_tag)
+                 for record_tag in record.tags
+             ],
     )
 
 
-def output_record_tag_model(record_tag: RecordTag) -> TagInstanceModel:
+def output_tag_instance_model(tag_instance: CollectionTag | RecordTag) -> TagInstanceModel:
     return TagInstanceModel(
-        tag_id=record_tag.tag_id,
-        user_id=record_tag.user_id,
-        user_name=record_tag.user.name if record_tag.user_id else None,
-        data=record_tag.data,
-        timestamp=record_tag.timestamp,
+        tag_id=tag_instance.tag_id,
+        user_id=tag_instance.user_id,
+        user_name=tag_instance.user.name if tag_instance.user_id else None,
+        data=tag_instance.data,
+        timestamp=tag_instance.timestamp,
     )
 
 
@@ -390,7 +393,7 @@ async def tag_record(
             _data=record_tag.data,
         ).save()
 
-    return output_record_tag_model(record_tag)
+    return output_tag_instance_model(record_tag)
 
 
 @router.delete(

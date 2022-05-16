@@ -26,19 +26,19 @@ def output_collection_model(result) -> CollectionModel:
         project_ids=[project.id for project in result.Collection.projects],
         record_count=result.count,
         tags=[
-            output_collection_tag_model(collection_tag)
+            output_tag_instance_model(collection_tag)
             for collection_tag in result.Collection.tags
         ],
     )
 
 
-def output_collection_tag_model(collection_tag: CollectionTag) -> TagInstanceModel:
+def output_tag_instance_model(tag_instance: CollectionTag) -> TagInstanceModel:
     return TagInstanceModel(
-        tag_id=collection_tag.tag_id,
-        user_id=collection_tag.user_id,
-        user_name=collection_tag.user.name if collection_tag.user_id else None,
-        data=collection_tag.data,
-        timestamp=collection_tag.timestamp,
+        tag_id=tag_instance.tag_id,
+        user_id=tag_instance.user_id,
+        user_name=tag_instance.user.name if tag_instance.user_id else None,
+        data=tag_instance.data,
+        timestamp=tag_instance.timestamp,
     )
 
 
@@ -207,7 +207,7 @@ async def tag_collection(
             _data=collection_tag.data,
         ).save()
 
-    return output_collection_tag_model(collection_tag)
+    return output_tag_instance_model(collection_tag)
 
 
 @router.delete(
