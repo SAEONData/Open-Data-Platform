@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint, Column, Enum, ForeignKeyConstraint, String
+from sqlalchemy import CheckConstraint, Column, Enum, ForeignKeyConstraint, String, TIMESTAMP
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
@@ -27,5 +27,7 @@ class Catalog(Base):
     schema_id = Column(String, nullable=False)
     schema_type = Column(Enum(SchemaType), nullable=False)
     schema = relationship('Schema')
+
+    timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
 
     _repr_ = 'id', 'schema_id'

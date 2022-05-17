@@ -66,6 +66,7 @@ class CatalogFactory(ODPModelFactory):
 
     id = factory.Sequence(lambda n: f'{fake.slug()}.{n}')
     schema = factory.SubFactory(SchemaFactory, type='catalog')
+    timestamp = factory.LazyFunction(lambda: datetime.now(timezone.utc))
 
 
 class ProviderFactory(ODPModelFactory):

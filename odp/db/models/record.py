@@ -12,7 +12,7 @@ class Record(Base):
     """An ODP record.
 
     This model represents a uniquely identifiable digital object
-    and its associated metdata.
+    and its associated metadata.
     """
 
     __tablename__ = 'record'
@@ -48,6 +48,9 @@ class Record(Base):
 
     # view of associated tags (one-to-many)
     tags = relationship('RecordTag', viewonly=True)
+
+    # view of associated catalog records (one-to-many)
+    catalog_records = relationship('CatalogRecord', viewonly=True)
 
     _repr_ = 'id', 'doi', 'sid', 'collection_id', 'schema_id'
 
