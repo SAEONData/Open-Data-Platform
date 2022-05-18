@@ -3,12 +3,12 @@ psycopg2
 alembic
 pydantic
 python-dotenv
-itsdangerous
+itsdangerous==2.0.1
 argon2-cffi
 requests
 redis
 pyyaml
-ory-hydra-client
+ory-hydra-client==1.11.7
 
 # APIs
 fastapi
