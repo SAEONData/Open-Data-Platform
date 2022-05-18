@@ -18,7 +18,7 @@ async-timeout==4.0.2
     # via redis
 attrs==21.4.0
     # via pytest
-authlib==1.0.1
+authlib==0.15.5
     # via -r requirements.in
 blinker==1.4
     # via flask-mail

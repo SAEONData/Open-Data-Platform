@@ -24,7 +24,7 @@ flask-wtf
 flask-mail
 wtforms
 gunicorn
-authlib
+authlib==0.15.5
 bootstrap-flask
 email-validator
 
