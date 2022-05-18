@@ -1,3 +1,4 @@
+import hashlib
 import re
 from datetime import datetime
 from pathlib import Path
@@ -11,6 +12,12 @@ schema_catalog.add_uri_source(
     URI('https://odp.saeon.ac.za/schema/'),
     LocalSource(Path(__file__).parent.parent.parent / 'schema', suffix='.json'),
 )
+
+
+def schema_md5(uri: str) -> str:
+    """Return an MD5 hash of the (serialized) schema identified by uri."""
+    schema = schema_catalog.get_schema(URI(uri))
+    return hashlib.md5(str(schema).encode()).hexdigest()
 
 
 @translation_filter('date-to-year')

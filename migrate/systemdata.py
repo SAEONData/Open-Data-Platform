@@ -13,6 +13,7 @@ data with the ODP codebase.
 import os
 import pathlib
 import sys
+from datetime import datetime, timezone
 from getpass import getpass
 
 import argon2
@@ -30,6 +31,7 @@ from odp import ODPScope
 from odp.db import Base, Session, engine
 from odp.db.models import Catalog, Client, Role, Schema, SchemaType, Scope, ScopeType, Tag, User, UserRole
 from odp.lib.hydra import GrantType, HydraAdminAPI, HydraScope, ResponseType
+from odp.lib.schema import schema_md5
 
 datadir = pathlib.Path(__file__).parent / 'systemdata'
 
@@ -173,6 +175,12 @@ def init_schemas():
         schema_type = schema_spec['type']
         schema = Session.get(Schema, (schema_id, schema_type)) or Schema(id=schema_id, type=schema_type)
         schema.uri = schema_spec['uri']
+
+        if (md5 := schema_md5(schema.uri)) != schema.md5:
+            schema.md5 = md5
+            schema.timestamp = datetime.now(timezone.utc)
+            print(f'Updated MD5 and timestamp for schema {schema_id}')
+
         schema.save()
 
 

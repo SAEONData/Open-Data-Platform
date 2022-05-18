@@ -17,7 +17,7 @@ def select_records(catalog_id: str) -> list[str]:
     * there is no corresponding catalog_record entry; or
     * catalog_record.timestamp is less than any of the following:
 
-      * catalog.timestamp
+      * catalog.schema.timestamp
       * record.timestamp
       * record_tag.timestamp, for any associated record tag
       * collection_tag.timestamp, for any associated collection tag
