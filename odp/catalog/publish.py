@@ -2,10 +2,10 @@ from datetime import datetime
 
 from jschon import JSON, URI
 
-from odp.api.lib.schema import schema_catalog
 from odp.api.routers.record import output_record_model
 from odp.db import Session
 from odp.db.models import CatalogRecord
+from odp.lib.schema import schema_catalog
 
 
 def select_records(catalog_id: str) -> list[str]:

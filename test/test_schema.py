@@ -1,6 +1,6 @@
 from jschon import JSON, JSONPatch, URI
 
-from odp.api.lib.schema import schema_catalog as catalog
+from odp.lib.schema import schema_catalog as catalog
 
 
 def test_validity():

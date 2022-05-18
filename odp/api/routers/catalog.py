@@ -6,10 +6,10 @@ from starlette.status import HTTP_404_NOT_FOUND
 from odp import ODPScope
 from odp.api.lib.auth import Authorize
 from odp.api.lib.paging import Page, Paginator
-from odp.api.lib.schema import schema_catalog
 from odp.api.models import CatalogModel
 from odp.db import Session
 from odp.db.models import Catalog
+from odp.lib.schema import schema_catalog
 
 router = APIRouter()
 
