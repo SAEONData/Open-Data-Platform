@@ -160,7 +160,6 @@ services:
         - CA_CERT_URL
         - ODP_UI_DAP_URL
         - ODP_UI_DAP_THREDDS_URL
-        - ODP_DAP_DOMAIN
     command: serve --config /config.yml
     network_mode: host
     restart: always
