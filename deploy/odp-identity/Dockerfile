@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.10
 
 ARG CA_CERT_URL
 RUN if [ -n "${CA_CERT_URL}" ]; then curl ${CA_CERT_URL} -k -o /usr/local/share/ca-certificates/saeon-ca.crt; fi
