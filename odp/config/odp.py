@@ -51,7 +51,6 @@ class ODPUIDAPConfig(BaseConfig, OAuth2ClientConfigMixin):
         env_prefix = 'ODP_UI_DAP_'
 
     FLASK_KEY: str           # Flask secret key
-    SERVER_NAME: str = None  # public domain name
     THREDDS_URL: AnyHttpUrl  # proxy URL for the THREDDS server
 
 

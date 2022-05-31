@@ -106,7 +106,6 @@ services:
       - ODP_UI_DAP_CLIENT_ID
       - ODP_UI_DAP_CLIENT_SECRET
       - ODP_UI_DAP_THREDDS_URL
-      - ODP_UI_DAP_SERVER_NAME=${ODP_DAP_DOMAIN}
       - ODP_DB_HOST
       - ODP_DB_NAME
       - ODP_DB_USER

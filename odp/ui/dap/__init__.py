@@ -17,7 +17,6 @@ def create_app():
     app = Flask(__name__)
     app.config.update(
         SECRET_KEY=config.ODP.UI.DAP.FLASK_KEY,
-        SERVER_NAME=config.ODP.UI.DAP.SERVER_NAME,
         SESSION_COOKIE_SECURE=True,
         SESSION_COOKIE_SAMESITE='Lax',
         CLIENT_ID=config.ODP.UI.DAP.CLIENT_ID,
