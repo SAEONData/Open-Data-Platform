@@ -1,5 +1,5 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from wtforms.validators import data_required
+from wtforms.validators import input_required
 
 from odp import ODPScope
 from odp.ui import api
@@ -28,7 +28,7 @@ def view(id):
 @api.client(ODPScope.CLIENT_ADMIN)
 def create():
     form = ClientForm(request.form)
-    form.secret.validators = [data_required()]
+    form.secret.validators = [input_required()]
     utils.populate_provider_choices(form.provider_id, include_none=True)
     utils.populate_scope_choices(form.scope_ids)
 

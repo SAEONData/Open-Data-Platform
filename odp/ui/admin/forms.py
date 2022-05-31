@@ -3,7 +3,7 @@ import json
 from flask import Flask, session
 from wtforms import BooleanField, Form, RadioField, SelectField, SelectMultipleField, StringField, TextAreaField, ValidationError
 from wtforms.csrf.session import SessionCSRF
-from wtforms.validators import input_required, length, regexp
+from wtforms.validators import data_required, input_required, regexp
 from wtforms.widgets import CheckboxInput, ListWidget
 
 from odp.lib.formats import DOI_REGEX, SID_REGEX
@@ -52,11 +52,12 @@ class BaseForm(Form):
 class ClientForm(BaseForm):
     id = StringField(
         label='Client id',
-        validators=[input_required(), length(min=2)],
+        filters=[lambda s: s.strip() if s else s],
+        validators=[data_required()],
     )
     name = StringField(
         label='Client name',
-        validators=[input_required(), length(min=2)],
+        validators=[data_required()],
     )
     secret = StringField(
         label='Client secret',
@@ -102,11 +103,12 @@ class ClientForm(BaseForm):
 class CollectionForm(BaseForm):
     id = StringField(
         label='Collection id',
-        validators=[input_required(), length(min=2)],
+        filters=[lambda s: s.strip() if s else s],
+        validators=[data_required()],
     )
     name = StringField(
         label='Collection name',
-        validators=[input_required(), length(min=2)],
+        validators=[data_required()],
     )
     provider_id = SelectField(
         label='Provider',
@@ -120,11 +122,12 @@ class CollectionForm(BaseForm):
 class ProjectForm(BaseForm):
     id = StringField(
         label='Project id',
-        validators=[input_required(), length(min=2)],
+        filters=[lambda s: s.strip() if s else s],
+        validators=[data_required()],
     )
     name = StringField(
         label='Project name',
-        validators=[input_required(), length(min=2)],
+        validators=[data_required()],
     )
     collection_ids = MultiCheckboxField(
         label='Collections',
@@ -134,11 +137,12 @@ class ProjectForm(BaseForm):
 class ProviderForm(BaseForm):
     id = StringField(
         label='Provider id',
-        validators=[input_required(), length(min=2)],
+        filters=[lambda s: s.strip() if s else s],
+        validators=[data_required()],
     )
     name = StringField(
         label='Provider name',
-        validators=[input_required(), length(min=2)],
+        validators=[data_required()],
     )
 
 
@@ -192,7 +196,8 @@ class RecordTagQCForm(BaseForm):
 class RoleForm(BaseForm):
     id = StringField(
         label='Role id',
-        validators=[input_required(), length(min=2)],
+        filters=[lambda s: s.strip() if s else s],
+        validators=[data_required()],
     )
     provider_id = SelectField(
         label='Provider',
