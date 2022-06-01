@@ -94,7 +94,7 @@ def client(*scope: ODPScope, fallback_to_referrer=False):
                     # avoid redirect loops when the API is unavailable
                     return redirect(url_for('home.index'))
 
-                if fallback_to_referrer:
+                if fallback_to_referrer and request.referrer:
                     return redirect(request.referrer)
 
                 # fall back to the index page
