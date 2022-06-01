@@ -28,12 +28,17 @@ def create():
     form = ProviderForm(request.form)
 
     if request.method == 'POST' and form.validate():
-        api.post('/provider/', dict(
-            id=(id := form.id.data),
-            name=form.name.data,
-        ))
-        flash(f'Provider {id} has been created.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.post('/provider/', dict(
+                id=(id := form.id.data),
+                name=form.name.data,
+            ))
+            flash(f'Provider {id} has been created.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('provider_edit.html', form=form)
 
@@ -45,12 +50,17 @@ def edit(id):
     form = ProviderForm(request.form, data=provider)
 
     if request.method == 'POST' and form.validate():
-        api.put('/provider/', dict(
-            id=id,
-            name=form.name.data,
-        ))
-        flash(f'Provider {id} has been updated.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.put('/provider/', dict(
+                id=id,
+                name=form.name.data,
+            ))
+            flash(f'Provider {id} has been updated.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('provider_edit.html', provider=provider, form=form)
 

@@ -33,21 +33,26 @@ def create():
     utils.populate_scope_choices(form.scope_ids)
 
     if request.method == 'POST' and form.validate():
-        api.post('/client/', dict(
-            id=(id := form.id.data),
-            name=form.name.data,
-            secret=form.secret.data,
-            provider_id=form.provider_id.data or None,
-            scope_ids=form.scope_ids.data,
-            grant_types=form.grant_types.data,
-            response_types=form.response_types.data,
-            redirect_uris=form.redirect_uris.data.split(),
-            post_logout_redirect_uris=form.post_logout_redirect_uris.data.split(),
-            token_endpoint_auth_method=form.token_endpoint_auth_method.data,
-            allowed_cors_origins=form.allowed_cors_origins.data.split(),
-        ))
-        flash(f'Client {id} has been created.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.post('/client/', dict(
+                id=(id := form.id.data),
+                name=form.name.data,
+                secret=form.secret.data,
+                provider_id=form.provider_id.data or None,
+                scope_ids=form.scope_ids.data,
+                grant_types=form.grant_types.data,
+                response_types=form.response_types.data,
+                redirect_uris=form.redirect_uris.data.split(),
+                post_logout_redirect_uris=form.post_logout_redirect_uris.data.split(),
+                token_endpoint_auth_method=form.token_endpoint_auth_method.data,
+                allowed_cors_origins=form.allowed_cors_origins.data.split(),
+            ))
+            flash(f'Client {id} has been created.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('client_edit.html', form=form)
 
@@ -69,21 +74,26 @@ def edit(id):
     utils.populate_scope_choices(form.scope_ids)
 
     if request.method == 'POST' and form.validate():
-        api.put('/client/', dict(
-            id=id,
-            name=form.name.data,
-            secret=form.secret.data or None,
-            provider_id=form.provider_id.data or None,
-            scope_ids=form.scope_ids.data,
-            grant_types=form.grant_types.data,
-            response_types=form.response_types.data,
-            redirect_uris=form.redirect_uris.data.split(),
-            post_logout_redirect_uris=form.post_logout_redirect_uris.data.split(),
-            token_endpoint_auth_method=form.token_endpoint_auth_method.data,
-            allowed_cors_origins=form.allowed_cors_origins.data.split(),
-        ))
-        flash(f'Client {id} has been updated.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.put('/client/', dict(
+                id=id,
+                name=form.name.data,
+                secret=form.secret.data or None,
+                provider_id=form.provider_id.data or None,
+                scope_ids=form.scope_ids.data,
+                grant_types=form.grant_types.data,
+                response_types=form.response_types.data,
+                redirect_uris=form.redirect_uris.data.split(),
+                post_logout_redirect_uris=form.post_logout_redirect_uris.data.split(),
+                token_endpoint_auth_method=form.token_endpoint_auth_method.data,
+                allowed_cors_origins=form.allowed_cors_origins.data.split(),
+            ))
+            flash(f'Client {id} has been updated.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('client_edit.html', client=client, form=form)
 

@@ -60,10 +60,15 @@ def _request(method, path, data, params):
         raise ODPAPIError(401, str(e)) from e
 
 
-def client(*scope: ODPScope):
+def client(*scope: ODPScope, fallback_to_referrer=False):
     """Decorator that configures a view as an API client requiring any of
     the given `scope` for API access. It provides client-side authorization
-    and API error handling."""
+    and API error handling.
+
+    If `fallback_to_referrer` is True, then after an unhandled API error the
+    user lands back on the same page they were on. Otherwise (by default),
+    they are redirected to the blueprint's index view.
+    """
 
     def decorator(f):
         @wraps(f)
@@ -75,30 +80,47 @@ def client(*scope: ODPScope):
             g.user_permissions = get_user_permissions(current_user.id, current_app.config['CLIENT_ID'])
             if not any(s in g.user_permissions for s in scope):
                 flash('You do not have permission to access that page.', category='warning')
-                return redirect(request.referrer)
+                return redirect(request.referrer or url_for('home.index'))
 
             try:
+                # call the view function
                 return f(*args, **kwargs)
+
             except ODPAPIError as e:
-                return _handle_error(e)
+                if response := handle_error(e):
+                    return response
+
+                if e.status_code == 503:
+                    # avoid redirect loops when the API is unavailable
+                    return redirect(url_for('home.index'))
+
+                if fallback_to_referrer:
+                    return redirect(request.referrer)
+
+                # fall back to the index page
+                return redirect(url_for('.index'))
 
         return decorated_function
 
     return decorator
 
 
-def _handle_error(e: ODPAPIError):
+def handle_error(e: ODPAPIError):
+    """For authentication and authorization errors we bail out and return
+    an appropriate redirect. For any other kind of error, we just display
+    the error message and let the caller decide what to do."""
+
     if e.status_code == 401:
         flash('An authentication error occurred. Please log in again to continue.', category='error')
         return redirect(url_for('hydra.logout'))
 
     if e.status_code == 403:
         flash('You do not have permission to access that page.', category='warning')
-        return redirect(request.referrer)
+        return redirect(request.referrer or url_for('home.index'))
 
     if e.status_code == 503:
         flash('Service unavailable. Please try again in a few minutes.', category='error')
-        return redirect(url_for('home.index'))
+        return
 
     try:
         detail = e.error_detail['detail']
@@ -117,5 +139,3 @@ def _handle_error(e: ODPAPIError):
 
     except (TypeError, KeyError, IndexError):
         flash(e.error_detail, category='error')
-
-    return redirect(request.referrer)

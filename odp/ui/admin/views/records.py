@@ -63,15 +63,20 @@ def create():
         if ODPScope.RECORD_ADMIN in g.user_permissions:
             api_route += 'admin/'
 
-        record = api.post(api_route, dict(
-            doi=(doi := form.doi.data) or None,
-            sid=(sid := form.sid.data) or None,
-            collection_id=form.collection_id.data,
-            schema_id=form.schema_id.data,
-            metadata=json.loads(form.metadata.data),
-        ))
-        flash(f'Record {doi or sid} has been created.', category='success')
-        return redirect(url_for('.view', id=record['id']))
+        try:
+            record = api.post(api_route, dict(
+                doi=(doi := form.doi.data) or None,
+                sid=(sid := form.sid.data) or None,
+                collection_id=form.collection_id.data,
+                schema_id=form.schema_id.data,
+                metadata=json.loads(form.metadata.data),
+            ))
+            flash(f'Record {doi or sid} has been created.', category='success')
+            return redirect(url_for('.view', id=record['id']))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('record_edit.html', form=form)
 
@@ -90,15 +95,20 @@ def edit(id):
         if ODPScope.RECORD_ADMIN in g.user_permissions:
             api_route += 'admin/'
 
-        api.put(api_route + id, dict(
-            doi=(doi := form.doi.data) or None,
-            sid=(sid := form.sid.data) or None,
-            collection_id=form.collection_id.data,
-            schema_id=form.schema_id.data,
-            metadata=json.loads(form.metadata.data),
-        ))
-        flash(f'Record {doi or sid} has been updated.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.put(api_route + id, dict(
+                doi=(doi := form.doi.data) or None,
+                sid=(sid := form.sid.data) or None,
+                collection_id=form.collection_id.data,
+                schema_id=form.schema_id.data,
+                metadata=json.loads(form.metadata.data),
+            ))
+            flash(f'Record {doi or sid} has been updated.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('record_edit.html', record=record, form=form)
 
@@ -133,21 +143,26 @@ def tag_qc(id):
         form = RecordTagQCForm(data=record_tag['data'] if record_tag else None)
 
     if request.method == 'POST' and form.validate():
-        api.post(f'/record/{id}/tag', dict(
-            tag_id=ODPRecordTag.QC,
-            data={
-                'pass_': form.pass_.data,
-                'comment': form.comment.data,
-            },
-        ))
-        flash(f'{ODPRecordTag.QC} tag has been set.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.post(f'/record/{id}/tag', dict(
+                tag_id=ODPRecordTag.QC,
+                data={
+                    'pass_': form.pass_.data,
+                    'comment': form.comment.data,
+                },
+            ))
+            flash(f'{ODPRecordTag.QC} tag has been set.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('record_tag_qc.html', record=record, form=form)
 
 
 @bp.route('/<id>/untag/qc', methods=('POST',))
-@api.client(ODPScope.RECORD_TAG_QC)
+@api.client(ODPScope.RECORD_TAG_QC, fallback_to_referrer=True)
 def untag_qc(id):
     api.delete(f'/record/{id}/tag/{ODPRecordTag.QC}')
     flash(f'{ODPRecordTag.QC} tag has been removed.', category='success')

@@ -43,14 +43,19 @@ def create():
     utils.populate_provider_choices(form.provider_id, include_none=True)
 
     if request.method == 'POST' and form.validate():
-        api.post('/collection/', dict(
-            id=(id := form.id.data),
-            name=form.name.data,
-            provider_id=form.provider_id.data,
-            doi_key=form.doi_key.data or None,
-        ))
-        flash(f'Collection {id} has been created.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.post('/collection/', dict(
+                id=(id := form.id.data),
+                name=form.name.data,
+                provider_id=form.provider_id.data,
+                doi_key=form.doi_key.data or None,
+            ))
+            flash(f'Collection {id} has been created.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('collection_edit.html', form=form)
 
@@ -64,14 +69,19 @@ def edit(id):
     utils.populate_provider_choices(form.provider_id)
 
     if request.method == 'POST' and form.validate():
-        api.put('/collection/', dict(
-            id=id,
-            name=form.name.data,
-            provider_id=form.provider_id.data,
-            doi_key=form.doi_key.data or None,
-        ))
-        flash(f'Collection {id} has been updated.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.put('/collection/', dict(
+                id=id,
+                name=form.name.data,
+                provider_id=form.provider_id.data,
+                doi_key=form.doi_key.data or None,
+            ))
+            flash(f'Collection {id} has been updated.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('collection_edit.html', collection=collection, form=form)
 
@@ -85,7 +95,7 @@ def delete(id):
 
 
 @bp.route('/<id>/tag/publish', methods=('POST',))
-@api.client(ODPScope.COLLECTION_TAG_PUBLISH)
+@api.client(ODPScope.COLLECTION_TAG_PUBLISH, fallback_to_referrer=True)
 def tag_publish(id):
     api.post(f'/collection/{id}/tag', dict(
         tag_id=ODPCollectionTag.PUBLISH,
@@ -96,7 +106,7 @@ def tag_publish(id):
 
 
 @bp.route('/<id>/untag/publish', methods=('POST',))
-@api.client(ODPScope.COLLECTION_TAG_PUBLISH)
+@api.client(ODPScope.COLLECTION_TAG_PUBLISH, fallback_to_referrer=True)
 def untag_publish(id):
     api.delete(f'/collection/{id}/tag/{ODPCollectionTag.PUBLISH}')
     flash(f'{ODPCollectionTag.PUBLISH} tag has been removed.', category='success')
@@ -104,7 +114,7 @@ def untag_publish(id):
 
 
 @bp.route('/<id>/tag/archive', methods=('POST',))
-@api.client(ODPScope.COLLECTION_TAG_ARCHIVE)
+@api.client(ODPScope.COLLECTION_TAG_ARCHIVE, fallback_to_referrer=True)
 def tag_archive(id):
     api.post(f'/collection/{id}/tag', dict(
         tag_id=ODPCollectionTag.ARCHIVE,
@@ -115,7 +125,7 @@ def tag_archive(id):
 
 
 @bp.route('/<id>/untag/archive', methods=('POST',))
-@api.client(ODPScope.COLLECTION_TAG_ARCHIVE)
+@api.client(ODPScope.COLLECTION_TAG_ARCHIVE, fallback_to_referrer=True)
 def untag_archive(id):
     api.delete(f'/collection/{id}/tag/{ODPCollectionTag.ARCHIVE}')
     flash(f'{ODPCollectionTag.ARCHIVE} tag has been removed.', category='success')

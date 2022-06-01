@@ -31,13 +31,18 @@ def create():
     utils.populate_scope_choices(form.scope_ids, ('odp', 'client'))
 
     if request.method == 'POST' and form.validate():
-        api.post('/role/', dict(
-            id=(id := form.id.data),
-            provider_id=form.provider_id.data or None,
-            scope_ids=form.scope_ids.data,
-        ))
-        flash(f'Role {id} has been created.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.post('/role/', dict(
+                id=(id := form.id.data),
+                provider_id=form.provider_id.data or None,
+                scope_ids=form.scope_ids.data,
+            ))
+            flash(f'Role {id} has been created.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('role_edit.html', form=form)
 
@@ -58,13 +63,18 @@ def edit(id):
     utils.populate_scope_choices(form.scope_ids, ('odp', 'client'))
 
     if request.method == 'POST' and form.validate():
-        api.put('/role/', dict(
-            id=id,
-            provider_id=form.provider_id.data or None,
-            scope_ids=form.scope_ids.data,
-        ))
-        flash(f'Role {id} has been updated.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.put('/role/', dict(
+                id=id,
+                provider_id=form.provider_id.data or None,
+                scope_ids=form.scope_ids.data,
+            ))
+            flash(f'Role {id} has been updated.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('role_edit.html', role=role, form=form)
 

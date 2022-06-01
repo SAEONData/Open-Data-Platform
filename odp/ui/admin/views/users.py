@@ -38,13 +38,18 @@ def edit(id):
     utils.populate_role_choices(form.role_ids)
 
     if request.method == 'POST' and form.validate():
-        api.put('/user/', dict(
-            id=id,
-            active=form.active.data,
-            role_ids=form.role_ids.data,
-        ))
-        flash(f'User {id} has been updated.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.put('/user/', dict(
+                id=id,
+                active=form.active.data,
+                role_ids=form.role_ids.data,
+            ))
+            flash(f'User {id} has been updated.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('user_edit.html', user=user, form=form)
 

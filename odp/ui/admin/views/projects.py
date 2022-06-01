@@ -30,13 +30,18 @@ def create():
     utils.populate_collection_choices(form.collection_ids)
 
     if request.method == 'POST' and form.validate():
-        api.post('/project/', dict(
-            id=(id := form.id.data),
-            name=form.name.data,
-            collection_ids=form.collection_ids.data,
-        ))
-        flash(f'Project {id} has been created.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.post('/project/', dict(
+                id=(id := form.id.data),
+                name=form.name.data,
+                collection_ids=form.collection_ids.data,
+            ))
+            flash(f'Project {id} has been created.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('project_edit.html', form=form)
 
@@ -56,13 +61,18 @@ def edit(id):
     utils.populate_collection_choices(form.collection_ids)
 
     if request.method == 'POST' and form.validate():
-        api.put('/project/', dict(
-            id=id,
-            name=form.name.data,
-            collection_ids=form.collection_ids.data,
-        ))
-        flash(f'Project {id} has been updated.', category='success')
-        return redirect(url_for('.view', id=id))
+        try:
+            api.put('/project/', dict(
+                id=id,
+                name=form.name.data,
+                collection_ids=form.collection_ids.data,
+            ))
+            flash(f'Project {id} has been updated.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('project_edit.html', project=project, form=form)
 
