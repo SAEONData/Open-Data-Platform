@@ -1,5 +1,4 @@
 import re
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from pydantic import AnyHttpUrl, BaseModel, Field, root_validator, validator
@@ -13,7 +12,7 @@ class TagInstanceModel(BaseModel):
     user_id: Optional[str]
     user_name: Optional[str]
     data: Dict[str, Any]
-    timestamp: datetime
+    timestamp: str
 
 
 class TagInstanceModelIn(BaseModel):
@@ -89,7 +88,7 @@ class RecordModel(BaseModel):
     schema_id: str
     metadata: Dict[str, Any]
     validity: Dict[str, Any]
-    timestamp: datetime
+    timestamp: str
     tags: List[TagInstanceModel]
 
 

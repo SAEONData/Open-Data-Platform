@@ -38,7 +38,7 @@ def output_tag_instance_model(tag_instance: CollectionTag) -> TagInstanceModel:
         user_id=tag_instance.user_id,
         user_name=tag_instance.user.name if tag_instance.user_id else None,
         data=tag_instance.data,
-        timestamp=tag_instance.timestamp,
+        timestamp=tag_instance.timestamp.isoformat(),
     )
 
 
