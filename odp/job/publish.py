@@ -92,14 +92,11 @@ def _evaluate_record(catalog_id: str, record_id: str, timestamp: datetime) -> No
                       CatalogRecord(catalog_id=catalog_id, record_id=record_id))
 
     record_model = output_record_model(record)
-    record_dict = record_model.dict()
-    record_dict['timestamp'] = record_dict['timestamp'].isoformat()
-    for tag in record_dict['tags']:
-        tag['timestamp'] = tag['timestamp'].isoformat()
+    record_json = JSON(record_dict := record_model.dict())
 
     publication_schema = schema_catalog.get_schema(URI(catalog.schema.uri))
 
-    if (result := publication_schema.evaluate(JSON(record_dict))).valid:
+    if (result := publication_schema.evaluate(record_json)).valid:
         catalog_record.validity = result.output('flag')
         # todo: strip out user ids and non-public tags
         catalog_record.catalog_record = record_dict
