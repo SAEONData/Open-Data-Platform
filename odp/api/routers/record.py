@@ -23,7 +23,12 @@ def output_record_model(record: Record) -> RecordModel:
         id=record.id,
         doi=record.doi,
         sid=record.sid,
+        provider_id=record.collection.provider_id,
         collection_id=record.collection_id,
+        project_ids=[
+            project.id
+            for project in record.collection.projects
+        ],
         schema_id=record.schema_id,
         metadata=record.metadata_,
         validity=record.validity,

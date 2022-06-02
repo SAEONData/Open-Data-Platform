@@ -9,7 +9,8 @@ from odp.db import Session
 from odp.db.models import CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, Scope, ScopeType
 from test.api import (ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
                       assert_unprocessable)
-from test.factories import CollectionFactory, CollectionTagFactory, ProviderFactory, RecordFactory, RecordTagFactory, SchemaFactory, TagFactory
+from test.factories import (CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory, RecordFactory, RecordTagFactory, SchemaFactory,
+                            TagFactory)
 
 
 @pytest.fixture
@@ -22,6 +23,10 @@ def record_batch():
             RecordTagFactory(record=record)
         for _ in range(randint(0, 3)):
             CollectionTagFactory(collection=record.collection)
+
+    ProjectFactory.create_batch(randint(0, 3), collections=[
+        record.collection for record in records
+    ])
     return records
 
 
@@ -143,7 +148,9 @@ def assert_json_record_result(response, json, record):
     assert json['id'] == record.id
     assert json['doi'] == record.doi
     assert json['sid'] == record.sid
+    assert json['provider_id'] == record.collection.provider_id
     assert json['collection_id'] == record.collection_id
+    assert json['project_ids'] == [project.id for project in record.collection.projects]
     assert json['schema_id'] == record.schema_id
     assert json['metadata'] == record.metadata_
     assert_new_timestamp(datetime.fromisoformat(json['timestamp']))

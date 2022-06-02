@@ -86,7 +86,9 @@ class RecordModel(BaseModel):
     id: str
     doi: Optional[str]
     sid: Optional[str]
+    provider_id: str
     collection_id: str
+    project_ids: List[str]
     schema_id: str
     metadata: Dict[str, Any]
     validity: Dict[str, Any]
