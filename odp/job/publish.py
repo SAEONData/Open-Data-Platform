@@ -6,6 +6,7 @@ from datetime import datetime
 from jschon import JSON, URI
 from sqlalchemy import func, or_, select
 
+from odp.api.models import CatalogRecordModel, CatalogTagInstanceModel, RecordModel
 from odp.api.routers.record import output_record_model
 from odp.db import Session
 from odp.db.models import Catalog, CatalogRecord, CollectionTag, Record, RecordTag
@@ -92,14 +93,13 @@ def _evaluate_record(catalog_id: str, record_id: str, timestamp: datetime) -> No
                       CatalogRecord(catalog_id=catalog_id, record_id=record_id))
 
     record_model = output_record_model(record)
-    record_json = JSON(record_dict := record_model.dict())
+    record_json = JSON(record_model.dict())
 
     publication_schema = schema_catalog.get_schema(URI(catalog.schema.uri))
 
     if (result := publication_schema.evaluate(record_json)).valid:
         catalog_record.validity = result.output('flag')
-        # todo: strip out user ids and non-public tags
-        catalog_record.catalog_record = record_dict
+        catalog_record.catalog_record = _create_catalog_record(record_model).dict()
     else:
         catalog_record.validity = result.output('detailed')
         catalog_record.catalog_record = None
@@ -107,6 +107,27 @@ def _evaluate_record(catalog_id: str, record_id: str, timestamp: datetime) -> No
     catalog_record.timestamp = timestamp
     catalog_record.save()
     Session.commit()
+
+
+def _create_catalog_record(record_model: RecordModel) -> CatalogRecordModel:
+    return CatalogRecordModel(
+        id=record_model.id,
+        doi=record_model.doi,
+        sid=record_model.sid,
+        provider_id=record_model.provider_id,
+        collection_id=record_model.collection_id,
+        project_ids=record_model.project_ids,
+        schema_id=record_model.schema_id,
+        metadata=record_model.metadata,
+        timestamp=record_model.timestamp,
+        tags=[CatalogTagInstanceModel(
+            tag_id=tag_instance.tag_id,
+            data=tag_instance.data,
+            user_name=tag_instance.user_name,
+            timestamp=tag_instance.timestamp,
+            flag=tag_instance.flag,
+        ) for tag_instance in record_model.tags if tag_instance.public],
+    )
 
 
 if __name__ == '__main__':

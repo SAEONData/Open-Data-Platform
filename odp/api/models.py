@@ -29,6 +29,27 @@ class CatalogModel(BaseModel):
     schema_: Dict[str, Any]
 
 
+class CatalogTagInstanceModel(BaseModel):
+    tag_id: str
+    data: Dict[str, Any]
+    user_name: Optional[str]
+    timestamp: str
+    flag: bool
+
+
+class CatalogRecordModel(BaseModel):
+    id: str
+    doi: Optional[str]
+    sid: Optional[str]
+    provider_id: str
+    collection_id: str
+    project_ids: List[str]
+    schema_id: str
+    metadata: Dict[str, Any]
+    timestamp: str
+    tags: List[CatalogTagInstanceModel]
+
+
 class ClientModel(BaseModel):
     id: str
     name: str
