@@ -98,9 +98,11 @@ def _evaluate_record(catalog_id: str, record_id: str, timestamp: datetime) -> No
     publication_schema = schema_catalog.get_schema(URI(catalog.schema.uri))
 
     if (result := publication_schema.evaluate(record_json)).valid:
+        catalog_record.published = True
         catalog_record.validity = result.output('flag')
         catalog_record.catalog_record = _create_catalog_record(record_model).dict()
     else:
+        catalog_record.published = False
         catalog_record.validity = result.output('detailed')
         catalog_record.catalog_record = None
 

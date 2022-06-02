@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, String, TIMESTAMP
+from sqlalchemy import Boolean, Column, ForeignKey, String, TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -6,12 +6,9 @@ from odp.db import Base
 
 
 class CatalogRecord(Base):
-    """Model of a many-to-many catalog-record association.
-
-    `validity` is the result of evaluating a record model (API output)
-    against the schema for a catalog; if such evaluation passes, the
-    record is taken to be published to the catalog.
-    """
+    """Model of a many-to-many catalog-record association,
+    representing the state of a record with respect to a
+    public catalog."""
 
     __tablename__ = 'catalog_record'
 
@@ -21,6 +18,7 @@ class CatalogRecord(Base):
     catalog = relationship('Catalog', viewonly=True)
     record = relationship('Record', viewonly=True)
 
+    published = Column(Boolean, nullable=False)
     validity = Column(JSONB, nullable=False)
     timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
 
