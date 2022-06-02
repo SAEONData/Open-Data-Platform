@@ -6,9 +6,9 @@ from starlette.status import HTTP_404_NOT_FOUND
 from odp import ODPScope
 from odp.api.lib.auth import Authorize
 from odp.api.lib.paging import Page, Paginator
-from odp.api.models import CatalogModel
+from odp.api.models import CatalogModel, CatalogRecordModel
 from odp.db import Session
-from odp.db.models import Catalog
+from odp.db.models import Catalog, CatalogRecord
 from odp.lib.schema import schema_catalog
 
 router = APIRouter()
@@ -49,4 +49,29 @@ async def get_catalog(
         schema_id=catalog.schema_id,
         schema_uri=catalog.schema.uri,
         schema_=schema_catalog.get_schema(URI(catalog.schema.uri)).value,
+    )
+
+
+@router.get(
+    '/{catalog_id}/records',
+    response_model=Page[CatalogRecordModel],
+    dependencies=[Depends(Authorize(ODPScope.CATALOG_READ))],
+)
+async def list_catalog_records(
+        catalog_id: str,
+        paginator: Paginator = Depends(),
+):
+    if not Session.get(Catalog, catalog_id):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    stmt = (
+        select(CatalogRecord).
+        where(CatalogRecord.catalog_id == catalog_id).
+        where(CatalogRecord.published)
+    )
+    paginator.sort = 'record_id'
+
+    return paginator.paginate(
+        stmt,
+        lambda row: CatalogRecordModel(**row.CatalogRecord.catalog_record),
     )
