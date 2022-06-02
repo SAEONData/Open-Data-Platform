@@ -10,6 +10,7 @@ from odp import DOI_PREFIX, ODPScope
 from odp.api.lib.auth import Authorize, Authorized, TagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_tag_schema
+from odp.api.lib.utils import output_tag_instance_model
 from odp.api.models import CollectionModel, CollectionModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
 from odp.db.models import AuditCommand, Collection, CollectionTag, CollectionTagAudit, Record, Tag, TagType
@@ -29,16 +30,6 @@ def output_collection_model(result) -> CollectionModel:
             output_tag_instance_model(collection_tag)
             for collection_tag in result.Collection.tags
         ],
-    )
-
-
-def output_tag_instance_model(tag_instance: CollectionTag) -> TagInstanceModel:
-    return TagInstanceModel(
-        tag_id=tag_instance.tag_id,
-        user_id=tag_instance.user_id,
-        user_name=tag_instance.user.name if tag_instance.user_id else None,
-        data=tag_instance.data,
-        timestamp=tag_instance.timestamp.isoformat(),
     )
 
 

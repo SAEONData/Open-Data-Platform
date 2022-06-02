@@ -13,6 +13,8 @@ class TagInstanceModel(BaseModel):
     user_name: Optional[str]
     data: Dict[str, Any]
     timestamp: str
+    flag: bool
+    public: bool
 
 
 class TagInstanceModelIn(BaseModel):

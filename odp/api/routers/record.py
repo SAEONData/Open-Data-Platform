@@ -10,6 +10,7 @@ from odp import ODPCollectionTag, ODPScope
 from odp.api.lib.auth import Authorize, Authorized, TagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_metadata_schema, get_tag_schema
+from odp.api.lib.utils import output_tag_instance_model
 from odp.api.models import RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
 from odp.db.models import AuditCommand, Collection, CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, SchemaType, Tag, TagType
@@ -34,16 +35,6 @@ def output_record_model(record: Record) -> RecordModel:
                  output_tag_instance_model(record_tag)
                  for record_tag in record.tags
              ],
-    )
-
-
-def output_tag_instance_model(tag_instance: CollectionTag | RecordTag) -> TagInstanceModel:
-    return TagInstanceModel(
-        tag_id=tag_instance.tag_id,
-        user_id=tag_instance.user_id,
-        user_name=tag_instance.user.name if tag_instance.user_id else None,
-        data=tag_instance.data,
-        timestamp=tag_instance.timestamp.isoformat(),
     )
 
 

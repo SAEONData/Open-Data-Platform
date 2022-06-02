@@ -173,6 +173,8 @@ def assert_json_tag_result(response, json, record_tag):
     assert json['user_name'] is None
     assert json['data'] == record_tag['data']
     assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
+    assert json['flag'] == record_tag['flag']
+    assert json['public'] == record_tag['public']
 
 
 def assert_json_record_results(response, json, records):
@@ -441,7 +443,7 @@ def test_tag_record(api, record_batch_no_tags, scopes, provider_auth):
         api_client_provider = None
 
     client = api(scopes, api_client_provider)
-    TagFactory(
+    tag = TagFactory(
         id='record-qc',
         type='record',
         scope=Session.get(
@@ -465,7 +467,7 @@ def test_tag_record(api, record_batch_no_tags, scopes, provider_auth):
             },
         )))
     if authorized:
-        assert_json_tag_result(r, r.json(), record_tag_v1)
+        assert_json_tag_result(r, r.json(), record_tag_v1 | dict(flag=tag.flag, public=tag.public))
         assert_db_tag_state(record_id, record_tag_v1)
         assert_tag_audit_log(
             dict(command='insert', record_id=record_id, record_tag=record_tag_v1),
@@ -488,7 +490,7 @@ def test_tag_record(api, record_batch_no_tags, scopes, provider_auth):
             },
         )))
     if authorized:
-        assert_json_tag_result(r, r.json(), record_tag_v2)
+        assert_json_tag_result(r, r.json(), record_tag_v2 | dict(flag=tag.flag, public=tag.public))
         assert_db_tag_state(record_id, record_tag_v2)
         assert_tag_audit_log(
             dict(command='insert', record_id=record_id, record_tag=record_tag_v1),
@@ -545,7 +547,7 @@ def test_tag_record_multi(api, record_batch_no_tags, scopes, provider_auth, flag
 
     record_tag_1 = RecordTagFactory(
         record=record_batch_no_tags[2],
-        tag=TagFactory(
+        tag=(tag := TagFactory(
             id='record-qc',
             type='record',
             flag=flag,
@@ -558,7 +560,7 @@ def test_tag_record_multi(api, record_batch_no_tags, scopes, provider_auth, flag
                 type='tag',
                 uri='https://odp.saeon.ac.za/schema/tag/generic',
             ),
-        )
+        ))
     )
 
     r = client.post(
@@ -574,7 +576,7 @@ def test_tag_record_multi(api, record_batch_no_tags, scopes, provider_auth, flag
             assert_db_tag_state(record_id, record_tag_1)
             assert_tag_audit_log()
         else:
-            assert_json_tag_result(r, r.json(), record_tag_2)
+            assert_json_tag_result(r, r.json(), record_tag_2 | dict(flag=False, public=tag.public))
             assert_db_tag_state(record_id, record_tag_1, record_tag_2)
             assert_tag_audit_log(
                 dict(command='insert', record_id=record_id, record_tag=record_tag_2),
