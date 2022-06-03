@@ -55,6 +55,15 @@ class PublishedRecordModel(BaseModel):
     tags: List[PublishedTagInstanceModel]
 
 
+class CatalogRecordModel(BaseModel):
+    catalog_id: str
+    record_id: str
+    timestamp: str
+    validity: Dict[str, Any]
+    published: bool
+    published_record: Optional[PublishedRecordModel]
+
+
 class ClientModel(BaseModel):
     id: str
     name: str

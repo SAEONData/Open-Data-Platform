@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'macros.html' import render_info, render_buttons, render_table, render_button_prompt_form, obj_link %}
 
 {% block web_title %}
     {{ super() }} |
@@ -29,10 +30,14 @@
                 QC
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#catalog-records" type="button" role="tab">
+                Catalog Records
+            </button>
+        </li>
     </ul>
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
-            {% from 'macros.html' import render_info, render_buttons, obj_link %}
             {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Migrated', 'Timestamp', 'Quality Control') %}
                 {% if prop == 'DOI' %}
                     {{ record.doi if record.doi }}
@@ -69,7 +74,6 @@
             </pre>
         </div>
         <div id="tag-qc" class="tab-pane fade" role="tabpanel">
-            {% from 'macros.html' import render_table, render_button_prompt_form, obj_link %}
             {% call(qc_tag) render_table(qc_tags, 'Pass', 'Comment', 'User', 'Timestamp', hide_id=True) %}
                 <td>{{ qc_tag.data.pass_ }}</td>
                 <td>{{ qc_tag.data.comment }}</td>
@@ -85,6 +89,17 @@
                         'Are you sure you want to delete your QC tag?') }}
                 {% endif %}
             </div>
+        </div>
+        <div id="catalog-records" class="tab-pane fade" role="tabpanel">
+            {% call(catalog_record) render_table(catalog_records, 'Catalog', 'Published', 'Timestamp', hide_id=True) %}
+                <td>{{ obj_link('catalogs', catalog_record.catalog_id) }}</td>
+                <td>
+                    <a href="{{ url_for('.view_catalog_record', id=record.id, catalog_id=catalog_record.catalog_id) }}" class="text-decoration-none">
+                        {{ catalog_record.published }}
+                    </a>
+                </td>
+                <td>{{ catalog_record.timestamp|timestamp }}</td>
+            {% endcall %}
         </div>
     </div>
 {% endblock %}

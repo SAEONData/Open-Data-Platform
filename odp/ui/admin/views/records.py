@@ -34,6 +34,8 @@ def index():
 @api.client(ODPScope.RECORD_READ)
 def view(id):
     record = api.get(f'/record/{id}')
+    catalog_records = api.get(f'/record/{id}/catalog')
+
     migrated_tag = next((tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.MIGRATED), None)
     qc_tags = {
         'items': (items := [tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.QC]),
@@ -42,12 +44,14 @@ def view(id):
         'pages': 1,
     }
     has_user_qc_tag = any(tag for tag in items if tag['user_id'] == current_user.id)
+
     return render_template(
         'record_view.html',
         record=record,
         migrated_tag=migrated_tag,
         qc_tags=qc_tags,
         has_user_qc_tag=has_user_qc_tag,
+        catalog_records=catalog_records,
     )
 
 
@@ -167,3 +171,10 @@ def untag_qc(id):
     api.delete(f'/record/{id}/tag/{ODPRecordTag.QC}')
     flash(f'{ODPRecordTag.QC} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/catalog/<catalog_id>')
+@api.client(ODPScope.RECORD_READ)
+def view_catalog_record(id, catalog_id):
+    catalog_record = api.get(f'/record/{id}/catalog/{catalog_id}')
+    return render_template('catalog_record_view.html', catalog_record=catalog_record)

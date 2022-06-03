@@ -11,9 +11,10 @@ from odp.api.lib.auth import Authorize, Authorized, TagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_metadata_schema, get_tag_schema
 from odp.api.lib.utils import output_tag_instance_model
-from odp.api.models import RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
+from odp.api.models import CatalogRecordModel, PublishedRecordModel, RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
-from odp.db.models import AuditCommand, Collection, CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, SchemaType, Tag, TagType
+from odp.db.models import (AuditCommand, CatalogRecord, Collection, CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, SchemaType, Tag,
+                           TagType)
 
 router = APIRouter()
 
@@ -40,6 +41,18 @@ def output_record_model(record: Record) -> RecordModel:
                  output_tag_instance_model(record_tag)
                  for record_tag in record.tags
              ],
+    )
+
+
+def output_catalog_record_model(catalog_record: CatalogRecord) -> CatalogRecordModel:
+    return CatalogRecordModel(
+        catalog_id=catalog_record.catalog_id,
+        record_id=catalog_record.record_id,
+        timestamp=catalog_record.timestamp.isoformat(),
+        validity=catalog_record.validity,
+        published=catalog_record.published,
+        published_record=(PublishedRecordModel(**catalog_record.published_record)
+                          if catalog_record.published else None),
     )
 
 
@@ -425,3 +438,48 @@ async def untag_record(
         _tag_id=record_tag.tag_id,
         _user_id=record_tag.user_id,
     ).save()
+
+
+@router.get(
+    '/{record_id}/catalog',
+    response_model=Page[CatalogRecordModel],
+)
+async def list_catalog_records(
+        record_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
+        paginator: Paginator = Depends(),
+):
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    stmt = (
+        select(CatalogRecord).
+        where(CatalogRecord.record_id == record_id)
+    )
+    paginator.sort = 'catalog_id'
+
+    return paginator.paginate(
+        stmt,
+        lambda row: output_catalog_record_model(row.CatalogRecord),
+    )
+
+
+@router.get(
+    '/{record_id}/catalog/{catalog_id}',
+    response_model=CatalogRecordModel,
+)
+async def get_catalog_record(
+        record_id: str,
+        catalog_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
+):
+    if not (catalog_record := Session.get(CatalogRecord, (catalog_id, record_id))):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.provider_ids != '*' and catalog_record.record.collection.provider_id not in auth.provider_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    return output_catalog_record_model(catalog_record)
