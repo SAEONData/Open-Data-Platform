@@ -6,7 +6,7 @@ from starlette.status import HTTP_404_NOT_FOUND
 from odp import ODPScope
 from odp.api.lib.auth import Authorize
 from odp.api.lib.paging import Page, Paginator
-from odp.api.models import CatalogModel, CatalogRecordModel
+from odp.api.models import CatalogModel, PublishedRecordModel
 from odp.db import Session
 from odp.db.models import Catalog, CatalogRecord
 from odp.lib.schema import schema_catalog
@@ -54,10 +54,10 @@ async def get_catalog(
 
 @router.get(
     '/{catalog_id}/records',
-    response_model=Page[CatalogRecordModel],
+    response_model=Page[PublishedRecordModel],
     dependencies=[Depends(Authorize(ODPScope.CATALOG_READ))],
 )
-async def list_catalog_records(
+async def list_published_records(
         catalog_id: str,
         paginator: Paginator = Depends(),
 ):
@@ -73,5 +73,5 @@ async def list_catalog_records(
 
     return paginator.paginate(
         stmt,
-        lambda row: CatalogRecordModel(**row.CatalogRecord.catalog_record),
+        lambda row: PublishedRecordModel(**row.CatalogRecord.published_record),
     )

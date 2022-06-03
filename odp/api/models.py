@@ -29,7 +29,7 @@ class CatalogModel(BaseModel):
     schema_: Dict[str, Any]
 
 
-class CatalogTagInstanceModel(BaseModel):
+class PublishedTagInstanceModel(BaseModel):
     tag_id: str
     data: Dict[str, Any]
     user_name: Optional[str]
@@ -37,7 +37,7 @@ class CatalogTagInstanceModel(BaseModel):
     flag: bool
 
 
-class CatalogRecordModel(BaseModel):
+class PublishedRecordModel(BaseModel):
     id: str
     doi: Optional[str]
     sid: Optional[str]
@@ -47,7 +47,7 @@ class CatalogRecordModel(BaseModel):
     schema_id: str
     metadata: Dict[str, Any]
     timestamp: str
-    tags: List[CatalogTagInstanceModel]
+    tags: List[PublishedTagInstanceModel]
 
 
 class ClientModel(BaseModel):
