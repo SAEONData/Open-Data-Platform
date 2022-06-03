@@ -7,6 +7,11 @@ from odp.lib.formats import DOI_REGEX, SID_REGEX
 from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
 
 
+# Note: reordering models alphabetically with the help of
+# `from __future__ import annotations` causes Pydantic to not
+# fully instantiate forward ref'd fields, which breaks stuff.
+
+
 class TagInstanceModel(BaseModel):
     tag_id: str
     user_id: Optional[str]
