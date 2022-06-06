@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import AnyHttpUrl, BaseModel, Field, root_validator, validator
 
-from odp.lib.formats import DOI_REGEX, SID_REGEX
+from odp.lib.formats import DOI_REGEX, ID_REGEX, SID_REGEX
 from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
 
 
@@ -65,7 +65,7 @@ class CatalogRecordModel(BaseModel):
 
 
 class ClientModel(BaseModel):
-    id: str
+    id: str = Field(..., regex=ID_REGEX)
     name: str
     scope_ids: List[str]
     provider_id: Optional[str]
@@ -92,14 +92,14 @@ class CollectionModel(BaseModel):
 
 
 class CollectionModelIn(BaseModel):
-    id: str
+    id: str = Field(..., regex=ID_REGEX)
     name: str
     doi_key: Optional[str]
     provider_id: str
 
 
 class ProjectModel(BaseModel):
-    id: str
+    id: str = Field(..., regex=ID_REGEX)
     name: str
     collection_ids: List[str]
 
@@ -113,7 +113,7 @@ class ProviderModel(BaseModel):
 
 
 class ProviderModelIn(BaseModel):
-    id: str
+    id: str = Field(..., regex=ID_REGEX)
     name: str
 
 
@@ -166,7 +166,7 @@ class RecordModelIn(BaseModel):
 
 
 class RoleModel(BaseModel):
-    id: str
+    id: str = Field(..., regex=ID_REGEX)
     scope_ids: List[str]
     provider_id: Optional[str]
 
