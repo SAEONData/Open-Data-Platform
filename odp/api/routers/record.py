@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from jschon import JSON, JSONSchema
@@ -204,16 +205,18 @@ async def update_record(
     response_model=RecordModel,
 )
 async def admin_set_record(
-        record_id: str,
+        # this route allows a record to be created with an externally
+        # generated id, so we must validate that it is a uuid
+        record_id: UUID,
         record_in: RecordModelIn,
         metadata_schema: JSONSchema = Depends(get_metadata_schema),
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_ADMIN)),
 ):
     create = False
-    record = Session.get(Record, record_id)
+    record = Session.get(Record, str(record_id))
     if not record:
         create = True
-        record = Record(id=record_id)
+        record = Record(id=str(record_id))
 
     return _set_record(create, record, record_in, metadata_schema, auth, True)
 
