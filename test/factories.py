@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timezone
 from random import choice, randint
 
@@ -14,7 +15,16 @@ fake = Faker()
 def id_from_name(obj):
     name, _, n = obj.name.rpartition('.')
     prefix, _, _ = name.partition(' ')
-    return f'{prefix}.{n}'
+    return f'{_sanitize_id(prefix)}.{n}'
+
+
+def id_from_fake(src, n):
+    fake_val = getattr(fake, src)()
+    return f'{_sanitize_id(fake_val)}.{n}'
+
+
+def _sanitize_id(val):
+    return re.sub(r'[^-.:\w]', '_', val)
 
 
 def schema_uri_from_type(schema):
@@ -83,7 +93,7 @@ class ClientFactory(ODPModelFactory):
         model = Client
         exclude = ('is_provider_client',)
 
-    id = factory.Sequence(lambda n: f'{fake.catch_phrase().replace("/", "|")}.{n}')
+    id = factory.Sequence(lambda n: id_from_fake('catch_phrase', n))
 
     is_provider_client = False
     provider = factory.Maybe(
@@ -198,7 +208,7 @@ class RoleFactory(ODPModelFactory):
         model = Role
         exclude = ('is_provider_role',)
 
-    id = factory.Sequence(lambda n: f'{fake.job().replace("/", "|")}.{n}')
+    id = factory.Sequence(lambda n: id_from_fake('job', n))
 
     is_provider_role = False
     provider = factory.Maybe(
