@@ -5,7 +5,7 @@ from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CO
 from odp import ODPScope
 from odp.api.lib.auth import Authorize, Authorized, select_scopes
 from odp.api.lib.paging import Page, Paginator
-from odp.api.models import RoleModel
+from odp.api.models import RoleModel, RoleModelIn
 from odp.db import Session
 from odp.db.models import Role, ScopeType
 
@@ -59,7 +59,7 @@ async def get_role(
     '/',
 )
 async def create_role(
-        role_in: RoleModel,
+        role_in: RoleModelIn,
         auth: Authorized = Depends(Authorize(ODPScope.ROLE_ADMIN)),
 ):
     if auth.provider_ids != '*' and role_in.provider_id not in auth.provider_ids:
@@ -80,7 +80,7 @@ async def create_role(
     '/',
 )
 async def update_role(
-        role_in: RoleModel,
+        role_in: RoleModelIn,
         auth: Authorized = Depends(Authorize(ODPScope.ROLE_ADMIN)),
 ):
     if auth.provider_ids != '*' and role_in.provider_id not in auth.provider_ids:

@@ -5,9 +5,9 @@ from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 from odp import ODPScope
 from odp.api.lib.auth import Authorize
 from odp.api.lib.paging import Page, Paginator
-from odp.api.models import ProjectModel
+from odp.api.models import ProjectModel, ProjectModelIn
 from odp.db import Session
-from odp.db.models import Project, Collection
+from odp.db.models import Collection, Project
 
 router = APIRouter()
 
@@ -53,7 +53,7 @@ async def get_project(
     dependencies=[Depends(Authorize(ODPScope.PROJECT_ADMIN))],
 )
 async def create_project(
-        project_in: ProjectModel,
+        project_in: ProjectModelIn,
 ):
     if Session.get(Project, project_in.id):
         raise HTTPException(HTTP_409_CONFLICT)
@@ -74,7 +74,7 @@ async def create_project(
     dependencies=[Depends(Authorize(ODPScope.PROJECT_ADMIN))],
 )
 async def update_project(
-        project_in: ProjectModel,
+        project_in: ProjectModelIn,
 ):
     if not (project := Session.get(Project, project_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)

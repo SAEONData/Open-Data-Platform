@@ -65,7 +65,7 @@ class CatalogRecordModel(BaseModel):
 
 
 class ClientModel(BaseModel):
-    id: str = Field(..., regex=ID_REGEX)
+    id: str
     name: str
     scope_ids: List[str]
     provider_id: Optional[str]
@@ -78,6 +78,7 @@ class ClientModel(BaseModel):
 
 
 class ClientModelIn(ClientModel):
+    id: str = Field(..., regex=ID_REGEX)
     secret: str = Field(None, min_length=6)
 
 
@@ -99,6 +100,12 @@ class CollectionModelIn(BaseModel):
 
 
 class ProjectModel(BaseModel):
+    id: str
+    name: str
+    collection_ids: List[str]
+
+
+class ProjectModelIn(BaseModel):
     id: str = Field(..., regex=ID_REGEX)
     name: str
     collection_ids: List[str]
@@ -166,6 +173,12 @@ class RecordModelIn(BaseModel):
 
 
 class RoleModel(BaseModel):
+    id: str
+    scope_ids: List[str]
+    provider_id: Optional[str]
+
+
+class RoleModelIn(BaseModel):
     id: str = Field(..., regex=ID_REGEX)
     scope_ids: List[str]
     provider_id: Optional[str]
