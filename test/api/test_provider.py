@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Provider
-from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
+from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_not_found
 from test.factories import ClientFactory, CollectionFactory, ProviderFactory, RoleFactory
 
 
@@ -124,6 +124,25 @@ def test_get_provider(api, provider_batch, scopes, provider_auth):
     assert_db_state(provider_batch)
 
 
+def test_get_provider_not_found(api, provider_batch, provider_auth):
+    scopes = [ODPScope.PROVIDER_READ]
+    authorized = provider_auth == ProviderAuth.NONE
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = provider_batch[2]
+
+    r = api(scopes, api_client_provider).get('/provider/foo')
+
+    if authorized:
+        assert_not_found(r)
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(provider_batch)
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.PROVIDER_ADMIN],
     [],
@@ -153,6 +172,57 @@ def test_create_provider(api, provider_batch, scopes, provider_auth):
     else:
         assert_forbidden(r)
         assert_db_state(provider_batch)
+
+
+def test_create_provider_conflict_id(api, provider_batch, provider_auth):
+    scopes = [ODPScope.PROVIDER_ADMIN]
+    authorized = provider_auth == ProviderAuth.NONE
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = provider_batch[2]
+
+    provider = provider_build(id=provider_batch[2].id)
+
+    r = api(scopes, api_client_provider).post('/provider/', json=dict(
+        id=provider.id,
+        name=provider.name,
+    ))
+
+    if authorized:
+        assert_conflict(r, 'Provider id is already in use')
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(provider_batch)
+
+
+def test_create_provider_conflict_name(api, provider_batch, provider_auth):
+    scopes = [ODPScope.PROVIDER_ADMIN]
+    authorized = provider_auth == ProviderAuth.NONE
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = provider_batch[2]
+
+    provider = provider_build(
+        id='foo',
+        name=provider_batch[2].name,
+    )
+
+    r = api(scopes, api_client_provider).post('/provider/', json=dict(
+        id=provider.id,
+        name=provider.name,
+    ))
+
+    if authorized:
+        assert_conflict(r, 'Provider name is already in use')
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(provider_batch)
 
 
 @pytest.mark.parametrize('scopes', [
@@ -193,6 +263,59 @@ def test_update_provider(api, provider_batch, scopes, provider_auth):
         assert_db_state(provider_batch)
 
 
+def test_update_provider_not_found(api, provider_batch, provider_auth):
+    scopes = [ODPScope.PROVIDER_ADMIN]
+    authorized = provider_auth == ProviderAuth.NONE
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = provider_batch[2]
+
+    provider = provider_build(id='foo')
+
+    r = api(scopes, api_client_provider).put('/provider/', json=dict(
+        id=provider.id,
+        name=provider.name,
+    ))
+
+    if authorized:
+        assert_not_found(r)
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(provider_batch)
+
+
+def test_update_provider_conflict_name(api, provider_batch, provider_auth):
+    scopes = [ODPScope.PROVIDER_ADMIN]
+    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = provider_batch[2]
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = provider_batch[1]
+    else:
+        api_client_provider = None
+
+    provider = provider_build(
+        id=provider_batch[2].id,
+        name=provider_batch[1].name,
+    )
+
+    r = api(scopes, api_client_provider).put('/provider/', json=dict(
+        id=provider.id,
+        name=provider.name,
+    ))
+
+    if authorized:
+        assert_conflict(r, 'Provider name is already in use')
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(provider_batch)
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.PROVIDER_ADMIN],
     [],
@@ -221,3 +344,22 @@ def test_delete_provider(api, provider_batch, scopes, provider_auth):
     else:
         assert_forbidden(r)
         assert_db_state(provider_batch)
+
+
+def test_delete_provider_not_found(api, provider_batch, provider_auth):
+    scopes = [ODPScope.PROVIDER_ADMIN]
+    authorized = provider_auth == ProviderAuth.NONE
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = provider_batch[2]
+
+    r = api(scopes, api_client_provider).delete('/provider/foo')
+
+    if authorized:
+        assert_not_found(r)
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(provider_batch)

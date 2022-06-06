@@ -31,6 +31,11 @@ def assert_forbidden(response):
     assert response.json() == {'detail': 'Forbidden'}
 
 
+def assert_not_found(response):
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Not Found'}
+
+
 def assert_method_not_allowed(response):
     assert response.status_code == 405
     assert response.json() == {'detail': 'Method Not Allowed'}
