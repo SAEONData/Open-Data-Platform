@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import User
-from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden, assert_method_not_allowed
+from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden, assert_method_not_allowed, assert_not_found
 from test.factories import RoleFactory, UserFactory
 
 
@@ -84,6 +84,13 @@ def test_get_user(api, user_batch, scopes):
     assert_db_state(user_batch)
 
 
+def test_get_user_not_found(api, user_batch):
+    scopes = [ODPScope.USER_READ]
+    r = api(scopes).get('/user/foo')
+    assert_not_found(r)
+    assert_db_state(user_batch)
+
+
 def test_create_user(api):
     r = api(all_scopes).post('/user/')
     assert_method_not_allowed(r)
@@ -118,6 +125,24 @@ def test_update_user(api, user_batch, scopes):
         assert_db_state(user_batch)
 
 
+def test_update_user_not_found(api, user_batch):
+    scopes = [ODPScope.USER_ADMIN]
+    user = UserFactory.build(
+        id='foo',
+        name=user_batch[2].name,
+        email=user_batch[2].email,
+        verified=user_batch[2].verified,
+        roles=RoleFactory.create_batch(randint(0, 3)),
+    )
+    r = api(scopes).put('/user/', json=dict(
+        id=user.id,
+        active=user.active,
+        role_ids=role_ids(user),
+    ))
+    assert_not_found(r)
+    assert_db_state(user_batch)
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.USER_ADMIN],
     [],
@@ -135,3 +160,10 @@ def test_delete_user(api, user_batch, scopes):
     else:
         assert_forbidden(r)
         assert_db_state(user_batch)
+
+
+def test_delete_user_not_found(api, user_batch):
+    scopes = [ODPScope.USER_ADMIN]
+    r = api(scopes).delete('/user/foo')
+    assert_not_found(r)
+    assert_db_state(user_batch)
