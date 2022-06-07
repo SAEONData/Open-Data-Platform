@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Tag
-from test.api import all_scopes, all_scopes_excluding, assert_forbidden
+from test.api import all_scopes, all_scopes_excluding, assert_forbidden, assert_not_found
 from test.factories import TagFactory
 
 
@@ -75,4 +75,11 @@ def test_get_tag(api, tag_batch, scopes):
         assert_json_result(r, r.json(), tag_batch[2])
     else:
         assert_forbidden(r)
+    assert_db_state(tag_batch)
+
+
+def test_get_tag_not_found(api, tag_batch):
+    scopes = [ODPScope.TAG_READ]
+    r = api(scopes).get('/tag/foo')
+    assert_not_found(r)
     assert_db_state(tag_batch)
