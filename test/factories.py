@@ -182,10 +182,12 @@ class ProjectFactory(ODPModelFactory):
 class RecordFactory(ODPModelFactory):
     class Meta:
         model = Record
+        exclude = ('identifiers',)
 
-    doi = factory.Sequence(lambda n: f'10.5555/test-{n}')
-    sid = factory.Sequence(lambda n: f'test-{n}' if randint(0, 1) else None)
-    metadata_ = factory.LazyAttribute(lambda record: {'doi': record.doi})
+    identifiers = factory.LazyFunction(lambda: choice(('doi', 'sid', 'both')))
+    doi = factory.LazyAttributeSequence(lambda r, n: f'10.5555/test-{n}' if r.identifiers in ('doi', 'both') else None)
+    sid = factory.LazyAttributeSequence(lambda r, n: f'test-{n}' if r.doi is None or r.identifiers in ('sid', 'both') else None)
+    metadata_ = factory.LazyAttribute(lambda r: {'doi': r.doi} if r.doi else {})
     validity = {}
     collection = factory.SubFactory(CollectionFactory)
     schema = factory.SubFactory(SchemaFactory, type='metadata')

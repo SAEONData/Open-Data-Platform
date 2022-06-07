@@ -37,6 +37,13 @@ def record_batch_no_tags():
     return [RecordFactory() for _ in range(randint(3, 5))]
 
 
+@pytest.fixture
+def record_batch_with_ids():
+    """Create and commit a batch of Record instances
+    with both DOIs and SIDs."""
+    return [RecordFactory(identifiers='both') for _ in range(randint(3, 5))]
+
+
 def record_build(collection=None, collection_tags=None, **id):
     """Build and return an uncommitted Record instance.
     Referenced collection and schema are however committed."""
@@ -327,6 +334,70 @@ def test_create_record(api, record_batch, admin_route, scopes, collection_tags, 
         assert_forbidden(r)
         assert_db_state(record_batch)
         assert_no_audit_log()
+
+
+@pytest.fixture(params=[True, False])
+def admin(request):
+    return request.param
+
+
+@pytest.fixture(params=['doi', 'sid', 'both'])
+def conflict(request):
+    return request.param
+
+
+def test_create_record_conflict(api, record_batch_with_ids, admin, provider_auth, conflict):
+    route = '/record/admin/' if admin else '/record/'
+    scopes = [ODPScope.RECORD_ADMIN] if admin else [ODPScope.RECORD_WRITE]
+    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = record_batch_with_ids[2].collection.provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = record_batch_with_ids[1].collection.provider
+    else:
+        api_client_provider = None
+
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        new_record_collection = record_batch_with_ids[2].collection
+    else:
+        new_record_collection = None  # new collection
+
+    if conflict == 'doi':
+        record = record_build(
+            doi=record_batch_with_ids[0].doi,
+            collection=new_record_collection,
+        )
+    elif conflict == 'sid':
+        record = record_build(
+            sid=record_batch_with_ids[0].sid,
+            collection=new_record_collection,
+        )
+    else:
+        record = record_build(
+            doi=record_batch_with_ids[0].doi,
+            sid=record_batch_with_ids[1].sid,
+            collection=new_record_collection,
+        )
+
+    r = api(scopes, api_client_provider).post(route, json=dict(
+        doi=record.doi,
+        sid=record.sid,
+        collection_id=record.collection_id,
+        schema_id=record.schema_id,
+        metadata=record.metadata_,
+    ))
+
+    if authorized:
+        if conflict in ('doi', 'both'):
+            assert_conflict(r, 'DOI is already in use')
+        else:
+            assert_conflict(r, 'SID is already in use')
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(record_batch_with_ids)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('admin_route, scopes, collection_tags', [

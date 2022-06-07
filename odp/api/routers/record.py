@@ -147,14 +147,17 @@ def _create_record(
     ).first() is not None:
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'A record cannot be added to an archived collection')
 
-    if Session.execute(
+    if record_in.doi and Session.execute(
         select(Record).
-        where(
-            ((Record.doi != None) & (Record.doi == record_in.doi)) |
-            ((Record.sid != None) & (Record.sid == record_in.sid))
-        )
+        where(Record.doi == record_in.doi)
     ).first() is not None:
-        raise HTTPException(HTTP_409_CONFLICT)
+        raise HTTPException(HTTP_409_CONFLICT, 'DOI is already in use')
+
+    if record_in.sid and Session.execute(
+        select(Record).
+        where(Record.sid == record_in.sid)
+    ).first() is not None:
+        raise HTTPException(HTTP_409_CONFLICT, 'SID is already in use')
 
     record = Record(
         doi=record_in.doi,
