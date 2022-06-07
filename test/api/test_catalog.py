@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Catalog
-from test.api import all_scopes, all_scopes_excluding, assert_forbidden
+from test.api import all_scopes, all_scopes_excluding, assert_forbidden, assert_not_found
 from test.factories import CatalogFactory
 
 
@@ -70,4 +70,11 @@ def test_get_catalog(api, catalog_batch, scopes):
         assert_json_result(r, r.json(), catalog_batch[2])
     else:
         assert_forbidden(r)
+    assert_db_state(catalog_batch)
+
+
+def test_get_catalog_not_found(api, catalog_batch):
+    scopes = [ODPScope.CATALOG_READ]
+    r = api(scopes).get('/catalog/foo')
+    assert_not_found(r)
     assert_db_state(catalog_batch)
