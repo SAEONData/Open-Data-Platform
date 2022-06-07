@@ -91,7 +91,7 @@ async def create_collection(
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if Session.get(Collection, collection_in.id):
-        raise HTTPException(HTTP_409_CONFLICT)
+        raise HTTPException(HTTP_409_CONFLICT, 'Collection id is already in use')
 
     collection = Collection(
         id=collection_in.id,

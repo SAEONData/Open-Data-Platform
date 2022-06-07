@@ -10,7 +10,7 @@ from odp.db import Session
 from odp.db.models import Collection, CollectionTag, CollectionTagAudit, Scope, ScopeType
 from odp.lib.formats import DOI_REGEX
 from test.api import (ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
-                      assert_unprocessable)
+                      assert_not_found, assert_unprocessable)
 from test.factories import CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory, SchemaFactory, TagFactory
 
 
@@ -187,6 +187,20 @@ def test_get_collection(api, collection_batch, scopes, provider_auth):
     assert_db_state(collection_batch)
 
 
+def test_get_collection_not_found(api, collection_batch, provider_auth):
+    scopes = [ODPScope.COLLECTION_READ]
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = collection_batch[2].provider
+
+    r = api(scopes, api_client_provider).get('/collection/foo')
+
+    assert_not_found(r)
+    assert_db_state(collection_batch)
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.COLLECTION_ADMIN],
     [],
@@ -226,6 +240,42 @@ def test_create_collection(api, collection_batch, scopes, provider_auth):
     else:
         assert_forbidden(r)
         assert_db_state(collection_batch)
+
+
+def test_create_collection_conflict(api, collection_batch, provider_auth):
+    scopes = [ODPScope.COLLECTION_ADMIN]
+    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = collection_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = collection_batch[1].provider
+    else:
+        api_client_provider = None
+
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        new_collection_provider = collection_batch[2].provider
+    else:
+        new_collection_provider = None
+
+    collection = collection_build(
+        id=collection_batch[2].id,
+        provider=new_collection_provider,
+    )
+
+    r = api(scopes, api_client_provider).post('/collection/', json=dict(
+        id=collection.id,
+        name=collection.name,
+        doi_key=collection.doi_key,
+        provider_id=collection.provider_id,
+    ))
+
+    if authorized:
+        assert_conflict(r, 'Collection id is already in use')
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(collection_batch)
 
 
 @pytest.mark.parametrize('scopes', [
@@ -271,6 +321,42 @@ def test_update_collection(api, collection_batch_no_projects, scopes, provider_a
         assert_db_state(collection_batch_no_projects)
 
 
+def test_update_collection_not_found(api, collection_batch_no_projects, provider_auth):
+    scopes = [ODPScope.COLLECTION_ADMIN]
+    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = collection_batch_no_projects[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = collection_batch_no_projects[1].provider
+    else:
+        api_client_provider = None
+
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        modified_collection_provider = collection_batch_no_projects[2].provider
+    else:
+        modified_collection_provider = None
+
+    collection = collection_build(
+        id='foo',
+        provider=modified_collection_provider,
+    )
+
+    r = api(scopes, api_client_provider).put('/collection/', json=dict(
+        id=collection.id,
+        name=collection.name,
+        doi_key=collection.doi_key,
+        provider_id=collection.provider_id,
+    ))
+
+    if authorized:
+        assert_not_found(r)
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(collection_batch_no_projects)
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.COLLECTION_ADMIN],
     [],
@@ -299,6 +385,20 @@ def test_delete_collection(api, collection_batch, scopes, provider_auth):
     else:
         assert_forbidden(r)
         assert_db_state(collection_batch)
+
+
+def test_delete_collection_not_found(api, collection_batch, provider_auth):
+    scopes = [ODPScope.COLLECTION_ADMIN]
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = collection_batch[2].provider
+
+    r = api(scopes, api_client_provider).delete('/collection/foo')
+
+    assert_not_found(r)
+    assert_db_state(collection_batch)
 
 
 @pytest.mark.parametrize('scopes', [
