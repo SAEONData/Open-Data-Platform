@@ -8,7 +8,7 @@ from odp import ODPCollectionTag, ODPScope
 from odp.db import Session
 from odp.db.models import CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, Scope, ScopeType
 from test.api import (ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
-                      assert_unprocessable)
+                      assert_not_found, assert_unprocessable)
 from test.factories import (CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory, RecordFactory, RecordTagFactory, SchemaFactory,
                             TagFactory)
 
@@ -248,6 +248,21 @@ def test_get_record(api, record_batch, scopes, provider_auth):
     else:
         assert_forbidden(r)
 
+    assert_db_state(record_batch)
+    assert_no_audit_log()
+
+
+def test_get_record_not_found(api, record_batch, provider_auth):
+    scopes = [ODPScope.RECORD_READ]
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = record_batch[2].collection.provider
+
+    r = api(scopes, api_client_provider).get('/record/foo')
+
+    assert_not_found(r)
     assert_db_state(record_batch)
     assert_no_audit_log()
 
