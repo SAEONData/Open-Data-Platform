@@ -89,7 +89,7 @@ async def create_client(
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if Session.get(Client, client_in.id):
-        raise HTTPException(HTTP_409_CONFLICT)
+        raise HTTPException(HTTP_409_CONFLICT, 'Client id is already in use')
 
     if client_in.secret is None:
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Client secret must be provided on create')

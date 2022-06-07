@@ -7,7 +7,7 @@ from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Client
 from odp.lib.hydra import TokenEndpointAuthMethod
-from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
+from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_not_found
 from test.factories import ClientFactory, ProviderFactory, ScopeFactory, fake
 
 
@@ -143,6 +143,22 @@ def test_get_client(api, client_batch, scopes, provider_auth):
     assert_db_state(client_batch)
 
 
+def test_get_client_not_found(api, client_batch, provider_auth):
+    scopes = [ODPScope.CLIENT_READ]
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = client_batch[2].provider
+
+    r = api(scopes, api_client_provider).get('/client/foo')
+
+    # we can't get a forbidden, regardless of provider auth, because
+    # if the client is not found, there is no provider to compare with
+    assert_not_found(r)
+    assert_db_state(client_batch)
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.CLIENT_ADMIN],
     [],
@@ -189,6 +205,49 @@ def test_create_client(api, client_batch, scopes, provider_auth):
     else:
         assert_forbidden(r)
         assert_db_state(client_batch)
+
+
+def test_create_client_conflict(api, client_batch, provider_auth):
+    scopes = [ODPScope.CLIENT_ADMIN]
+    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = client_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = client_batch[1].provider
+    else:
+        api_client_provider = None
+
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        new_client_provider = client_batch[2].provider
+    else:
+        new_client_provider = None
+
+    client = client_build(
+        id=client_batch[2].id,
+        provider=new_client_provider,
+    )
+
+    r = api(scopes, api_client_provider).post('/client/', json=dict(
+        id=client.id,
+        name=fake.catch_phrase(),
+        secret=fake.password(),
+        scope_ids=scope_ids(client),
+        provider_id=client.provider_id,
+        grant_types=[],
+        response_types=[],
+        redirect_uris=[],
+        post_logout_redirect_uris=[],
+        token_endpoint_auth_method=TokenEndpointAuthMethod.CLIENT_SECRET_BASIC,
+        allowed_cors_origins=[],
+    ))
+
+    if authorized:
+        assert_conflict(r, 'Client id is already in use')
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(client_batch)
 
 
 @pytest.mark.parametrize('scopes', [
@@ -241,6 +300,49 @@ def test_update_client(api, client_batch, scopes, provider_auth):
         assert_db_state(client_batch)
 
 
+def test_update_client_not_found(api, client_batch, provider_auth):
+    scopes = [ODPScope.CLIENT_ADMIN]
+    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = client_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = client_batch[1].provider
+    else:
+        api_client_provider = None
+
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        modified_client_provider = client_batch[2].provider
+    else:
+        modified_client_provider = None
+
+    client = client_build(
+        id='foo',
+        provider=modified_client_provider,
+    )
+
+    r = api(scopes, api_client_provider).put('/client/', json=dict(
+        id=client.id,
+        name=fake.catch_phrase(),
+        secret=fake.password(),
+        scope_ids=scope_ids(client),
+        provider_id=client.provider_id,
+        grant_types=[],
+        response_types=[],
+        redirect_uris=[],
+        post_logout_redirect_uris=[],
+        token_endpoint_auth_method=TokenEndpointAuthMethod.CLIENT_SECRET_BASIC,
+        allowed_cors_origins=[],
+    ))
+
+    if authorized:
+        assert_not_found(r)
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(client_batch)
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.CLIENT_ADMIN],
     [],
@@ -269,3 +371,19 @@ def test_delete_client(api, client_batch, scopes, provider_auth):
     else:
         assert_forbidden(r)
         assert_db_state(client_batch)
+
+
+def test_delete_client_not_found(api, client_batch, provider_auth):
+    scopes = [ODPScope.CLIENT_ADMIN]
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = client_batch[2].provider
+
+    r = api(scopes, api_client_provider).delete('/client/foo')
+
+    # we can't get a forbidden, regardless of provider auth, because
+    # if the client is not found, there is no provider to compare with
+    assert_not_found(r)
+    assert_db_state(client_batch)
