@@ -72,12 +72,6 @@ async def create_provider(
     if Session.get(Provider, provider_in.id):
         raise HTTPException(HTTP_409_CONFLICT, 'Provider id is already in use')
 
-    if Session.execute(
-        select(Provider).
-        where(Provider.name == provider_in.name)
-    ).first() is not None:
-        raise HTTPException(HTTP_409_CONFLICT, 'Provider name is already in use')
-
     provider = Provider(
         id=provider_in.id,
         name=provider_in.name,
@@ -97,13 +91,6 @@ async def update_provider(
 
     if not (provider := Session.get(Provider, provider_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
-
-    if Session.execute(
-        select(Provider).
-        where(Provider.id != provider_in.id).
-        where(Provider.name == provider_in.name)
-    ).first() is not None:
-        raise HTTPException(HTTP_409_CONFLICT, 'Provider name is already in use')
 
     provider.name = provider_in.name
     provider.save()

@@ -15,7 +15,7 @@ class Provider(Base):
     __tablename__ = 'provider'
 
     id = Column(String, primary_key=True)
-    name = Column(String, unique=True, nullable=False)
+    name = Column(String, nullable=False)
 
     # view of associated collections (one-to-many)
     collections = relationship('Collection', viewonly=True)

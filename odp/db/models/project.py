@@ -13,7 +13,7 @@ class Project(Base):
     __tablename__ = 'project'
 
     id = Column(String, primary_key=True)
-    name = Column(String, unique=True, nullable=False)
+    name = Column(String, nullable=False)
 
     # many-to-many project_collection entities are persisted by
     # assigning/removing Collection instances to/from collections

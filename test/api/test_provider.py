@@ -174,7 +174,7 @@ def test_create_provider(api, provider_batch, scopes, provider_auth):
         assert_db_state(provider_batch)
 
 
-def test_create_provider_conflict_id(api, provider_batch, provider_auth):
+def test_create_provider_conflict(api, provider_batch, provider_auth):
     scopes = [ODPScope.PROVIDER_ADMIN]
     authorized = provider_auth == ProviderAuth.NONE
 
@@ -192,33 +192,6 @@ def test_create_provider_conflict_id(api, provider_batch, provider_auth):
 
     if authorized:
         assert_conflict(r, 'Provider id is already in use')
-    else:
-        assert_forbidden(r)
-
-    assert_db_state(provider_batch)
-
-
-def test_create_provider_conflict_name(api, provider_batch, provider_auth):
-    scopes = [ODPScope.PROVIDER_ADMIN]
-    authorized = provider_auth == ProviderAuth.NONE
-
-    if provider_auth == ProviderAuth.NONE:
-        api_client_provider = None
-    else:
-        api_client_provider = provider_batch[2]
-
-    provider = provider_build(
-        id='foo',
-        name=provider_batch[2].name,
-    )
-
-    r = api(scopes, api_client_provider).post('/provider/', json=dict(
-        id=provider.id,
-        name=provider.name,
-    ))
-
-    if authorized:
-        assert_conflict(r, 'Provider name is already in use')
     else:
         assert_forbidden(r)
 
@@ -281,35 +254,6 @@ def test_update_provider_not_found(api, provider_batch, provider_auth):
 
     if authorized:
         assert_not_found(r)
-    else:
-        assert_forbidden(r)
-
-    assert_db_state(provider_batch)
-
-
-def test_update_provider_conflict_name(api, provider_batch, provider_auth):
-    scopes = [ODPScope.PROVIDER_ADMIN]
-    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
-
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = provider_batch[2]
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = provider_batch[1]
-    else:
-        api_client_provider = None
-
-    provider = provider_build(
-        id=provider_batch[2].id,
-        name=provider_batch[1].name,
-    )
-
-    r = api(scopes, api_client_provider).put('/provider/', json=dict(
-        id=provider.id,
-        name=provider.name,
-    ))
-
-    if authorized:
-        assert_conflict(r, 'Provider name is already in use')
     else:
         assert_forbidden(r)
 
