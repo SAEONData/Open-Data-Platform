@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Schema
-from test.api import all_scopes, all_scopes_excluding, assert_forbidden
+from test.api import all_scopes, all_scopes_excluding, assert_forbidden, assert_not_found
 from test.factories import SchemaFactory
 
 
@@ -74,4 +74,11 @@ def test_get_schema(api, schema_batch, scopes):
         assert_json_result(r, r.json(), schema_batch[2])
     else:
         assert_forbidden(r)
+    assert_db_state(schema_batch)
+
+
+def test_get_schema_not_found(api, schema_batch):
+    scopes = [ODPScope.SCHEMA_READ]
+    r = api(scopes).get('/schema/foo')
+    assert_not_found(r)
     assert_db_state(schema_batch)
