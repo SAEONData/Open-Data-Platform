@@ -56,7 +56,7 @@ async def create_project(
         project_in: ProjectModelIn,
 ):
     if Session.get(Project, project_in.id):
-        raise HTTPException(HTTP_409_CONFLICT)
+        raise HTTPException(HTTP_409_CONFLICT, 'Project id is already in use')
 
     project = Project(
         id=project_in.id,

@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Project
-from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
+from test.api import all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_not_found
 from test.factories import CollectionFactory, ProjectFactory
 
 
@@ -90,6 +90,13 @@ def test_get_project(api, project_batch, scopes):
     assert_db_state(project_batch)
 
 
+def test_get_project_not_found(api, project_batch):
+    scopes = [ODPScope.PROJECT_READ]
+    r = api(scopes).get('/project/foo')
+    assert_not_found(r)
+    assert_db_state(project_batch)
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.PROJECT_ADMIN],
     [],
@@ -110,6 +117,18 @@ def test_create_project(api, project_batch, scopes):
     else:
         assert_forbidden(r)
         assert_db_state(project_batch)
+
+
+def test_create_project_conflict(api, project_batch):
+    scopes = [ODPScope.PROJECT_ADMIN]
+    project = project_build(id=project_batch[2].id)
+    r = api(scopes).post('/project/', json=dict(
+        id=project.id,
+        name=project.name,
+        collection_ids=collection_ids(project),
+    ))
+    assert_conflict(r, 'Project id is already in use')
+    assert_db_state(project_batch)
 
 
 @pytest.mark.parametrize('scopes', [
@@ -135,6 +154,18 @@ def test_update_project(api, project_batch, scopes):
         assert_db_state(project_batch)
 
 
+def test_update_project_not_found(api, project_batch):
+    scopes = [ODPScope.PROJECT_ADMIN]
+    project = project_build(id='foo')
+    r = api(scopes).put('/project/', json=dict(
+        id=project.id,
+        name=project.name,
+        collection_ids=collection_ids(project),
+    ))
+    assert_not_found(r)
+    assert_db_state(project_batch)
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.PROJECT_ADMIN],
     [],
@@ -152,3 +183,10 @@ def test_delete_project(api, project_batch, scopes):
     else:
         assert_forbidden(r)
         assert_db_state(project_batch)
+
+
+def test_delete_project_not_found(api, project_batch):
+    scopes = [ODPScope.PROJECT_ADMIN]
+    r = api(scopes).delete('/project/foo')
+    assert_not_found(r)
+    assert_db_state(project_batch)
