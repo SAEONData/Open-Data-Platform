@@ -66,7 +66,7 @@ async def create_role(
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if Session.get(Role, role_in.id):
-        raise HTTPException(HTTP_409_CONFLICT)
+        raise HTTPException(HTTP_409_CONFLICT, 'Role id is already in use')
 
     role = Role(
         id=role_in.id,

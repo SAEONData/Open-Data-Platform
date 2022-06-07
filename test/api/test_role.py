@@ -6,7 +6,7 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Role
-from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden
+from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_not_found
 from test.factories import ProviderFactory, RoleFactory, ScopeFactory
 
 
@@ -119,6 +119,20 @@ def test_get_role(api, role_batch, scopes, provider_auth):
     assert_db_state(role_batch)
 
 
+def test_get_role_not_found(api, role_batch, provider_auth):
+    scopes = [ODPScope.ROLE_READ]
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = role_batch[2].provider
+
+    r = api(scopes, api_client_provider).get('/role/foo')
+
+    assert_not_found(r)
+    assert_db_state(role_batch)
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.ROLE_ADMIN],
     [],
@@ -157,6 +171,41 @@ def test_create_role(api, role_batch, scopes, provider_auth):
     else:
         assert_forbidden(r)
         assert_db_state(role_batch)
+
+
+def test_create_role_conflict(api, role_batch, provider_auth):
+    scopes = [ODPScope.ROLE_ADMIN]
+    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = role_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = role_batch[1].provider
+    else:
+        api_client_provider = None
+
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        new_role_provider = role_batch[2].provider
+    else:
+        new_role_provider = None
+
+    role = role_build(
+        id=role_batch[2].id,
+        provider=new_role_provider,
+    )
+
+    r = api(scopes, api_client_provider).post('/role/', json=dict(
+        id=role.id,
+        scope_ids=scope_ids(role),
+        provider_id=role.provider_id,
+    ))
+
+    if authorized:
+        assert_conflict(r, 'Role id is already in use')
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(role_batch)
 
 
 @pytest.mark.parametrize('scopes', [
@@ -201,6 +250,41 @@ def test_update_role(api, role_batch, scopes, provider_auth):
         assert_db_state(role_batch)
 
 
+def test_update_role_not_found(api, role_batch, provider_auth):
+    scopes = [ODPScope.ROLE_ADMIN]
+    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = role_batch[2].provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = role_batch[1].provider
+    else:
+        api_client_provider = None
+
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        modified_role_provider = role_batch[2].provider
+    else:
+        modified_role_provider = None
+
+    role = role_build(
+        id='foo',
+        provider=modified_role_provider,
+    )
+
+    r = api(scopes, api_client_provider).put('/role/', json=dict(
+        id=role.id,
+        scope_ids=scope_ids(role),
+        provider_id=role.provider_id,
+    ))
+
+    if authorized:
+        assert_not_found(r)
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(role_batch)
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.ROLE_ADMIN],
     [],
@@ -229,3 +313,17 @@ def test_delete_role(api, role_batch, scopes, provider_auth):
     else:
         assert_forbidden(r)
         assert_db_state(role_batch)
+
+
+def test_delete_role_not_found(api, role_batch, provider_auth):
+    scopes = [ODPScope.ROLE_ADMIN]
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = role_batch[2].provider
+
+    r = api(scopes, api_client_provider).delete('/role/foo')
+
+    assert_not_found(r)
+    assert_db_state(role_batch)
