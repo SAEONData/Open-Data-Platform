@@ -255,15 +255,19 @@ def _set_record(
             'Cannot update a record belonging to a published or archived collection',
         )
 
-    if Session.execute(
+    if record_in.doi and Session.execute(
         select(Record).
-        where(
-            (Record.id != record.id) &
-            (((Record.doi != None) & (Record.doi == record_in.doi)) |
-             ((Record.sid != None) & (Record.sid == record_in.sid)))
-        )
+        where(Record.id != record.id).
+        where(Record.doi == record_in.doi)
     ).first() is not None:
-        raise HTTPException(HTTP_409_CONFLICT)
+        raise HTTPException(HTTP_409_CONFLICT, 'DOI is already in use')
+
+    if record_in.sid and Session.execute(
+        select(Record).
+        where(Record.id != record.id).
+        where(Record.sid == record_in.sid)
+    ).first() is not None:
+        raise HTTPException(HTTP_409_CONFLICT, 'SID is already in use')
 
     if record.doi is not None and record.doi != record_in.doi:
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'The DOI cannot be changed or removed')
