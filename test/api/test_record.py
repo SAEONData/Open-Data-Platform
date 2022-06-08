@@ -568,6 +568,58 @@ def test_update_record_conflict(api, record_batch_with_ids, admin, provider_auth
     assert_no_audit_log()
 
 
+@pytest.fixture(params=['change', 'remove'])
+def doi_change(request):
+    return request.param
+
+
+def test_update_record_doi_change(api, record_batch_with_ids, admin, provider_auth, doi_change):
+    route = '/record/admin/' if admin else '/record/'
+    scopes = [ODPScope.RECORD_ADMIN] if admin else [ODPScope.RECORD_WRITE]
+    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = record_batch_with_ids[2].collection.provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = record_batch_with_ids[1].collection.provider
+    else:
+        api_client_provider = None
+
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        modified_record_collection = record_batch_with_ids[2].collection
+    else:
+        modified_record_collection = None  # new collection
+
+    if doi_change == 'change':
+        record = record_build(
+            identifiers='doi',
+            id=record_batch_with_ids[2].id,
+            collection=modified_record_collection,
+        )
+    elif doi_change == 'remove':
+        record = record_build(
+            identifiers='sid',
+            id=record_batch_with_ids[2].id,
+            collection=modified_record_collection,
+        )
+
+    r = api(scopes, api_client_provider).put(route + record.id, json=dict(
+        doi=record.doi,
+        sid=record.sid,
+        collection_id=record.collection_id,
+        schema_id=record.schema_id,
+        metadata=record.metadata_,
+    ))
+
+    if authorized:
+        assert_unprocessable(r, 'The DOI cannot be changed or removed')
+    else:
+        assert_forbidden(r)
+
+    assert_db_state(record_batch_with_ids)
+    assert_no_audit_log()
+
+
 @pytest.mark.parametrize('admin_route, scopes, collection_tags', [
     (False, [ODPScope.RECORD_WRITE], []),
     (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE]),
