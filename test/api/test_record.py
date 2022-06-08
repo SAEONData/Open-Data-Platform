@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from random import randint
 
@@ -458,6 +459,52 @@ def test_update_record(api, record_batch, admin_route, scopes, collection_tags, 
             assert_json_record_result(r, r.json(), record)
             assert_db_state(modified_record_batch)
             assert_audit_log('update', record)
+    else:
+        assert_forbidden(r)
+        assert_db_state(record_batch)
+        assert_no_audit_log()
+
+
+def test_update_record_not_found(api, record_batch, admin, provider_auth):
+    # if not found on the admin route, the record is created!
+    route = '/record/admin/' if admin else '/record/'
+    scopes = [ODPScope.RECORD_ADMIN] if admin else [ODPScope.RECORD_WRITE]
+    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+
+    if provider_auth == ProviderAuth.MATCH:
+        api_client_provider = record_batch[2].collection.provider
+    elif provider_auth == ProviderAuth.MISMATCH:
+        api_client_provider = record_batch[1].collection.provider
+    else:
+        api_client_provider = None
+
+    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+        modified_record_collection = record_batch[2].collection
+    else:
+        modified_record_collection = None  # new collection
+
+    modified_record_batch = record_batch + [record := record_build(
+        id=str(uuid.uuid4()),
+        collection=modified_record_collection,
+    )]
+
+    r = api(scopes, api_client_provider).put(route + record.id, json=dict(
+        doi=record.doi,
+        sid=record.sid,
+        collection_id=record.collection_id,
+        schema_id=record.schema_id,
+        metadata=record.metadata_,
+    ))
+
+    if authorized:
+        if admin:
+            assert_json_record_result(r, r.json(), record)
+            assert_db_state(modified_record_batch)
+            assert_audit_log('insert', record)
+        else:
+            assert_not_found(r)
+            assert_db_state(record_batch)
+            assert_no_audit_log()
     else:
         assert_forbidden(r)
         assert_db_state(record_batch)
