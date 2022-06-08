@@ -674,6 +674,22 @@ def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, 
         assert_no_audit_log()
 
 
+def test_delete_record_not_found(api, record_batch, admin, provider_auth):
+    route = '/record/admin/' if admin else '/record/'
+    scopes = [ODPScope.RECORD_ADMIN] if admin else [ODPScope.RECORD_WRITE]
+
+    if provider_auth == ProviderAuth.NONE:
+        api_client_provider = None
+    else:
+        api_client_provider = record_batch[2].collection.provider
+
+    r = api(scopes, api_client_provider).delete(f'{route}foo')
+
+    assert_not_found(r)
+    assert_db_state(record_batch)
+    assert_no_audit_log()
+
+
 @pytest.mark.parametrize('scopes', [
     [ODPScope.RECORD_TAG_QC],
     [],
