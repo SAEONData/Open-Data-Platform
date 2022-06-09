@@ -19,7 +19,7 @@ class Role(Base):
 
     id = Column(String, primary_key=True)
 
-    provider_id = Column(String, ForeignKey('provider.id', ondelete='CASCADE'))
+    provider_id = Column(String, ForeignKey('provider.id', onupdate='CASCADE', ondelete='CASCADE'))
     provider = relationship('Provider')
 
     # many-to-many role_scope entities are persisted by

@@ -14,7 +14,7 @@ class Collection(Base):
     name = Column(String, nullable=False)
     doi_key = Column(String)
 
-    provider_id = Column(String, ForeignKey('provider.id', ondelete='CASCADE'), nullable=False)
+    provider_id = Column(String, ForeignKey('provider.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
     provider = relationship('Provider')
 
     # view of associated projects via many-to-many project_collection relation

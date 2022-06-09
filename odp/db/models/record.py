@@ -39,7 +39,7 @@ class Record(Base):
     validity = Column(JSONB, nullable=False)
     timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
 
-    collection_id = Column(String, ForeignKey('collection.id', ondelete='RESTRICT'), nullable=False)
+    collection_id = Column(String, ForeignKey('collection.id', onupdate='CASCADE', ondelete='RESTRICT'), nullable=False)
     collection = relationship('Collection')
 
     schema_id = Column(String, nullable=False)

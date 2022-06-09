@@ -9,8 +9,8 @@ class ProjectCollection(Base):
 
     __tablename__ = 'project_collection'
 
-    project_id = Column(String, ForeignKey('project.id', ondelete='CASCADE'), primary_key=True)
-    collection_id = Column(String, ForeignKey('collection.id', ondelete='CASCADE'), primary_key=True)
+    project_id = Column(String, ForeignKey('project.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
+    collection_id = Column(String, ForeignKey('collection.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
 
     project = relationship('Project', viewonly=True)
     collection = relationship('Collection')
