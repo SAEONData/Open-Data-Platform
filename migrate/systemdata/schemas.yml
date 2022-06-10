@@ -10,6 +10,10 @@ record-qc:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/record-qc
 
+record-embargo:
+  type: tag
+  uri: https://odp.saeon.ac.za/schema/tag/record-embargo
+
 record-migrated:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/record-migrated

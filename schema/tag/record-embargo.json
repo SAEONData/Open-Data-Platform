@@ -1,0 +1,15 @@
+{
+    "$id": "https://odp.saeon.ac.za/schema/tag/record-embargo",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "start": {"type": "string", "format": "date"},
+        "end": {"type": "string", "format": "date"},
+        "comment": {"type": "string"}
+    },
+    "anyOf": [
+        {"required": ["start"]},
+        {"required": ["end"]}
+    ],
+    "additionalProperties": false
+}

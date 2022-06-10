@@ -32,6 +32,7 @@ class ODPScope(str, Enum):
     RECORD_READ = 'odp.record:read'
     RECORD_WRITE = 'odp.record:write'
     RECORD_TAG_QC = 'odp.record_tag:qc'
+    RECORD_TAG_EMBARGO = 'odp.record_tag:embargo'
     RECORD_TAG_MIGRATED = 'odp.record_tag:migrated'
 
     # role
@@ -60,3 +61,4 @@ class ODPCollectionTag(str, Enum):
 class ODPRecordTag(str, Enum):
     MIGRATED = 'record-migrated'
     QC = 'record-qc'
+    EMBARGO = 'record-embargo'

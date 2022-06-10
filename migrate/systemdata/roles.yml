@@ -28,6 +28,7 @@ SAEON:Curator:
     - odp.record:admin
     - odp.record:read
     - odp.record_tag:qc
+    - odp.record_tag:embargo
     - odp.role:read
     - odp.schema:read
     - odp.scope:read

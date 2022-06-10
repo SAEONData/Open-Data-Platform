@@ -25,3 +25,10 @@ record-qc:
   public: False
   scope_id: odp.record_tag:qc
   schema_id: record-qc
+
+record-embargo:
+  type: record
+  flag: False
+  public: True
+  scope_id: odp.record_tag:embargo
+  schema_id: record-embargo

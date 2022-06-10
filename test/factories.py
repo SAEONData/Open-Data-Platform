@@ -38,6 +38,7 @@ def schema_uri_from_type(schema):
             'https://odp.saeon.ac.za/schema/tag/generic',
             'https://odp.saeon.ac.za/schema/tag/record-migrated',
             'https://odp.saeon.ac.za/schema/tag/record-qc',
+            'https://odp.saeon.ac.za/schema/tag/record-embargo',
         ))
     elif schema.type == 'catalog':
         return choice((
