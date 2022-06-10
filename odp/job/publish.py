@@ -10,15 +10,25 @@ from odp.api.models import PublishedRecordModel, PublishedTagInstanceModel, Reco
 from odp.api.routers.record import output_record_model
 from odp.db import Session
 from odp.db.models import Catalog, CatalogRecord, CollectionTag, Record, RecordTag
+from odp.lib.logging import init_logging
 from odp.lib.schema import schema_catalog
+
+init_logging()
 
 logger = logging.getLogger(__name__)
 
 
-def run():
-    for catalog_id in Session.execute(select(Catalog.id)).scalars():
-        for record_id, timestamp in _select_records(catalog_id):
-            _evaluate_record(catalog_id, record_id, timestamp)
+def main():
+    logger.info('PUBLISHING STARTED')
+    try:
+        for catalog_id in Session.execute(select(Catalog.id)).scalars():
+            for record_id, timestamp in _select_records(catalog_id):
+                _evaluate_record(catalog_id, record_id, timestamp)
+
+        logger.info('PUBLISHING FINISHED')
+
+    except Exception as e:
+        logger.critical(f'PUBLISHING ABORTED: {str(e)}')
 
 
 def _select_records(catalog_id: str) -> list[tuple[str, datetime]]:
@@ -133,6 +143,4 @@ def _create_published_record(record_model: RecordModel) -> PublishedRecordModel:
 
 
 if __name__ == '__main__':
-    logger.info('----- publishing started -----')
-    run()
-    logger.info('----- publishing finished -----')
+    main()
