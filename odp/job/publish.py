@@ -22,8 +22,15 @@ def main():
     logger.info('PUBLISHING STARTED')
     try:
         for catalog_id in Session.execute(select(Catalog.id)).scalars():
-            for record_id, timestamp in _select_records(catalog_id):
-                _evaluate_record(catalog_id, record_id, timestamp)
+            records = _select_records(catalog_id)
+            logger.info(f'{catalog_id} catalog: {(total := len(records))} records selected for evaluation')
+
+            published = 0
+            for record_id, timestamp in records:
+                published += _evaluate_record(catalog_id, record_id, timestamp)
+
+            if total:
+                logger.info(f'{catalog_id} catalog: {published} records published; {total - published} records not published')
 
         logger.info('PUBLISHING FINISHED')
 
@@ -90,7 +97,7 @@ def _select_records(catalog_id: str) -> list[tuple[str, datetime]]:
     return Session.execute(stmt).all()
 
 
-def _evaluate_record(catalog_id: str, record_id: str, timestamp: datetime) -> None:
+def _evaluate_record(catalog_id: str, record_id: str, timestamp: datetime) -> bool:
     """Evaluate a record model (API) against the publication schema for
     a catalog, and commit the result to the catalog_record table.
 
@@ -119,6 +126,8 @@ def _evaluate_record(catalog_id: str, record_id: str, timestamp: datetime) -> No
     catalog_record.timestamp = timestamp
     catalog_record.save()
     Session.commit()
+
+    return catalog_record.published
 
 
 def _create_published_record(record_model: RecordModel) -> PublishedRecordModel:
