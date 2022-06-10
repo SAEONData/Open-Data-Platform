@@ -1,9 +1,10 @@
 import json
+from datetime import datetime
 
 from flask import Flask, session
-from wtforms import BooleanField, Form, RadioField, SelectField, SelectMultipleField, StringField, TextAreaField, ValidationError
+from wtforms import BooleanField, DateField, Form, RadioField, SelectField, SelectMultipleField, StringField, TextAreaField, ValidationError
 from wtforms.csrf.session import SessionCSRF
-from wtforms.validators import data_required, input_required, regexp
+from wtforms.validators import data_required, input_required, optional, regexp
 from wtforms.widgets import CheckboxInput, ListWidget
 
 from odp.lib.formats import DOI_REGEX, SID_REGEX
@@ -37,6 +38,11 @@ class MultiCheckboxField(SelectMultipleField):
 class StringListField(TextAreaField):
     def process_data(self, value):
         self.data = '\n'.join(value) if value is not None else None
+
+
+class DateStringField(DateField):
+    def process_data(self, value):
+        self.data = datetime.strptime(value, '%Y-%m-%d') if value is not None else None
 
 
 class BaseForm(Form):
@@ -187,6 +193,20 @@ class RecordFilterForm(BaseForm):
 class RecordTagQCForm(BaseForm):
     pass_ = BooleanField(
         label='Pass',
+    )
+    comment = StringField(
+        label='Comment',
+    )
+
+
+class RecordTagEmbargoForm(BaseForm):
+    start = DateStringField(
+        label='Start date',
+        validators=[optional()],
+    )
+    end = DateStringField(
+        label='End date',
+        validators=[optional()],
     )
     comment = StringField(
         label='Comment',

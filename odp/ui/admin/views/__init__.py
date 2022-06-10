@@ -42,3 +42,8 @@ def init_app(app: Flask):
     def timestamp(value):
         dt = datetime.fromisoformat(value).astimezone(ZoneInfo('Africa/Johannesburg'))
         return dt.strftime('%d %b %Y, %H:%M %Z')
+
+    @app.template_filter()
+    def date(value):
+        dt = datetime.strptime(value, '%Y-%m-%d')
+        return dt.strftime('%d %b %Y')

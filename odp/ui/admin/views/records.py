@@ -5,7 +5,7 @@ from flask_login import current_user
 
 from odp import ODPRecordTag, ODPScope
 from odp.ui import api
-from odp.ui.admin.forms import RecordFilterForm, RecordForm, RecordTagQCForm
+from odp.ui.admin.forms import RecordFilterForm, RecordForm, RecordTagEmbargoForm, RecordTagQCForm
 from odp.ui.admin.views import utils
 
 bp = Blueprint('records', __name__)
@@ -37,6 +37,7 @@ def view(id):
     catalog_records = api.get(f'/record/{id}/catalog')
 
     migrated_tag = next((tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.MIGRATED), None)
+
     qc_tags = {
         'items': (items := [tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.QC]),
         'total': len(items),
@@ -45,12 +46,22 @@ def view(id):
     }
     has_user_qc_tag = any(tag for tag in items if tag['user_id'] == current_user.id)
 
+    embargo_tags = {
+        'items': (items := [tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.EMBARGO]),
+        'total': len(items),
+        'page': 1,
+        'pages': 1,
+    }
+    has_user_embargo_tag = any(tag for tag in items if tag['user_id'] == current_user.id)
+
     return render_template(
         'record_view.html',
         record=record,
         migrated_tag=migrated_tag,
         qc_tags=qc_tags,
         has_user_qc_tag=has_user_qc_tag,
+        embargo_tags=embargo_tags,
+        has_user_embargo_tag=has_user_embargo_tag,
         catalog_records=catalog_records,
     )
 
@@ -170,6 +181,52 @@ def tag_qc(id):
 def untag_qc(id):
     api.delete(f'/record/{id}/tag/{ODPRecordTag.QC}')
     flash(f'{ODPRecordTag.QC} tag has been removed.', category='success')
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/tag/embargo', methods=('GET', 'POST'))
+@api.client(ODPScope.RECORD_TAG_EMBARGO)
+def tag_embargo(id):
+    record = api.get(f'/record/{id}')
+
+    if request.method == 'POST':
+        form = RecordTagEmbargoForm(request.form)
+    else:
+        record_tag = next(
+            (tag for tag in record['tags']
+             if tag['tag_id'] == ODPRecordTag.EMBARGO and tag['user_id'] == current_user.id),
+            None
+        )
+        form = RecordTagEmbargoForm(data=record_tag['data'] if record_tag else None)
+
+    if request.method == 'POST' and form.validate():
+        if not form.start.data and not form.end.data:
+            flash('Please specify a start and/or end date.', category='error')
+        else:
+            try:
+                api.post(f'/record/{id}/tag', dict(
+                    tag_id=ODPRecordTag.EMBARGO,
+                    data={
+                        'start': form.start.data.strftime('%Y-%m-%d') if form.start.data else None,
+                        'end': form.end.data.strftime('%Y-%m-%d') if form.end.data else None,
+                        'comment': form.comment.data,
+                    },
+                ))
+                flash(f'{ODPRecordTag.EMBARGO} tag has been set.', category='success')
+                return redirect(url_for('.view', id=id))
+
+            except api.ODPAPIError as e:
+                if response := api.handle_error(e):
+                    return response
+
+    return render_template('record_tag_embargo.html', record=record, form=form)
+
+
+@bp.route('/<id>/untag/embargo', methods=('POST',))
+@api.client(ODPScope.RECORD_TAG_EMBARGO, fallback_to_referrer=True)
+def untag_embargo(id):
+    api.delete(f'/record/{id}/tag/{ODPRecordTag.EMBARGO}')
+    flash(f'{ODPRecordTag.EMBARGO} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
 
 

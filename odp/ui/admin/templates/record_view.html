@@ -31,6 +31,11 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tag-embargo" type="button" role="tab">
+                Embargo
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#catalog-records" type="button" role="tab">
                 Catalog Records
             </button>
@@ -38,7 +43,8 @@
     </ul>
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
-            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Migrated', 'Timestamp', 'Quality Control') %}
+            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Migrated', 'Timestamp',
+                    'Quality Control', 'Dataset Embargo') %}
                 {% if prop == 'DOI' %}
                     {{ record.doi if record.doi }}
                 {% elif prop == 'SID' %}
@@ -58,6 +64,12 @@
                     {% for qc_tag in qc_tags['items'] %}
                         {{ qc_tag.data.pass_|replace('True', 'Passed')|replace('False', 'Failed') }}
                         by {{ obj_link('users', qc_tag.user_id, qc_tag.user_name) }}<br/>
+                    {% endfor %}
+                {% elif prop == 'Dataset Embargo' %}
+                    {% for embargo_tag in embargo_tags['items'] %}
+                        From {{ embargo_tag.data.start|date if embargo_tag.data.start else '(no start date)' }}
+                        to {{ embargo_tag.data.end|date if embargo_tag.data.end else '(no end date)' }}
+                        set by {{ obj_link('users', embargo_tag.user_id, embargo_tag.user_name) }}<br/>
                     {% endfor %}
                 {% endif %}
             {% endcall %}
@@ -87,6 +99,24 @@
                 {% if has_user_qc_tag %}
                     {{ render_button_prompt_form('.untag_qc', record.id, 'Untag', 'warning',
                         'Are you sure you want to delete your QC tag?') }}
+                {% endif %}
+            </div>
+        </div>
+        <div id="tag-embargo" class="tab-pane fade" role="tabpanel">
+            {% call(embargo_tag) render_table(embargo_tags, 'Start date', 'End date', 'Comment', 'User', 'Timestamp', hide_id=True) %}
+                <td>{{ embargo_tag.data.start }}</td>
+                <td>{{ embargo_tag.data.end }}</td>
+                <td>{{ embargo_tag.data.comment }}</td>
+                <td>{{ obj_link('users', embargo_tag.user_id, embargo_tag.user_name) }}</td>
+                <td>{{ embargo_tag.timestamp|timestamp }}</td>
+            {% endcall %}
+            <div class="btn-toolbar justify-content-between mt-4">
+                <a href="{{ url_for('.tag_embargo', id=record.id) }}" class="btn btn-outline-success btn-action">
+                    Tag
+                </a>
+                {% if has_user_embargo_tag %}
+                    {{ render_button_prompt_form('.untag_embargo', record.id, 'Untag', 'warning',
+                        'Are you sure you want to delete your embargo tag?') }}
                 {% endif %}
             </div>
         </div>
