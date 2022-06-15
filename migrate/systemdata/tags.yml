@@ -17,18 +17,18 @@ record-migrated:
   flag: True
   public: False
   scope_id: odp.record_tag:migrated
-  schema_id: record-migrated
+  schema_id: record-migrated-tag
 
 record-qc:
   type: record
   flag: False
   public: False
   scope_id: odp.record_tag:qc
-  schema_id: record-qc
+  schema_id: record-qc-tag
 
 record-embargo:
   type: record
   flag: False
   public: True
   scope_id: odp.record_tag:embargo
-  schema_id: record-embargo
+  schema_id: record-embargo-tag

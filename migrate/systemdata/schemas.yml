@@ -6,15 +6,15 @@ iso19115-saeon:
   type: metadata
   uri: https://odp.saeon.ac.za/schema/metadata/iso19115-saeon
 
-record-qc:
+record-qc-tag:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/record-qc
 
-record-embargo:
+record-embargo-tag:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/record-embargo
 
-record-migrated:
+record-migrated-tag:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/record-migrated
 

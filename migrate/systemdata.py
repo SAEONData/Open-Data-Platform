@@ -27,7 +27,7 @@ sys.path.append(str(rootdir))
 dotenv_path = pathlib.Path.cwd() / '.env'
 load_dotenv(dotenv_path)
 
-from odp import ODPCatalog, ODPCollectionTag, ODPRecordTag, ODPScope
+from odp import ODPCatalog, ODPCatalogSchema, ODPCollectionTag, ODPMetadataSchema, ODPRecordTag, ODPScope, ODPTagSchema
 from odp.db import Base, Session, engine
 from odp.db.models import Catalog, Client, Role, Schema, SchemaType, Scope, ScopeType, Tag, User, UserRole
 from odp.lib.hydra import GrantType, HydraAdminAPI, HydraScope, ResponseType
@@ -171,7 +171,10 @@ def init_schemas():
     with open(datadir / 'schemas.yml') as f:
         schema_data = yaml.safe_load(f)
 
-    for schema_id, schema_spec in schema_data.items():
+    for schema_id in (schema_ids := [s.value for s in ODPMetadataSchema] +
+                                    [s.value for s in ODPTagSchema] +
+                                    [s.value for s in ODPCatalogSchema]):
+        schema_spec = schema_data[schema_id]
         schema_type = schema_spec['type']
         schema = Session.get(Schema, (schema_id, schema_type)) or Schema(id=schema_id, type=schema_type)
         schema.uri = schema_spec['uri']
@@ -182,6 +185,12 @@ def init_schemas():
             print(f'Updated MD5 and timestamp for schema {schema_id}')
 
         schema.save()
+
+    if orphaned_yml_schemas := [schema_id for schema_id in schema_data if schema_id not in schema_ids]:
+        print(f'Warning: orphaned schema definitions in schemas.yml {orphaned_yml_schemas}')
+
+    if orphaned_db_schemas := Session.execute(select(Schema.id).where(Schema.id.not_in(schema_ids))).scalars().all():
+        print(f'Warning: orphaned schema definitions in schema table {orphaned_db_schemas}')
 
 
 def init_tags():
