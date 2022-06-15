@@ -402,13 +402,13 @@ def test_delete_collection_not_found(api, collection_batch, provider_auth):
 
 
 @pytest.mark.parametrize('scopes', [
-    [ODPScope.COLLECTION_TAG_PUBLISH],
+    [ODPScope.COLLECTION_PUBLISH],
     [],
     all_scopes,
-    all_scopes_excluding(ODPScope.COLLECTION_TAG_PUBLISH),
+    all_scopes_excluding(ODPScope.COLLECTION_PUBLISH),
 ])
 def test_tag_collection(api, collection_batch, scopes, provider_auth):
-    authorized = ODPScope.COLLECTION_TAG_PUBLISH in scopes and \
+    authorized = ODPScope.COLLECTION_PUBLISH in scopes and \
                  provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
     if provider_auth == ProviderAuth.MATCH:
@@ -423,9 +423,9 @@ def test_tag_collection(api, collection_batch, scopes, provider_auth):
         id='Collection.Publish',
         type='collection',
         scope=Session.get(
-            Scope, (ODPScope.COLLECTION_TAG_PUBLISH, ScopeType.odp)
+            Scope, (ODPScope.COLLECTION_PUBLISH, ScopeType.odp)
         ) or Scope(
-            id=ODPScope.COLLECTION_TAG_PUBLISH, type=ScopeType.odp
+            id=ODPScope.COLLECTION_PUBLISH, type=ScopeType.odp
         ),
         schema=SchemaFactory(
             type='tag',
@@ -527,13 +527,13 @@ def flag(request):
 
 
 @pytest.mark.parametrize('scopes', [
-    [ODPScope.COLLECTION_TAG_PUBLISH],
+    [ODPScope.COLLECTION_PUBLISH],
     [],
     all_scopes,
-    all_scopes_excluding(ODPScope.COLLECTION_TAG_PUBLISH),
+    all_scopes_excluding(ODPScope.COLLECTION_PUBLISH),
 ])
 def test_tag_collection_multi(api, collection_batch, scopes, provider_auth, flag):
-    authorized = ODPScope.COLLECTION_TAG_PUBLISH in scopes and \
+    authorized = ODPScope.COLLECTION_PUBLISH in scopes and \
                  provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
     if provider_auth == ProviderAuth.MATCH:
@@ -552,9 +552,9 @@ def test_tag_collection_multi(api, collection_batch, scopes, provider_auth, flag
             type='collection',
             flag=flag,
             scope=Session.get(
-                Scope, (ODPScope.COLLECTION_TAG_PUBLISH, ScopeType.odp)
+                Scope, (ODPScope.COLLECTION_PUBLISH, ScopeType.odp)
             ) or Scope(
-                id=ODPScope.COLLECTION_TAG_PUBLISH, type=ScopeType.odp
+                id=ODPScope.COLLECTION_PUBLISH, type=ScopeType.odp
             ),
             schema=SchemaFactory(
                 type='tag',

@@ -2,33 +2,33 @@ Collection.Publish:
   type: collection
   flag: True
   public: False
-  scope_id: odp.collection_tag:publish
+  scope_id: odp.collection:publish
   schema_id: Tag.Generic
 
 Collection.Archive:
   type: collection
   flag: True
   public: False
-  scope_id: odp.collection_tag:archive
+  scope_id: odp.collection:archive
   schema_id: Tag.Generic
 
 Record.Migrated:
   type: record
   flag: True
   public: False
-  scope_id: odp.record_tag:migrated
+  scope_id: odp.record:migrate
   schema_id: Tag.Record.Migrated
 
 Record.QC:
   type: record
   flag: False
   public: False
-  scope_id: odp.record_tag:qc
+  scope_id: odp.record:qc
   schema_id: Tag.Record.QC
 
 Record.Embargo:
   type: record
   flag: False
   public: True
-  scope_id: odp.record_tag:embargo
+  scope_id: odp.record:embargo
   schema_id: Tag.Record.Embargo

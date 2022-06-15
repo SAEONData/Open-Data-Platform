@@ -95,7 +95,7 @@ def delete(id):
 
 
 @bp.route('/<id>/tag/publish', methods=('POST',))
-@api.client(ODPScope.COLLECTION_TAG_PUBLISH, fallback_to_referrer=True)
+@api.client(ODPScope.COLLECTION_PUBLISH, fallback_to_referrer=True)
 def tag_publish(id):
     api.post(f'/collection/{id}/tag', dict(
         tag_id=ODPCollectionTag.PUBLISH,
@@ -106,7 +106,7 @@ def tag_publish(id):
 
 
 @bp.route('/<id>/untag/publish', methods=('POST',))
-@api.client(ODPScope.COLLECTION_TAG_PUBLISH, fallback_to_referrer=True)
+@api.client(ODPScope.COLLECTION_PUBLISH, fallback_to_referrer=True)
 def untag_publish(id):
     api.delete(f'/collection/{id}/tag/{ODPCollectionTag.PUBLISH}')
     flash(f'{ODPCollectionTag.PUBLISH} tag has been removed.', category='success')
@@ -114,7 +114,7 @@ def untag_publish(id):
 
 
 @bp.route('/<id>/tag/archive', methods=('POST',))
-@api.client(ODPScope.COLLECTION_TAG_ARCHIVE, fallback_to_referrer=True)
+@api.client(ODPScope.COLLECTION_ARCHIVE, fallback_to_referrer=True)
 def tag_archive(id):
     api.post(f'/collection/{id}/tag', dict(
         tag_id=ODPCollectionTag.ARCHIVE,
@@ -125,7 +125,7 @@ def tag_archive(id):
 
 
 @bp.route('/<id>/untag/archive', methods=('POST',))
-@api.client(ODPScope.COLLECTION_TAG_ARCHIVE, fallback_to_referrer=True)
+@api.client(ODPScope.COLLECTION_ARCHIVE, fallback_to_referrer=True)
 def untag_archive(id):
     api.delete(f'/collection/{id}/tag/{ODPCollectionTag.ARCHIVE}')
     flash(f'{ODPCollectionTag.ARCHIVE} tag has been removed.', category='success')

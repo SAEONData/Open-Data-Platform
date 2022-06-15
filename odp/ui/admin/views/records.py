@@ -141,7 +141,7 @@ def delete(id):
 
 
 @bp.route('/<id>/tag/qc', methods=('GET', 'POST'))
-@api.client(ODPScope.RECORD_TAG_QC)
+@api.client(ODPScope.RECORD_QC)
 def tag_qc(id):
     record = api.get(f'/record/{id}')
 
@@ -177,7 +177,7 @@ def tag_qc(id):
 
 
 @bp.route('/<id>/untag/qc', methods=('POST',))
-@api.client(ODPScope.RECORD_TAG_QC, fallback_to_referrer=True)
+@api.client(ODPScope.RECORD_QC, fallback_to_referrer=True)
 def untag_qc(id):
     api.delete(f'/record/{id}/tag/{ODPRecordTag.QC}')
     flash(f'{ODPRecordTag.QC} tag has been removed.', category='success')
@@ -185,7 +185,7 @@ def untag_qc(id):
 
 
 @bp.route('/<id>/tag/embargo', methods=('GET', 'POST'))
-@api.client(ODPScope.RECORD_TAG_EMBARGO)
+@api.client(ODPScope.RECORD_EMBARGO)
 def tag_embargo(id):
     record = api.get(f'/record/{id}')
 
@@ -223,7 +223,7 @@ def tag_embargo(id):
 
 
 @bp.route('/<id>/untag/embargo', methods=('POST',))
-@api.client(ODPScope.RECORD_TAG_EMBARGO, fallback_to_referrer=True)
+@api.client(ODPScope.RECORD_EMBARGO, fallback_to_referrer=True)
 def untag_embargo(id):
     api.delete(f'/record/{id}/tag/{ODPRecordTag.EMBARGO}')
     flash(f'{ODPRecordTag.EMBARGO} tag has been removed.', category='success')

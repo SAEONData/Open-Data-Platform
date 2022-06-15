@@ -691,13 +691,13 @@ def test_delete_record_not_found(api, record_batch, admin, provider_auth):
 
 
 @pytest.mark.parametrize('scopes', [
-    [ODPScope.RECORD_TAG_QC],
+    [ODPScope.RECORD_QC],
     [],
     all_scopes,
-    all_scopes_excluding(ODPScope.RECORD_TAG_QC),
+    all_scopes_excluding(ODPScope.RECORD_QC),
 ])
 def test_tag_record(api, record_batch_no_tags, scopes, provider_auth):
-    authorized = ODPScope.RECORD_TAG_QC in scopes and \
+    authorized = ODPScope.RECORD_QC in scopes and \
                  provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
     if provider_auth == ProviderAuth.MATCH:
@@ -712,9 +712,9 @@ def test_tag_record(api, record_batch_no_tags, scopes, provider_auth):
         id='Record.QC',
         type='record',
         scope=Session.get(
-            Scope, (ODPScope.RECORD_TAG_QC, ScopeType.odp)
+            Scope, (ODPScope.RECORD_QC, ScopeType.odp)
         ) or Scope(
-            id=ODPScope.RECORD_TAG_QC, type=ScopeType.odp
+            id=ODPScope.RECORD_QC, type=ScopeType.odp
         ),
         schema=SchemaFactory(
             type='tag',
@@ -792,13 +792,13 @@ def flag(request):
 
 
 @pytest.mark.parametrize('scopes', [
-    [ODPScope.RECORD_TAG_QC],
+    [ODPScope.RECORD_QC],
     [],
     all_scopes,
-    all_scopes_excluding(ODPScope.RECORD_TAG_QC),
+    all_scopes_excluding(ODPScope.RECORD_QC),
 ])
 def test_tag_record_multi(api, record_batch_no_tags, scopes, provider_auth, flag):
-    authorized = ODPScope.RECORD_TAG_QC in scopes and \
+    authorized = ODPScope.RECORD_QC in scopes and \
                  provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
 
     if provider_auth == ProviderAuth.MATCH:
@@ -817,9 +817,9 @@ def test_tag_record_multi(api, record_batch_no_tags, scopes, provider_auth, flag
             type='record',
             flag=flag,
             scope=Session.get(
-                Scope, (ODPScope.RECORD_TAG_QC, ScopeType.odp)
+                Scope, (ODPScope.RECORD_QC, ScopeType.odp)
             ) or Scope(
-                id=ODPScope.RECORD_TAG_QC, type=ScopeType.odp
+                id=ODPScope.RECORD_QC, type=ScopeType.odp
             ),
             schema=SchemaFactory(
                 type='tag',

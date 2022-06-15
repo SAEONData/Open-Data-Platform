@@ -18,8 +18,8 @@ SAEON:Curator:
     - odp.client:read
     - odp.collection:admin
     - odp.collection:read
-    - odp.collection_tag:archive
-    - odp.collection_tag:publish
+    - odp.collection:archive
+    - odp.collection:publish
     - odp.project:admin
     - odp.project:read
     - odp.provider:admin
@@ -27,8 +27,8 @@ SAEON:Curator:
     - odp.record:write
     - odp.record:admin
     - odp.record:read
-    - odp.record_tag:qc
-    - odp.record_tag:embargo
+    - odp.record:qc
+    - odp.record:embargo
     - odp.role:read
     - odp.schema:read
     - odp.scope:read
