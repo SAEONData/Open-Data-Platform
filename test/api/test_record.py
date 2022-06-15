@@ -718,7 +718,7 @@ def test_tag_record(api, record_batch_no_tags, scopes, provider_auth):
         ),
         schema=SchemaFactory(
             type='tag',
-            uri='https://odp.saeon.ac.za/schema/tag/record-qc',
+            uri='https://odp.saeon.ac.za/schema/tag/record/qc',
         ),
     )
 

@@ -1,27 +1,27 @@
-datacite4-saeon:
+SAEON.DataCite4:
   type: metadata
-  uri: https://odp.saeon.ac.za/schema/metadata/datacite4-saeon
+  uri: https://odp.saeon.ac.za/schema/metadata/saeon/datacite4
 
-iso19115-saeon:
+SAEON.ISO19115:
   type: metadata
-  uri: https://odp.saeon.ac.za/schema/metadata/iso19115-saeon
+  uri: https://odp.saeon.ac.za/schema/metadata/saeon/iso19115
 
-record-qc-tag:
+Tag.Record.QC:
   type: tag
-  uri: https://odp.saeon.ac.za/schema/tag/record-qc
+  uri: https://odp.saeon.ac.za/schema/tag/record/qc
 
-record-embargo-tag:
+Tag.Record.Embargo:
   type: tag
-  uri: https://odp.saeon.ac.za/schema/tag/record-embargo
+  uri: https://odp.saeon.ac.za/schema/tag/record/embargo
 
-record-migrated-tag:
+Tag.Record.Migrated:
   type: tag
-  uri: https://odp.saeon.ac.za/schema/tag/record-migrated
+  uri: https://odp.saeon.ac.za/schema/tag/record/migrated
 
-generic-tag:
+Tag.Generic:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/generic
 
-saeon-catalog:
+Catalog.SAEON:
   type: catalog
   uri: https://odp.saeon.ac.za/schema/catalog/saeon

@@ -1,11 +1,11 @@
 {
-    "$id": "https://odp.saeon.ac.za/schema/tag/record-qc",
+    "$id": "https://odp.saeon.ac.za/schema/tag/record/migrated",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "properties": {
-        "pass_": {"type": "boolean"},
+        "published": {"type": "boolean"},
         "comment": {"type": "string"}
     },
-    "required": ["pass_"],
+    "required": ["published"],
     "additionalProperties": false
 }

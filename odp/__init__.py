@@ -44,19 +44,19 @@ class ODPRecordTag(str, Enum):
 
 
 class ODPMetadataSchema(str, Enum):
-    DATACITE4_SAEON = 'datacite4-saeon'
-    ISO19115_SAEON = 'iso19115-saeon'
+    SAEON_DATACITE4 = 'SAEON.DataCite4'
+    SAEON_ISO19115 = 'SAEON.ISO19115'
 
 
 class ODPTagSchema(str, Enum):
-    GENERIC = 'generic-tag'
-    RECORD_QC = 'record-qc-tag'
-    RECORD_EMBARGO = 'record-embargo-tag'
-    RECORD_MIGRATED = 'record-migrated-tag'
+    GENERIC = 'Tag.Generic'
+    RECORD_QC = 'Tag.Record.QC'
+    RECORD_EMBARGO = 'Tag.Record.Embargo'
+    RECORD_MIGRATED = 'Tag.Record.Migrated'
 
 
 class ODPCatalogSchema(str, Enum):
-    SAEON = 'saeon-catalog'
+    SAEON = 'Catalog.SAEON'
 
 
 class ODPCatalog(str, Enum):

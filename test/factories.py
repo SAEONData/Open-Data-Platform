@@ -30,15 +30,15 @@ def _sanitize_id(val):
 def schema_uri_from_type(schema):
     if schema.type == 'metadata':
         return choice((
-            'https://odp.saeon.ac.za/schema/metadata/datacite4-saeon',
-            'https://odp.saeon.ac.za/schema/metadata/iso19115-saeon',
+            'https://odp.saeon.ac.za/schema/metadata/saeon/datacite4',
+            'https://odp.saeon.ac.za/schema/metadata/saeon/iso19115',
         ))
     elif schema.type == 'tag':
         return choice((
             'https://odp.saeon.ac.za/schema/tag/generic',
-            'https://odp.saeon.ac.za/schema/tag/record-migrated',
-            'https://odp.saeon.ac.za/schema/tag/record-qc',
-            'https://odp.saeon.ac.za/schema/tag/record-embargo',
+            'https://odp.saeon.ac.za/schema/tag/record/migrated',
+            'https://odp.saeon.ac.za/schema/tag/record/qc',
+            'https://odp.saeon.ac.za/schema/tag/record/embargo',
         ))
     elif schema.type == 'catalog':
         return choice((

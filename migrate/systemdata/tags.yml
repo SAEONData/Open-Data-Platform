@@ -3,32 +3,32 @@ collection-publish:
   flag: True
   public: False
   scope_id: odp.collection_tag:publish
-  schema_id: generic-tag
+  schema_id: Tag.Generic
 
 collection-archive:
   type: collection
   flag: True
   public: False
   scope_id: odp.collection_tag:archive
-  schema_id: generic-tag
+  schema_id: Tag.Generic
 
 record-migrated:
   type: record
   flag: True
   public: False
   scope_id: odp.record_tag:migrated
-  schema_id: record-migrated-tag
+  schema_id: Tag.Record.Migrated
 
 record-qc:
   type: record
   flag: False
   public: False
   scope_id: odp.record_tag:qc
-  schema_id: record-qc-tag
+  schema_id: Tag.Record.QC
 
 record-embargo:
   type: record
   flag: False
   public: True
   scope_id: odp.record_tag:embargo
-  schema_id: record-embargo-tag
+  schema_id: Tag.Record.Embargo

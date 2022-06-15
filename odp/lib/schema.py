@@ -33,8 +33,8 @@ def base_url(url: str) -> str:
 
 @translation_filter('split-archived-formats')
 def split_archived_formats(value: str) -> list:
-    """Filter for translating /onlineResources/n/applicationProfile (iso19115-saeon)
-    to /immutableResource/resourceDownload/archivedFormats (datacite4-saeon).
+    """Filter for translating /onlineResources/n/applicationProfile (saeon/iso19115)
+    to /immutableResource/resourceDownload/archivedFormats (saeon/datacite4).
 
     e.g. given "[shp, shx, dbf]", return ["shp", "shx", "dbf"]
     """

@@ -34,11 +34,11 @@
             hide_id=True, filter_=filter_) %}
         <th scope="row">{{ obj_link('records', record.id, record.doi or record.sid) }}</th>
         <td>
-            {% if record.schema_id == 'datacite4-saeon' %}
+            {% if record.schema_id == 'SAEON.DataCite4' %}
                 {% if 'titles' in record.metadata %}
                     {{ record.metadata.titles[0].title }}
                 {% endif %}
-            {% elif record.schema_id == 'iso19115-saeon' %}
+            {% elif record.schema_id == 'SAEON.ISO19115' %}
                 {{ record.metadata.title }}
             {% endif %}
         </td>
