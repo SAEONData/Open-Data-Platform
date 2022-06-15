@@ -4,6 +4,7 @@ import logging
 
 from sqlalchemy import select
 
+from odp import ODPCatalog
 from odp.db import Session
 from odp.db.models import Catalog
 from odp.job.publish.saeon import SAEONPublisher
@@ -14,7 +15,7 @@ init_logging()
 logger = logging.getLogger(__name__)
 
 publishers = {
-    'SAEON': SAEONPublisher,
+    ODPCatalog.SAEON: SAEONPublisher,
 }
 
 

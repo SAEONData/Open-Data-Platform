@@ -62,3 +62,7 @@ class ODPRecordTag(str, Enum):
     MIGRATED = 'record-migrated'
     QC = 'record-qc'
     EMBARGO = 'record-embargo'
+
+
+class ODPCatalog(str, Enum):
+    SAEON = 'SAEON'
