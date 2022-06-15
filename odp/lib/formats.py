@@ -1,5 +1,5 @@
 # object IDs
-ID_REGEX = r'^\w[-.:\w]*\w$'
+ID_REGEX = r'^\w[-.\w]*\w$'
 
 # adapted from https://www.crossref.org/blog/dois-and-matching-regular-expressions
 DOI_REGEX = r'^10\.\d{4,}(\.\d+)*/[-._;()/:a-zA-Z0-9]+$'

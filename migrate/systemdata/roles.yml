@@ -1,4 +1,4 @@
-SAEON:Staff:
+SAEON.Staff:
   scopes:
     - odp.catalog:read
     - odp.client:read
@@ -12,7 +12,7 @@ SAEON:Staff:
     - odp.tag:read
     - odp.user:read
 
-SAEON:Curator:
+SAEON.Curator:
   scopes:
     - odp.catalog:read
     - odp.client:read

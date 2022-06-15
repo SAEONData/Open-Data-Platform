@@ -35,7 +35,7 @@ from odp.lib.schema import schema_md5
 
 datadir = pathlib.Path(__file__).parent / 'systemdata'
 
-ODP_ADMIN_ROLE = 'ODP:Admin'
+ODP_ADMIN_ROLE = 'ODP.Admin'
 
 
 def create_db_schema():
