@@ -27,7 +27,7 @@ sys.path.append(str(rootdir))
 dotenv_path = pathlib.Path.cwd() / '.env'
 load_dotenv(dotenv_path)
 
-from odp import ODPScope
+from odp import ODPCatalog, ODPCollectionTag, ODPRecordTag, ODPScope
 from odp.db import Base, Session, engine
 from odp.db.models import Catalog, Client, Role, Schema, SchemaType, Scope, ScopeType, Tag, User, UserRole
 from odp.lib.hydra import GrantType, HydraAdminAPI, HydraScope, ResponseType
@@ -189,7 +189,8 @@ def init_tags():
     with open(datadir / 'tags.yml') as f:
         tag_data = yaml.safe_load(f)
 
-    for tag_id, tag_spec in tag_data.items():
+    for tag_id in (tag_ids := [t.value for t in ODPRecordTag] + [t.value for t in ODPCollectionTag]):
+        tag_spec = tag_data[tag_id]
         tag_type = tag_spec['type']
         tag = Session.get(Tag, (tag_id, tag_type)) or Tag(id=tag_id, type=tag_type)
         tag.flag = tag_spec['flag']
@@ -199,6 +200,12 @@ def init_tags():
         tag.schema_id = tag_spec['schema_id']
         tag.schema_type = SchemaType.tag
         tag.save()
+
+    if orphaned_yml_tags := [tag_id for tag_id in tag_data if tag_id not in tag_ids]:
+        print(f'Warning: orphaned tag definitions in tags.yml {orphaned_yml_tags}')
+
+    if orphaned_db_tags := Session.execute(select(Tag.id).where(Tag.id.not_in(tag_ids))).scalars().all():
+        print(f'Warning: orphaned tag definitions in tag table {orphaned_db_tags}')
 
 
 def init_roles():
@@ -217,11 +224,18 @@ def init_catalogs():
     with open(datadir / 'catalogs.yml') as f:
         catalog_data = yaml.safe_load(f)
 
-    for catalog_id, catalog_spec in catalog_data.items():
+    for catalog_id in (catalog_ids := [c.value for c in ODPCatalog]):
+        catalog_spec = catalog_data[catalog_id]
         catalog = Session.get(Catalog, catalog_id) or Catalog(id=catalog_id)
         catalog.schema_id = catalog_spec['schema_id']
         catalog.schema_type = SchemaType.catalog
         catalog.save()
+
+    if orphaned_yml_catalogs := [catalog_id for catalog_id in catalog_data if catalog_id not in catalog_ids]:
+        print(f'Warning: orphaned catalog definitions in catalogs.yml {orphaned_yml_catalogs}')
+
+    if orphaned_db_catalogs := Session.execute(select(Catalog.id).where(Catalog.id.not_in(catalog_ids))).scalars().all():
+        print(f'Warning: orphaned catalog definitions in catalog table {orphaned_db_catalogs}')
 
 
 if __name__ == '__main__':
