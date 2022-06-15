@@ -709,7 +709,7 @@ def test_tag_record(api, record_batch_no_tags, scopes, provider_auth):
 
     client = api(scopes, api_client_provider)
     tag = TagFactory(
-        id='record-qc',
+        id='Record.QC',
         type='record',
         scope=Session.get(
             Scope, (ODPScope.RECORD_TAG_QC, ScopeType.odp)
@@ -726,7 +726,7 @@ def test_tag_record(api, record_batch_no_tags, scopes, provider_auth):
     r = client.post(
         f'/record/{(record_id := record_batch_no_tags[2].id)}/tag',
         json=(record_tag_v1 := dict(
-            tag_id='record-qc',
+            tag_id='Record.QC',
             data={
                 'pass_': (qc_passed := bool(randint(0, 1))),
             },
@@ -748,7 +748,7 @@ def test_tag_record(api, record_batch_no_tags, scopes, provider_auth):
     r = client.post(
         f'/record/{record_id}/tag',
         json=(record_tag_v2 := dict(
-            tag_id='record-qc',
+            tag_id='Record.QC',
             data={
                 'pass_': not qc_passed,
                 'comment': 'Hello',
@@ -813,7 +813,7 @@ def test_tag_record_multi(api, record_batch_no_tags, scopes, provider_auth, flag
     record_tag_1 = RecordTagFactory(
         record=record_batch_no_tags[2],
         tag=(tag := TagFactory(
-            id='record-qc',
+            id='Record.QC',
             type='record',
             flag=flag,
             scope=Session.get(
@@ -831,7 +831,7 @@ def test_tag_record_multi(api, record_batch_no_tags, scopes, provider_auth, flag
     r = client.post(
         f'/record/{(record_id := record_batch_no_tags[2].id)}/tag',
         json=(record_tag_2 := dict(
-            tag_id='record-qc',
+            tag_id='Record.QC',
             data={'comment': 'Second tag instance'},
         )))
 

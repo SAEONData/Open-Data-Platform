@@ -420,7 +420,7 @@ def test_tag_collection(api, collection_batch, scopes, provider_auth):
 
     client = api(scopes, api_client_provider)
     tag = TagFactory(
-        id='collection-publish',
+        id='Collection.Publish',
         type='collection',
         scope=Session.get(
             Scope, (ODPScope.COLLECTION_TAG_PUBLISH, ScopeType.odp)
@@ -437,7 +437,7 @@ def test_tag_collection(api, collection_batch, scopes, provider_auth):
     r = client.post(
         f'/collection/{(collection_id := collection_batch[2].id)}/tag',
         json=(collection_tag_v1 := dict(
-            tag_id='collection-publish',
+            tag_id='Collection.Publish',
             data={
                 'comment': 'Hello World',
             },
@@ -458,7 +458,7 @@ def test_tag_collection(api, collection_batch, scopes, provider_auth):
     r = client.post(
         f'/collection/{collection_id}/tag',
         json=(collection_tag_v2 := dict(
-            tag_id='collection-publish',
+            tag_id='Collection.Publish',
             data={},
         )))
     if authorized:
@@ -548,7 +548,7 @@ def test_tag_collection_multi(api, collection_batch, scopes, provider_auth, flag
     collection_tag_1 = CollectionTagFactory(
         collection=collection_batch[2],
         tag=(tag := TagFactory(
-            id='collection-publish',
+            id='Collection.Publish',
             type='collection',
             flag=flag,
             scope=Session.get(
@@ -566,7 +566,7 @@ def test_tag_collection_multi(api, collection_batch, scopes, provider_auth, flag
     r = client.post(
         f'/collection/{(collection_id := collection_batch[2].id)}/tag',
         json=(collection_tag_2 := dict(
-            tag_id='collection-publish',
+            tag_id='Collection.Publish',
             data={'comment': 'Second tag instance'},
         )))
 

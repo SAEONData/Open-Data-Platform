@@ -33,14 +33,14 @@ class ODPScope(str, Enum):
 
 
 class ODPCollectionTag(str, Enum):
-    ARCHIVE = 'collection-archive'
-    PUBLISH = 'collection-publish'
+    ARCHIVE = 'Collection.Archive'
+    PUBLISH = 'Collection.Publish'
 
 
 class ODPRecordTag(str, Enum):
-    QC = 'record-qc'
-    EMBARGO = 'record-embargo'
-    MIGRATED = 'record-migrated'
+    QC = 'Record.QC'
+    EMBARGO = 'Record.Embargo'
+    MIGRATED = 'Record.Migrated'
 
 
 class ODPMetadataSchema(str, Enum):

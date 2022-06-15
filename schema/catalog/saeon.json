@@ -9,7 +9,7 @@
                 "contains": {
                     "type": "object",
                     "properties": {
-                        "tag_id": {"const": "record-migrated"},
+                        "tag_id": {"const": "Record.Migrated"},
                         "data": {
                             "type": "object",
                             "properties": {
@@ -42,7 +42,7 @@
                         "contains": {
                             "type": "object",
                             "properties": {
-                                "tag_id": {"const": "collection-publish"}
+                                "tag_id": {"const": "Collection.Publish"}
                             },
                             "required": ["tag_id"]
                         }
@@ -51,7 +51,7 @@
                         "contains": {
                             "type": "object",
                             "properties": {
-                                "tag_id": {"const": "record-qc"},
+                                "tag_id": {"const": "Record.QC"},
                                 "data": {
                                     "type": "object",
                                     "properties": {
