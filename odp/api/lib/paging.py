@@ -26,7 +26,7 @@ class Paginator:
     def __init__(
             self,
             page: int = Query(1, ge=1, description='Page number'),
-            size: int = Query(50, ge=1, description='Page size'),
+            size: int = Query(50, ge=0, description='Page size (0 = unlimited)'),
             sort: str = Query('id', description='Sort column'),
     ):
         self.page = page
@@ -54,12 +54,14 @@ class Paginator:
             else:
                 sort_col = self.sort
 
+            limit = self.size or total
+
             items = [
                 item_factory(row) for row in Session.execute(
                     query.
                     order_by(sort_col).
-                    offset(self.size * (self.page - 1)).
-                    limit(self.size)
+                    offset(limit * (self.page - 1)).
+                    limit(limit)
                 )
             ]
         except (AttributeError, CompileError):
@@ -69,5 +71,5 @@ class Paginator:
             items=items,
             total=total,
             page=self.page,
-            pages=ceil(total / self.size),
+            pages=ceil(total / limit) if limit else 0,
         )
