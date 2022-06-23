@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 
 import logging
+import pathlib
+import sys
 
 from sqlalchemy import select
+
+rootdir = pathlib.Path(__file__).parent.parent.parent.parent
+sys.path.append(str(rootdir))
 
 from odp import ODPCatalog
 from odp.db import Session
