@@ -10,7 +10,7 @@ Permissions = Dict[str, Literal['*'] | List[str]]
 scope ids (OAuth2 scope identifiers), where the value for each id is either:
 
 - '*' if the scope is applicable across all relevant platform entities; or
-- a set of provider ids to which the scope's usage is limited (implemented
+- a set of collection ids to which the scope's usage is limited (implemented
   as a list for JSON serialization)
 """
 
@@ -32,7 +32,7 @@ def get_client_permissions(client_id: str) -> Permissions:
         raise x.ODPClientNotFound
 
     return {
-        scope.id: '*' if not client.provider else [client.provider_id]
+        scope.id: '*' if not client.collection else [client.collection_id]
         for scope in client.scopes
     }
 
@@ -49,33 +49,33 @@ def get_user_permissions(user_id: str, client_id: str) -> Permissions:
         raise x.ODPClientNotFound
 
     platform_scopes = set()
-    if not client.provider:
+    if not client.collection:
         for role in user.roles:
-            if not role.provider:
+            if not role.collection:
                 platform_scopes |= {
                     scope.id for scope in role.scopes
                     if scope in client.scopes
                 }
 
-    provider_scopes = {}
+    collection_scopes = {}
     for role in user.roles:
-        if role.provider or client.provider:
-            if role.provider and client.provider and role.provider_id != client.provider_id:
+        if role.collection or client.collection:
+            if role.collection and client.collection and role.collection_id != client.collection_id:
                 continue
             for scope in role.scopes:
                 if scope.id in platform_scopes:
                     continue
                 if scope not in client.scopes:
                     continue
-                provider_scopes.setdefault(scope.id, set())
-                provider_scopes[scope.id] |= {role.provider_id if role.provider else client.provider_id}
+                collection_scopes.setdefault(scope.id, set())
+                collection_scopes[scope.id] |= {role.collection_id if role.collection else client.collection_id}
 
-    provider_scopes = {
-        scope: list(providers)
-        for scope, providers in provider_scopes.items()
+    collection_scopes = {
+        scope: list(collections)
+        for scope, collections in collection_scopes.items()
     }
 
-    return {scope: '*' for scope in platform_scopes} | provider_scopes
+    return {scope: '*' for scope in platform_scopes} | collection_scopes
 
 
 def get_user_info(user_id: str, client_id: str) -> UserInfo:
@@ -101,6 +101,6 @@ def get_user_info(user_id: str, client_id: str) -> UserInfo:
         picture=user.picture,
         roles=[
             role.id for role in user.roles
-            if not role.provider or not client.provider or role.provider_id == client.provider_id
+            if not role.collection or not client.collection or role.collection_id == client.collection_id
         ],
     )
