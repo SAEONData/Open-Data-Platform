@@ -4,11 +4,11 @@ from enum import Enum
 from odp import ODPScope
 
 
-class ProviderAuth(Enum):
-    """API routes that support provider-specific resource authorization
+class CollectionAuth(Enum):
+    """API routes that support collection-specific resource authorization
     may have three possible outcomes (all else being equal) depending on
-    whether the test client is configured with no provider, or with a
-    provider (not) matching the resource provider."""
+    whether the test client is configured with no collection, or with a
+    collection (not) matching the resource collection."""
     NONE = 0
     MATCH = 1
     MISMATCH = 2

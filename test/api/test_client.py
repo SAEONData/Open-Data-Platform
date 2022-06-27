@@ -7,8 +7,8 @@ from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Client
 from odp.lib.hydra import TokenEndpointAuthMethod
-from test.api import ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_not_found
-from test.factories import ClientFactory, ProviderFactory, ScopeFactory, fake
+from test.api import CollectionAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_not_found
+from test.factories import ClientFactory, CollectionFactory, ScopeFactory, fake
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def client_batch(hydra_admin_api):
     for n in range(randint(3, 5)):
         clients += [client := ClientFactory(
             scopes=(scopes := ScopeFactory.create_batch(randint(1, 3))),
-            is_provider_client=n in (1, 2) or randint(0, 1),
+            is_collection_client=n in (1, 2) or randint(0, 1),
         )]
         hydra_admin_api.create_or_update_client(
             client.id,
@@ -43,14 +43,14 @@ def delete_hydra_clients(hydra_admin_api):
                 hydra_admin_api.delete_client(hydra_client.id)
 
 
-def client_build(provider=None, **id):
+def client_build(collection=None, **id):
     """Build and return an uncommitted Client instance.
-    Referenced scopes and/or provider are however committed."""
+    Referenced scopes and/or collection are however committed."""
     return ClientFactory.build(
         **id,
         scopes=ScopeFactory.create_batch(randint(1, 3)),
-        provider=provider or (provider := ProviderFactory() if randint(0, 1) else None),
-        provider_id=provider.id if provider else None,
+        collection=collection or (collection := CollectionFactory() if randint(0, 1) else None),
+        collection_id=collection.id if collection else None,
     )
 
 
@@ -62,8 +62,8 @@ def assert_db_state(clients):
     """Verify that the DB client table contains the given client batch."""
     Session.expire_all()
     result = Session.execute(select(Client).where(Client.id != 'odp.test')).scalars().all()
-    assert set((row.id, scope_ids(row), row.provider_id) for row in result) \
-           == set((client.id, scope_ids(client), client.provider_id) for client in clients)
+    assert set((row.id, scope_ids(row), row.collection_id) for row in result) \
+           == set((client.id, scope_ids(client), client.collection_id) for client in clients)
 
 
 def assert_json_result(response, json, client):
@@ -73,7 +73,7 @@ def assert_json_result(response, json, client):
     """
     assert response.status_code == 200
     assert json['id'] == client.id
-    assert json['provider_id'] == client.provider_id
+    assert json['collection_id'] == client.collection_id
     assert tuple(sorted(json['scope_ids'])) == scope_ids(client)
 
 
@@ -93,20 +93,20 @@ def assert_json_results(response, json, clients):
     all_scopes,
     all_scopes_excluding(ODPScope.CLIENT_READ),
 ])
-def test_list_clients(api, client_batch, scopes, provider_auth):
+def test_list_clients(api, client_batch, scopes, collection_auth):
     authorized = ODPScope.CLIENT_READ in scopes
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = client_batch[2].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = client_batch[2].collection
         expected_result_batch = [client_batch[2]]
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = ProviderFactory()
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = CollectionFactory()
         expected_result_batch = []
     else:
-        api_client_provider = None
+        api_client_collection = None
         expected_result_batch = client_batch
 
-    r = api(scopes, api_client_provider).get('/client/')
+    r = api(scopes, api_client_collection).get('/client/')
 
     if authorized:
         assert_json_results(r, r.json(), expected_result_batch)
@@ -122,18 +122,18 @@ def test_list_clients(api, client_batch, scopes, provider_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.CLIENT_READ),
 ])
-def test_get_client(api, client_batch, scopes, provider_auth):
+def test_get_client(api, client_batch, scopes, collection_auth):
     authorized = ODPScope.CLIENT_READ in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = client_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = client_batch[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = client_batch[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = client_batch[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    r = api(scopes, api_client_provider).get(f'/client/{client_batch[2].id}')
+    r = api(scopes, api_client_collection).get(f'/client/{client_batch[2].id}')
 
     if authorized:
         assert_json_result(r, r.json(), client_batch[2])
@@ -143,18 +143,18 @@ def test_get_client(api, client_batch, scopes, provider_auth):
     assert_db_state(client_batch)
 
 
-def test_get_client_not_found(api, client_batch, provider_auth):
+def test_get_client_not_found(api, client_batch, collection_auth):
     scopes = [ODPScope.CLIENT_READ]
 
-    if provider_auth == ProviderAuth.NONE:
-        api_client_provider = None
+    if collection_auth == CollectionAuth.NONE:
+        api_client_collection = None
     else:
-        api_client_provider = client_batch[2].provider
+        api_client_collection = client_batch[2].collection
 
-    r = api(scopes, api_client_provider).get('/client/foo')
+    r = api(scopes, api_client_collection).get('/client/foo')
 
-    # we can't get a forbidden, regardless of provider auth, because
-    # if the client is not found, there is no provider to compare with
+    # we can't get a forbidden, regardless of collection auth, because
+    # if the client is not found, there is no collection to compare with
     assert_not_found(r)
     assert_db_state(client_batch)
 
@@ -165,32 +165,32 @@ def test_get_client_not_found(api, client_batch, provider_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.CLIENT_ADMIN),
 ])
-def test_create_client(api, client_batch, scopes, provider_auth):
+def test_create_client(api, client_batch, scopes, collection_auth):
     authorized = ODPScope.CLIENT_ADMIN in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = client_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = client_batch[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = client_batch[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = client_batch[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
-        new_client_provider = client_batch[2].provider
+    if collection_auth in (CollectionAuth.MATCH, CollectionAuth.MISMATCH):
+        new_client_collection = client_batch[2].collection
     else:
-        new_client_provider = None
+        new_client_collection = None
 
     modified_client_batch = client_batch + [client := client_build(
-        provider=new_client_provider
+        collection=new_client_collection
     )]
 
-    r = api(scopes, api_client_provider).post('/client/', json=dict(
+    r = api(scopes, api_client_collection).post('/client/', json=dict(
         id=client.id,
         name=fake.catch_phrase(),
         secret=fake.password(),
         scope_ids=scope_ids(client),
-        provider_id=client.provider_id,
+        collection_id=client.collection_id,
         grant_types=[],
         response_types=[],
         redirect_uris=[],
@@ -207,33 +207,33 @@ def test_create_client(api, client_batch, scopes, provider_auth):
         assert_db_state(client_batch)
 
 
-def test_create_client_conflict(api, client_batch, provider_auth):
+def test_create_client_conflict(api, client_batch, collection_auth):
     scopes = [ODPScope.CLIENT_ADMIN]
-    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+    authorized = collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = client_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = client_batch[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = client_batch[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = client_batch[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
-        new_client_provider = client_batch[2].provider
+    if collection_auth in (CollectionAuth.MATCH, CollectionAuth.MISMATCH):
+        new_client_collection = client_batch[2].collection
     else:
-        new_client_provider = None
+        new_client_collection = None
 
     client = client_build(
         id=client_batch[2].id,
-        provider=new_client_provider,
+        collection=new_client_collection,
     )
 
-    r = api(scopes, api_client_provider).post('/client/', json=dict(
+    r = api(scopes, api_client_collection).post('/client/', json=dict(
         id=client.id,
         name=fake.catch_phrase(),
         secret=fake.password(),
         scope_ids=scope_ids(client),
-        provider_id=client.provider_id,
+        collection_id=client.collection_id,
         grant_types=[],
         response_types=[],
         redirect_uris=[],
@@ -256,34 +256,34 @@ def test_create_client_conflict(api, client_batch, provider_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.CLIENT_ADMIN),
 ])
-def test_update_client(api, client_batch, scopes, provider_auth):
+def test_update_client(api, client_batch, scopes, collection_auth):
     authorized = ODPScope.CLIENT_ADMIN in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = client_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = client_batch[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = client_batch[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = client_batch[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
-        modified_client_provider = client_batch[2].provider
+    if collection_auth in (CollectionAuth.MATCH, CollectionAuth.MISMATCH):
+        modified_client_collection = client_batch[2].collection
     else:
-        modified_client_provider = None
+        modified_client_collection = None
 
     modified_client_batch = client_batch.copy()
     modified_client_batch[2] = (client := client_build(
         id=client_batch[2].id,
-        provider=modified_client_provider,
+        collection=modified_client_collection,
     ))
 
-    r = api(scopes, api_client_provider).put('/client/', json=dict(
+    r = api(scopes, api_client_collection).put('/client/', json=dict(
         id=client.id,
         name=fake.catch_phrase(),
         secret=fake.password(),
         scope_ids=scope_ids(client),
-        provider_id=client.provider_id,
+        collection_id=client.collection_id,
         grant_types=[],
         response_types=[],
         redirect_uris=[],
@@ -300,33 +300,33 @@ def test_update_client(api, client_batch, scopes, provider_auth):
         assert_db_state(client_batch)
 
 
-def test_update_client_not_found(api, client_batch, provider_auth):
+def test_update_client_not_found(api, client_batch, collection_auth):
     scopes = [ODPScope.CLIENT_ADMIN]
-    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+    authorized = collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = client_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = client_batch[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = client_batch[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = client_batch[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
-        modified_client_provider = client_batch[2].provider
+    if collection_auth in (CollectionAuth.MATCH, CollectionAuth.MISMATCH):
+        modified_client_collection = client_batch[2].collection
     else:
-        modified_client_provider = None
+        modified_client_collection = None
 
     client = client_build(
         id='foo',
-        provider=modified_client_provider,
+        collection=modified_client_collection,
     )
 
-    r = api(scopes, api_client_provider).put('/client/', json=dict(
+    r = api(scopes, api_client_collection).put('/client/', json=dict(
         id=client.id,
         name=fake.catch_phrase(),
         secret=fake.password(),
         scope_ids=scope_ids(client),
-        provider_id=client.provider_id,
+        collection_id=client.collection_id,
         grant_types=[],
         response_types=[],
         redirect_uris=[],
@@ -349,21 +349,21 @@ def test_update_client_not_found(api, client_batch, provider_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.CLIENT_ADMIN),
 ])
-def test_delete_client(api, client_batch, scopes, provider_auth):
+def test_delete_client(api, client_batch, scopes, collection_auth):
     authorized = ODPScope.CLIENT_ADMIN in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = client_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = client_batch[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = client_batch[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = client_batch[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
     modified_client_batch = client_batch.copy()
     del modified_client_batch[2]
 
-    r = api(scopes, api_client_provider).delete(f'/client/{client_batch[2].id}')
+    r = api(scopes, api_client_collection).delete(f'/client/{client_batch[2].id}')
 
     if authorized:
         assert_empty_result(r)
@@ -373,17 +373,17 @@ def test_delete_client(api, client_batch, scopes, provider_auth):
         assert_db_state(client_batch)
 
 
-def test_delete_client_not_found(api, client_batch, provider_auth):
+def test_delete_client_not_found(api, client_batch, collection_auth):
     scopes = [ODPScope.CLIENT_ADMIN]
 
-    if provider_auth == ProviderAuth.NONE:
-        api_client_provider = None
+    if collection_auth == CollectionAuth.NONE:
+        api_client_collection = None
     else:
-        api_client_provider = client_batch[2].provider
+        api_client_collection = client_batch[2].collection
 
-    r = api(scopes, api_client_provider).delete('/client/foo')
+    r = api(scopes, api_client_collection).delete('/client/foo')
 
-    # we can't get a forbidden, regardless of provider auth, because
-    # if the client is not found, there is no provider to compare with
+    # we can't get a forbidden, regardless of collection auth, because
+    # if the client is not found, there is no collection to compare with
     assert_not_found(r)
     assert_db_state(client_batch)

@@ -6,7 +6,7 @@ from starlette.testclient import TestClient
 
 import odp.api
 from odp.lib.hydra import HydraAdminAPI
-from test.api import ProviderAuth
+from test.api import CollectionAuth
 from test.factories import ClientFactory, ScopeFactory
 
 hydra_admin_url = os.environ['HYDRA_ADMIN_URL']
@@ -15,11 +15,11 @@ hydra_public_url = os.environ['HYDRA_PUBLIC_URL']
 
 @pytest.fixture
 def api():
-    def scoped_client(scopes, provider=None):
+    def scoped_client(scopes, collection=None):
         ClientFactory(
             id='odp.test',
             scopes=[ScopeFactory(id=s.value, type='odp') for s in scopes],
-            provider=provider,
+            collection=collection,
         )
         token = OAuth2Session(
             client_id='odp.test',
@@ -45,8 +45,8 @@ def hydra_admin_api():
     return HydraAdminAPI(hydra_admin_url)
 
 
-@pytest.fixture(params=ProviderAuth)
-def provider_auth(request):
+@pytest.fixture(params=CollectionAuth)
+def collection_auth(request):
     """Use for parameterizing the three possible logic branches
-    involving provider-specific authorization."""
+    involving collection-specific authorization."""
     return request.param

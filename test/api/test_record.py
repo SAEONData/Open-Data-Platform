@@ -8,9 +8,9 @@ from sqlalchemy import select
 from odp import ODPCollectionTag, ODPScope
 from odp.db import Session
 from odp.db.models import CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, Scope, ScopeType
-from test.api import (ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
+from test.api import (CollectionAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
                       assert_not_found, assert_unprocessable)
-from test.factories import (CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory, RecordFactory, RecordTagFactory, SchemaFactory,
+from test.factories import (CollectionFactory, CollectionTagFactory, ProjectFactory, RecordFactory, RecordTagFactory, SchemaFactory,
                             TagFactory)
 
 
@@ -208,20 +208,20 @@ def assert_json_record_results(response, json, records):
     all_scopes,
     all_scopes_excluding(ODPScope.RECORD_READ),
 ])
-def test_list_records(api, record_batch, scopes, provider_auth):
+def test_list_records(api, record_batch, scopes, collection_auth):
     authorized = ODPScope.RECORD_READ in scopes
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch[2].collection.provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch[2].collection
         expected_result_batch = [record_batch[2]]
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = ProviderFactory()
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = CollectionFactory()
         expected_result_batch = []
     else:
-        api_client_provider = None
+        api_client_collection = None
         expected_result_batch = record_batch
 
-    r = api(scopes, api_client_provider).get('/record/')
+    r = api(scopes, api_client_collection).get('/record/')
 
     if authorized:
         assert_json_record_results(r, r.json(), expected_result_batch)
@@ -238,18 +238,18 @@ def test_list_records(api, record_batch, scopes, provider_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.RECORD_READ),
 ])
-def test_get_record(api, record_batch, scopes, provider_auth):
+def test_get_record(api, record_batch, scopes, collection_auth):
     authorized = ODPScope.RECORD_READ in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch[1].collection.provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    r = api(scopes, api_client_provider).get(f'/record/{record_batch[2].id}')
+    r = api(scopes, api_client_collection).get(f'/record/{record_batch[2].id}')
 
     if authorized:
         assert_json_record_result(r, r.json(), record_batch[2])
@@ -260,15 +260,15 @@ def test_get_record(api, record_batch, scopes, provider_auth):
     assert_no_audit_log()
 
 
-def test_get_record_not_found(api, record_batch, provider_auth):
+def test_get_record_not_found(api, record_batch, collection_auth):
     scopes = [ODPScope.RECORD_READ]
 
-    if provider_auth == ProviderAuth.NONE:
-        api_client_provider = None
+    if collection_auth == CollectionAuth.NONE:
+        api_client_collection = None
     else:
-        api_client_provider = record_batch[2].collection.provider
+        api_client_collection = record_batch[2].collection
 
-    r = api(scopes, api_client_provider).get('/record/foo')
+    r = api(scopes, api_client_collection).get('/record/foo')
 
     assert_not_found(r)
     assert_db_state(record_batch)
@@ -289,21 +289,21 @@ def test_get_record_not_found(api, record_batch, provider_auth):
     (True, all_scopes, []),
     (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
 ])
-def test_create_record(api, record_batch, admin_route, scopes, collection_tags, provider_auth):
+def test_create_record(api, record_batch, admin_route, scopes, collection_tags, collection_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
                  not admin_route and ODPScope.RECORD_WRITE in scopes
-    authorized = authorized and provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+    authorized = authorized and collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch[1].collection.provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+    if collection_auth in (CollectionAuth.MATCH, CollectionAuth.MISMATCH):
         new_record_collection = record_batch[2].collection
     else:
         new_record_collection = None  # new collection
@@ -313,7 +313,7 @@ def test_create_record(api, record_batch, admin_route, scopes, collection_tags, 
         collection_tags=collection_tags,
     )]
 
-    r = api(scopes, api_client_provider).post(route, json=dict(
+    r = api(scopes, api_client_collection).post(route, json=dict(
         doi=record.doi,
         sid=record.sid,
         collection_id=record.collection_id,
@@ -347,19 +347,19 @@ def conflict(request):
     return request.param
 
 
-def test_create_record_conflict(api, record_batch_with_ids, admin, provider_auth, conflict):
+def test_create_record_conflict(api, record_batch_with_ids, admin, collection_auth, conflict):
     route = '/record/admin/' if admin else '/record/'
     scopes = [ODPScope.RECORD_ADMIN] if admin else [ODPScope.RECORD_WRITE]
-    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+    authorized = collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch_with_ids[2].collection.provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch_with_ids[1].collection.provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch_with_ids[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch_with_ids[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+    if collection_auth in (CollectionAuth.MATCH, CollectionAuth.MISMATCH):
         new_record_collection = record_batch_with_ids[2].collection
     else:
         new_record_collection = None  # new collection
@@ -381,7 +381,7 @@ def test_create_record_conflict(api, record_batch_with_ids, admin, provider_auth
             collection=new_record_collection,
         )
 
-    r = api(scopes, api_client_provider).post(route, json=dict(
+    r = api(scopes, api_client_collection).post(route, json=dict(
         doi=record.doi,
         sid=record.sid,
         collection_id=record.collection_id,
@@ -415,21 +415,21 @@ def test_create_record_conflict(api, record_batch_with_ids, admin, provider_auth
     (True, all_scopes, []),
     (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
 ])
-def test_update_record(api, record_batch, admin_route, scopes, collection_tags, provider_auth):
+def test_update_record(api, record_batch, admin_route, scopes, collection_tags, collection_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
                  not admin_route and ODPScope.RECORD_WRITE in scopes
-    authorized = authorized and provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+    authorized = authorized and collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch[1].collection.provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+    if collection_auth in (CollectionAuth.MATCH, CollectionAuth.MISMATCH):
         modified_record_collection = record_batch[2].collection
     else:
         modified_record_collection = None  # new collection
@@ -442,7 +442,7 @@ def test_update_record(api, record_batch, admin_route, scopes, collection_tags, 
         collection_tags=collection_tags,
     ))
 
-    r = api(scopes, api_client_provider).put(route + record.id, json=dict(
+    r = api(scopes, api_client_collection).put(route + record.id, json=dict(
         doi=record.doi,
         sid=record.sid,
         collection_id=record.collection_id,
@@ -465,20 +465,20 @@ def test_update_record(api, record_batch, admin_route, scopes, collection_tags, 
         assert_no_audit_log()
 
 
-def test_update_record_not_found(api, record_batch, admin, provider_auth):
+def test_update_record_not_found(api, record_batch, admin, collection_auth):
     # if not found on the admin route, the record is created!
     route = '/record/admin/' if admin else '/record/'
     scopes = [ODPScope.RECORD_ADMIN] if admin else [ODPScope.RECORD_WRITE]
-    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+    authorized = collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch[1].collection.provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+    if collection_auth in (CollectionAuth.MATCH, CollectionAuth.MISMATCH):
         modified_record_collection = record_batch[2].collection
     else:
         modified_record_collection = None  # new collection
@@ -488,7 +488,7 @@ def test_update_record_not_found(api, record_batch, admin, provider_auth):
         collection=modified_record_collection,
     )]
 
-    r = api(scopes, api_client_provider).put(route + record.id, json=dict(
+    r = api(scopes, api_client_collection).put(route + record.id, json=dict(
         doi=record.doi,
         sid=record.sid,
         collection_id=record.collection_id,
@@ -511,19 +511,19 @@ def test_update_record_not_found(api, record_batch, admin, provider_auth):
         assert_no_audit_log()
 
 
-def test_update_record_conflict(api, record_batch_with_ids, admin, provider_auth, conflict):
+def test_update_record_conflict(api, record_batch_with_ids, admin, collection_auth, conflict):
     route = '/record/admin/' if admin else '/record/'
     scopes = [ODPScope.RECORD_ADMIN] if admin else [ODPScope.RECORD_WRITE]
-    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+    authorized = collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch_with_ids[2].collection.provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch_with_ids[1].collection.provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch_with_ids[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch_with_ids[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+    if collection_auth in (CollectionAuth.MATCH, CollectionAuth.MISMATCH):
         modified_record_collection = record_batch_with_ids[2].collection
     else:
         modified_record_collection = None  # new collection
@@ -548,7 +548,7 @@ def test_update_record_conflict(api, record_batch_with_ids, admin, provider_auth
             collection=modified_record_collection,
         )
 
-    r = api(scopes, api_client_provider).put(route + record.id, json=dict(
+    r = api(scopes, api_client_collection).put(route + record.id, json=dict(
         doi=record.doi,
         sid=record.sid,
         collection_id=record.collection_id,
@@ -573,19 +573,19 @@ def doi_change(request):
     return request.param
 
 
-def test_update_record_doi_change(api, record_batch_with_ids, admin, provider_auth, doi_change):
+def test_update_record_doi_change(api, record_batch_with_ids, admin, collection_auth, doi_change):
     route = '/record/admin/' if admin else '/record/'
     scopes = [ODPScope.RECORD_ADMIN] if admin else [ODPScope.RECORD_WRITE]
-    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+    authorized = collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch_with_ids[2].collection.provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch_with_ids[1].collection.provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch_with_ids[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch_with_ids[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
+    if collection_auth in (CollectionAuth.MATCH, CollectionAuth.MISMATCH):
         modified_record_collection = record_batch_with_ids[2].collection
     else:
         modified_record_collection = None  # new collection
@@ -603,7 +603,7 @@ def test_update_record_doi_change(api, record_batch_with_ids, admin, provider_au
             collection=modified_record_collection,
         )
 
-    r = api(scopes, api_client_provider).put(route + record.id, json=dict(
+    r = api(scopes, api_client_collection).put(route + record.id, json=dict(
         doi=record.doi,
         sid=record.sid,
         collection_id=record.collection_id,
@@ -634,19 +634,19 @@ def test_update_record_doi_change(api, record_batch_with_ids, admin, provider_au
     (True, all_scopes, []),
     (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
 ])
-def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, provider_auth):
+def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, collection_auth):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
                  not admin_route and ODPScope.RECORD_WRITE in scopes
-    authorized = authorized and provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+    authorized = authorized and collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch[2].collection.provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch[1].collection.provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
     for ct in collection_tags:
         CollectionTagFactory(
@@ -657,7 +657,7 @@ def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, 
     modified_record_batch = record_batch.copy()
     del modified_record_batch[2]
 
-    r = api(scopes, api_client_provider).delete(f'{route}{(record_id := record_batch[2].id)}')
+    r = api(scopes, api_client_collection).delete(f'{route}{(record_id := record_batch[2].id)}')
 
     if authorized:
         if not admin_route and set(collection_tags) & {ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH}:
@@ -674,16 +674,16 @@ def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, 
         assert_no_audit_log()
 
 
-def test_delete_record_not_found(api, record_batch, admin, provider_auth):
+def test_delete_record_not_found(api, record_batch, admin, collection_auth):
     route = '/record/admin/' if admin else '/record/'
     scopes = [ODPScope.RECORD_ADMIN] if admin else [ODPScope.RECORD_WRITE]
 
-    if provider_auth == ProviderAuth.NONE:
-        api_client_provider = None
+    if collection_auth == CollectionAuth.NONE:
+        api_client_collection = None
     else:
-        api_client_provider = record_batch[2].collection.provider
+        api_client_collection = record_batch[2].collection
 
-    r = api(scopes, api_client_provider).delete(f'{route}foo')
+    r = api(scopes, api_client_collection).delete(f'{route}foo')
 
     assert_not_found(r)
     assert_db_state(record_batch)
@@ -696,18 +696,18 @@ def test_delete_record_not_found(api, record_batch, admin, provider_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.RECORD_QC),
 ])
-def test_tag_record(api, record_batch_no_tags, scopes, provider_auth):
+def test_tag_record(api, record_batch_no_tags, scopes, collection_auth):
     authorized = ODPScope.RECORD_QC in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch_no_tags[2].collection.provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch_no_tags[1].collection.provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch_no_tags[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch_no_tags[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    client = api(scopes, api_client_provider)
+    client = api(scopes, api_client_collection)
     tag = TagFactory(
         id='Record.QC',
         type='record',
@@ -797,18 +797,18 @@ def flag(request):
     all_scopes,
     all_scopes_excluding(ODPScope.RECORD_QC),
 ])
-def test_tag_record_multi(api, record_batch_no_tags, scopes, provider_auth, flag):
+def test_tag_record_multi(api, record_batch_no_tags, scopes, collection_auth, flag):
     authorized = ODPScope.RECORD_QC in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = record_batch_no_tags[2].collection.provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = record_batch_no_tags[1].collection.provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch_no_tags[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch_no_tags[1].collection
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    client = api(scopes, api_client_provider)
+    client = api(scopes, api_client_collection)
 
     record_tag_1 = RecordTagFactory(
         record=record_batch_no_tags[2],

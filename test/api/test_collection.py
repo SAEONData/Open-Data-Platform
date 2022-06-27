@@ -9,16 +9,21 @@ from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Collection, CollectionTag, CollectionTagAudit, Scope, ScopeType
 from odp.lib.formats import DOI_REGEX
-from test.api import (ProviderAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
+from test.api import (CollectionAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
                       assert_not_found, assert_unprocessable)
-from test.factories import CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory, SchemaFactory, TagFactory
+from test.factories import (ClientFactory, CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory, RoleFactory, SchemaFactory,
+                            TagFactory)
 
 
 @pytest.fixture
 def collection_batch():
-    """Create and commit a batch of Collection instances."""
+    """Create and commit a batch of Collection instances,
+    with associated projects, clients and roles."""
     collections = [CollectionFactory() for _ in range(randint(3, 5))]
     ProjectFactory.create_batch(randint(0, 3), collections=collections)
+    for collection in collections:
+        ClientFactory.create_batch(randint(0, 3), collection=collection)
+        RoleFactory.create_batch(randint(0, 3), collection=collection)
     return collections
 
 
@@ -27,15 +32,19 @@ def collection_batch_no_projects():
     """Create and commit a batch of Collection instances
     without projects, for testing the update API - we cannot
     assign projects to collections, only the other way around."""
-    return [CollectionFactory() for _ in range(randint(3, 5))]
+    collections = [CollectionFactory() for _ in range(randint(3, 5))]
+    for collection in collections:
+        ClientFactory.create_batch(randint(0, 3), collection=collection)
+        RoleFactory.create_batch(randint(0, 3), collection=collection)
+    return collections
 
 
-def collection_build(provider=None, **id):
+def collection_build(**id):
     """Build and return an uncommitted Collection instance.
     Referenced provider is however committed."""
     return CollectionFactory.build(
         **id,
-        provider=provider or (provider := ProviderFactory()),
+        provider=(provider := ProviderFactory()),
         provider_id=provider.id,
     )
 
@@ -44,12 +53,21 @@ def project_ids(collection):
     return tuple(project.id for project in collection.projects)
 
 
+def client_ids(collection):
+    return tuple(client.id for client in collection.clients if client.id != 'odp.test')
+
+
+def role_ids(collection):
+    return tuple(role.id for role in collection.roles)
+
+
 def assert_db_state(collections):
     """Verify that the DB collection table contains the given collection batch."""
     Session.expire_all()
     result = Session.execute(select(Collection)).scalars().all()
-    assert set((row.id, row.name, row.doi_key, row.provider_id, project_ids(row)) for row in result) \
-           == set((collection.id, collection.name, collection.doi_key, collection.provider_id, project_ids(collection)) for collection in collections)
+    assert set((row.id, row.name, row.doi_key, row.provider_id, project_ids(row), client_ids(row), role_ids(row)) for row in result) \
+           == set((collection.id, collection.name, collection.doi_key, collection.provider_id, project_ids(collection), client_ids(collection),
+                   role_ids(collection)) for collection in collections)
 
 
 def assert_db_tag_state(collection_id, *collection_tags):
@@ -99,6 +117,8 @@ def assert_json_collection_result(response, json, collection):
     assert json['doi_key'] == collection.doi_key
     assert json['provider_id'] == collection.provider_id
     assert tuple(json['project_ids']) == project_ids(collection)
+    assert tuple(j for j in json['client_ids'] if j != 'odp.test') == client_ids(collection)
+    assert tuple(json['role_ids']) == role_ids(collection)
 
 
 def assert_json_collection_results(response, json, collections):
@@ -137,20 +157,21 @@ def assert_doi_result(response, collection):
     all_scopes,
     all_scopes_excluding(ODPScope.COLLECTION_READ),
 ])
-def test_list_collections(api, collection_batch, scopes, provider_auth):
+def test_list_collections(api, collection_batch, scopes, collection_auth):
     authorized = ODPScope.COLLECTION_READ in scopes
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = collection_batch[2].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = collection_batch[2]
         expected_result_batch = [collection_batch[2]]
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = ProviderFactory()
-        expected_result_batch = []
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = CollectionFactory()
+        expected_result_batch = [api_client_collection]
+        collection_batch += [api_client_collection]
     else:
-        api_client_provider = None
+        api_client_collection = None
         expected_result_batch = collection_batch
 
-    r = api(scopes, api_client_provider).get('/collection/')
+    r = api(scopes, api_client_collection).get('/collection/')
 
     if authorized:
         assert_json_collection_results(r, r.json(), expected_result_batch)
@@ -166,18 +187,18 @@ def test_list_collections(api, collection_batch, scopes, provider_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.COLLECTION_READ),
 ])
-def test_get_collection(api, collection_batch, scopes, provider_auth):
+def test_get_collection(api, collection_batch, scopes, collection_auth):
     authorized = ODPScope.COLLECTION_READ in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = collection_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = collection_batch[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = collection_batch[2]
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = collection_batch[1]
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    r = api(scopes, api_client_provider).get(f'/collection/{collection_batch[2].id}')
+    r = api(scopes, api_client_collection).get(f'/collection/{collection_batch[2].id}')
 
     if authorized:
         assert_json_collection_result(r, r.json(), collection_batch[2])
@@ -187,17 +208,22 @@ def test_get_collection(api, collection_batch, scopes, provider_auth):
     assert_db_state(collection_batch)
 
 
-def test_get_collection_not_found(api, collection_batch, provider_auth):
+def test_get_collection_not_found(api, collection_batch, collection_auth):
     scopes = [ODPScope.COLLECTION_READ]
+    authorized = collection_auth == CollectionAuth.NONE
 
-    if provider_auth == ProviderAuth.NONE:
-        api_client_provider = None
+    if collection_auth == CollectionAuth.NONE:
+        api_client_collection = None
     else:
-        api_client_provider = collection_batch[2].provider
+        api_client_collection = collection_batch[2]
 
-    r = api(scopes, api_client_provider).get('/collection/foo')
+    r = api(scopes, api_client_collection).get('/collection/foo')
 
-    assert_not_found(r)
+    if authorized:
+        assert_not_found(r)
+    else:
+        assert_forbidden(r)
+
     assert_db_state(collection_batch)
 
 
@@ -207,27 +233,19 @@ def test_get_collection_not_found(api, collection_batch, provider_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
 ])
-def test_create_collection(api, collection_batch, scopes, provider_auth):
+def test_create_collection(api, collection_batch, scopes, collection_auth):
+    # note that collection-specific auth will never allow creating a new collection
     authorized = ODPScope.COLLECTION_ADMIN in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth == CollectionAuth.NONE
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = collection_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = collection_batch[1].provider
+    if collection_auth == CollectionAuth.NONE:
+        api_client_collection = None
     else:
-        api_client_provider = None
+        api_client_collection = collection_batch[2]
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
-        new_collection_provider = collection_batch[2].provider
-    else:
-        new_collection_provider = None
+    modified_collection_batch = collection_batch + [collection := collection_build()]
 
-    modified_collection_batch = collection_batch + [collection := collection_build(
-        provider=new_collection_provider
-    )]
-
-    r = api(scopes, api_client_provider).post('/collection/', json=dict(
+    r = api(scopes, api_client_collection).post('/collection/', json=dict(
         id=collection.id,
         name=collection.name,
         doi_key=collection.doi_key,
@@ -242,28 +260,18 @@ def test_create_collection(api, collection_batch, scopes, provider_auth):
         assert_db_state(collection_batch)
 
 
-def test_create_collection_conflict(api, collection_batch, provider_auth):
+def test_create_collection_conflict(api, collection_batch, collection_auth):
     scopes = [ODPScope.COLLECTION_ADMIN]
-    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+    authorized = collection_auth == CollectionAuth.NONE
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = collection_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = collection_batch[1].provider
+    if collection_auth == CollectionAuth.NONE:
+        api_client_collection = None
     else:
-        api_client_provider = None
+        api_client_collection = collection_batch[2]
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
-        new_collection_provider = collection_batch[2].provider
-    else:
-        new_collection_provider = None
+    collection = collection_build(id=collection_batch[2].id)
 
-    collection = collection_build(
-        id=collection_batch[2].id,
-        provider=new_collection_provider,
-    )
-
-    r = api(scopes, api_client_provider).post('/collection/', json=dict(
+    r = api(scopes, api_client_collection).post('/collection/', json=dict(
         id=collection.id,
         name=collection.name,
         doi_key=collection.doi_key,
@@ -284,29 +292,25 @@ def test_create_collection_conflict(api, collection_batch, provider_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
 ])
-def test_update_collection(api, collection_batch_no_projects, scopes, provider_auth):
+def test_update_collection(api, collection_batch_no_projects, scopes, collection_auth):
     authorized = ODPScope.COLLECTION_ADMIN in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = collection_batch_no_projects[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = collection_batch_no_projects[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = collection_batch_no_projects[2]
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = collection_batch_no_projects[1]
     else:
-        api_client_provider = None
-
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
-        modified_collection_provider = collection_batch_no_projects[2].provider
-    else:
-        modified_collection_provider = None
+        api_client_collection = None
 
     modified_collection_batch = collection_batch_no_projects.copy()
     modified_collection_batch[2] = (collection := collection_build(
         id=collection_batch_no_projects[2].id,
-        provider=modified_collection_provider,
+        clients=collection_batch_no_projects[2].clients,
+        roles=collection_batch_no_projects[2].roles,
     ))
 
-    r = api(scopes, api_client_provider).put('/collection/', json=dict(
+    r = api(scopes, api_client_collection).put('/collection/', json=dict(
         id=collection.id,
         name=collection.name,
         doi_key=collection.doi_key,
@@ -321,28 +325,18 @@ def test_update_collection(api, collection_batch_no_projects, scopes, provider_a
         assert_db_state(collection_batch_no_projects)
 
 
-def test_update_collection_not_found(api, collection_batch_no_projects, provider_auth):
+def test_update_collection_not_found(api, collection_batch_no_projects, collection_auth):
     scopes = [ODPScope.COLLECTION_ADMIN]
-    authorized = provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+    authorized = collection_auth == CollectionAuth.NONE
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = collection_batch_no_projects[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = collection_batch_no_projects[1].provider
+    if collection_auth == CollectionAuth.NONE:
+        api_client_collection = None
     else:
-        api_client_provider = None
+        api_client_collection = collection_batch_no_projects[2]
 
-    if provider_auth in (ProviderAuth.MATCH, ProviderAuth.MISMATCH):
-        modified_collection_provider = collection_batch_no_projects[2].provider
-    else:
-        modified_collection_provider = None
+    collection = collection_build(id='foo')
 
-    collection = collection_build(
-        id='foo',
-        provider=modified_collection_provider,
-    )
-
-    r = api(scopes, api_client_provider).put('/collection/', json=dict(
+    r = api(scopes, api_client_collection).put('/collection/', json=dict(
         id=collection.id,
         name=collection.name,
         doi_key=collection.doi_key,
@@ -363,21 +357,21 @@ def test_update_collection_not_found(api, collection_batch_no_projects, provider
     all_scopes,
     all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
 ])
-def test_delete_collection(api, collection_batch, scopes, provider_auth):
+def test_delete_collection(api, collection_batch, scopes, collection_auth):
     authorized = ODPScope.COLLECTION_ADMIN in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = collection_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = collection_batch[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = collection_batch[2]
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = collection_batch[1]
     else:
-        api_client_provider = None
+        api_client_collection = None
 
     modified_collection_batch = collection_batch.copy()
     del modified_collection_batch[2]
 
-    r = api(scopes, api_client_provider).delete(f'/collection/{collection_batch[2].id}')
+    r = api(scopes, api_client_collection).delete(f'/collection/{collection_batch[2].id}')
 
     if authorized:
         assert_empty_result(r)
@@ -387,17 +381,22 @@ def test_delete_collection(api, collection_batch, scopes, provider_auth):
         assert_db_state(collection_batch)
 
 
-def test_delete_collection_not_found(api, collection_batch, provider_auth):
+def test_delete_collection_not_found(api, collection_batch, collection_auth):
     scopes = [ODPScope.COLLECTION_ADMIN]
+    authorized = collection_auth == CollectionAuth.NONE
 
-    if provider_auth == ProviderAuth.NONE:
-        api_client_provider = None
+    if collection_auth == CollectionAuth.NONE:
+        api_client_collection = None
     else:
-        api_client_provider = collection_batch[2].provider
+        api_client_collection = collection_batch[2]
 
-    r = api(scopes, api_client_provider).delete('/collection/foo')
+    r = api(scopes, api_client_collection).delete('/collection/foo')
 
-    assert_not_found(r)
+    if authorized:
+        assert_not_found(r)
+    else:
+        assert_forbidden(r)
+
     assert_db_state(collection_batch)
 
 
@@ -407,18 +406,18 @@ def test_delete_collection_not_found(api, collection_batch, provider_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.COLLECTION_PUBLISH),
 ])
-def test_tag_collection(api, collection_batch, scopes, provider_auth):
+def test_tag_collection(api, collection_batch, scopes, collection_auth):
     authorized = ODPScope.COLLECTION_PUBLISH in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = collection_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = collection_batch[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = collection_batch[2]
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = collection_batch[1]
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    client = api(scopes, api_client_provider)
+    client = api(scopes, api_client_collection)
     tag = TagFactory(
         id='Collection.Publish',
         type='collection',
@@ -497,18 +496,18 @@ def test_tag_collection(api, collection_batch, scopes, provider_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.COLLECTION_READ),
 ])
-def test_get_new_doi(api, collection_batch, scopes, provider_auth):
+def test_get_new_doi(api, collection_batch, scopes, collection_auth):
     authorized = ODPScope.COLLECTION_READ in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = collection_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = collection_batch[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = collection_batch[2]
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = collection_batch[1]
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    r = api(scopes, api_client_provider).get(f'/collection/{(collection := collection_batch[2]).id}/doi/new')
+    r = api(scopes, api_client_collection).get(f'/collection/{(collection := collection_batch[2]).id}/doi/new')
 
     if authorized:
         if collection.doi_key:
@@ -532,18 +531,18 @@ def flag(request):
     all_scopes,
     all_scopes_excluding(ODPScope.COLLECTION_PUBLISH),
 ])
-def test_tag_collection_multi(api, collection_batch, scopes, provider_auth, flag):
+def test_tag_collection_multi(api, collection_batch, scopes, collection_auth, flag):
     authorized = ODPScope.COLLECTION_PUBLISH in scopes and \
-                 provider_auth in (ProviderAuth.NONE, ProviderAuth.MATCH)
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
-    if provider_auth == ProviderAuth.MATCH:
-        api_client_provider = collection_batch[2].provider
-    elif provider_auth == ProviderAuth.MISMATCH:
-        api_client_provider = collection_batch[1].provider
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = collection_batch[2]
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = collection_batch[1]
     else:
-        api_client_provider = None
+        api_client_collection = None
 
-    client = api(scopes, api_client_provider)
+    client = api(scopes, api_client_collection)
 
     collection_tag_1 = CollectionTagFactory(
         collection=collection_batch[2],
