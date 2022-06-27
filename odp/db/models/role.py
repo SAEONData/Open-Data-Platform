@@ -11,16 +11,16 @@ class Role(Base):
     permissions - represented by the associated scopes - that
     may be granted to a user.
 
-    If a role is linked to a provider, then its scopes apply
-    only to entities that are associated with that provider.
+    If a role is linked to a collection, then its scopes apply
+    only to entities that are associated with that collection.
     """
 
     __tablename__ = 'role'
 
     id = Column(String, primary_key=True)
 
-    provider_id = Column(String, ForeignKey('provider.id', onupdate='CASCADE', ondelete='CASCADE'))
-    provider = relationship('Provider')
+    collection_id = Column(String, ForeignKey('collection.id', onupdate='CASCADE', ondelete='CASCADE'))
+    collection = relationship('Collection')
 
     # many-to-many role_scope entities are persisted by
     # assigning/removing Scope instances to/from scopes
@@ -31,4 +31,4 @@ class Role(Base):
     role_users = relationship('UserRole', viewonly=True)
     users = association_proxy('role_users', 'user')
 
-    _repr_ = 'id', 'provider_id'
+    _repr_ = 'id', 'collection_id'

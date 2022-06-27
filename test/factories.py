@@ -89,17 +89,27 @@ class ProviderFactory(ODPModelFactory):
     name = factory.Sequence(lambda n: f'{fake.company()}.{n}')
 
 
+class CollectionFactory(ODPModelFactory):
+    class Meta:
+        model = Collection
+
+    id = factory.LazyAttribute(id_from_name)
+    name = factory.Sequence(lambda n: f'{fake.catch_phrase()}.{n}')
+    doi_key = factory.LazyFunction(lambda: fake.word() if randint(0, 1) else None)
+    provider = factory.SubFactory(ProviderFactory)
+
+
 class ClientFactory(ODPModelFactory):
     class Meta:
         model = Client
-        exclude = ('is_provider_client',)
+        exclude = ('is_collection_client',)
 
     id = factory.Sequence(lambda n: id_from_fake('catch_phrase', n))
 
-    is_provider_client = False
-    provider = factory.Maybe(
-        'is_provider_client',
-        yes_declaration=factory.SubFactory(ProviderFactory),
+    is_collection_client = False
+    collection = factory.Maybe(
+        'is_collection_client',
+        yes_declaration=factory.SubFactory(CollectionFactory),
         no_declaration=None,
     )
 
@@ -110,16 +120,6 @@ class ClientFactory(ODPModelFactory):
                 obj.scopes.append(scope)
             if create:
                 Session.commit()
-
-
-class CollectionFactory(ODPModelFactory):
-    class Meta:
-        model = Collection
-
-    id = factory.LazyAttribute(id_from_name)
-    name = factory.Sequence(lambda n: f'{fake.catch_phrase()}.{n}')
-    doi_key = factory.LazyFunction(lambda: fake.word() if randint(0, 1) else None)
-    provider = factory.SubFactory(ProviderFactory)
 
 
 class TagFactory(ODPModelFactory):
@@ -209,14 +209,14 @@ class RecordTagFactory(ODPModelFactory):
 class RoleFactory(ODPModelFactory):
     class Meta:
         model = Role
-        exclude = ('is_provider_role',)
+        exclude = ('is_collection_role',)
 
     id = factory.Sequence(lambda n: id_from_fake('job', n))
 
-    is_provider_role = False
-    provider = factory.Maybe(
-        'is_provider_role',
-        yes_declaration=factory.SubFactory(ProviderFactory),
+    is_collection_role = False
+    collection = factory.Maybe(
+        'is_collection_role',
+        yes_declaration=factory.SubFactory(CollectionFactory),
         no_declaration=None,
     )
 

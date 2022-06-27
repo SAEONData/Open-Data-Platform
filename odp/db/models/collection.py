@@ -24,4 +24,10 @@ class Collection(Base):
     # view of associated tags (one-to-many)
     tags = relationship('CollectionTag', viewonly=True)
 
+    # view of associated roles (zero-or-one-to-many)
+    roles = relationship('Role', viewonly=True)
+
+    # view of associated clients (zero-or-one-to-many)
+    clients = relationship('Client', viewonly=True)
+
     _repr_ = 'id', 'name', 'doi_key', 'provider_id'

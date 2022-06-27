@@ -21,7 +21,7 @@ def test_db_setup():
     migrate.systemdata.init_admin_role()
     Session.commit()
     result = Session.execute(select(Role)).scalar_one()
-    assert (result.id, result.provider_id) == (migrate.systemdata.ODP_ADMIN_ROLE, None)
+    assert (result.id, result.collection_id) == (migrate.systemdata.ODP_ADMIN_ROLE, None)
 
     result = Session.execute(select(RoleScope)).scalars()
     assert [(row.role_id, row.scope_id, row.scope_type) for row in result] \
@@ -38,14 +38,14 @@ def test_create_catalog():
 def test_create_client():
     client = ClientFactory()
     result = Session.execute(select(Client)).scalar_one()
-    assert (result.id, result.provider_id) == (client.id, None)
+    assert (result.id, result.collection_id) == (client.id, None)
 
 
-def test_create_client_with_provider():
-    client = ClientFactory(is_provider_client=True)
-    result = Session.execute(select(Client, Provider).join(Provider)).one()
-    assert (result.Client.id, result.Client.provider_id, result.Provider.name) \
-           == (client.id, client.provider.id, client.provider.name)
+def test_create_client_with_collection():
+    client = ClientFactory(is_collection_client=True)
+    result = Session.execute(select(Client, Collection).join(Collection)).one()
+    assert (result.Client.id, result.Client.collection_id, result.Collection.name) \
+           == (client.id, client.collection.id, client.collection.name)
 
 
 def test_create_client_with_scopes():
@@ -107,14 +107,14 @@ def test_create_record_tag():
 def test_create_role():
     role = RoleFactory()
     result = Session.execute(select(Role)).scalar_one()
-    assert (result.id, result.provider_id) == (role.id, None)
+    assert (result.id, result.collection_id) == (role.id, None)
 
 
-def test_create_role_with_provider():
-    role = RoleFactory(is_provider_role=True)
-    result = Session.execute(select(Role, Provider).join(Provider)).one()
-    assert (result.Role.id, result.Role.provider_id, result.Provider.name) \
-           == (role.id, role.provider.id, role.provider.name)
+def test_create_role_with_collection():
+    role = RoleFactory(is_collection_role=True)
+    result = Session.execute(select(Role, Collection).join(Collection)).one()
+    assert (result.Role.id, result.Role.collection_id, result.Collection.name) \
+           == (role.id, role.collection.id, role.collection.name)
 
 
 def test_create_role_with_scopes():
