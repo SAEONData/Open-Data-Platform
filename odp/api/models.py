@@ -68,7 +68,7 @@ class ClientModel(BaseModel):
     id: str
     name: str
     scope_ids: List[str]
-    provider_id: Optional[str]
+    collection_id: Optional[str]
     grant_types: List[GrantType]
     response_types: List[ResponseType]
     redirect_uris: List[AnyHttpUrl]
@@ -90,6 +90,8 @@ class CollectionModel(BaseModel):
     project_ids: List[str]
     record_count: int
     tags: List[TagInstanceModel]
+    client_ids: List[str]
+    role_ids: List[str]
 
 
 class CollectionModelIn(BaseModel):
@@ -115,8 +117,6 @@ class ProviderModel(BaseModel):
     id: str
     name: str
     collection_ids: List[str]
-    client_ids: List[str]
-    role_ids: List[str]
 
 
 class ProviderModelIn(BaseModel):
@@ -175,13 +175,13 @@ class RecordModelIn(BaseModel):
 class RoleModel(BaseModel):
     id: str
     scope_ids: List[str]
-    provider_id: Optional[str]
+    collection_id: Optional[str]
 
 
 class RoleModelIn(BaseModel):
     id: str = Field(..., regex=ID_REGEX)
     scope_ids: List[str]
-    provider_id: Optional[str]
+    collection_id: Optional[str]
 
 
 class SchemaModel(BaseModel):

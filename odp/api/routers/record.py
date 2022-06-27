@@ -77,8 +77,8 @@ async def list_records(
         select(Record).
         join(Collection)
     )
-    if auth.provider_ids != '*':
-        stmt = stmt.where(Collection.provider_id.in_(auth.provider_ids))
+    if auth.collection_ids != '*':
+        stmt = stmt.where(Collection.id.in_(auth.collection_ids))
     if collection_id:
         stmt = stmt.where(Collection.id.in_(collection_id))
 
@@ -99,7 +99,7 @@ async def get_record(
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     return output_record_model(record)
@@ -135,9 +135,7 @@ def _create_record(
         auth: Authorized,
         ignore_collection_tags: bool = False,
 ) -> RecordModel:
-    if (auth.provider_ids != '*'
-            and (collection := Session.get(Collection, record_in.collection_id))
-            and collection.provider_id not in auth.provider_ids):
+    if auth.collection_ids != '*' and record_in.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if not ignore_collection_tags and Session.execute(
@@ -197,9 +195,7 @@ async def update_record(
         metadata_schema: JSONSchema = Depends(get_metadata_schema),
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_WRITE)),
 ):
-    if (auth.provider_ids != '*'
-            and (collection := Session.get(Collection, record_in.collection_id))
-            and collection.provider_id not in auth.provider_ids):
+    if auth.collection_ids != '*' and record_in.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if not (record := Session.get(Record, record_id)):
@@ -220,9 +216,7 @@ async def admin_set_record(
         metadata_schema: JSONSchema = Depends(get_metadata_schema),
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_ADMIN)),
 ):
-    if (auth.provider_ids != '*'
-            and (collection := Session.get(Collection, record_in.collection_id))
-            and collection.provider_id not in auth.provider_ids):
+    if auth.collection_ids != '*' and record_in.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     create = False
@@ -242,7 +236,7 @@ def _set_record(
         auth: Authorized,
         ignore_collection_tags: bool = False,
 ) -> RecordModel:
-    if not create and auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
+    if not create and auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if not ignore_collection_tags and Session.execute(
@@ -334,7 +328,7 @@ def _delete_record(
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if not ignore_collection_tags and Session.execute(
@@ -371,7 +365,7 @@ async def tag_record(
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if record_tag := Session.execute(
@@ -433,7 +427,7 @@ async def untag_record(
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if not (record_tag := Session.execute(
@@ -469,7 +463,7 @@ async def list_catalog_records(
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if auth.provider_ids != '*' and record.collection.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     stmt = (
@@ -496,7 +490,7 @@ async def get_catalog_record(
     if not (catalog_record := Session.get(CatalogRecord, (catalog_id, record_id))):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if auth.provider_ids != '*' and catalog_record.record.collection.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and catalog_record.record.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     return output_catalog_record_model(catalog_record)

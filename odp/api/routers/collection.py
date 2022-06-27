@@ -30,6 +30,8 @@ def output_collection_model(result) -> CollectionModel:
             output_tag_instance_model(collection_tag)
             for collection_tag in result.Collection.tags
         ],
+        client_ids=[client.id for client in result.Collection.clients],
+        role_ids=[role.id for role in result.Collection.roles],
     )
 
 
@@ -46,8 +48,8 @@ async def list_collections(
         outerjoin(Record).
         group_by(Collection)
     )
-    if auth.provider_ids != '*':
-        stmt = stmt.where(Collection.provider_id.in_(auth.provider_ids))
+    if auth.collection_ids != '*':
+        stmt = stmt.where(Collection.id.in_(auth.collection_ids))
 
     return paginator.paginate(
         stmt,
@@ -64,6 +66,9 @@ async def get_collection(
         collection_id: str,
         auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_READ)),
 ):
+    if auth.collection_ids != '*' and collection_id not in auth.collection_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
     stmt = (
         select(Collection, func.count(Record.id)).
         outerjoin(Record).
@@ -73,9 +78,6 @@ async def get_collection(
 
     if not (result := Session.execute(stmt).one_or_none()):
         raise HTTPException(HTTP_404_NOT_FOUND)
-
-    if auth.provider_ids != '*' and result.Collection.provider_id not in auth.provider_ids:
-        raise HTTPException(HTTP_403_FORBIDDEN)
 
     return output_collection_model(result)
 
@@ -87,7 +89,7 @@ async def create_collection(
         collection_in: CollectionModelIn,
         auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_ADMIN)),
 ):
-    if auth.provider_ids != '*' and collection_in.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*':
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if Session.get(Collection, collection_in.id):
@@ -109,7 +111,7 @@ async def update_collection(
         collection_in: CollectionModelIn,
         auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_ADMIN)),
 ):
-    if auth.provider_ids != '*' and collection_in.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and collection_in.id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if not (collection := Session.get(Collection, collection_in.id)):
@@ -128,11 +130,11 @@ async def delete_collection(
         collection_id: str,
         auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_ADMIN)),
 ):
+    if auth.collection_ids != '*' and collection_id not in auth.collection_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
     if not (collection := Session.get(Collection, collection_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
-
-    if auth.provider_ids != '*' and collection.provider_id not in auth.provider_ids:
-        raise HTTPException(HTTP_403_FORBIDDEN)
 
     collection.delete()
 
@@ -147,11 +149,11 @@ async def tag_collection(
         tag_schema: JSONSchema = Depends(get_tag_schema),
         auth: Authorized = Depends(TagAuthorize()),
 ):
-    if not (collection := Session.get(Collection, collection_id)):
-        raise HTTPException(HTTP_404_NOT_FOUND)
-
-    if auth.provider_ids != '*' and collection.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not Session.get(Collection, collection_id):
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     if collection_tag := Session.execute(
         select(CollectionTag).
@@ -209,11 +211,11 @@ async def untag_collection(
         tag_id: str,
         auth: Authorized = Depends(UntagAuthorize()),
 ):
-    if not (collection := Session.get(Collection, collection_id)):
-        raise HTTPException(HTTP_404_NOT_FOUND)
-
-    if auth.provider_ids != '*' and collection.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not Session.get(Collection, collection_id):
+        raise HTTPException(HTTP_404_NOT_FOUND)
 
     if not (collection_tag := Session.execute(
         select(CollectionTag).
@@ -244,11 +246,11 @@ async def get_new_doi(
         collection_id: str,
         auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_READ)),
 ):
+    if auth.collection_ids != '*' and collection_id not in auth.collection_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
     if not (collection := Session.get(Collection, collection_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
-
-    if auth.provider_ids != '*' and collection.provider_id not in auth.provider_ids:
-        raise HTTPException(HTTP_403_FORBIDDEN)
 
     if not (doi_key := collection.doi_key):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'The collection does not have a DOI key')

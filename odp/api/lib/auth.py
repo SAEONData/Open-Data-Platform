@@ -25,7 +25,7 @@ hydra_public_url = config.HYDRA.PUBLIC.URL
 class Authorized:
     client_id: str
     user_id: Optional[str]
-    provider_ids: Set[str] | Literal['*']
+    collection_ids: Set[str] | Literal['*']
 
 
 def _authorize_request(request: Request, required_scope_id: str) -> Authorized:
@@ -53,7 +53,7 @@ def _authorize_request(request: Request, required_scope_id: str) -> Authorized:
         return Authorized(
             client_id=token.client_id,
             user_id=None,
-            provider_ids=client_permissions[required_scope_id],
+            collection_ids=client_permissions[required_scope_id],
         )
 
     # user-initiated API call
@@ -64,7 +64,7 @@ def _authorize_request(request: Request, required_scope_id: str) -> Authorized:
     return Authorized(
         client_id=token.client_id,
         user_id=token.sub,
-        provider_ids=user_permissions[required_scope_id],
+        collection_ids=user_permissions[required_scope_id],
     )
 
 

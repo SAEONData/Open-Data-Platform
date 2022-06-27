@@ -18,7 +18,7 @@ def output_client_model(client: Client) -> ClientModel:
         id=client.id,
         name=hydra_client.name,
         scope_ids=[scope.id for scope in client.scopes],
-        provider_id=client.provider_id,
+        collection_id=client.collection_id,
         grant_types=hydra_client.grant_types,
         response_types=hydra_client.response_types,
         redirect_uris=hydra_client.redirect_uris,
@@ -52,8 +52,8 @@ async def list_clients(
         paginator: Paginator = Depends(),
 ):
     stmt = select(Client)
-    if auth.provider_ids != '*':
-        stmt = stmt.where(Client.provider_id.in_(auth.provider_ids))
+    if auth.collection_ids != '*':
+        stmt = stmt.where(Client.collection_id.in_(auth.collection_ids))
 
     return paginator.paginate(
         stmt,
@@ -72,7 +72,7 @@ async def get_client(
     if not (client := Session.get(Client, client_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if auth.provider_ids != '*' and client.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and client.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     return output_client_model(client)
@@ -85,7 +85,7 @@ async def create_client(
         client_in: ClientModelIn,
         auth: Authorized = Depends(Authorize(ODPScope.CLIENT_ADMIN)),
 ):
-    if auth.provider_ids != '*' and client_in.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and client_in.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if Session.get(Client, client_in.id):
@@ -97,7 +97,7 @@ async def create_client(
     client = Client(
         id=client_in.id,
         scopes=select_scopes(client_in.scope_ids),
-        provider_id=client_in.provider_id,
+        collection_id=client_in.collection_id,
     )
     client.save()
     create_or_update_hydra_client(client_in)
@@ -110,14 +110,14 @@ async def update_client(
         client_in: ClientModelIn,
         auth: Authorized = Depends(Authorize(ODPScope.CLIENT_ADMIN)),
 ):
-    if auth.provider_ids != '*' and client_in.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and client_in.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     if not (client := Session.get(Client, client_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     client.scopes = select_scopes(client_in.scope_ids)
-    client.provider_id = client_in.provider_id,
+    client.collection_id = client_in.collection_id,
     client.save()
     create_or_update_hydra_client(client_in)
 
@@ -132,7 +132,7 @@ async def delete_client(
     if not (client := Session.get(Client, client_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if auth.provider_ids != '*' and client.provider_id not in auth.provider_ids:
+    if auth.collection_ids != '*' and client.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     client.delete()
