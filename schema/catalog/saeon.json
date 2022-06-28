@@ -42,7 +42,7 @@
                         "contains": {
                             "type": "object",
                             "properties": {
-                                "tag_id": {"const": "Collection.Publish"}
+                                "tag_id": {"const": "Collection.Ready"}
                             },
                             "required": ["tag_id"]
                         }

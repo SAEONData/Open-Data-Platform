@@ -401,13 +401,13 @@ def test_delete_collection_not_found(api, collection_batch, collection_auth):
 
 
 @pytest.mark.parametrize('scopes', [
-    [ODPScope.COLLECTION_PUBLISH],
+    [ODPScope.COLLECTION_ADMIN],
     [],
     all_scopes,
-    all_scopes_excluding(ODPScope.COLLECTION_PUBLISH),
+    all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
 ])
 def test_tag_collection(api, collection_batch, scopes, collection_auth):
-    authorized = ODPScope.COLLECTION_PUBLISH in scopes and \
+    authorized = ODPScope.COLLECTION_ADMIN in scopes and \
                  collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
     if collection_auth == CollectionAuth.MATCH:
@@ -419,12 +419,12 @@ def test_tag_collection(api, collection_batch, scopes, collection_auth):
 
     client = api(scopes, api_client_collection)
     tag = TagFactory(
-        id='Collection.Publish',
+        id='Collection.Ready',
         type='collection',
         scope=Session.get(
-            Scope, (ODPScope.COLLECTION_PUBLISH, ScopeType.odp)
+            Scope, (ODPScope.COLLECTION_ADMIN, ScopeType.odp)
         ) or Scope(
-            id=ODPScope.COLLECTION_PUBLISH, type=ScopeType.odp
+            id=ODPScope.COLLECTION_ADMIN, type=ScopeType.odp
         ),
         schema=SchemaFactory(
             type='tag',
@@ -436,7 +436,7 @@ def test_tag_collection(api, collection_batch, scopes, collection_auth):
     r = client.post(
         f'/collection/{(collection_id := collection_batch[2].id)}/tag',
         json=(collection_tag_v1 := dict(
-            tag_id='Collection.Publish',
+            tag_id='Collection.Ready',
             data={
                 'comment': 'Hello World',
             },
@@ -457,7 +457,7 @@ def test_tag_collection(api, collection_batch, scopes, collection_auth):
     r = client.post(
         f'/collection/{collection_id}/tag',
         json=(collection_tag_v2 := dict(
-            tag_id='Collection.Publish',
+            tag_id='Collection.Ready',
             data={},
         )))
     if authorized:
@@ -526,13 +526,13 @@ def flag(request):
 
 
 @pytest.mark.parametrize('scopes', [
-    [ODPScope.COLLECTION_PUBLISH],
+    [ODPScope.COLLECTION_ADMIN],
     [],
     all_scopes,
-    all_scopes_excluding(ODPScope.COLLECTION_PUBLISH),
+    all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
 ])
 def test_tag_collection_multi(api, collection_batch, scopes, collection_auth, flag):
-    authorized = ODPScope.COLLECTION_PUBLISH in scopes and \
+    authorized = ODPScope.COLLECTION_ADMIN in scopes and \
                  collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
     if collection_auth == CollectionAuth.MATCH:
@@ -547,13 +547,13 @@ def test_tag_collection_multi(api, collection_batch, scopes, collection_auth, fl
     collection_tag_1 = CollectionTagFactory(
         collection=collection_batch[2],
         tag=(tag := TagFactory(
-            id='Collection.Publish',
+            id='Collection.Ready',
             type='collection',
             flag=flag,
             scope=Session.get(
-                Scope, (ODPScope.COLLECTION_PUBLISH, ScopeType.odp)
+                Scope, (ODPScope.COLLECTION_ADMIN, ScopeType.odp)
             ) or Scope(
-                id=ODPScope.COLLECTION_PUBLISH, type=ScopeType.odp
+                id=ODPScope.COLLECTION_ADMIN, type=ScopeType.odp
             ),
             schema=SchemaFactory(
                 type='tag',
@@ -565,7 +565,7 @@ def test_tag_collection_multi(api, collection_batch, scopes, collection_auth, fl
     r = client.post(
         f'/collection/{(collection_id := collection_batch[2].id)}/tag',
         json=(collection_tag_2 := dict(
-            tag_id='Collection.Publish',
+            tag_id='Collection.Ready',
             data={'comment': 'Second tag instance'},
         )))
 

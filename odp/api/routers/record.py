@@ -141,9 +141,9 @@ def _create_record(
     if not ignore_collection_tags and Session.execute(
         select(CollectionTag).
         where(CollectionTag.collection_id == record_in.collection_id).
-        where(CollectionTag.tag_id == ODPCollectionTag.ARCHIVE)
+        where(CollectionTag.tag_id == ODPCollectionTag.FROZEN)
     ).first() is not None:
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'A record cannot be added to an archived collection')
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'A record cannot be added to a frozen collection')
 
     if record_in.doi and Session.execute(
         select(Record).
@@ -242,11 +242,11 @@ def _set_record(
     if not ignore_collection_tags and Session.execute(
         select(CollectionTag).
         where(CollectionTag.collection_id == record_in.collection_id).
-        where(CollectionTag.tag_id.in_((ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH)))
+        where(CollectionTag.tag_id.in_((ODPCollectionTag.FROZEN, ODPCollectionTag.READY)))
     ).first() is not None:
         raise HTTPException(
             HTTP_422_UNPROCESSABLE_ENTITY,
-            'Cannot update a record belonging to a published or archived collection',
+            'Cannot update a record belonging to a ready or frozen collection',
         )
 
     if record_in.doi and Session.execute(
@@ -334,11 +334,11 @@ def _delete_record(
     if not ignore_collection_tags and Session.execute(
         select(CollectionTag).
         where(CollectionTag.collection_id == record.collection_id).
-        where(CollectionTag.tag_id.in_((ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH)))
+        where(CollectionTag.tag_id.in_((ODPCollectionTag.FROZEN, ODPCollectionTag.READY)))
     ).first() is not None:
         raise HTTPException(
             HTTP_422_UNPROCESSABLE_ENTITY,
-            'Cannot delete a record belonging to a published or archived collection',
+            'Cannot delete a record belonging to a ready or frozen collection',
         )
 
     RecordAudit(

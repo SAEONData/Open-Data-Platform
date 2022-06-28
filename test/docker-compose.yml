@@ -19,7 +19,7 @@ services:
         --id odp.test
         --secret secret
         --grant-types client_credentials
-        --scope odp.catalog:read,odp.client:admin,odp.client:read,odp.collection:admin,odp.collection:read,odp.collection:archive,odp.collection:publish,odp.project:admin,odp.project:read,odp.provider:admin,odp.provider:read,odp.record:write,odp.record:admin,odp.record:read,odp.record:qc,odp.record:embargo,odp.record:migrate,odp.role:admin,odp.role:read,odp.schema:read,odp.scope:read,odp.tag:read,odp.user:admin,odp.user:read
+        --scope odp.catalog:read,odp.client:admin,odp.client:read,odp.collection:admin,odp.collection:read,odp.project:admin,odp.project:read,odp.provider:admin,odp.provider:read,odp.record:write,odp.record:admin,odp.record:read,odp.record:qc,odp.record:embargo,odp.record:migrate,odp.role:admin,odp.role:read,odp.schema:read,odp.scope:read,odp.tag:read,odp.user:admin,odp.user:read
     environment:
       - HYDRA_ADMIN_URL=http://hydra:4445
     depends_on:

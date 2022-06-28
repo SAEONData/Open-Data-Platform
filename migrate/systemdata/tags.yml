@@ -1,15 +1,15 @@
-Collection.Publish:
+Collection.Ready:
   type: collection
   flag: True
   public: False
-  scope_id: odp.collection:publish
+  scope_id: odp.collection:admin
   schema_id: Tag.Generic
 
-Collection.Archive:
+Collection.Frozen:
   type: collection
   flag: True
   public: False
-  scope_id: odp.collection:archive
+  scope_id: odp.collection:admin
   schema_id: Tag.Generic
 
 Record.Migrated:

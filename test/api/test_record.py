@@ -277,14 +277,14 @@ def test_get_record_not_found(api, record_batch, collection_auth):
 
 @pytest.mark.parametrize('admin_route, scopes, collection_tags', [
     (False, [ODPScope.RECORD_WRITE], []),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.PUBLISH]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.FROZEN]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.READY]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.FROZEN, ODPCollectionTag.READY]),
     (False, [], []),
     (False, all_scopes, []),
     (False, all_scopes_excluding(ODPScope.RECORD_WRITE), []),
     (True, [ODPScope.RECORD_ADMIN], []),
-    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
+    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionTag.FROZEN, ODPCollectionTag.READY]),
     (True, [], []),
     (True, all_scopes, []),
     (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
@@ -322,8 +322,8 @@ def test_create_record(api, record_batch, admin_route, scopes, collection_tags, 
     ))
 
     if authorized:
-        if not admin_route and ODPCollectionTag.ARCHIVE in collection_tags:
-            assert_unprocessable(r, 'A record cannot be added to an archived collection')
+        if not admin_route and ODPCollectionTag.FROZEN in collection_tags:
+            assert_unprocessable(r, 'A record cannot be added to a frozen collection')
             assert_db_state(record_batch)
             assert_no_audit_log()
         else:
@@ -403,14 +403,14 @@ def test_create_record_conflict(api, record_batch_with_ids, admin, collection_au
 
 @pytest.mark.parametrize('admin_route, scopes, collection_tags', [
     (False, [ODPScope.RECORD_WRITE], []),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.PUBLISH]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.FROZEN]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.READY]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.FROZEN, ODPCollectionTag.READY]),
     (False, [], []),
     (False, all_scopes, []),
     (False, all_scopes_excluding(ODPScope.RECORD_WRITE), []),
     (True, [ODPScope.RECORD_ADMIN], []),
-    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
+    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionTag.FROZEN, ODPCollectionTag.READY]),
     (True, [], []),
     (True, all_scopes, []),
     (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
@@ -451,8 +451,8 @@ def test_update_record(api, record_batch, admin_route, scopes, collection_tags, 
     ))
 
     if authorized:
-        if not admin_route and set(collection_tags) & {ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH}:
-            assert_unprocessable(r, 'Cannot update a record belonging to a published or archived collection')
+        if not admin_route and set(collection_tags) & {ODPCollectionTag.FROZEN, ODPCollectionTag.READY}:
+            assert_unprocessable(r, 'Cannot update a record belonging to a ready or frozen collection')
             assert_db_state(record_batch)
             assert_no_audit_log()
         else:
@@ -622,14 +622,14 @@ def test_update_record_doi_change(api, record_batch_with_ids, admin, collection_
 
 @pytest.mark.parametrize('admin_route, scopes, collection_tags', [
     (False, [ODPScope.RECORD_WRITE], []),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.PUBLISH]),
-    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.FROZEN]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.READY]),
+    (False, [ODPScope.RECORD_WRITE], [ODPCollectionTag.FROZEN, ODPCollectionTag.READY]),
     (False, [], []),
     (False, all_scopes, []),
     (False, all_scopes_excluding(ODPScope.RECORD_WRITE), []),
     (True, [ODPScope.RECORD_ADMIN], []),
-    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH]),
+    (True, [ODPScope.RECORD_ADMIN], [ODPCollectionTag.FROZEN, ODPCollectionTag.READY]),
     (True, [], []),
     (True, all_scopes, []),
     (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
@@ -660,8 +660,8 @@ def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, 
     r = api(scopes, api_client_collection).delete(f'{route}{(record_id := record_batch[2].id)}')
 
     if authorized:
-        if not admin_route and set(collection_tags) & {ODPCollectionTag.ARCHIVE, ODPCollectionTag.PUBLISH}:
-            assert_unprocessable(r, 'Cannot delete a record belonging to a published or archived collection')
+        if not admin_route and set(collection_tags) & {ODPCollectionTag.FROZEN, ODPCollectionTag.READY}:
+            assert_unprocessable(r, 'Cannot delete a record belonging to a ready or frozen collection')
             assert_db_state(record_batch)
             assert_no_audit_log()
         else:

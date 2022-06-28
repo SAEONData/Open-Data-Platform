@@ -11,8 +11,6 @@ class ODPScope(str, Enum):
     CLIENT_READ = 'odp.client:read'
     COLLECTION_ADMIN = 'odp.collection:admin'
     COLLECTION_READ = 'odp.collection:read'
-    COLLECTION_ARCHIVE = 'odp.collection:archive'
-    COLLECTION_PUBLISH = 'odp.collection:publish'
     PROJECT_ADMIN = 'odp.project:admin'
     PROJECT_READ = 'odp.project:read'
     PROVIDER_ADMIN = 'odp.provider:admin'
@@ -33,8 +31,8 @@ class ODPScope(str, Enum):
 
 
 class ODPCollectionTag(str, Enum):
-    ARCHIVE = 'Collection.Archive'
-    PUBLISH = 'Collection.Publish'
+    READY = 'Collection.Ready'
+    FROZEN = 'Collection.Frozen'
 
 
 class ODPRecordTag(str, Enum):
