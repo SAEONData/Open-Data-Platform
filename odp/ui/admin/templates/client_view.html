@@ -9,12 +9,12 @@
 
 {% block content %}
     {% from 'macros.html' import render_info, render_buttons, obj_link %}
-    {% call(prop) render_info(client, 'Name', 'Provider', 'Scope', 'Grant types', 'Response types',
+    {% call(prop) render_info(client, 'Name', 'Collection', 'Scope', 'Grant types', 'Response types',
             'Redirect URIs', 'Post-logout redirect URIs', 'Token endpoint auth method', 'Allowed CORS origins') %}
         {% if prop == 'Name' %}
             {{ client.name }}
-        {% elif prop == 'Provider' %}
-            {{ obj_link('providers', client.provider_id) }}
+        {% elif prop == 'Collection' %}
+            {{ obj_link('collections', client.collection_id) }}
         {% elif prop == 'Scope' %}
             {{ client.scope_ids|sort|join('<br/>')|safe }}
         {% elif prop == 'Grant types' %}

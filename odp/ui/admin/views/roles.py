@@ -27,14 +27,14 @@ def view(id):
 @api.client(ODPScope.ROLE_ADMIN)
 def create():
     form = RoleForm(request.form)
-    utils.populate_provider_choices(form.provider_id, include_none=True)
+    utils.populate_collection_choices(form.collection_id, include_none=True)
     utils.populate_scope_choices(form.scope_ids, ('odp', 'client'))
 
     if request.method == 'POST' and form.validate():
         try:
             api.post('/role/', dict(
                 id=(id := form.id.data),
-                provider_id=form.provider_id.data or None,
+                collection_id=form.collection_id.data or None,
                 scope_ids=form.scope_ids.data,
             ))
             flash(f'Role {id} has been created.', category='success')
@@ -59,14 +59,14 @@ def edit(id):
     else:
         form = RoleForm(data=role)
 
-    utils.populate_provider_choices(form.provider_id, include_none=True)
+    utils.populate_collection_choices(form.collection_id, include_none=True)
     utils.populate_scope_choices(form.scope_ids, ('odp', 'client'))
 
     if request.method == 'POST' and form.validate():
         try:
             api.put('/role/', dict(
                 id=id,
-                provider_id=form.provider_id.data or None,
+                collection_id=form.collection_id.data or None,
                 scope_ids=form.scope_ids.data,
             ))
             flash(f'Role {id} has been updated.', category='success')

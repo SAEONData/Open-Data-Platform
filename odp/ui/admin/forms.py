@@ -68,8 +68,8 @@ class ClientForm(BaseForm):
     secret = StringField(
         label='Client secret',
     )
-    provider_id = SelectField(
-        label='Provider',
+    collection_id = SelectField(
+        label='Collection',
     )
     scope_ids = MultiCheckboxField(
         label='Scope',
@@ -219,8 +219,8 @@ class RoleForm(BaseForm):
         filters=[lambda s: s.strip() if s else s],
         validators=[data_required()],
     )
-    provider_id = SelectField(
-        label='Provider',
+    collection_id = SelectField(
+        label='Collection',
     )
     scope_ids = MultiCheckboxField(
         label='Scope',

@@ -9,9 +9,9 @@
 
 {% block content %}
     {% from 'macros.html' import render_info, render_buttons, obj_link %}
-    {% call(prop) render_info(role, 'Provider', 'Scope') %}
-        {% if prop == 'Provider' %}
-            {{ obj_link('providers', role.provider_id) }}
+    {% call(prop) render_info(role, 'Collection', 'Scope') %}
+        {% if prop == 'Collection' %}
+            {{ obj_link('collections', role.collection_id) }}
         {% elif prop == 'Scope' %}
             {{ role.scope_ids|sort|join('<br/>')|safe }}
         {% endif %}
