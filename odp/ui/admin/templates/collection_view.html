@@ -10,7 +10,7 @@
 {% block content %}
     {% from 'macros.html' import render_info, render_buttons, render_button_prompt_form, obj_link, obj_links %}
     {% call(prop) render_info(collection, 'Name', 'Provider', 'Projects', 'DOI key', 'Records',
-            'Published', 'Archived') %}
+            'Ready', 'Frozen') %}
         {% if prop == 'Name' %}
             {{ collection.name }}
         {% elif prop == 'Provider' %}
@@ -23,39 +23,39 @@
             <a href="{{ url_for('records.index', collection=collection.id) }}" class="text-decoration-none">
                 {{ collection.record_count }}
             </a>
-        {% elif prop == 'Published' %}
-            {% if publish_tag %}
-                {{ publish_tag.timestamp|timestamp }} by {{ obj_link('users', publish_tag.user_id, publish_tag.user_name) }}
+        {% elif prop == 'Ready' %}
+            {% if ready_tag %}
+                {{ ready_tag.timestamp|timestamp }} by {{ obj_link('users', ready_tag.user_id, ready_tag.user_name) }}
             {% endif %}
-        {% elif prop == 'Archived' %}
-            {% if archive_tag %}
-                {{ archive_tag.timestamp|timestamp }} by {{ obj_link('users', archive_tag.user_id, archive_tag.user_name) }}
+        {% elif prop == 'Frozen' %}
+            {% if frozen_tag %}
+                {{ frozen_tag.timestamp|timestamp }} by {{ obj_link('users', frozen_tag.user_id, frozen_tag.user_name) }}
             {% endif %}
         {% endif %}
     {% endcall %}
-    {% if publish_tag %}
-        {% set publish_btn = ['unpublish'] %}
+    {% if ready_tag %}
+        {% set ready_btn = ['unready'] %}
     {% else %}
-        {% set publish_btn = ['publish'] %}
+        {% set ready_btn = ['ready'] %}
     {% endif %}
-    {% if archive_tag %}
-        {% set archive_btn = ['unarchive'] %}
+    {% if frozen_tag %}
+        {% set freeze_btn = ['unfreeze'] %}
     {% else %}
-        {% set archive_btn = ['archive'] %}
+        {% set freeze_btn = ['freeze'] %}
     {% endif %}
-    {% call(btn) render_buttons(collection, edit=True, delete=True, custom=publish_btn + archive_btn) %}
-        {% if btn == 'publish' %}
-            {{ render_button_prompt_form('.tag_publish', collection.id, 'Publish', 'success',
-                'Are you sure you want to publish the collection?') }}
-        {% elif btn == 'unpublish' %}
-            {{ render_button_prompt_form('.untag_publish', collection.id, 'Un-publish', 'warning',
-                'Are you sure you want to un-publish the collection?') }}
-        {% elif btn == 'archive' %}
-            {{ render_button_prompt_form('.tag_archive', collection.id, 'Archive', 'warning',
-                'Are you sure you want to archive the collection?') }}
-        {% elif btn == 'unarchive' %}
-            {{ render_button_prompt_form('.untag_archive', collection.id, 'Un-archive', 'success',
-                'Are you sure you want to un-archive the collection?') }}
+    {% call(btn) render_buttons(collection, edit=True, delete=True, custom=ready_btn + freeze_btn) %}
+        {% if btn == 'ready' %}
+            {{ render_button_prompt_form('.tag_ready', collection.id, 'Ready', 'success',
+                'Are you sure you want to tag the collection as ready for publication?') }}
+        {% elif btn == 'unready' %}
+            {{ render_button_prompt_form('.untag_ready', collection.id, 'Un-ready', 'warning',
+                'Are you sure you want to remove the ready for publication tag?') }}
+        {% elif btn == 'freeze' %}
+            {{ render_button_prompt_form('.tag_frozen', collection.id, 'Freeze', 'warning',
+                'Are you sure you want to freeze the collection?') }}
+        {% elif btn == 'unfreeze' %}
+            {{ render_button_prompt_form('.untag_frozen', collection.id, 'Un-freeze', 'success',
+                'Are you sure you want to un-freeze the collection?') }}
         {% endif %}
     {% endcall %}
 {% endblock %}

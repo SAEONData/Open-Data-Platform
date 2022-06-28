@@ -20,19 +20,19 @@ def index():
 @api.client(ODPScope.COLLECTION_READ)
 def view(id):
     collection = api.get(f'/collection/{id}')
-    publish_tag = next(
+    ready_tag = next(
         (tag for tag in collection['tags']
          if tag['tag_id'] == ODPCollectionTag.READY),
         None
     )
-    archive_tag = next(
+    frozen_tag = next(
         (tag for tag in collection['tags']
          if tag['tag_id'] == ODPCollectionTag.FROZEN),
         None
     )
     return render_template(
         'collection_view.html', collection=collection,
-        publish_tag=publish_tag, archive_tag=archive_tag,
+        ready_tag=ready_tag, frozen_tag=frozen_tag,
     )
 
 
@@ -94,9 +94,9 @@ def delete(id):
     return redirect(url_for('.index'))
 
 
-@bp.route('/<id>/tag/publish', methods=('POST',))
+@bp.route('/<id>/tag/ready', methods=('POST',))
 @api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
-def tag_publish(id):
+def tag_ready(id):
     api.post(f'/collection/{id}/tag', dict(
         tag_id=ODPCollectionTag.READY,
         data={},
@@ -105,17 +105,17 @@ def tag_publish(id):
     return redirect(url_for('.view', id=id))
 
 
-@bp.route('/<id>/untag/publish', methods=('POST',))
+@bp.route('/<id>/untag/ready', methods=('POST',))
 @api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
-def untag_publish(id):
+def untag_ready(id):
     api.delete(f'/collection/{id}/tag/{ODPCollectionTag.READY}')
     flash(f'{ODPCollectionTag.READY} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
 
 
-@bp.route('/<id>/tag/archive', methods=('POST',))
+@bp.route('/<id>/tag/frozen', methods=('POST',))
 @api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
-def tag_archive(id):
+def tag_frozen(id):
     api.post(f'/collection/{id}/tag', dict(
         tag_id=ODPCollectionTag.FROZEN,
         data={},
@@ -124,9 +124,9 @@ def tag_archive(id):
     return redirect(url_for('.view', id=id))
 
 
-@bp.route('/<id>/untag/archive', methods=('POST',))
+@bp.route('/<id>/untag/frozen', methods=('POST',))
 @api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
-def untag_archive(id):
+def untag_frozen(id):
     api.delete(f'/collection/{id}/tag/{ODPCollectionTag.FROZEN}')
     flash(f'{ODPCollectionTag.FROZEN} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
