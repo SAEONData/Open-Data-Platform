@@ -188,7 +188,7 @@ def assert_json_tag_result(response, json, record_tag):
     assert json['user_name'] is None
     assert json['data'] == record_tag['data']
     assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
-    assert json['flag'] == record_tag['flag']
+    assert json['cardinality'] == record_tag['cardinality']
     assert json['public'] == record_tag['public']
 
 
@@ -690,27 +690,10 @@ def test_delete_record_not_found(api, record_batch, admin, collection_auth):
     assert_no_audit_log()
 
 
-@pytest.mark.parametrize('scopes', [
-    [ODPScope.RECORD_QC],
-    [],
-    all_scopes,
-    all_scopes_excluding(ODPScope.RECORD_QC),
-])
-def test_tag_record(api, record_batch_no_tags, scopes, collection_auth):
-    authorized = ODPScope.RECORD_QC in scopes and \
-                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
-
-    if collection_auth == CollectionAuth.MATCH:
-        api_client_collection = record_batch_no_tags[2].collection
-    elif collection_auth == CollectionAuth.MISMATCH:
-        api_client_collection = record_batch_no_tags[1].collection
-    else:
-        api_client_collection = None
-
-    client = api(scopes, api_client_collection)
-    tag = TagFactory(
-        id='Record.QC',
+def new_generic_tag(cardinality):
+    return TagFactory(
         type='record',
+        cardinality=cardinality,
         scope=Session.get(
             Scope, (ODPScope.RECORD_QC, ScopeType.odp)
         ) or Scope(
@@ -718,76 +701,13 @@ def test_tag_record(api, record_batch_no_tags, scopes, collection_auth):
         ),
         schema=SchemaFactory(
             type='tag',
-            uri='https://odp.saeon.ac.za/schema/tag/record/qc',
+            uri='https://odp.saeon.ac.za/schema/tag/generic',
         ),
     )
 
-    # insert tag
-    r = client.post(
-        f'/record/{(record_id := record_batch_no_tags[2].id)}/tag',
-        json=(record_tag_v1 := dict(
-            tag_id='Record.QC',
-            data={
-                'pass_': (qc_passed := bool(randint(0, 1))),
-            },
-        )))
-    if authorized:
-        assert_json_tag_result(r, r.json(), record_tag_v1 | dict(flag=tag.flag, public=tag.public))
-        assert_db_tag_state(record_id, record_tag_v1)
-        assert_tag_audit_log(
-            dict(command='insert', record_id=record_id, record_tag=record_tag_v1),
-        )
-    else:
-        assert_forbidden(r)
-        assert_db_tag_state(record_id)
-        assert_tag_audit_log()
-    assert_db_state(record_batch_no_tags)
-    assert_no_audit_log()
 
-    # update tag
-    r = client.post(
-        f'/record/{record_id}/tag',
-        json=(record_tag_v2 := dict(
-            tag_id='Record.QC',
-            data={
-                'pass_': not qc_passed,
-                'comment': 'Hello',
-            },
-        )))
-    if authorized:
-        assert_json_tag_result(r, r.json(), record_tag_v2 | dict(flag=tag.flag, public=tag.public))
-        assert_db_tag_state(record_id, record_tag_v2)
-        assert_tag_audit_log(
-            dict(command='insert', record_id=record_id, record_tag=record_tag_v1),
-            dict(command='update', record_id=record_id, record_tag=record_tag_v2),
-        )
-    else:
-        assert_forbidden(r)
-        assert_db_tag_state(record_id)
-        assert_tag_audit_log()
-    assert_db_state(record_batch_no_tags)
-    assert_no_audit_log()
-
-    # delete tag
-    r = client.delete(f'/record/{record_id}/tag/{record_tag_v1["tag_id"]}')
-    if authorized:
-        assert_empty_result(r)
-        assert_db_tag_state(record_id)
-        assert_tag_audit_log(
-            dict(command='insert', record_id=record_id, record_tag=record_tag_v1),
-            dict(command='update', record_id=record_id, record_tag=record_tag_v2),
-            dict(command='delete', record_id=record_id, record_tag=record_tag_v2),
-        )
-    else:
-        assert_forbidden(r)
-        assert_db_tag_state(record_id)
-        assert_tag_audit_log()
-    assert_db_state(record_batch_no_tags)
-    assert_no_audit_log()
-
-
-@pytest.fixture(params=[True, False])
-def flag(request):
+@pytest.fixture(params=['one', 'user', 'multi'])
+def cardinality(request):
     return request.param
 
 
@@ -797,7 +717,7 @@ def flag(request):
     all_scopes,
     all_scopes_excluding(ODPScope.RECORD_QC),
 ])
-def test_tag_record_multi(api, record_batch_no_tags, scopes, collection_auth, flag):
+def test_tag_record(api, record_batch_no_tags, scopes, collection_auth, cardinality):
     authorized = ODPScope.RECORD_QC in scopes and \
                  collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
@@ -809,46 +729,106 @@ def test_tag_record_multi(api, record_batch_no_tags, scopes, collection_auth, fl
         api_client_collection = None
 
     client = api(scopes, api_client_collection)
+    tag = new_generic_tag(cardinality)
 
+    r = client.post(
+        f'/record/{(record_id := record_batch_no_tags[2].id)}/tag',
+        json=(record_tag_1 := dict(
+            tag_id=tag.id,
+            data={'comment': 'test1'},
+        )))
+
+    if authorized:
+        assert_json_tag_result(r, r.json(), record_tag_1 | dict(cardinality=cardinality, public=tag.public))
+        assert_db_tag_state(record_id, record_tag_1)
+        assert_tag_audit_log(
+            dict(command='insert', record_id=record_id, record_tag=record_tag_1),
+        )
+    else:
+        assert_forbidden(r)
+        assert_db_tag_state(record_id)
+        assert_tag_audit_log()
+
+    r = client.post(
+        f'/record/{(record_id := record_batch_no_tags[2].id)}/tag',
+        json=(record_tag_2 := dict(
+            tag_id=tag.id,
+            data={'comment': 'test2'},
+        )))
+
+    if authorized:
+        assert_json_tag_result(r, r.json(), record_tag_2 | dict(cardinality=cardinality, public=tag.public))
+        if cardinality in ('one', 'user'):
+            assert_db_tag_state(record_id, record_tag_2)
+            assert_tag_audit_log(
+                dict(command='insert', record_id=record_id, record_tag=record_tag_1),
+                dict(command='update', record_id=record_id, record_tag=record_tag_2),
+            )
+        elif cardinality == 'multi':
+            assert_db_tag_state(record_id, record_tag_1, record_tag_2)
+            assert_tag_audit_log(
+                dict(command='insert', record_id=record_id, record_tag=record_tag_1),
+                dict(command='insert', record_id=record_id, record_tag=record_tag_2),
+            )
+        else:
+            assert False
+    else:
+        assert_forbidden(r)
+        assert_db_tag_state(record_id)
+        assert_tag_audit_log()
+
+    assert_db_state(record_batch_no_tags)
+    assert_no_audit_log()
+
+
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.RECORD_QC],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.RECORD_QC),
+])
+def test_tag_record_user_conflict(api, record_batch_no_tags, scopes, collection_auth, cardinality):
+    authorized = ODPScope.RECORD_QC in scopes and \
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
+
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch_no_tags[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch_no_tags[1].collection
+    else:
+        api_client_collection = None
+
+    client = api(scopes, api_client_collection)
+    tag = new_generic_tag(cardinality)
     record_tag_1 = RecordTagFactory(
         record=record_batch_no_tags[2],
-        tag=(tag := TagFactory(
-            id='Record.QC',
-            type='record',
-            flag=flag,
-            scope=Session.get(
-                Scope, (ODPScope.RECORD_QC, ScopeType.odp)
-            ) or Scope(
-                id=ODPScope.RECORD_QC, type=ScopeType.odp
-            ),
-            schema=SchemaFactory(
-                type='tag',
-                uri='https://odp.saeon.ac.za/schema/tag/generic',
-            ),
-        ))
+        tag=tag,
     )
 
     r = client.post(
         f'/record/{(record_id := record_batch_no_tags[2].id)}/tag',
         json=(record_tag_2 := dict(
-            tag_id='Record.QC',
-            data={'comment': 'Second tag instance'},
+            tag_id=tag.id,
+            data={'comment': 'test2'},
         )))
 
     if authorized:
-        if flag:
-            assert_conflict(r, 'Flag has already been set')
+        if cardinality == 'one':
+            assert_conflict(r, 'Cannot update a tag set by another user')
             assert_db_tag_state(record_id, record_tag_1)
             assert_tag_audit_log()
-        else:
-            assert_json_tag_result(r, r.json(), record_tag_2 | dict(flag=False, public=tag.public))
+        elif cardinality in ('user', 'multi'):
+            assert_json_tag_result(r, r.json(), record_tag_2 | dict(cardinality=cardinality, public=tag.public))
             assert_db_tag_state(record_id, record_tag_1, record_tag_2)
             assert_tag_audit_log(
                 dict(command='insert', record_id=record_id, record_tag=record_tag_2),
             )
+        else:
+            assert False
     else:
         assert_forbidden(r)
         assert_db_tag_state(record_id, record_tag_1)
         assert_tag_audit_log()
 
     assert_db_state(record_batch_no_tags)
+    assert_no_audit_log()

@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import AnyHttpUrl, BaseModel, Field, root_validator, validator
 
+from odp.db.models import TagCardinality
 from odp.lib.formats import DOI_REGEX, ID_REGEX, SID_REGEX
 from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
 
@@ -18,7 +19,7 @@ class TagInstanceModel(BaseModel):
     user_name: Optional[str]
     data: Dict[str, Any]
     timestamp: str
-    flag: bool
+    cardinality: TagCardinality
     public: bool
 
 
@@ -39,7 +40,7 @@ class PublishedTagInstanceModel(BaseModel):
     data: Dict[str, Any]
     user_name: Optional[str]
     timestamp: str
-    flag: bool
+    cardinality: TagCardinality
 
 
 class PublishedRecordModel(BaseModel):
@@ -198,7 +199,7 @@ class ScopeModel(BaseModel):
 
 class TagModel(BaseModel):
     id: str
-    flag: bool
+    cardinality: TagCardinality
     public: bool
     scope_id: str
     schema_id: str

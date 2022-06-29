@@ -15,7 +15,7 @@ from odp.api.lib.utils import output_tag_instance_model
 from odp.api.models import CatalogRecordModel, PublishedRecordModel, RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
 from odp.db.models import (AuditCommand, CatalogRecord, Collection, CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, SchemaType, Tag,
-                           TagType)
+                           TagCardinality, TagType)
 
 router = APIRouter()
 
@@ -368,30 +368,51 @@ async def tag_record(
     if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if record_tag := Session.execute(
-        select(RecordTag).
-        where(RecordTag.record_id == record_id).
-        where(RecordTag.tag_id == tag_instance_in.tag_id).
-        where(RecordTag.user_id == auth.user_id)
-    ).scalar_one_or_none():
-        command = AuditCommand.update
-    else:
-        if Session.get(
-                Tag, (tag_instance_in.tag_id, TagType.record)
-        ).flag and Session.execute(
+    if not (tag := Session.get(Tag, (tag_instance_in.tag_id, TagType.record))):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    # only one tag instance per record is allowed
+    # update allowed only by the user who did the insert
+    if tag.cardinality == TagCardinality.one:
+        if record_tag := Session.execute(
                 select(RecordTag).
                 where(RecordTag.record_id == record_id).
                 where(RecordTag.tag_id == tag_instance_in.tag_id)
-        ).first() is not None:
-            raise HTTPException(HTTP_409_CONFLICT, 'Flag has already been set')
+        ).scalar_one_or_none():
+            if record_tag.user_id != auth.user_id:
+                raise HTTPException(HTTP_409_CONFLICT, 'Cannot update a tag set by another user')
+            command = AuditCommand.update
+        else:
+            command = AuditCommand.insert
 
+    # one tag instance per user per record is allowed
+    # update a user's existing tag instance if found
+    elif tag.cardinality == TagCardinality.user:
+        if record_tag := Session.execute(
+                select(RecordTag).
+                where(RecordTag.record_id == record_id).
+                where(RecordTag.tag_id == tag_instance_in.tag_id).
+                where(RecordTag.user_id == auth.user_id)
+        ).scalar_one_or_none():
+            command = AuditCommand.update
+        else:
+            command = AuditCommand.insert
+
+    # multiple tag instances are allowed per user per record
+    # can only insert/delete
+    elif tag.cardinality == TagCardinality.multi:
+        command = AuditCommand.insert
+
+    else:
+        assert False
+
+    if command == AuditCommand.insert:
         record_tag = RecordTag(
             record_id=record_id,
             tag_id=tag_instance_in.tag_id,
             tag_type=TagType.record,
             user_id=auth.user_id,
         )
-        command = AuditCommand.insert
 
     if record_tag.data != tag_instance_in.data:
         validity = tag_schema.evaluate(JSON(tag_instance_in.data)).output('detailed')
