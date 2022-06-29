@@ -1,34 +1,34 @@
 Collection.Ready:
   type: collection
-  flag: True
+  cardinality: one
   public: False
   scope_id: odp.collection:admin
   schema_id: Tag.Generic
 
 Collection.Frozen:
   type: collection
-  flag: True
+  cardinality: one
   public: False
   scope_id: odp.collection:admin
   schema_id: Tag.Generic
 
 Record.Migrated:
   type: record
-  flag: True
+  cardinality: one
   public: False
   scope_id: odp.record:migrate
   schema_id: Tag.Record.Migrated
 
 Record.QC:
   type: record
-  flag: False
+  cardinality: user
   public: False
   scope_id: odp.record:qc
   schema_id: Tag.Record.QC
 
 Record.Embargo:
   type: record
-  flag: False
+  cardinality: multi
   public: True
   scope_id: odp.record:embargo
   schema_id: Tag.Record.Embargo

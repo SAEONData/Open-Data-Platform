@@ -27,6 +27,15 @@ class TagType(str, Enum):
         return repr(self.value)
 
 
+class TagCardinality(str, Enum):
+    one = 'one'  # one tag instance per object
+    user = 'user'  # one tag instance per user per object
+    multi = 'multi'  # multiple tag instances per user per object
+
+    def __repr__(self):
+        return repr(self.value)
+
+
 class AuditCommand(str, Enum):
     insert = 'insert'
     update = 'update'

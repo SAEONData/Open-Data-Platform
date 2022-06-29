@@ -202,7 +202,7 @@ def init_tags():
         tag_spec = tag_data[tag_id]
         tag_type = tag_spec['type']
         tag = Session.get(Tag, (tag_id, tag_type)) or Tag(id=tag_id, type=tag_type)
-        tag.flag = tag_spec['flag']
+        tag.cardinality = tag_spec['cardinality']
         tag.public = tag_spec['public']
         tag.scope_id = tag_spec['scope_id']
         tag.scope_type = ScopeType.odp

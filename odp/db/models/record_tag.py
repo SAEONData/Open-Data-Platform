@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint, Column, Enum, ForeignKey, ForeignKeyConstraint, Identity, Integer, String, TIMESTAMP, UniqueConstraint
+from sqlalchemy import CheckConstraint, Column, Enum, ForeignKey, ForeignKeyConstraint, Identity, Integer, String, TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -7,19 +7,11 @@ from odp.db.models.types import AuditCommand, TagType
 
 
 class RecordTag(Base):
-    """Tag instance model, representing a tag attached by a user to
-    a record.
-
-    Multiple instances of the same tag id may be attached to a given
-    record, but only one such tag per user.
-
-    user_id is nullable to allow tags to be set by the system.
-    """
+    """Tag instance model, representing a tag attached to a record."""
 
     __tablename__ = 'record_tag'
 
     __table_args__ = (
-        UniqueConstraint('record_id', 'tag_id', 'user_id'),
         ForeignKeyConstraint(
             ('tag_id', 'tag_type'), ('tag.id', 'tag.type'),
             name='record_tag_tag_fkey', ondelete='CASCADE',

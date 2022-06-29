@@ -128,7 +128,7 @@ class TagFactory(ODPModelFactory):
 
     id = factory.LazyAttribute(lambda tag: f'tag-{tag.scope.id}')
     type = factory.LazyFunction(lambda: choice(('collection', 'record')))
-    flag = factory.LazyFunction(lambda: randint(0, 1))
+    cardinality = factory.LazyFunction(lambda: choice(('one', 'user', 'multi')))
     public = factory.LazyFunction(lambda: randint(0, 1))
     scope = factory.SubFactory(ScopeFactory, type='odp')
     schema = factory.SubFactory(SchemaFactory, type='tag')
