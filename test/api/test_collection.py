@@ -139,7 +139,7 @@ def assert_json_tag_result(response, json, collection_tag):
     assert json['user_name'] is None
     assert json['data'] == collection_tag['data']
     assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
-    assert json['flag'] == collection_tag['flag']
+    assert json['cardinality'] == collection_tag['cardinality']
     assert json['public'] == collection_tag['public']
 
 
@@ -401,96 +401,6 @@ def test_delete_collection_not_found(api, collection_batch, collection_auth):
 
 
 @pytest.mark.parametrize('scopes', [
-    [ODPScope.COLLECTION_ADMIN],
-    [],
-    all_scopes,
-    all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
-])
-def test_tag_collection(api, collection_batch, scopes, collection_auth):
-    authorized = ODPScope.COLLECTION_ADMIN in scopes and \
-                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
-
-    if collection_auth == CollectionAuth.MATCH:
-        api_client_collection = collection_batch[2]
-    elif collection_auth == CollectionAuth.MISMATCH:
-        api_client_collection = collection_batch[1]
-    else:
-        api_client_collection = None
-
-    client = api(scopes, api_client_collection)
-    tag = TagFactory(
-        id='Collection.Ready',
-        type='collection',
-        scope=Session.get(
-            Scope, (ODPScope.COLLECTION_ADMIN, ScopeType.odp)
-        ) or Scope(
-            id=ODPScope.COLLECTION_ADMIN, type=ScopeType.odp
-        ),
-        schema=SchemaFactory(
-            type='tag',
-            uri='https://odp.saeon.ac.za/schema/tag/generic',
-        ),
-    )
-
-    # insert tag
-    r = client.post(
-        f'/collection/{(collection_id := collection_batch[2].id)}/tag',
-        json=(collection_tag_v1 := dict(
-            tag_id='Collection.Ready',
-            data={
-                'comment': 'Hello World',
-            },
-        )))
-    if authorized:
-        assert_json_tag_result(r, r.json(), collection_tag_v1 | dict(flag=tag.flag, public=tag.public))
-        assert_db_tag_state(collection_id, collection_tag_v1)
-        assert_tag_audit_log(
-            dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_v1),
-        )
-    else:
-        assert_forbidden(r)
-        assert_db_tag_state(collection_id)
-        assert_tag_audit_log()
-    assert_db_state(collection_batch)
-
-    # update tag
-    r = client.post(
-        f'/collection/{collection_id}/tag',
-        json=(collection_tag_v2 := dict(
-            tag_id='Collection.Ready',
-            data={},
-        )))
-    if authorized:
-        assert_json_tag_result(r, r.json(), collection_tag_v2 | dict(flag=tag.flag, public=tag.public))
-        assert_db_tag_state(collection_id, collection_tag_v2)
-        assert_tag_audit_log(
-            dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_v1),
-            dict(command='update', collection_id=collection_id, collection_tag=collection_tag_v2),
-        )
-    else:
-        assert_forbidden(r)
-        assert_db_tag_state(collection_id)
-        assert_tag_audit_log()
-    assert_db_state(collection_batch)
-
-    # delete tag
-    r = client.delete(f'/collection/{collection_id}/tag/{collection_tag_v1["tag_id"]}')
-    if authorized:
-        assert_empty_result(r)
-        assert_db_tag_state(collection_id)
-        assert_tag_audit_log(
-            dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_v1),
-            dict(command='update', collection_id=collection_id, collection_tag=collection_tag_v2),
-            dict(command='delete', collection_id=collection_id, collection_tag=collection_tag_v2),
-        )
-    else:
-        assert_forbidden(r)
-        assert_db_tag_state(collection_id)
-        assert_tag_audit_log()
-    assert_db_state(collection_batch)
-
-
-@pytest.mark.parametrize('scopes', [
     [ODPScope.COLLECTION_READ],
     [],
     all_scopes,
@@ -520,9 +430,20 @@ def test_get_new_doi(api, collection_batch, scopes, collection_auth):
     assert_db_state(collection_batch)
 
 
-@pytest.fixture(params=[True, False])
-def flag(request):
-    return request.param
+def new_generic_tag(cardinality):
+    return TagFactory(
+        type='collection',
+        cardinality=cardinality,
+        scope=Session.get(
+            Scope, (ODPScope.COLLECTION_ADMIN, ScopeType.odp)
+        ) or Scope(
+            id=ODPScope.COLLECTION_ADMIN, type=ScopeType.odp
+        ),
+        schema=SchemaFactory(
+            type='tag',
+            uri='https://odp.saeon.ac.za/schema/tag/generic',
+        ),
+    )
 
 
 @pytest.mark.parametrize('scopes', [
@@ -531,7 +452,7 @@ def flag(request):
     all_scopes,
     all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
 ])
-def test_tag_collection_multi(api, collection_batch, scopes, collection_auth, flag):
+def test_tag_collection(api, collection_batch, scopes, collection_auth, tag_cardinality):
     authorized = ODPScope.COLLECTION_ADMIN in scopes and \
                  collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
@@ -543,43 +464,101 @@ def test_tag_collection_multi(api, collection_batch, scopes, collection_auth, fl
         api_client_collection = None
 
     client = api(scopes, api_client_collection)
+    tag = new_generic_tag(tag_cardinality)
 
+    r = client.post(
+        f'/collection/{(collection_id := collection_batch[2].id)}/tag',
+        json=(collection_tag_1 := dict(
+            tag_id=tag.id,
+            data={'comment': 'test1'},
+        )))
+
+    if authorized:
+        assert_json_tag_result(r, r.json(), collection_tag_1 | dict(cardinality=tag_cardinality, public=tag.public))
+        assert_db_tag_state(collection_id, collection_tag_1)
+        assert_tag_audit_log(
+            dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_1),
+        )
+    else:
+        assert_forbidden(r)
+        assert_db_tag_state(collection_id)
+        assert_tag_audit_log()
+
+    r = client.post(
+        f'/collection/{(collection_id := collection_batch[2].id)}/tag',
+        json=(collection_tag_2 := dict(
+            tag_id=tag.id,
+            data={'comment': 'test2'},
+        )))
+
+    if authorized:
+        assert_json_tag_result(r, r.json(), collection_tag_2 | dict(cardinality=tag_cardinality, public=tag.public))
+        if tag_cardinality in ('one', 'user'):
+            assert_db_tag_state(collection_id, collection_tag_2)
+            assert_tag_audit_log(
+                dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_1),
+                dict(command='update', collection_id=collection_id, collection_tag=collection_tag_2),
+            )
+        elif tag_cardinality == 'multi':
+            assert_db_tag_state(collection_id, collection_tag_1, collection_tag_2)
+            assert_tag_audit_log(
+                dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_1),
+                dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_2),
+            )
+        else:
+            assert False
+    else:
+        assert_forbidden(r)
+        assert_db_tag_state(collection_id)
+        assert_tag_audit_log()
+
+    assert_db_state(collection_batch)
+
+
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.COLLECTION_ADMIN],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
+])
+def test_tag_collection_user_conflict(api, collection_batch, scopes, collection_auth, tag_cardinality):
+    authorized = ODPScope.COLLECTION_ADMIN in scopes and \
+                 collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
+
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = collection_batch[2]
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = collection_batch[1]
+    else:
+        api_client_collection = None
+
+    client = api(scopes, api_client_collection)
+    tag = new_generic_tag(tag_cardinality)
     collection_tag_1 = CollectionTagFactory(
         collection=collection_batch[2],
-        tag=(tag := TagFactory(
-            id='Collection.Ready',
-            type='collection',
-            flag=flag,
-            scope=Session.get(
-                Scope, (ODPScope.COLLECTION_ADMIN, ScopeType.odp)
-            ) or Scope(
-                id=ODPScope.COLLECTION_ADMIN, type=ScopeType.odp
-            ),
-            schema=SchemaFactory(
-                type='tag',
-                uri='https://odp.saeon.ac.za/schema/tag/generic',
-            ),
-        ))
+        tag=tag,
     )
 
     r = client.post(
         f'/collection/{(collection_id := collection_batch[2].id)}/tag',
         json=(collection_tag_2 := dict(
-            tag_id='Collection.Ready',
-            data={'comment': 'Second tag instance'},
+            tag_id=tag.id,
+            data={'comment': 'test2'},
         )))
 
     if authorized:
-        if flag:
-            assert_conflict(r, 'Flag has already been set')
+        if tag_cardinality == 'one':
+            assert_conflict(r, 'Cannot update a tag set by another user')
             assert_db_tag_state(collection_id, collection_tag_1)
             assert_tag_audit_log()
-        else:
-            assert_json_tag_result(r, r.json(), collection_tag_2 | dict(flag=False, public=tag.public))
+        elif tag_cardinality in ('user', 'multi'):
+            assert_json_tag_result(r, r.json(), collection_tag_2 | dict(cardinality=tag_cardinality, public=tag.public))
             assert_db_tag_state(collection_id, collection_tag_1, collection_tag_2)
             assert_tag_audit_log(
                 dict(command='insert', collection_id=collection_id, collection_tag=collection_tag_2),
             )
+        else:
+            assert False
     else:
         assert_forbidden(r)
         assert_db_tag_state(collection_id, collection_tag_1)

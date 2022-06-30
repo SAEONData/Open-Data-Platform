@@ -13,7 +13,7 @@ from odp.api.lib.schema import get_tag_schema
 from odp.api.lib.utils import output_tag_instance_model
 from odp.api.models import CollectionModel, CollectionModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
-from odp.db.models import AuditCommand, Collection, CollectionTag, CollectionTagAudit, Record, Tag, TagType
+from odp.db.models import AuditCommand, Collection, CollectionTag, CollectionTagAudit, Record, Tag, TagCardinality, TagType
 
 router = APIRouter()
 
@@ -155,30 +155,51 @@ async def tag_collection(
     if not Session.get(Collection, collection_id):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if collection_tag := Session.execute(
-        select(CollectionTag).
-        where(CollectionTag.collection_id == collection_id).
-        where(CollectionTag.tag_id == tag_instance_in.tag_id).
-        where(CollectionTag.user_id == auth.user_id)
-    ).scalar_one_or_none():
-        command = AuditCommand.update
-    else:
-        if Session.get(
-                Tag, (tag_instance_in.tag_id, TagType.collection)
-        ).flag and Session.execute(
+    if not (tag := Session.get(Tag, (tag_instance_in.tag_id, TagType.collection))):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    # only one tag instance per collection is allowed
+    # update allowed only by the user who did the insert
+    if tag.cardinality == TagCardinality.one:
+        if collection_tag := Session.execute(
                 select(CollectionTag).
                 where(CollectionTag.collection_id == collection_id).
                 where(CollectionTag.tag_id == tag_instance_in.tag_id)
-        ).first() is not None:
-            raise HTTPException(HTTP_409_CONFLICT, 'Flag has already been set')
+        ).scalar_one_or_none():
+            if collection_tag.user_id != auth.user_id:
+                raise HTTPException(HTTP_409_CONFLICT, 'Cannot update a tag set by another user')
+            command = AuditCommand.update
+        else:
+            command = AuditCommand.insert
 
+    # one tag instance per user per collection is allowed
+    # update a user's existing tag instance if found
+    elif tag.cardinality == TagCardinality.user:
+        if collection_tag := Session.execute(
+                select(CollectionTag).
+                where(CollectionTag.collection_id == collection_id).
+                where(CollectionTag.tag_id == tag_instance_in.tag_id).
+                where(CollectionTag.user_id == auth.user_id)
+        ).scalar_one_or_none():
+            command = AuditCommand.update
+        else:
+            command = AuditCommand.insert
+
+    # multiple tag instances are allowed per user per collection
+    # can only insert/delete
+    elif tag.cardinality == TagCardinality.multi:
+        command = AuditCommand.insert
+
+    else:
+        assert False
+
+    if command == AuditCommand.insert:
         collection_tag = CollectionTag(
             collection_id=collection_id,
             tag_id=tag_instance_in.tag_id,
             tag_type=TagType.collection,
             user_id=auth.user_id,
         )
-        command = AuditCommand.insert
 
     if collection_tag.data != tag_instance_in.data:
         validity = tag_schema.evaluate(JSON(tag_instance_in.data)).output('detailed')

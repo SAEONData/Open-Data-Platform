@@ -5,6 +5,7 @@ from authlib.integrations.requests_client import OAuth2Session
 from starlette.testclient import TestClient
 
 import odp.api
+from odp.db.models import TagCardinality
 from odp.lib.hydra import HydraAdminAPI
 from test.api import CollectionAuth
 from test.factories import ClientFactory, ScopeFactory
@@ -49,4 +50,10 @@ def hydra_admin_api():
 def collection_auth(request):
     """Use for parameterizing the three possible logic branches
     involving collection-specific authorization."""
+    return request.param
+
+
+@pytest.fixture(params=TagCardinality)
+def tag_cardinality(request):
+    """Use for parameterizing the range of tag cardinalities."""
     return request.param

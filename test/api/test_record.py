@@ -706,18 +706,13 @@ def new_generic_tag(cardinality):
     )
 
 
-@pytest.fixture(params=['one', 'user', 'multi'])
-def cardinality(request):
-    return request.param
-
-
 @pytest.mark.parametrize('scopes', [
     [ODPScope.RECORD_QC],
     [],
     all_scopes,
     all_scopes_excluding(ODPScope.RECORD_QC),
 ])
-def test_tag_record(api, record_batch_no_tags, scopes, collection_auth, cardinality):
+def test_tag_record(api, record_batch_no_tags, scopes, collection_auth, tag_cardinality):
     authorized = ODPScope.RECORD_QC in scopes and \
                  collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
@@ -729,7 +724,7 @@ def test_tag_record(api, record_batch_no_tags, scopes, collection_auth, cardinal
         api_client_collection = None
 
     client = api(scopes, api_client_collection)
-    tag = new_generic_tag(cardinality)
+    tag = new_generic_tag(tag_cardinality)
 
     r = client.post(
         f'/record/{(record_id := record_batch_no_tags[2].id)}/tag',
@@ -739,7 +734,7 @@ def test_tag_record(api, record_batch_no_tags, scopes, collection_auth, cardinal
         )))
 
     if authorized:
-        assert_json_tag_result(r, r.json(), record_tag_1 | dict(cardinality=cardinality, public=tag.public))
+        assert_json_tag_result(r, r.json(), record_tag_1 | dict(cardinality=tag_cardinality, public=tag.public))
         assert_db_tag_state(record_id, record_tag_1)
         assert_tag_audit_log(
             dict(command='insert', record_id=record_id, record_tag=record_tag_1),
@@ -757,14 +752,14 @@ def test_tag_record(api, record_batch_no_tags, scopes, collection_auth, cardinal
         )))
 
     if authorized:
-        assert_json_tag_result(r, r.json(), record_tag_2 | dict(cardinality=cardinality, public=tag.public))
-        if cardinality in ('one', 'user'):
+        assert_json_tag_result(r, r.json(), record_tag_2 | dict(cardinality=tag_cardinality, public=tag.public))
+        if tag_cardinality in ('one', 'user'):
             assert_db_tag_state(record_id, record_tag_2)
             assert_tag_audit_log(
                 dict(command='insert', record_id=record_id, record_tag=record_tag_1),
                 dict(command='update', record_id=record_id, record_tag=record_tag_2),
             )
-        elif cardinality == 'multi':
+        elif tag_cardinality == 'multi':
             assert_db_tag_state(record_id, record_tag_1, record_tag_2)
             assert_tag_audit_log(
                 dict(command='insert', record_id=record_id, record_tag=record_tag_1),
@@ -787,7 +782,7 @@ def test_tag_record(api, record_batch_no_tags, scopes, collection_auth, cardinal
     all_scopes,
     all_scopes_excluding(ODPScope.RECORD_QC),
 ])
-def test_tag_record_user_conflict(api, record_batch_no_tags, scopes, collection_auth, cardinality):
+def test_tag_record_user_conflict(api, record_batch_no_tags, scopes, collection_auth, tag_cardinality):
     authorized = ODPScope.RECORD_QC in scopes and \
                  collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
@@ -799,7 +794,7 @@ def test_tag_record_user_conflict(api, record_batch_no_tags, scopes, collection_
         api_client_collection = None
 
     client = api(scopes, api_client_collection)
-    tag = new_generic_tag(cardinality)
+    tag = new_generic_tag(tag_cardinality)
     record_tag_1 = RecordTagFactory(
         record=record_batch_no_tags[2],
         tag=tag,
@@ -813,12 +808,12 @@ def test_tag_record_user_conflict(api, record_batch_no_tags, scopes, collection_
         )))
 
     if authorized:
-        if cardinality == 'one':
+        if tag_cardinality == 'one':
             assert_conflict(r, 'Cannot update a tag set by another user')
             assert_db_tag_state(record_id, record_tag_1)
             assert_tag_audit_log()
-        elif cardinality in ('user', 'multi'):
-            assert_json_tag_result(r, r.json(), record_tag_2 | dict(cardinality=cardinality, public=tag.public))
+        elif tag_cardinality in ('user', 'multi'):
+            assert_json_tag_result(r, r.json(), record_tag_2 | dict(cardinality=tag_cardinality, public=tag.public))
             assert_db_tag_state(record_id, record_tag_1, record_tag_2)
             assert_tag_audit_log(
                 dict(command='insert', record_id=record_id, record_tag=record_tag_2),
