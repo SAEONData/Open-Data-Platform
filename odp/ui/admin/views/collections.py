@@ -8,16 +8,9 @@ from odp.ui.admin.views import utils
 bp = Blueprint('collections', __name__)
 
 
-def get_ready_tag(collection):
+def get_tag_instance(collection, tag_id):
     return next(
-        (tag for tag in collection['tags'] if tag['tag_id'] == ODPCollectionTag.READY),
-        None
-    )
-
-
-def get_frozen_tag(collection):
-    return next(
-        (tag for tag in collection['tags'] if tag['tag_id'] == ODPCollectionTag.FROZEN),
+        (tag for tag in collection['tags'] if tag['tag_id'] == tag_id),
         None
     )
 
@@ -37,8 +30,8 @@ def view(id):
     return render_template(
         'collection_view.html',
         collection=collection,
-        ready_tag=get_ready_tag(collection),
-        frozen_tag=get_frozen_tag(collection),
+        ready_tag=get_tag_instance(collection, ODPCollectionTag.READY),
+        frozen_tag=get_tag_instance(collection, ODPCollectionTag.FROZEN),
     )
 
 
@@ -115,7 +108,7 @@ def tag_ready(id):
 @api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
 def untag_ready(id):
     collection = api.get(f'/collection/{id}')
-    if ready_tag := get_ready_tag(collection):
+    if ready_tag := get_tag_instance(collection, ODPCollectionTag.READY):
         api.delete(f'/collection/admin/{id}/tag/{ready_tag["id"]}')
         flash(f'{ODPCollectionTag.READY} tag has been removed.', category='success')
 
@@ -137,7 +130,7 @@ def tag_frozen(id):
 @api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
 def untag_frozen(id):
     collection = api.get(f'/collection/{id}')
-    if frozen_tag := get_frozen_tag(collection):
+    if frozen_tag := get_tag_instance(collection, ODPCollectionTag.FROZEN):
         api.delete(f'/collection/admin/{id}/tag/{frozen_tag["id"]}')
         flash(f'{ODPCollectionTag.FROZEN} tag has been removed.', category='success')
 
