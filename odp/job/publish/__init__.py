@@ -132,6 +132,6 @@ class Publisher:
                 data=tag_instance.data,
                 user_name=tag_instance.user_name,
                 timestamp=tag_instance.timestamp,
-                flag=tag_instance.flag,
+                cardinality=tag_instance.cardinality,
             ) for tag_instance in record_model.tags if tag_instance.public],
         )
