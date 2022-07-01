@@ -428,6 +428,7 @@ async def tag_record(
             user_id=auth.user_id,
             command=command,
             timestamp=timestamp,
+            _id=record_tag.id,
             _record_id=record_tag.record_id,
             _tag_id=record_tag.tag_id,
             _user_id=record_tag.user_id,
@@ -438,13 +439,33 @@ async def tag_record(
 
 
 @router.delete(
-    '/{record_id}/tag/{tag_id}',
+    '/{record_id}/tag/{tag_instance_id}',
 )
 async def untag_record(
         record_id: str,
-        tag_id: str,
-        auth: Authorized = Depends(UntagAuthorize()),
+        tag_instance_id: str,
+        auth: Authorized = Depends(UntagAuthorize(TagType.record)),
 ):
+    _untag_record(record_id, tag_instance_id, auth)
+
+
+@router.delete(
+    '/admin/{record_id}/tag/{tag_instance_id}',
+)
+async def admin_untag_record(
+        record_id: str,
+        tag_instance_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_ADMIN)),
+):
+    _untag_record(record_id, tag_instance_id, auth, True)
+
+
+def _untag_record(
+        record_id: str,
+        tag_instance_id: str,
+        auth: Authorized,
+        ignore_user_id: bool = False,
+) -> None:
     if not (record := Session.get(Record, record_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
@@ -453,11 +474,13 @@ async def untag_record(
 
     if not (record_tag := Session.execute(
         select(RecordTag).
-        where(RecordTag.record_id == record_id).
-        where(RecordTag.tag_id == tag_id).
-        where(RecordTag.user_id == auth.user_id)
+        where(RecordTag.id == tag_instance_id).
+        where(RecordTag.record_id == record_id)
     ).scalar_one_or_none()):
         raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if not ignore_user_id and record_tag.user_id != auth.user_id:
+        raise HTTPException(HTTP_403_FORBIDDEN)
 
     record_tag.delete()
 
@@ -466,6 +489,7 @@ async def untag_record(
         user_id=auth.user_id,
         command=AuditCommand.delete,
         timestamp=datetime.now(timezone.utc),
+        _id=record_tag.id,
         _record_id=record_tag.record_id,
         _tag_id=record_tag.tag_id,
         _user_id=record_tag.user_id,

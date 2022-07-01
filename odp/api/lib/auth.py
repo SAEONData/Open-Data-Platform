@@ -7,13 +7,13 @@ from fastapi.security.base import SecurityBase
 from fastapi.security.utils import get_authorization_scheme_param
 from sqlalchemy import select
 from starlette.requests import Request
-from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
 from odp.api.models import TagInstanceModelIn
 from odp.config import config
 from odp.db import Session
-from odp.db.models import Scope, ScopeType, Tag
+from odp.db.models import CollectionTag, RecordTag, Scope, ScopeType, Tag, TagType
 from odp.lib.auth import get_client_permissions, get_user_permissions
 from odp.lib.hydra import HydraAdminAPI, OAuth2TokenIntrospection
 
@@ -90,24 +90,40 @@ class Authorize(BaseAuthorize):
 
 class TagAuthorize(BaseAuthorize):
     async def __call__(self, request: Request, tag_instance_in: TagInstanceModelIn) -> Authorized:
-        if not (tag := Session.execute(
-                select(Tag).
+        if not (tag_scope_id := Session.execute(
+                select(Tag.scope_id).
                 where(Tag.id == tag_instance_in.tag_id)
         ).scalar_one_or_none()):
-            raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
+            raise HTTPException(HTTP_404_NOT_FOUND)
 
-        return _authorize_request(request, tag.scope_id)
+        return _authorize_request(request, tag_scope_id)
 
 
 class UntagAuthorize(BaseAuthorize):
-    async def __call__(self, request: Request, tag_id: str) -> Authorized:
-        if not (tag := Session.execute(
-                select(Tag).
-                where(Tag.id == tag_id)
-        ).scalar_one_or_none()):
-            raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid tag id')
+    def __init__(self, tag_type: TagType):
+        super().__init__()
+        self.tag_type = tag_type
 
-        return _authorize_request(request, tag.scope_id)
+    async def __call__(self, request: Request, tag_instance_id: str) -> Authorized:
+        if self.tag_type == TagType.record:
+            stmt = (
+                select(Tag.scope_id).
+                join(RecordTag).
+                where(RecordTag.id == tag_instance_id)
+            )
+        elif self.tag_type == TagType.collection:
+            stmt = (
+                select(Tag.scope_id).
+                join(CollectionTag).
+                where(CollectionTag.id == tag_instance_id)
+            )
+        else:
+            assert False
+
+        if not (tag_scope_id := Session.execute(stmt).scalar_one_or_none()):
+            raise HTTPException(HTTP_404_NOT_FOUND)
+
+        return _authorize_request(request, tag_scope_id)
 
 
 def select_scopes(

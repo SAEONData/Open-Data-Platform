@@ -14,6 +14,7 @@ from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
 
 
 class TagInstanceModel(BaseModel):
+    id: str
     tag_id: str
     user_id: Optional[str]
     user_name: Optional[str]

@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy import CheckConstraint, Column, Enum, ForeignKey, ForeignKeyConstraint, Identity, Integer, String, TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
@@ -22,7 +24,7 @@ class CollectionTag(Base):
         ),
     )
 
-    id = Column(Integer, Identity(), primary_key=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     collection_id = Column(String, ForeignKey('collection.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
     tag_id = Column(String, nullable=False)
     tag_type = Column(Enum(TagType), nullable=False)
@@ -47,6 +49,7 @@ class CollectionTagAudit(Base):
     command = Column(Enum(AuditCommand), nullable=False)
     timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
 
+    _id = Column(String, nullable=False)
     _collection_id = Column(String, nullable=False)
     _tag_id = Column(String, nullable=False)
     _user_id = Column(String)

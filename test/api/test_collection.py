@@ -74,20 +74,22 @@ def assert_db_tag_state(collection_id, *collection_tags):
     """Verify that the collection_tag table contains the given collection tags."""
     Session.expire_all()
     result = Session.execute(select(CollectionTag)).scalars().all()
+    result.sort(key=lambda r: r.tag_id)
+    collection_tags = list(collection_tags)
+    collection_tags.sort(key=lambda c: c.tag_id if isinstance(c, CollectionTag) else c['tag_id'])
+
     assert len(result) == len(collection_tags)
     for n, row in enumerate(result):
         assert row.collection_id == collection_id
         assert_new_timestamp(row.timestamp)
-        try:
-            # collection_tags[n] is a dict we posted to the collection API
-            assert row.tag_id == collection_tags[n]['tag_id']
+        if isinstance(collection_tag := collection_tags[n], CollectionTag):
+            assert row.tag_id == collection_tag.tag_id
+            assert row.user_id == collection_tag.user_id
+            assert row.data == collection_tag.data
+        else:
+            assert row.tag_id == collection_tag['tag_id']
             assert row.user_id is None
-            assert row.data == collection_tags[n]['data']
-        except TypeError:
-            # collection_tags[n] is an object we created with CollectionTagFactory
-            assert row.tag_id == collection_tags[n].tag_id
-            assert row.user_id == collection_tags[n].user_id
-            assert row.data == collection_tags[n].data
+            assert row.data == collection_tag['data']
 
 
 def assert_tag_audit_log(*entries):
@@ -100,7 +102,7 @@ def assert_tag_audit_log(*entries):
         assert_new_timestamp(row.timestamp)
         assert row._collection_id == entries[n]['collection_id']
         assert row._tag_id == entries[n]['collection_tag']['tag_id']
-        assert row._user_id is None
+        assert row._user_id == entries[n]['collection_tag'].get('user_id')
         if row.command in ('insert', 'update'):
             assert row._data == entries[n]['collection_tag']['data']
         elif row.command == 'delete':
@@ -431,13 +433,14 @@ def test_get_new_doi(api, collection_batch, scopes, collection_auth):
 
 
 def new_generic_tag(cardinality):
+    # we can use any scope; just make it something other than COLLECTION_ADMIN
     return TagFactory(
         type='collection',
         cardinality=cardinality,
         scope=Session.get(
-            Scope, (ODPScope.COLLECTION_ADMIN, ScopeType.odp)
+            Scope, (ODPScope.COLLECTION_READ, ScopeType.odp)
         ) or Scope(
-            id=ODPScope.COLLECTION_ADMIN, type=ScopeType.odp
+            id=ODPScope.COLLECTION_READ, type=ScopeType.odp
         ),
         schema=SchemaFactory(
             type='tag',
@@ -447,13 +450,13 @@ def new_generic_tag(cardinality):
 
 
 @pytest.mark.parametrize('scopes', [
-    [ODPScope.COLLECTION_ADMIN],
+    [ODPScope.COLLECTION_READ],  # the scope we've associated with the generic tag
     [],
     all_scopes,
-    all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
+    all_scopes_excluding(ODPScope.COLLECTION_READ),
 ])
 def test_tag_collection(api, collection_batch, scopes, collection_auth, tag_cardinality):
-    authorized = ODPScope.COLLECTION_ADMIN in scopes and \
+    authorized = ODPScope.COLLECTION_READ in scopes and \
                  collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
     if collection_auth == CollectionAuth.MATCH:
@@ -516,13 +519,13 @@ def test_tag_collection(api, collection_batch, scopes, collection_auth, tag_card
 
 
 @pytest.mark.parametrize('scopes', [
-    [ODPScope.COLLECTION_ADMIN],
+    [ODPScope.COLLECTION_READ],  # the scope we've associated with the generic tag
     [],
     all_scopes,
-    all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
+    all_scopes_excluding(ODPScope.COLLECTION_READ),
 ])
 def test_tag_collection_user_conflict(api, collection_batch, scopes, collection_auth, tag_cardinality):
-    authorized = ODPScope.COLLECTION_ADMIN in scopes and \
+    authorized = ODPScope.COLLECTION_READ in scopes and \
                  collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
     if collection_auth == CollectionAuth.MATCH:
@@ -562,6 +565,78 @@ def test_tag_collection_user_conflict(api, collection_batch, scopes, collection_
     else:
         assert_forbidden(r)
         assert_db_tag_state(collection_id, collection_tag_1)
+        assert_tag_audit_log()
+
+    assert_db_state(collection_batch)
+
+
+@pytest.fixture(params=[True, False])
+def same_user(request):
+    return request.param
+
+
+@pytest.mark.parametrize('admin_route, scopes', [
+    (False, [ODPScope.COLLECTION_READ]),  # the scope we've associated with the generic tag
+    (False, []),
+    (False, all_scopes),
+    (False, all_scopes_excluding(ODPScope.COLLECTION_READ)),
+    (True, [ODPScope.COLLECTION_ADMIN]),
+    (True, []),
+    (True, all_scopes),
+    (True, all_scopes_excluding(ODPScope.COLLECTION_ADMIN)),
+])
+def test_untag_collection(api, collection_batch, admin_route, scopes, collection_auth, tag_cardinality, same_user):
+    route = '/collection/admin/' if admin_route else '/collection/'
+
+    authorized = admin_route and ODPScope.COLLECTION_ADMIN in scopes or \
+                 not admin_route and ODPScope.COLLECTION_READ in scopes
+    authorized = authorized and collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
+
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = collection_batch[2]
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = collection_batch[1]
+    else:
+        api_client_collection = None
+
+    client = api(scopes, api_client_collection)
+    collection = collection_batch[2]
+    collection_tags = CollectionTagFactory.create_batch(randint(1, 3), collection=collection)
+
+    tag = new_generic_tag(tag_cardinality)
+    if same_user:
+        collection_tag_1 = CollectionTagFactory(
+            collection=collection,
+            tag=tag,
+            user=None,
+        )
+    else:
+        collection_tag_1 = CollectionTagFactory(
+            collection=collection,
+            tag=tag,
+        )
+    collection_tag_1_dict = {
+        'tag_id': collection_tag_1.tag_id,
+        'user_id': collection_tag_1.user_id,
+        'data': collection_tag_1.data,
+    }
+
+    r = client.delete(f'{route}{collection.id}/tag/{collection_tag_1.id}')
+
+    if authorized:
+        if not admin_route and not same_user:
+            assert_forbidden(r)
+            assert_db_tag_state(collection.id, *collection_tags, collection_tag_1)
+            assert_tag_audit_log()
+        else:
+            assert_empty_result(r)
+            assert_db_tag_state(collection.id, *collection_tags)
+            assert_tag_audit_log(
+                dict(command='delete', collection_id=collection.id, collection_tag=collection_tag_1_dict),
+            )
+    else:
+        assert_forbidden(r)
+        assert_db_tag_state(collection.id, *collection_tags, collection_tag_1)
         assert_tag_audit_log()
 
     assert_db_state(collection_batch)

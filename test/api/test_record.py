@@ -20,10 +20,8 @@ def record_batch():
     records = []
     for _ in range(randint(3, 5)):
         records += [record := RecordFactory()]
-        for _ in range(randint(0, 3)):
-            RecordTagFactory(record=record)
-        for _ in range(randint(0, 3)):
-            CollectionTagFactory(collection=record.collection)
+        RecordTagFactory.create_batch(randint(0, 3), record=record)
+        CollectionTagFactory.create_batch(randint(0, 3), collection=record.collection)
 
     ProjectFactory.create_batch(randint(0, 3), collections=[
         record.collection for record in records
@@ -87,20 +85,22 @@ def assert_db_tag_state(record_id, *record_tags):
     """Verify that the record_tag table contains the given record tags."""
     Session.expire_all()
     result = Session.execute(select(RecordTag)).scalars().all()
+    result.sort(key=lambda r: r.tag_id)
+    record_tags = list(record_tags)
+    record_tags.sort(key=lambda r: r.tag_id if isinstance(r, RecordTag) else r['tag_id'])
+
     assert len(result) == len(record_tags)
     for n, row in enumerate(result):
         assert row.record_id == record_id
         assert_new_timestamp(row.timestamp)
-        try:
-            # record_tags[n] is a dict we posted to the record API
-            assert row.tag_id == record_tags[n]['tag_id']
+        if isinstance(record_tag := record_tags[n], RecordTag):
+            assert row.tag_id == record_tag.tag_id
+            assert row.user_id == record_tag.user_id
+            assert row.data == record_tag.data
+        else:
+            assert row.tag_id == record_tag['tag_id']
             assert row.user_id is None
-            assert row.data == record_tags[n]['data']
-        except TypeError:
-            # record_tags[n] is an object we created with RecordTagFactory
-            assert row.tag_id == record_tags[n].tag_id
-            assert row.user_id == record_tags[n].user_id
-            assert row.data == record_tags[n].data
+            assert row.data == record_tag['data']
 
 
 def assert_audit_log(command, record=None, record_id=None):
@@ -141,7 +141,7 @@ def assert_tag_audit_log(*entries):
         assert_new_timestamp(row.timestamp)
         assert row._record_id == entries[n]['record_id']
         assert row._tag_id == entries[n]['record_tag']['tag_id']
-        assert row._user_id is None
+        assert row._user_id == entries[n]['record_tag'].get('user_id')
         if row.command in ('insert', 'update'):
             assert row._data == entries[n]['record_tag']['data']
         elif row.command == 'delete':
@@ -823,6 +823,79 @@ def test_tag_record_user_conflict(api, record_batch_no_tags, scopes, collection_
     else:
         assert_forbidden(r)
         assert_db_tag_state(record_id, record_tag_1)
+        assert_tag_audit_log()
+
+    assert_db_state(record_batch_no_tags)
+    assert_no_audit_log()
+
+
+@pytest.fixture(params=[True, False])
+def same_user(request):
+    return request.param
+
+
+@pytest.mark.parametrize('admin_route, scopes', [
+    (False, [ODPScope.RECORD_QC]),
+    (False, []),
+    (False, all_scopes),
+    (False, all_scopes_excluding(ODPScope.RECORD_QC)),
+    (True, [ODPScope.RECORD_ADMIN]),
+    (True, []),
+    (True, all_scopes),
+    (True, all_scopes_excluding(ODPScope.RECORD_ADMIN)),
+])
+def test_untag_record(api, record_batch_no_tags, admin_route, scopes, collection_auth, tag_cardinality, same_user):
+    route = '/record/admin/' if admin_route else '/record/'
+
+    authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
+                 not admin_route and ODPScope.RECORD_QC in scopes
+    authorized = authorized and collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
+
+    if collection_auth == CollectionAuth.MATCH:
+        api_client_collection = record_batch_no_tags[2].collection
+    elif collection_auth == CollectionAuth.MISMATCH:
+        api_client_collection = record_batch_no_tags[1].collection
+    else:
+        api_client_collection = None
+
+    client = api(scopes, api_client_collection)
+    record = record_batch_no_tags[2]
+    record_tags = RecordTagFactory.create_batch(randint(1, 3), record=record)
+
+    tag = new_generic_tag(tag_cardinality)
+    if same_user:
+        record_tag_1 = RecordTagFactory(
+            record=record,
+            tag=tag,
+            user=None,
+        )
+    else:
+        record_tag_1 = RecordTagFactory(
+            record=record,
+            tag=tag,
+        )
+    record_tag_1_dict = {
+        'tag_id': record_tag_1.tag_id,
+        'user_id': record_tag_1.user_id,
+        'data': record_tag_1.data,
+    }
+
+    r = client.delete(f'{route}{record.id}/tag/{record_tag_1.id}')
+
+    if authorized:
+        if not admin_route and not same_user:
+            assert_forbidden(r)
+            assert_db_tag_state(record.id, *record_tags, record_tag_1)
+            assert_tag_audit_log()
+        else:
+            assert_empty_result(r)
+            assert_db_tag_state(record.id, *record_tags)
+            assert_tag_audit_log(
+                dict(command='delete', record_id=record.id, record_tag=record_tag_1_dict),
+            )
+    else:
+        assert_forbidden(r)
+        assert_db_tag_state(record.id, *record_tags, record_tag_1)
         assert_tag_audit_log()
 
     assert_db_state(record_batch_no_tags)

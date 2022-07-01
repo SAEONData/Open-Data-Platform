@@ -4,6 +4,7 @@ from odp.db.models import CollectionTag, RecordTag
 
 def output_tag_instance_model(tag_instance: CollectionTag | RecordTag) -> TagInstanceModel:
     return TagInstanceModel(
+        id=tag_instance.id,
         tag_id=tag_instance.tag_id,
         user_id=tag_instance.user_id,
         user_name=tag_instance.user.name if tag_instance.user_id else None,

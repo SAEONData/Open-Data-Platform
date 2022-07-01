@@ -215,6 +215,7 @@ async def tag_collection(
             user_id=auth.user_id,
             command=command,
             timestamp=timestamp,
+            _id=collection_tag.id,
             _collection_id=collection_tag.collection_id,
             _tag_id=collection_tag.tag_id,
             _user_id=collection_tag.user_id,
@@ -225,26 +226,45 @@ async def tag_collection(
 
 
 @router.delete(
-    '/{collection_id}/tag/{tag_id}',
+    '/{collection_id}/tag/{tag_instance_id}',
 )
 async def untag_collection(
         collection_id: str,
-        tag_id: str,
-        auth: Authorized = Depends(UntagAuthorize()),
+        tag_instance_id: str,
+        auth: Authorized = Depends(UntagAuthorize(TagType.collection)),
 ):
+    _untag_collection(collection_id, tag_instance_id, auth)
+
+
+@router.delete(
+    '/admin/{collection_id}/tag/{tag_instance_id}',
+)
+async def admin_untag_collection(
+        collection_id: str,
+        tag_instance_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_ADMIN)),
+):
+    _untag_collection(collection_id, tag_instance_id, auth, True)
+
+
+def _untag_collection(
+        collection_id: str,
+        tag_instance_id: str,
+        auth: Authorized,
+        ignore_user_id: bool = False,
+) -> None:
     if auth.collection_ids != '*' and collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if not Session.get(Collection, collection_id):
-        raise HTTPException(HTTP_404_NOT_FOUND)
-
     if not (collection_tag := Session.execute(
         select(CollectionTag).
-        where(CollectionTag.collection_id == collection_id).
-        where(CollectionTag.tag_id == tag_id).
-        where(CollectionTag.user_id == auth.user_id)
+        where(CollectionTag.id == tag_instance_id).
+        where(CollectionTag.collection_id == collection_id)
     ).scalar_one_or_none()):
         raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if not ignore_user_id and collection_tag.user_id != auth.user_id:
+        raise HTTPException(HTTP_403_FORBIDDEN)
 
     collection_tag.delete()
 
@@ -253,6 +273,7 @@ async def untag_collection(
         user_id=auth.user_id,
         command=AuditCommand.delete,
         timestamp=datetime.now(timezone.utc),
+        _id=collection_tag.id,
         _collection_id=collection_tag.collection_id,
         _tag_id=collection_tag.tag_id,
         _user_id=collection_tag.user_id,
