@@ -10,8 +10,7 @@ from odp.db import Session
 from odp.db.models import CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, Scope, ScopeType
 from test.api import (CollectionAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
                       assert_not_found, assert_unprocessable)
-from test.factories import (CollectionFactory, CollectionTagFactory, ProjectFactory, RecordFactory, RecordTagFactory, SchemaFactory,
-                            TagFactory)
+from test.factories import CollectionFactory, CollectionTagFactory, RecordFactory, RecordTagFactory, SchemaFactory, TagFactory
 
 
 @pytest.fixture
@@ -22,10 +21,6 @@ def record_batch():
         records += [record := RecordFactory()]
         RecordTagFactory.create_batch(randint(0, 3), record=record)
         CollectionTagFactory.create_batch(randint(0, 3), collection=record.collection)
-
-    ProjectFactory.create_batch(randint(0, 3), collections=[
-        record.collection for record in records
-    ])
     return records
 
 
@@ -156,9 +151,7 @@ def assert_json_record_result(response, json, record):
     assert json['id'] == record.id
     assert json['doi'] == record.doi
     assert json['sid'] == record.sid
-    assert json['provider_id'] == record.collection.provider_id
     assert json['collection_id'] == record.collection_id
-    assert json['project_ids'] == [project.id for project in record.collection.projects]
     assert json['schema_id'] == record.schema_id
     assert json['metadata'] == record.metadata_
     assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
