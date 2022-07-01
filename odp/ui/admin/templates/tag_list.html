@@ -9,8 +9,8 @@
 
 {% block content %}
     {% from 'macros.html' import render_table %}
-    {% call(tag) render_table(tags, 'Flag', 'Public', 'Scope') %}
-        <td>{{ tag.flag }}</td>
+    {% call(tag) render_table(tags, 'Cardinality', 'Public', 'Scope') %}
+        <td>{{ tag.cardinality }}</td>
         <td>{{ tag.public }}</td>
         <td>{{ tag.scope_id }}</td>
     {% endcall %}
