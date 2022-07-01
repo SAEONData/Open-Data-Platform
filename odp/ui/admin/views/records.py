@@ -44,7 +44,6 @@ def view(id):
         'page': 1,
         'pages': 1,
     }
-    has_user_qc_tag = any(tag for tag in items if tag['user_id'] == current_user.id)
 
     embargo_tags = {
         'items': (items := [tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.EMBARGO]),
@@ -52,16 +51,13 @@ def view(id):
         'page': 1,
         'pages': 1,
     }
-    has_user_embargo_tag = any(tag for tag in items if tag['user_id'] == current_user.id)
 
     return render_template(
         'record_view.html',
         record=record,
         migrated_tag=migrated_tag,
         qc_tags=qc_tags,
-        has_user_qc_tag=has_user_qc_tag,
         embargo_tags=embargo_tags,
-        has_user_embargo_tag=has_user_embargo_tag,
         catalog_records=catalog_records,
     )
 
@@ -176,10 +172,10 @@ def tag_qc(id):
     return render_template('record_tag_qc.html', record=record, form=form)
 
 
-@bp.route('/<id>/untag/qc', methods=('POST',))
+@bp.route('/<id>/untag/qc/<tag_instance_id>', methods=('POST',))
 @api.client(ODPScope.RECORD_QC, fallback_to_referrer=True)
-def untag_qc(id):
-    api.delete(f'/record/{id}/tag/{ODPRecordTag.QC}')
+def untag_qc(id, tag_instance_id):
+    api.delete(f'/record/{id}/tag/{tag_instance_id}')
     flash(f'{ODPRecordTag.QC} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
 
@@ -192,12 +188,8 @@ def tag_embargo(id):
     if request.method == 'POST':
         form = RecordTagEmbargoForm(request.form)
     else:
-        record_tag = next(
-            (tag for tag in record['tags']
-             if tag['tag_id'] == ODPRecordTag.EMBARGO and tag['user_id'] == current_user.id),
-            None
-        )
-        form = RecordTagEmbargoForm(data=record_tag['data'] if record_tag else None)
+        # embargo tag has cardinality 'multi', so this will always be an insert
+        form = RecordTagEmbargoForm()
 
     if request.method == 'POST' and form.validate():
         if not form.start.data and not form.end.data:
@@ -222,10 +214,10 @@ def tag_embargo(id):
     return render_template('record_tag_embargo.html', record=record, form=form)
 
 
-@bp.route('/<id>/untag/embargo', methods=('POST',))
+@bp.route('/<id>/untag/embargo/<tag_instance_id>', methods=('POST',))
 @api.client(ODPScope.RECORD_EMBARGO, fallback_to_referrer=True)
-def untag_embargo(id):
-    api.delete(f'/record/{id}/tag/{ODPRecordTag.EMBARGO}')
+def untag_embargo(id, tag_instance_id):
+    api.delete(f'/record/{id}/tag/{tag_instance_id}')
     flash(f'{ODPRecordTag.EMBARGO} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
 
