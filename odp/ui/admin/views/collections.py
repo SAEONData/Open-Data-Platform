@@ -8,6 +8,20 @@ from odp.ui.admin.views import utils
 bp = Blueprint('collections', __name__)
 
 
+def get_ready_tag(collection):
+    return next(
+        (tag for tag in collection['tags'] if tag['tag_id'] == ODPCollectionTag.READY),
+        None
+    )
+
+
+def get_frozen_tag(collection):
+    return next(
+        (tag for tag in collection['tags'] if tag['tag_id'] == ODPCollectionTag.FROZEN),
+        None
+    )
+
+
 @bp.route('/')
 @api.client(ODPScope.COLLECTION_READ)
 def index():
@@ -20,19 +34,11 @@ def index():
 @api.client(ODPScope.COLLECTION_READ)
 def view(id):
     collection = api.get(f'/collection/{id}')
-    ready_tag = next(
-        (tag for tag in collection['tags']
-         if tag['tag_id'] == ODPCollectionTag.READY),
-        None
-    )
-    frozen_tag = next(
-        (tag for tag in collection['tags']
-         if tag['tag_id'] == ODPCollectionTag.FROZEN),
-        None
-    )
     return render_template(
-        'collection_view.html', collection=collection,
-        ready_tag=ready_tag, frozen_tag=frozen_tag,
+        'collection_view.html',
+        collection=collection,
+        ready_tag=get_ready_tag(collection),
+        frozen_tag=get_frozen_tag(collection),
     )
 
 
@@ -108,8 +114,11 @@ def tag_ready(id):
 @bp.route('/<id>/untag/ready', methods=('POST',))
 @api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
 def untag_ready(id):
-    api.delete(f'/collection/{id}/tag/{ODPCollectionTag.READY}')
-    flash(f'{ODPCollectionTag.READY} tag has been removed.', category='success')
+    collection = api.get(f'/collection/{id}')
+    if ready_tag := get_ready_tag(collection):
+        api.delete(f'/collection/admin/{id}/tag/{ready_tag["id"]}')
+        flash(f'{ODPCollectionTag.READY} tag has been removed.', category='success')
+
     return redirect(url_for('.view', id=id))
 
 
@@ -127,8 +136,11 @@ def tag_frozen(id):
 @bp.route('/<id>/untag/frozen', methods=('POST',))
 @api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
 def untag_frozen(id):
-    api.delete(f'/collection/{id}/tag/{ODPCollectionTag.FROZEN}')
-    flash(f'{ODPCollectionTag.FROZEN} tag has been removed.', category='success')
+    collection = api.get(f'/collection/{id}')
+    if frozen_tag := get_frozen_tag(collection):
+        api.delete(f'/collection/admin/{id}/tag/{frozen_tag["id"]}')
+        flash(f'{ODPCollectionTag.FROZEN} tag has been removed.', category='success')
+
     return redirect(url_for('.view', id=id))
 
 
