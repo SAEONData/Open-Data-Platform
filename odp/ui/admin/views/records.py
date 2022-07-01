@@ -173,9 +173,13 @@ def tag_qc(id):
 
 
 @bp.route('/<id>/untag/qc/<tag_instance_id>', methods=('POST',))
-@api.client(ODPScope.RECORD_QC, fallback_to_referrer=True)
+@api.client(ODPScope.RECORD_QC, ODPScope.RECORD_ADMIN, fallback_to_referrer=True)
 def untag_qc(id, tag_instance_id):
-    api.delete(f'/record/{id}/tag/{tag_instance_id}')
+    api_route = '/record/'
+    if ODPScope.RECORD_ADMIN in g.user_permissions:
+        api_route += 'admin/'
+
+    api.delete(f'{api_route}{id}/tag/{tag_instance_id}')
     flash(f'{ODPRecordTag.QC} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
 
@@ -215,9 +219,13 @@ def tag_embargo(id):
 
 
 @bp.route('/<id>/untag/embargo/<tag_instance_id>', methods=('POST',))
-@api.client(ODPScope.RECORD_EMBARGO, fallback_to_referrer=True)
+@api.client(ODPScope.RECORD_EMBARGO, ODPScope.RECORD_ADMIN, fallback_to_referrer=True)
 def untag_embargo(id, tag_instance_id):
-    api.delete(f'/record/{id}/tag/{tag_instance_id}')
+    api_route = '/record/'
+    if ODPScope.RECORD_ADMIN in g.user_permissions:
+        api_route += 'admin/'
+
+    api.delete(f'{api_route}{id}/tag/{tag_instance_id}')
     flash(f'{ODPRecordTag.EMBARGO} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
 
