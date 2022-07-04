@@ -7,7 +7,7 @@ from sqlalchemy import func, or_, select
 from odp.api.models import PublishedRecordModel, PublishedTagInstanceModel, RecordModel
 from odp.api.routers.record import output_record_model
 from odp.db import Session
-from odp.db.models import Catalog, CatalogRecord, CollectionTag, Record, RecordTag
+from odp.db.models import Catalog, CatalogRecord, CollectionTag, PublishedDOI, Record, RecordTag
 from odp.lib.schema import schema_catalog
 
 logger = logging.getLogger(__name__)
@@ -107,6 +107,7 @@ class Publisher:
             catalog_record.validity = result.output('flag')
             catalog_record.published = True
             catalog_record.published_record = self._create_published_record(record_model).dict()
+            self._save_published_doi(record_model)
         else:
             catalog_record.validity = result.output('detailed')
             catalog_record.published = False
@@ -135,3 +136,8 @@ class Publisher:
                 cardinality=tag_instance.cardinality,
             ) for tag_instance in record_model.tags if tag_instance.public],
         )
+
+    def _save_published_doi(self, record_model: RecordModel) -> None:
+        if record_model.doi and not Session.get(PublishedDOI, record_model.doi):
+            published_doi = PublishedDOI(doi=record_model.doi)
+            published_doi.save()

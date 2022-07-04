@@ -14,8 +14,8 @@ from odp.api.lib.schema import get_metadata_schema, get_tag_schema
 from odp.api.lib.utils import output_tag_instance_model
 from odp.api.models import CatalogRecordModel, PublishedRecordModel, RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
-from odp.db.models import (AuditCommand, CatalogRecord, Collection, CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, SchemaType, Tag,
-                           TagCardinality, TagType)
+from odp.db.models import (AuditCommand, CatalogRecord, Collection, CollectionTag, PublishedDOI, Record, RecordAudit, RecordTag, RecordTagAudit,
+                           SchemaType, Tag, TagCardinality, TagType)
 
 router = APIRouter()
 
@@ -258,8 +258,9 @@ def _set_record(
     ).first() is not None:
         raise HTTPException(HTTP_409_CONFLICT, 'SID is already in use')
 
-    if record.doi is not None and record.doi != record_in.doi:
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'The DOI cannot be changed or removed')
+    if (record.doi is not None and record.doi != record_in.doi and
+            Session.get(PublishedDOI, record.doi)):
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'The DOI has been published and cannot be modified.')
 
     if (
         create or
@@ -335,6 +336,9 @@ def _delete_record(
             HTTP_422_UNPROCESSABLE_ENTITY,
             'Cannot delete a record belonging to a ready or frozen collection',
         )
+
+    if record.doi is not None and Session.get(PublishedDOI, record.doi):
+        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'The DOI has been published and cannot be deleted.')
 
     RecordAudit(
         client_id=auth.client_id,

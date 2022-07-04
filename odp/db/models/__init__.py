@@ -8,6 +8,7 @@ from .oauth2_token import OAuth2Token
 from .project import Project
 from .project_collection import ProjectCollection
 from .provider import Provider
+from .published_doi import PublishedDOI
 from .record import Record, RecordAudit
 from .record_tag import RecordTag, RecordTagAudit
 from .role import Role
