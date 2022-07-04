@@ -567,11 +567,11 @@ def doi_change(request):
 
 
 @pytest.fixture(params=[True, False])
-def published(request):
+def published_doi(request):
     return request.param
 
 
-def test_update_record_doi_change(api, record_batch_with_ids, admin, collection_auth, doi_change, published):
+def test_update_record_doi_change(api, record_batch_with_ids, admin, collection_auth, doi_change, published_doi):
     route = '/record/admin/' if admin else '/record/'
     scopes = [ODPScope.RECORD_ADMIN] if admin else [ODPScope.RECORD_WRITE]
     authorized = collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
@@ -588,7 +588,7 @@ def test_update_record_doi_change(api, record_batch_with_ids, admin, collection_
     else:
         modified_record_collection = None  # new collection
 
-    if published:
+    if published_doi:
         PublishedDOI(doi=record_batch_with_ids[2].doi).save()
 
     modified_record_batch = record_batch_with_ids.copy()
@@ -614,7 +614,7 @@ def test_update_record_doi_change(api, record_batch_with_ids, admin, collection_
     ))
 
     if authorized:
-        if published:
+        if published_doi:
             assert_unprocessable(r, 'The DOI has been published and cannot be modified.')
             assert_db_state(record_batch_with_ids)
             assert_no_audit_log()
@@ -642,7 +642,7 @@ def test_update_record_doi_change(api, record_batch_with_ids, admin, collection_
     (True, all_scopes, []),
     (True, all_scopes_excluding(ODPScope.RECORD_ADMIN), []),
 ])
-def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, collection_auth):
+def test_delete_record(api, record_batch_with_ids, admin_route, scopes, collection_tags, collection_auth, published_doi):
     route = '/record/admin/' if admin_route else '/record/'
 
     authorized = admin_route and ODPScope.RECORD_ADMIN in scopes or \
@@ -650,27 +650,34 @@ def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, 
     authorized = authorized and collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
     if collection_auth == CollectionAuth.MATCH:
-        api_client_collection = record_batch[2].collection
+        api_client_collection = record_batch_with_ids[2].collection
     elif collection_auth == CollectionAuth.MISMATCH:
-        api_client_collection = record_batch[1].collection
+        api_client_collection = record_batch_with_ids[1].collection
     else:
         api_client_collection = None
 
     for ct in collection_tags:
         CollectionTagFactory(
-            collection=record_batch[2].collection,
+            collection=record_batch_with_ids[2].collection,
             tag=TagFactory(id=ct, type='collection'),
         )
 
-    modified_record_batch = record_batch.copy()
+    if published_doi:
+        PublishedDOI(doi=record_batch_with_ids[2].doi).save()
+
+    modified_record_batch = record_batch_with_ids.copy()
     del modified_record_batch[2]
 
-    r = api(scopes, api_client_collection).delete(f'{route}{(record_id := record_batch[2].id)}')
+    r = api(scopes, api_client_collection).delete(f'{route}{(record_id := record_batch_with_ids[2].id)}')
 
     if authorized:
         if not admin_route and set(collection_tags) & {ODPCollectionTag.FROZEN, ODPCollectionTag.READY}:
             assert_unprocessable(r, 'Cannot delete a record belonging to a ready or frozen collection')
-            assert_db_state(record_batch)
+            assert_db_state(record_batch_with_ids)
+            assert_no_audit_log()
+        elif published_doi:
+            assert_unprocessable(r, 'The DOI has been published and cannot be deleted.')
+            assert_db_state(record_batch_with_ids)
             assert_no_audit_log()
         else:
             assert_empty_result(r)
@@ -678,7 +685,7 @@ def test_delete_record(api, record_batch, admin_route, scopes, collection_tags, 
             assert_audit_log('delete', record_id=record_id)
     else:
         assert_forbidden(r)
-        assert_db_state(record_batch)
+        assert_db_state(record_batch_with_ids)
         assert_no_audit_log()
 
 
