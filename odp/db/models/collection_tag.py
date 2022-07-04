@@ -28,7 +28,7 @@ class CollectionTag(Base):
     collection_id = Column(String, ForeignKey('collection.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
     tag_id = Column(String, nullable=False)
     tag_type = Column(Enum(TagType), nullable=False)
-    user_id = Column(String, ForeignKey('user.id', ondelete='CASCADE'))
+    user_id = Column(String, ForeignKey('user.id', ondelete='RESTRICT'))
 
     data = Column(JSONB, nullable=False)
     timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
