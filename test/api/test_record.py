@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from odp import ODPCollectionTag, ODPScope
 from odp.db import Session
-from odp.db.models import CollectionTag, Record, RecordAudit, RecordTag, RecordTagAudit, Scope, ScopeType
+from odp.db.models import CollectionTag, PublishedDOI, Record, RecordAudit, RecordTag, RecordTagAudit, Scope, ScopeType
 from test.api import (CollectionAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
                       assert_not_found, assert_unprocessable)
 from test.factories import CollectionFactory, CollectionTagFactory, RecordFactory, RecordTagFactory, SchemaFactory, TagFactory
@@ -566,7 +566,12 @@ def doi_change(request):
     return request.param
 
 
-def test_update_record_doi_change(api, record_batch_with_ids, admin, collection_auth, doi_change):
+@pytest.fixture(params=[True, False])
+def published(request):
+    return request.param
+
+
+def test_update_record_doi_change(api, record_batch_with_ids, admin, collection_auth, doi_change, published):
     route = '/record/admin/' if admin else '/record/'
     scopes = [ODPScope.RECORD_ADMIN] if admin else [ODPScope.RECORD_WRITE]
     authorized = collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
@@ -583,18 +588,22 @@ def test_update_record_doi_change(api, record_batch_with_ids, admin, collection_
     else:
         modified_record_collection = None  # new collection
 
+    if published:
+        PublishedDOI(doi=record_batch_with_ids[2].doi).save()
+
+    modified_record_batch = record_batch_with_ids.copy()
     if doi_change == 'change':
-        record = record_build(
+        modified_record_batch[2] = (record := record_build(
             identifiers='doi',
             id=record_batch_with_ids[2].id,
             collection=modified_record_collection,
-        )
+        ))
     elif doi_change == 'remove':
-        record = record_build(
+        modified_record_batch[2] = (record := record_build(
             identifiers='sid',
             id=record_batch_with_ids[2].id,
             collection=modified_record_collection,
-        )
+        ))
 
     r = api(scopes, api_client_collection).put(route + record.id, json=dict(
         doi=record.doi,
@@ -605,12 +614,18 @@ def test_update_record_doi_change(api, record_batch_with_ids, admin, collection_
     ))
 
     if authorized:
-        assert_unprocessable(r, 'The DOI cannot be changed or removed')
+        if published:
+            assert_unprocessable(r, 'The DOI has been published and cannot be modified.')
+            assert_db_state(record_batch_with_ids)
+            assert_no_audit_log()
+        else:
+            assert_json_record_result(r, r.json(), record)
+            assert_db_state(modified_record_batch)
+            assert_audit_log('update', record)
     else:
         assert_forbidden(r)
-
-    assert_db_state(record_batch_with_ids)
-    assert_no_audit_log()
+        assert_db_state(record_batch_with_ids)
+        assert_no_audit_log()
 
 
 @pytest.mark.parametrize('admin_route, scopes, collection_tags', [
