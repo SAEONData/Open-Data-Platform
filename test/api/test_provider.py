@@ -26,7 +26,7 @@ def provider_build(**kwargs):
 
 
 def collection_ids(provider):
-    return tuple(collection.id for collection in provider.collections)
+    return tuple(sorted(collection.id for collection in provider.collections))
 
 
 def assert_db_state(providers):
@@ -42,7 +42,7 @@ def assert_json_result(response, json, provider):
     assert response.status_code == 200
     assert json['id'] == provider.id
     assert json['name'] == provider.name
-    assert tuple(json['collection_ids']) == collection_ids(provider)
+    assert tuple(sorted(json['collection_ids'])) == collection_ids(provider)
 
 
 def assert_json_results(response, json, providers):

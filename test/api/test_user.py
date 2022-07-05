@@ -20,7 +20,7 @@ def user_batch():
 
 
 def role_ids(user):
-    return tuple(role.id for role in user.roles)
+    return tuple(sorted(role.id for role in user.roles))
 
 
 def assert_db_state(users):
@@ -39,7 +39,7 @@ def assert_json_result(response, json, user):
     assert json['email'] == user.email
     assert json['active'] == user.active
     assert json['verified'] == user.verified
-    assert tuple(json['role_ids']) == role_ids(user)
+    assert tuple(sorted(json['role_ids'])) == role_ids(user)
 
 
 def assert_json_results(response, json, users):

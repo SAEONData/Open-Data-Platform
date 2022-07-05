@@ -29,7 +29,7 @@ def project_build(**id):
 
 
 def collection_ids(project):
-    return tuple(collection.id for collection in project.collections)
+    return tuple(sorted(collection.id for collection in project.collections))
 
 
 def assert_db_state(projects):
@@ -45,7 +45,7 @@ def assert_json_result(response, json, project):
     assert response.status_code == 200
     assert json['id'] == project.id
     assert json['name'] == project.name
-    assert tuple(json['collection_ids']) == collection_ids(project)
+    assert tuple(sorted(json['collection_ids'])) == collection_ids(project)
 
 
 def assert_json_results(response, json, projects):

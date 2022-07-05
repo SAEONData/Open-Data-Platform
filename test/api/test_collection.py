@@ -50,15 +50,15 @@ def collection_build(**id):
 
 
 def project_ids(collection):
-    return tuple(project.id for project in collection.projects)
+    return tuple(sorted(project.id for project in collection.projects))
 
 
 def client_ids(collection):
-    return tuple(client.id for client in collection.clients if client.id != 'odp.test')
+    return tuple(sorted(client.id for client in collection.clients if client.id != 'odp.test'))
 
 
 def role_ids(collection):
-    return tuple(role.id for role in collection.roles)
+    return tuple(sorted(role.id for role in collection.roles))
 
 
 def assert_db_state(collections):
@@ -116,9 +116,9 @@ def assert_json_collection_result(response, json, collection):
     assert json['name'] == collection.name
     assert json['doi_key'] == collection.doi_key
     assert json['provider_id'] == collection.provider_id
-    assert tuple(json['project_ids']) == project_ids(collection)
-    assert tuple(j for j in json['client_ids'] if j != 'odp.test') == client_ids(collection)
-    assert tuple(json['role_ids']) == role_ids(collection)
+    assert tuple(sorted(json['project_ids'])) == project_ids(collection)
+    assert tuple(sorted(cid for cid in json['client_ids'] if cid != 'odp.test')) == client_ids(collection)
+    assert tuple(sorted(json['role_ids'])) == role_ids(collection)
 
 
 def assert_json_collection_results(response, json, collections):
