@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from pydantic import AnyHttpUrl, BaseModel, Field, root_validator, validator
 
@@ -18,7 +18,7 @@ class TagInstanceModel(BaseModel):
     tag_id: str
     user_id: Optional[str]
     user_name: Optional[str]
-    data: Dict[str, Any]
+    data: dict[str, Any]
     timestamp: str
     cardinality: TagCardinality
     public: bool
@@ -26,14 +26,14 @@ class TagInstanceModel(BaseModel):
 
 class TagInstanceModelIn(BaseModel):
     tag_id: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
 
 
 class CatalogModel(BaseModel):
     id: str
     schema_id: str
     schema_uri: str
-    schema_: Dict[str, Any]
+    schema_: dict[str, Any]
 
 
 class PublishedMetadataModel(BaseModel):
@@ -62,7 +62,7 @@ class CatalogRecordModel(BaseModel):
     catalog_id: str
     record_id: str
     timestamp: str
-    validity: Dict[str, Any]
+    validity: dict[str, Any]
     published: bool
     published_record: Optional[PublishedRecordModel]
 
@@ -70,14 +70,14 @@ class CatalogRecordModel(BaseModel):
 class ClientModel(BaseModel):
     id: str
     name: str
-    scope_ids: List[str]
+    scope_ids: list[str]
     collection_id: Optional[str]
-    grant_types: List[GrantType]
-    response_types: List[ResponseType]
-    redirect_uris: List[AnyHttpUrl]
-    post_logout_redirect_uris: List[AnyHttpUrl]
+    grant_types: list[GrantType]
+    response_types: list[ResponseType]
+    redirect_uris: list[AnyHttpUrl]
+    post_logout_redirect_uris: list[AnyHttpUrl]
     token_endpoint_auth_method: TokenEndpointAuthMethod
-    allowed_cors_origins: List[AnyHttpUrl]
+    allowed_cors_origins: list[AnyHttpUrl]
 
 
 class ClientModelIn(ClientModel):
@@ -90,11 +90,11 @@ class CollectionModel(BaseModel):
     name: str
     doi_key: Optional[str]
     provider_id: str
-    project_ids: List[str]
+    project_ids: list[str]
     record_count: int
-    tags: List[TagInstanceModel]
-    client_ids: List[str]
-    role_ids: List[str]
+    tags: list[TagInstanceModel]
+    client_ids: list[str]
+    role_ids: list[str]
 
 
 class CollectionModelIn(BaseModel):
@@ -107,19 +107,19 @@ class CollectionModelIn(BaseModel):
 class ProjectModel(BaseModel):
     id: str
     name: str
-    collection_ids: List[str]
+    collection_ids: list[str]
 
 
 class ProjectModelIn(BaseModel):
     id: str = Field(..., regex=ID_REGEX)
     name: str
-    collection_ids: List[str]
+    collection_ids: list[str]
 
 
 class ProviderModel(BaseModel):
     id: str
     name: str
-    collection_ids: List[str]
+    collection_ids: list[str]
 
 
 class ProviderModelIn(BaseModel):
@@ -133,10 +133,10 @@ class RecordModel(BaseModel):
     sid: Optional[str]
     collection_id: str
     schema_id: str
-    metadata: Dict[str, Any]
-    validity: Dict[str, Any]
+    metadata: dict[str, Any]
+    validity: dict[str, Any]
     timestamp: str
-    tags: List[TagInstanceModel]
+    tags: list[TagInstanceModel]
 
 
 class RecordModelIn(BaseModel):
@@ -144,7 +144,7 @@ class RecordModelIn(BaseModel):
     sid: str = Field(None, regex=SID_REGEX, description="Secondary Identifier")
     collection_id: str
     schema_id: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
     @validator('sid', always=True)
     def validate_sid(cls, sid, values):
@@ -175,13 +175,13 @@ class RecordModelIn(BaseModel):
 
 class RoleModel(BaseModel):
     id: str
-    scope_ids: List[str]
+    scope_ids: list[str]
     collection_id: Optional[str]
 
 
 class RoleModelIn(BaseModel):
     id: str = Field(..., regex=ID_REGEX)
-    scope_ids: List[str]
+    scope_ids: list[str]
     collection_id: Optional[str]
 
 
@@ -189,7 +189,7 @@ class SchemaModel(BaseModel):
     id: str
     type: str
     uri: str
-    schema_: Dict[str, Any]
+    schema_: dict[str, Any]
 
 
 class ScopeModel(BaseModel):
@@ -204,7 +204,7 @@ class TagModel(BaseModel):
     scope_id: str
     schema_id: str
     schema_uri: str
-    schema_: Dict[str, Any]
+    schema_: dict[str, Any]
 
 
 class UserModel(BaseModel):
@@ -214,10 +214,10 @@ class UserModel(BaseModel):
     verified: bool
     name: str
     picture: Optional[str]
-    role_ids: List[str]
+    role_ids: list[str]
 
 
 class UserModelIn(BaseModel):
     id: str
     active: bool
-    role_ids: List[str]
+    role_ids: list[str]
