@@ -1,9 +1,10 @@
 import logging
-from datetime import datetime
+from datetime import date, datetime
 
 from jschon import JSON, URI
 from sqlalchemy import func, or_, select
 
+from odp import ODPMetadataSchema, ODPRecordTag
 from odp.api.models import PublishedMetadataModel, PublishedRecordModel, PublishedTagInstanceModel, RecordModel
 from odp.api.routers.record import output_record_model
 from odp.db import Session
@@ -120,6 +121,7 @@ class Publisher:
         return catalog_record.published
 
     def _create_published_record(self, record_model: RecordModel) -> PublishedRecordModel:
+        """Create the published form of a record."""
         return PublishedRecordModel(
             id=record_model.id,
             doi=record_model.doi,
@@ -131,6 +133,8 @@ class Publisher:
         )
 
     def _create_published_metadata(self, record_model: RecordModel) -> list[PublishedMetadataModel]:
+        """Create the published metadata outputs for a record."""
+        self._process_embargo_tags(record_model)
         return [
             PublishedMetadataModel(
                 schema_id=record_model.schema_id,
@@ -138,7 +142,43 @@ class Publisher:
             )
         ]
 
+    def _process_embargo_tags(self, record_model: RecordModel) -> None:
+        """Check if a record is currently subject to an embargo and, if so,
+        strip out download links / embedded datasets from the metadata."""
+        current_date = date.today()
+        embargoed = False
+
+        for tag in record_model.tags:
+            if tag.tag_id == ODPRecordTag.EMBARGO:
+                start_date = date.fromisoformat(tag.data['start'])
+                end_date = date.fromisoformat(tag.data['end'])
+                if start_date <= current_date <= end_date:
+                    embargoed = True
+                    break
+
+        if not embargoed:
+            return
+
+        if record_model.schema_id == ODPMetadataSchema.SAEON_DATACITE4:
+            try:
+                record_model.metadata['immutableResource']['resourceData'] = None
+            except KeyError:
+                pass
+            try:
+                record_model.metadata['immutableResource']['resourceDownload']['downloadURL'] = None
+            except KeyError:
+                pass
+
+        elif record_model.schema_id == ODPMetadataSchema.SAEON_ISO19115:
+            for item in record_model.metadata.get('onlineResources', []):
+                try:
+                    if item['description'] == 'download':
+                        item['linkage'] = None
+                except KeyError:
+                    pass
+
     def _create_published_tags(self, record_model: RecordModel) -> list[PublishedTagInstanceModel]:
+        """Create the published tags for a record."""
         return [
             PublishedTagInstanceModel(
                 tag_id=tag_instance.tag_id,
@@ -149,6 +189,7 @@ class Publisher:
         ]
 
     def _save_published_doi(self, record_model: RecordModel) -> None:
+        """Permanently save a DOI when it is first published."""
         if record_model.doi and not Session.get(PublishedDOI, record_model.doi):
             published_doi = PublishedDOI(doi=record_model.doi)
             published_doi.save()
