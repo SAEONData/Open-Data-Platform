@@ -4,7 +4,7 @@ from datetime import datetime
 from jschon import JSON, URI
 from sqlalchemy import func, or_, select
 
-from odp.api.models import PublishedRecordModel, PublishedTagInstanceModel, RecordModel
+from odp.api.models import PublishedMetadataModel, PublishedRecordModel, PublishedTagInstanceModel, RecordModel
 from odp.api.routers.record import output_record_model
 from odp.db import Session
 from odp.db.models import Catalog, CatalogRecord, CollectionTag, PublishedDOI, Record, RecordTag
@@ -125,17 +125,28 @@ class Publisher:
             doi=record_model.doi,
             sid=record_model.sid,
             collection_id=record_model.collection_id,
-            schema_id=record_model.schema_id,
-            metadata=record_model.metadata,
+            metadata=self._create_published_metadata(record_model),
+            tags=self._create_published_tags(record_model),
             timestamp=record_model.timestamp,
-            tags=[PublishedTagInstanceModel(
+        )
+
+    def _create_published_metadata(self, record_model: RecordModel) -> list[PublishedMetadataModel]:
+        return [
+            PublishedMetadataModel(
+                schema_id=record_model.schema_id,
+                metadata=record_model.metadata,
+            )
+        ]
+
+    def _create_published_tags(self, record_model: RecordModel) -> list[PublishedTagInstanceModel]:
+        return [
+            PublishedTagInstanceModel(
                 tag_id=tag_instance.tag_id,
                 data=tag_instance.data,
                 user_name=tag_instance.user_name,
                 timestamp=tag_instance.timestamp,
-                cardinality=tag_instance.cardinality,
-            ) for tag_instance in record_model.tags if tag_instance.public],
-        )
+            ) for tag_instance in record_model.tags if tag_instance.public
+        ]
 
     def _save_published_doi(self, record_model: RecordModel) -> None:
         if record_model.doi and not Session.get(PublishedDOI, record_model.doi):

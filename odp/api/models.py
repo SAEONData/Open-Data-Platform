@@ -36,12 +36,16 @@ class CatalogModel(BaseModel):
     schema_: Dict[str, Any]
 
 
+class PublishedMetadataModel(BaseModel):
+    schema_id: str
+    metadata: dict[str, Any]
+
+
 class PublishedTagInstanceModel(BaseModel):
     tag_id: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
     user_name: Optional[str]
     timestamp: str
-    cardinality: TagCardinality
 
 
 class PublishedRecordModel(BaseModel):
@@ -49,10 +53,9 @@ class PublishedRecordModel(BaseModel):
     doi: Optional[str]
     sid: Optional[str]
     collection_id: str
-    schema_id: str
-    metadata: Dict[str, Any]
+    metadata: list[PublishedMetadataModel]
+    tags: list[PublishedTagInstanceModel]
     timestamp: str
-    tags: List[PublishedTagInstanceModel]
 
 
 class CatalogRecordModel(BaseModel):
