@@ -203,8 +203,8 @@ def tag_embargo(id):
                 api.post(f'/record/{id}/tag', dict(
                     tag_id=ODPRecordTag.EMBARGO,
                     data={
-                        'start': form.start.data.strftime('%Y-%m-%d') if form.start.data else None,
-                        'end': form.end.data.strftime('%Y-%m-%d') if form.end.data else None,
+                        'start': form.start.data.isoformat() if form.start.data else None,
+                        'end': form.end.data.isoformat() if form.end.data else None,
                         'comment': form.comment.data,
                     },
                 ))
