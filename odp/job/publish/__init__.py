@@ -150,8 +150,8 @@ class Publisher:
 
         for tag in record_model.tags:
             if tag.tag_id == ODPRecordTag.EMBARGO:
-                start_date = date.fromisoformat(tag.data['start'])
-                end_date = date.fromisoformat(tag.data['end'])
+                start_date = date.fromisoformat(tag.data['start'] or '2000-01-01')
+                end_date = date.fromisoformat(tag.data['end'] or '3000-01-01')
                 if start_date <= current_date <= end_date:
                     embargoed = True
                     break
