@@ -74,9 +74,7 @@ def assert_db_tag_state(collection_id, *collection_tags):
     """Verify that the collection_tag table contains the given collection tags."""
     Session.expire_all()
     result = Session.execute(select(CollectionTag)).scalars().all()
-    result.sort(key=lambda r: r.tag_id)
-    collection_tags = list(collection_tags)
-    collection_tags.sort(key=lambda c: c.tag_id if isinstance(c, CollectionTag) else c['tag_id'])
+    result.sort(key=lambda r: r.timestamp)
 
     assert len(result) == len(collection_tags)
     for n, row in enumerate(result):
