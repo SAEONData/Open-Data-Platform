@@ -161,11 +161,13 @@ class Publisher:
 
         if record_model.schema_id == ODPMetadataSchema.SAEON_DATACITE4:
             try:
-                record_model.metadata['immutableResource']['resourceData'] = None
+                if 'resourceDownload' in record_model.metadata['immutableResource']:
+                    record_model.metadata['immutableResource']['resourceDownload']['downloadURL'] = None
             except KeyError:
                 pass
             try:
-                record_model.metadata['immutableResource']['resourceDownload']['downloadURL'] = None
+                if 'resourceData' in record_model.metadata['immutableResource']:
+                    record_model.metadata['immutableResource']['resourceData'] = None
             except KeyError:
                 pass
 
