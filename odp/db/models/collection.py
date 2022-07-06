@@ -14,6 +14,7 @@ class Collection(Base):
     id = Column(String, primary_key=True)
     name = Column(String, nullable=False)
     doi_key = Column(String)
+    timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
 
     provider_id = Column(String, ForeignKey('provider.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
     provider = relationship('Provider')

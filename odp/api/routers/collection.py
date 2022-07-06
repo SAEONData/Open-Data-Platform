@@ -32,6 +32,7 @@ def output_collection_model(result) -> CollectionModel:
         ],
         client_ids=[client.id for client in result.Collection.clients],
         role_ids=[role.id for role in result.Collection.roles],
+        timestamp=result.Collection.timestamp.isoformat(),
     )
 
 
@@ -100,6 +101,7 @@ async def create_collection(
         name=collection_in.name,
         doi_key=collection_in.doi_key,
         provider_id=collection_in.provider_id,
+        timestamp=(timestamp := datetime.now(timezone.utc)),
     )
     collection.save()
 
@@ -107,7 +109,7 @@ async def create_collection(
         client_id=auth.client_id,
         user_id=auth.user_id,
         command=AuditCommand.insert,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=timestamp,
         _id=collection.id,
         _name=collection.name,
         _doi_key=collection.doi_key,
@@ -136,13 +138,14 @@ async def update_collection(
         collection.name = collection_in.name
         collection.doi_key = collection_in.doi_key
         collection.provider_id = collection_in.provider_id
+        collection.timestamp = (timestamp := datetime.now(timezone.utc))
         collection.save()
 
         CollectionAudit(
             client_id=auth.client_id,
             user_id=auth.user_id,
             command=AuditCommand.update,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=timestamp,
             _id=collection.id,
             _name=collection.name,
             _doi_key=collection.doi_key,

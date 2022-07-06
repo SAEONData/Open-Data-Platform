@@ -95,6 +95,7 @@ class CollectionModel(BaseModel):
     tags: list[TagInstanceModel]
     client_ids: list[str]
     role_ids: list[str]
+    timestamp: str
 
 
 class CollectionModelIn(BaseModel):

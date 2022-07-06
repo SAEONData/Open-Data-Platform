@@ -65,9 +65,18 @@ def assert_db_state(collections):
     """Verify that the DB collection table contains the given collection batch."""
     Session.expire_all()
     result = Session.execute(select(Collection)).scalars().all()
-    assert set((row.id, row.name, row.doi_key, row.provider_id, project_ids(row), client_ids(row), role_ids(row)) for row in result) \
-           == set((collection.id, collection.name, collection.doi_key, collection.provider_id, project_ids(collection), client_ids(collection),
-                   role_ids(collection)) for collection in collections)
+    result.sort(key=lambda c: c.id)
+    collections.sort(key=lambda c: c.id)
+    assert len(result) == len(collections)
+    for n, row in enumerate(result):
+        assert row.id == collections[n].id
+        assert row.name == collections[n].name
+        assert row.doi_key == collections[n].doi_key
+        assert row.provider_id == collections[n].provider_id
+        assert_new_timestamp(row.timestamp)
+        assert project_ids(row) == project_ids(collections[n])
+        assert client_ids(row) == client_ids(collections[n])
+        assert role_ids(row) == role_ids(collections[n])
 
 
 def assert_db_tag_state(collection_id, *collection_tags):
@@ -143,6 +152,7 @@ def assert_json_collection_result(response, json, collection):
     assert tuple(sorted(json['project_ids'])) == project_ids(collection)
     assert tuple(sorted(cid for cid in json['client_ids'] if cid != 'odp.test')) == client_ids(collection)
     assert tuple(sorted(json['role_ids'])) == role_ids(collection)
+    assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
 
 
 def assert_json_collection_results(response, json, collections):

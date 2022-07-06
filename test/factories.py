@@ -97,6 +97,7 @@ class CollectionFactory(ODPModelFactory):
     name = factory.Sequence(lambda n: f'{fake.catch_phrase()}.{n}')
     doi_key = factory.LazyFunction(lambda: fake.word() if randint(0, 1) else None)
     provider = factory.SubFactory(ProviderFactory)
+    timestamp = factory.LazyFunction(lambda: datetime.now(timezone.utc))
 
 
 class ClientFactory(ODPModelFactory):
