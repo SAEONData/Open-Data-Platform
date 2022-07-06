@@ -8,7 +8,7 @@ from odp import ODPMetadataSchema, ODPRecordTag
 from odp.api.models import PublishedMetadataModel, PublishedRecordModel, PublishedTagInstanceModel, RecordModel
 from odp.api.routers.record import output_record_model
 from odp.db import Session
-from odp.db.models import Catalog, CatalogRecord, CollectionTag, PublishedDOI, Record, RecordTag
+from odp.db.models import Catalog, CatalogRecord, Collection, PublishedDOI, Record, RecordTag
 from odp.lib.schema import schema_catalog
 
 logger = logging.getLogger(__name__)
@@ -40,9 +40,8 @@ class Publisher:
         * catalog_record.timestamp is less than any of the following:
 
           * catalog.schema.timestamp
+          * collection.timestamp
           * record.timestamp
-          * record_tag.timestamp, for any associated record tag
-          * collection_tag.timestamp, for any associated collection tag
 
         :return: a list of (record_id, timestamp) tuples, where
             timestamp is that of the latest contributing change
@@ -54,14 +53,11 @@ class Publisher:
                 Record.id.label('record_id'),
                 func.greatest(
                     catalog.schema.timestamp,
+                    Collection.timestamp,
                     Record.timestamp,
-                    func.max(RecordTag.timestamp),
-                    func.max(CollectionTag.timestamp)
                 ).label('max_timestamp')
             ).
-            outerjoin(RecordTag).
-            outerjoin(CollectionTag, Record.collection_id == CollectionTag.collection_id).
-            group_by(Record.id, Record.timestamp).
+            join(Collection).
             subquery()
         )
 
