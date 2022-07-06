@@ -212,6 +212,10 @@ class RecordTagEmbargoForm(BaseForm):
         label='Comment',
     )
 
+    def validate_end(self, field):
+        if self.start.data and field.data and field.data < self.start.data:
+            raise ValidationError('The end date cannot be earlier than the start date.')
+
 
 class RoleForm(BaseForm):
     id = StringField(
