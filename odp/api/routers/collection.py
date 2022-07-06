@@ -13,7 +13,7 @@ from odp.api.lib.schema import get_tag_schema
 from odp.api.lib.utils import output_tag_instance_model
 from odp.api.models import CollectionModel, CollectionModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
-from odp.db.models import AuditCommand, Collection, CollectionTag, CollectionTagAudit, Record, Tag, TagCardinality, TagType
+from odp.db.models import AuditCommand, Collection, CollectionAudit, CollectionTag, CollectionTagAudit, Record, Tag, TagCardinality, TagType
 
 router = APIRouter()
 
@@ -103,6 +103,17 @@ async def create_collection(
     )
     collection.save()
 
+    CollectionAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=AuditCommand.insert,
+        timestamp=datetime.now(timezone.utc),
+        _id=collection.id,
+        _name=collection.name,
+        _doi_key=collection.doi_key,
+        _provider_id=collection.provider_id,
+    ).save()
+
 
 @router.put(
     '/',
@@ -117,10 +128,26 @@ async def update_collection(
     if not (collection := Session.get(Collection, collection_in.id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
-    collection.name = collection_in.name
-    collection.doi_key = collection_in.doi_key
-    collection.provider_id = collection_in.provider_id
-    collection.save()
+    if (
+            collection.name != collection_in.name or
+            collection.doi_key != collection_in.doi_key or
+            collection.provider_id != collection_in.provider_id
+    ):
+        collection.name = collection_in.name
+        collection.doi_key = collection_in.doi_key
+        collection.provider_id = collection_in.provider_id
+        collection.save()
+
+        CollectionAudit(
+            client_id=auth.client_id,
+            user_id=auth.user_id,
+            command=AuditCommand.update,
+            timestamp=datetime.now(timezone.utc),
+            _id=collection.id,
+            _name=collection.name,
+            _doi_key=collection.doi_key,
+            _provider_id=collection.provider_id,
+        ).save()
 
 
 @router.delete(
@@ -137,6 +164,14 @@ async def delete_collection(
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     collection.delete()
+
+    CollectionAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=AuditCommand.delete,
+        timestamp=datetime.now(timezone.utc),
+        _id=collection.id,
+    ).save()
 
 
 @router.post(

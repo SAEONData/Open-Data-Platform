@@ -2,7 +2,7 @@ from .catalog import Catalog
 from .catalog_record import CatalogRecord
 from .client import Client
 from .client_scope import ClientScope
-from .collection import Collection
+from .collection import Collection, CollectionAudit
 from .collection_tag import CollectionTag, CollectionTagAudit
 from .oauth2_token import OAuth2Token
 from .project import Project

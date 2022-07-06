@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import Collection, CollectionTag, CollectionTagAudit, Scope, ScopeType
+from odp.db.models import Collection, CollectionAudit, CollectionTag, CollectionTagAudit, Scope, ScopeType
 from odp.lib.formats import DOI_REGEX
 from test.api import (CollectionAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
                       assert_not_found, assert_unprocessable)
@@ -88,6 +88,30 @@ def assert_db_tag_state(collection_id, *collection_tags):
             assert row.tag_id == collection_tag['tag_id']
             assert row.user_id is None
             assert row.data == collection_tag['data']
+
+
+def assert_audit_log(command, collection=None, collection_id=None):
+    result = Session.execute(select(CollectionAudit)).scalar_one_or_none()
+    assert result.client_id == 'odp.test'
+    assert result.user_id is None
+    assert result.command == command
+    assert_new_timestamp(result.timestamp)
+    if command in ('insert', 'update'):
+        assert result._id == collection.id
+        assert result._name == collection.name
+        assert result._doi_key == collection.doi_key
+        assert result._provider_id == collection.provider_id
+    elif command == 'delete':
+        assert result._id == collection_id
+        assert result._name is None
+        assert result._doi_key is None
+        assert result._provider_id is None
+    else:
+        assert False
+
+
+def assert_no_audit_log():
+    assert Session.execute(select(CollectionAudit)).first() is None
 
 
 def assert_tag_audit_log(*entries):
@@ -179,6 +203,7 @@ def test_list_collections(api, collection_batch, scopes, collection_auth):
         assert_forbidden(r)
 
     assert_db_state(collection_batch)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes', [
@@ -206,6 +231,7 @@ def test_get_collection(api, collection_batch, scopes, collection_auth):
         assert_forbidden(r)
 
     assert_db_state(collection_batch)
+    assert_no_audit_log()
 
 
 def test_get_collection_not_found(api, collection_batch, collection_auth):
@@ -225,6 +251,7 @@ def test_get_collection_not_found(api, collection_batch, collection_auth):
         assert_forbidden(r)
 
     assert_db_state(collection_batch)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes', [
@@ -255,9 +282,11 @@ def test_create_collection(api, collection_batch, scopes, collection_auth):
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_collection_batch)
+        assert_audit_log('insert', collection)
     else:
         assert_forbidden(r)
         assert_db_state(collection_batch)
+        assert_no_audit_log()
 
 
 def test_create_collection_conflict(api, collection_batch, collection_auth):
@@ -284,6 +313,7 @@ def test_create_collection_conflict(api, collection_batch, collection_auth):
         assert_forbidden(r)
 
     assert_db_state(collection_batch)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes', [
@@ -320,9 +350,11 @@ def test_update_collection(api, collection_batch_no_projects, scopes, collection
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_collection_batch)
+        assert_audit_log('update', collection)
     else:
         assert_forbidden(r)
         assert_db_state(collection_batch_no_projects)
+        assert_no_audit_log()
 
 
 def test_update_collection_not_found(api, collection_batch_no_projects, collection_auth):
@@ -349,6 +381,7 @@ def test_update_collection_not_found(api, collection_batch_no_projects, collecti
         assert_forbidden(r)
 
     assert_db_state(collection_batch_no_projects)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes', [
@@ -371,14 +404,16 @@ def test_delete_collection(api, collection_batch, scopes, collection_auth):
     modified_collection_batch = collection_batch.copy()
     del modified_collection_batch[2]
 
-    r = api(scopes, api_client_collection).delete(f'/collection/{collection_batch[2].id}')
+    r = api(scopes, api_client_collection).delete(f'/collection/{(collection_id := collection_batch[2].id)}')
 
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_collection_batch)
+        assert_audit_log('delete', collection_id=collection_id)
     else:
         assert_forbidden(r)
         assert_db_state(collection_batch)
+        assert_no_audit_log()
 
 
 def test_delete_collection_not_found(api, collection_batch, collection_auth):
@@ -398,6 +433,7 @@ def test_delete_collection_not_found(api, collection_batch, collection_auth):
         assert_forbidden(r)
 
     assert_db_state(collection_batch)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes', [
@@ -428,6 +464,7 @@ def test_get_new_doi(api, collection_batch, scopes, collection_auth):
         assert_forbidden(r)
 
     assert_db_state(collection_batch)
+    assert_no_audit_log()
 
 
 def new_generic_tag(cardinality):
@@ -514,6 +551,7 @@ def test_tag_collection(api, collection_batch, scopes, collection_auth, tag_card
         assert_tag_audit_log()
 
     assert_db_state(collection_batch)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes', [
@@ -566,6 +604,7 @@ def test_tag_collection_user_conflict(api, collection_batch, scopes, collection_
         assert_tag_audit_log()
 
     assert_db_state(collection_batch)
+    assert_no_audit_log()
 
 
 @pytest.fixture(params=[True, False])
@@ -638,3 +677,4 @@ def test_untag_collection(api, collection_batch, admin_route, scopes, collection
         assert_tag_audit_log()
 
     assert_db_state(collection_batch)
+    assert_no_audit_log()
