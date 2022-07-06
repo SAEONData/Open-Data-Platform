@@ -422,6 +422,9 @@ async def tag_record(
         record_tag.timestamp = (timestamp := datetime.now(timezone.utc))
         record_tag.save()
 
+        record.timestamp = timestamp
+        record.save()
+
         RecordTagAudit(
             client_id=auth.client_id,
             user_id=auth.user_id,
@@ -483,11 +486,14 @@ def _untag_record(
 
     record_tag.delete()
 
+    record.timestamp = (timestamp := datetime.now(timezone.utc))
+    record.save()
+
     RecordTagAudit(
         client_id=auth.client_id,
         user_id=auth.user_id,
         command=AuditCommand.delete,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=timestamp,
         _id=record_tag.id,
         _record_id=record_tag.record_id,
         _tag_id=record_tag.tag_id,

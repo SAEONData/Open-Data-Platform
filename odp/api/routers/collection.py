@@ -190,7 +190,7 @@ async def tag_collection(
     if auth.collection_ids != '*' and collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if not Session.get(Collection, collection_id):
+    if not (collection := Session.get(Collection, collection_id)):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     if not (tag := Session.get(Tag, (tag_instance_in.tag_id, TagType.collection))):
@@ -248,6 +248,9 @@ async def tag_collection(
         collection_tag.timestamp = (timestamp := datetime.now(timezone.utc))
         collection_tag.save()
 
+        collection.timestamp = timestamp
+        collection.save()
+
         CollectionTagAudit(
             client_id=auth.client_id,
             user_id=auth.user_id,
@@ -294,6 +297,9 @@ def _untag_collection(
     if auth.collection_ids != '*' and collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
+    if not (collection := Session.get(Collection, collection_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
     if not (collection_tag := Session.execute(
         select(CollectionTag).
         where(CollectionTag.id == tag_instance_id).
@@ -306,11 +312,14 @@ def _untag_collection(
 
     collection_tag.delete()
 
+    collection.timestamp = (timestamp := datetime.now(timezone.utc))
+    collection.save()
+
     CollectionTagAudit(
         client_id=auth.client_id,
         user_id=auth.user_id,
         command=AuditCommand.delete,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=timestamp,
         _id=collection_tag.id,
         _collection_id=collection_tag.collection_id,
         _tag_id=collection_tag.tag_id,
