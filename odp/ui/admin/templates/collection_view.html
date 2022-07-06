@@ -10,7 +10,7 @@
 {% block content %}
     {% from 'macros.html' import render_info, render_buttons, render_button_prompt_form, obj_link, obj_links %}
     {% call(prop) render_info(collection, 'Name', 'Provider', 'Projects', 'DOI key', 'Records',
-            'Ready', 'Frozen') %}
+            'Ready', 'Frozen', 'Timestamp') %}
         {% if prop == 'Name' %}
             {{ collection.name }}
         {% elif prop == 'Provider' %}
@@ -31,6 +31,8 @@
             {% if frozen_tag %}
                 {{ frozen_tag.timestamp|timestamp }} by {{ obj_link('users', frozen_tag.user_id, frozen_tag.user_name) }}
             {% endif %}
+        {% elif prop == 'Timestamp' %}
+            {{ collection.timestamp|timestamp }}
         {% endif %}
     {% endcall %}
     {% if ready_tag %}
