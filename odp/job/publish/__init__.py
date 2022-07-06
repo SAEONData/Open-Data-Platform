@@ -36,6 +36,7 @@ class Publisher:
         A record is selected if:
 
         * there is no corresponding catalog_record entry; or
+        * the record has any embargo tags; or
         * catalog_record.timestamp is less than any of the following:
 
           * catalog.schema.timestamp
@@ -81,7 +82,11 @@ class Publisher:
             outerjoin_from(records_subq, catalog_records_subq).
             where(or_(
                 catalog_records_subq.c.record_id == None,
-                catalog_records_subq.c.timestamp < records_subq.c.max_timestamp
+                catalog_records_subq.c.timestamp < records_subq.c.max_timestamp,
+                catalog_records_subq.c.record_id.in_(
+                    select(RecordTag.record_id).
+                    where(RecordTag.tag_id == ODPRecordTag.EMBARGO)
+                )
             ))
         )
 
