@@ -77,9 +77,10 @@
             {% endcall %}
         </div>
         <div id="audit-log" class="tab-pane fade" role="tabpanel">
-            {% call(audit_record) render_table(audit_records, 'Table', 'Command', 'User', 'Client', 'Timestamp', hide_id=True) %}
+            {% call(audit_record) render_table(audit_records, 'Table', 'Command', 'Tag', 'User', 'Client', 'Timestamp', hide_id=True) %}
                 <td>{{ audit_record.table }}</td>
                 <td>{{ audit_record.command }}</td>
+                <td>{{ obj_link('tags', audit_record.tag_id) }}</td>
                 <td>{{ obj_link('users', audit_record.user_id, audit_record.user_name) }}</td>
                 <td>{{ obj_link('clients', audit_record.client_id) }}</td>
                 <td>{{ audit_record.timestamp|timestamp }}</td>

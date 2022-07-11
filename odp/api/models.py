@@ -221,6 +221,7 @@ class UserModelIn(BaseModel):
 
 class AuditModel(BaseModel):
     table: str
+    tag_id: Optional[str]
     audit_id: int
     client_id: str
     user_id: Optional[str]

@@ -3,7 +3,7 @@ from random import randint
 
 from fastapi import APIRouter, Depends, HTTPException
 from jschon import JSON, JSONSchema
-from sqlalchemy import func, literal_column, select, union_all
+from sqlalchemy import func, literal_column, null, select, union_all
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import DOI_PREFIX, ODPScope
@@ -371,6 +371,7 @@ async def get_collection_audit_log(
     audit_subq = union_all(
         select(
             literal_column("'collection'").label('table'),
+            null().label('tag_id'),
             CollectionAudit.id,
             CollectionAudit.client_id,
             CollectionAudit.user_id,
@@ -379,6 +380,7 @@ async def get_collection_audit_log(
         ).where(CollectionAudit._id == collection_id),
         select(
             literal_column("'collection_tag'").label('table'),
+            CollectionTagAudit._tag_id,
             CollectionTagAudit.id,
             CollectionTagAudit.client_id,
             CollectionTagAudit.user_id,
@@ -397,6 +399,7 @@ async def get_collection_audit_log(
         stmt,
         lambda row: AuditModel(
             table=row.table,
+            tag_id=row.tag_id,
             audit_id=row.id,
             client_id=row.client_id,
             user_id=row.user_id,

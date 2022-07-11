@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from jschon import JSON, JSONSchema
-from sqlalchemy import literal_column, select, union_all
+from sqlalchemy import literal_column, null, select, union_all
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPCollectionTag, ODPScope
@@ -564,6 +564,7 @@ async def get_record_audit_log(
     audit_subq = union_all(
         select(
             literal_column("'record'").label('table'),
+            null().label('tag_id'),
             RecordAudit.id,
             RecordAudit.client_id,
             RecordAudit.user_id,
@@ -572,6 +573,7 @@ async def get_record_audit_log(
         ).where(RecordAudit._id == record_id),
         select(
             literal_column("'record_tag'").label('table'),
+            RecordTagAudit._tag_id,
             RecordTagAudit.id,
             RecordTagAudit.client_id,
             RecordTagAudit.user_id,
@@ -590,6 +592,7 @@ async def get_record_audit_log(
         stmt,
         lambda row: AuditModel(
             table=row.table,
+            tag_id=row.tag_id,
             audit_id=row.id,
             client_id=row.client_id,
             user_id=row.user_id,
