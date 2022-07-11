@@ -35,6 +35,7 @@ def index():
 def view(id):
     record = api.get(f'/record/{id}')
     catalog_records = api.get(f'/record/{id}/catalog')
+    audit_records = api.get(f'/record/{id}/audit')
 
     migrated_tag = next((tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.MIGRATED), None)
 
@@ -59,6 +60,7 @@ def view(id):
         qc_tags=qc_tags,
         embargo_tags=embargo_tags,
         catalog_records=catalog_records,
+        audit_records=audit_records,
     )
 
 

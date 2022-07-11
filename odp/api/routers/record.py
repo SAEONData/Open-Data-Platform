@@ -563,7 +563,7 @@ async def list_audit_records(
 
     audit_subq = union_all(
         select(
-            literal_column("'record_audit'").label('table'),
+            literal_column("'record'").label('table'),
             RecordAudit.id,
             RecordAudit.client_id,
             RecordAudit.user_id,
@@ -571,7 +571,7 @@ async def list_audit_records(
             RecordAudit.timestamp
         ).where(RecordAudit._id == record_id),
         select(
-            literal_column("'record_tag_audit'").label('table'),
+            literal_column("'record_tag'").label('table'),
             RecordTagAudit.id,
             RecordTagAudit.client_id,
             RecordTagAudit.user_id,
@@ -589,12 +589,12 @@ async def list_audit_records(
     return paginator.paginate(
         stmt,
         lambda row: AuditModel(
-            audit_table=row.table,
+            table=row.table,
             audit_id=row.id,
-            audit_client_id=row.client_id,
-            audit_user_id=row.user_id,
-            audit_user_name=row.user_name,
-            audit_command=row.command,
-            audit_timestamp=row.timestamp.isoformat(),
+            client_id=row.client_id,
+            user_id=row.user_id,
+            user_name=row.user_name,
+            command=row.command,
+            timestamp=row.timestamp.isoformat(),
         ),
     )

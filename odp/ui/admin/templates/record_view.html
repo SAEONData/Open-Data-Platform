@@ -41,6 +41,11 @@
                 Catalog Records
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#audit-log" type="button" role="tab">
+                Audit Log
+            </button>
+        </li>
     </ul>
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
@@ -124,6 +129,15 @@
                     </a>
                 </td>
                 <td>{{ catalog_record.timestamp|timestamp }}</td>
+            {% endcall %}
+        </div>
+        <div id="audit-log" class="tab-pane fade" role="tabpanel">
+            {% call(audit_record) render_table(audit_records, 'Table', 'Command', 'User', 'Client', 'Timestamp', hide_id=True) %}
+                <td>{{ audit_record.table }}</td>
+                <td>{{ audit_record.command }}</td>
+                <td>{{ obj_link('users', audit_record.user_id, audit_record.user_name) }}</td>
+                <td>{{ obj_link('clients', audit_record.client_id) }}</td>
+                <td>{{ audit_record.timestamp|timestamp }}</td>
             {% endcall %}
         </div>
     </div>

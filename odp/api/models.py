@@ -220,42 +220,42 @@ class UserModelIn(BaseModel):
 
 
 class AuditModel(BaseModel):
-    audit_table: str
+    table: str
     audit_id: int
-    audit_client_id: str
-    audit_user_id: Optional[str]
-    audit_user_name: Optional[str]
-    audit_command: AuditCommand
-    audit_timestamp: str
+    client_id: str
+    user_id: Optional[str]
+    user_name: Optional[str]
+    command: AuditCommand
+    timestamp: str
 
 
 class CollectionAuditModel(AuditModel):
-    id: str
-    name: Optional[str]
-    doi_key: Optional[str]
-    provider_id: Optional[str]
+    collection_id: str
+    collection_name: Optional[str]
+    collection_doi_key: Optional[str]
+    collection_provider_id: Optional[str]
 
 
 class CollectionTagAuditModel(AuditModel):
-    id: str
-    collection_id: str
-    tag_id: str
-    user_id: Optional[str]
-    data: Optional[dict[str, Any]]
+    collection_tag_id: str
+    collection_tag_collection_id: str
+    collection_tag_tag_id: str
+    collection_tag_user_id: Optional[str]
+    collection_tag_data: Optional[dict[str, Any]]
 
 
 class RecordAuditModel(AuditModel):
-    id: str
-    doi: Optional[str]
-    sid: Optional[str]
-    metadata: Optional[dict[str, Any]]
-    collection_id: Optional[str]
-    schema_id: Optional[str]
+    record_id: str
+    record_doi: Optional[str]
+    record_sid: Optional[str]
+    record_metadata: Optional[dict[str, Any]]
+    record_collection_id: Optional[str]
+    record_schema_id: Optional[str]
 
 
 class RecordTagAuditModel(AuditModel):
-    id: str
-    record_id: str
-    tag_id: str
-    user_id: Optional[str]
-    data: Optional[dict[str, Any]]
+    record_tag_id: str
+    record_tag_record_id: str
+    record_tag_tag_id: str
+    record_tag_user_id: Optional[str]
+    record_tag_data: Optional[dict[str, Any]]
