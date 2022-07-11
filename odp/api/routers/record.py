@@ -550,7 +550,7 @@ async def get_catalog_record(
     '/{record_id}/audit',
     response_model=Page[AuditModel],
 )
-async def list_audit_records(
+async def get_record_audit_log(
         record_id: str,
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
         paginator: Paginator = Depends(),

@@ -3,7 +3,7 @@ from random import randint
 
 from fastapi import APIRouter, Depends, HTTPException
 from jschon import JSON, JSONSchema
-from sqlalchemy import func, select
+from sqlalchemy import func, literal_column, select, union_all
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import DOI_PREFIX, ODPScope
@@ -11,9 +11,9 @@ from odp.api.lib.auth import Authorize, Authorized, TagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_tag_schema
 from odp.api.lib.utils import output_tag_instance_model
-from odp.api.models import CollectionModel, CollectionModelIn, TagInstanceModel, TagInstanceModelIn
+from odp.api.models import AuditModel, CollectionModel, CollectionModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
-from odp.db.models import AuditCommand, Collection, CollectionAudit, CollectionTag, CollectionTagAudit, Record, Tag, TagCardinality, TagType
+from odp.db.models import AuditCommand, Collection, CollectionAudit, CollectionTag, CollectionTagAudit, Record, Tag, TagCardinality, TagType, User
 
 router = APIRouter()
 
@@ -351,3 +351,57 @@ async def get_new_doi(
             break
 
     return doi
+
+
+@router.get(
+    '/{collection_id}/audit',
+    response_model=Page[AuditModel],
+)
+async def get_collection_audit_log(
+        collection_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_READ)),
+        paginator: Paginator = Depends(),
+):
+    if auth.collection_ids != '*' and collection_id not in auth.collection_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not Session.get(Collection, collection_id):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    audit_subq = union_all(
+        select(
+            literal_column("'collection'").label('table'),
+            CollectionAudit.id,
+            CollectionAudit.client_id,
+            CollectionAudit.user_id,
+            CollectionAudit.command,
+            CollectionAudit.timestamp
+        ).where(CollectionAudit._id == collection_id),
+        select(
+            literal_column("'collection_tag'").label('table'),
+            CollectionTagAudit.id,
+            CollectionTagAudit.client_id,
+            CollectionTagAudit.user_id,
+            CollectionTagAudit.command,
+            CollectionTagAudit.timestamp
+        ).where(CollectionTagAudit._collection_id == collection_id)
+    ).subquery()
+
+    stmt = (
+        select(audit_subq, User.name.label('user_name')).
+        outerjoin(User, audit_subq.c.user_id == User.id)
+    )
+
+    paginator.sort = 'timestamp'
+    return paginator.paginate(
+        stmt,
+        lambda row: AuditModel(
+            table=row.table,
+            audit_id=row.id,
+            client_id=row.client_id,
+            user_id=row.user_id,
+            user_name=row.user_name,
+            command=row.command,
+            timestamp=row.timestamp.isoformat(),
+        ),
+    )
