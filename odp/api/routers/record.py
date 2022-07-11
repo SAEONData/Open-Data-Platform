@@ -12,7 +12,8 @@ from odp.api.lib.auth import Authorize, Authorized, TagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_metadata_schema, get_tag_schema
 from odp.api.lib.utils import output_tag_instance_model
-from odp.api.models import AuditModel, CatalogRecordModel, PublishedRecordModel, RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
+from odp.api.models import (AuditModel, CatalogRecordModel, PublishedRecordModel, RecordAuditModel, RecordModel, RecordModelIn, RecordTagAuditModel,
+                            TagInstanceModel, TagInstanceModelIn)
 from odp.db import Session
 from odp.db.models import (AuditCommand, CatalogRecord, Collection, CollectionTag, PublishedDOI, Record, RecordAudit, RecordTag, RecordTagAudit,
                            SchemaType, Tag, TagCardinality, TagType, User)
@@ -600,4 +601,85 @@ async def get_record_audit_log(
             command=row.command,
             timestamp=row.timestamp.isoformat(),
         ),
+    )
+
+
+@router.get(
+    '/{record_id}/record_audit/{record_audit_id}',
+    response_model=RecordAuditModel,
+)
+async def get_record_audit_entry(
+        record_id: str,
+        record_audit_id: int,
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
+):
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not (row := Session.execute(
+        select(RecordAudit, User.name.label('user_name')).
+        outerjoin(User, RecordAudit.user_id == User.id).
+        where(RecordAudit.id == record_audit_id).
+        where(RecordAudit._id == record_id)
+    ).one_or_none()):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    return RecordAuditModel(
+        table='record',
+        tag_id=None,
+        audit_id=row.RecordAudit.id,
+        client_id=row.RecordAudit.client_id,
+        user_id=row.RecordAudit.user_id,
+        user_name=row.user_name,
+        command=row.RecordAudit.command,
+        timestamp=row.RecordAudit.timestamp.isoformat(),
+        record_id=row.RecordAudit._id,
+        record_doi=row.RecordAudit._doi,
+        record_sid=row.RecordAudit._sid,
+        record_metadata=row.RecordAudit._metadata,
+        record_collection_id=row.RecordAudit._collection_id,
+        record_schema_id=row.RecordAudit._schema_id,
+    )
+
+
+@router.get(
+    '/{record_id}/record_tag_audit/{record_tag_audit_id}',
+    response_model=RecordTagAuditModel,
+)
+async def get_record_tag_audit_entry(
+        record_id: str,
+        record_tag_audit_id: int,
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
+):
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    if not (row := Session.execute(
+        select(RecordTagAudit, User.name.label('user_name')).
+        outerjoin(User, RecordTagAudit.user_id == User.id).
+        where(RecordTagAudit.id == record_tag_audit_id).
+        where(RecordTagAudit._record_id == record_id)
+    ).one_or_none()):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    return RecordTagAuditModel(
+        table='record_tag',
+        tag_id=row.RecordTagAudit._tag_id,
+        audit_id=row.RecordTagAudit.id,
+        client_id=row.RecordTagAudit.client_id,
+        user_id=row.RecordTagAudit.user_id,
+        user_name=row.user_name,
+        command=row.RecordTagAudit.command,
+        timestamp=row.RecordTagAudit.timestamp.isoformat(),
+        record_tag_id=row.RecordTagAudit._id,
+        record_tag_record_id=row.RecordTagAudit._record_id,
+        record_tag_tag_id=row.RecordTagAudit._tag_id,
+        record_tag_user_id=row.RecordTagAudit._user_id,
+        record_tag_data=row.RecordTagAudit._data,
     )
