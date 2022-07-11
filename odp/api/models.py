@@ -3,14 +3,9 @@ from typing import Any, Optional
 
 from pydantic import AnyHttpUrl, BaseModel, Field, root_validator, validator
 
-from odp.db.models import TagCardinality
+from odp.db.models import AuditCommand, TagCardinality
 from odp.lib.formats import DOI_REGEX, ID_REGEX, SID_REGEX
 from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
-
-
-# Note: reordering models alphabetically with the help of
-# `from __future__ import annotations` causes Pydantic to not
-# fully instantiate forward ref'd fields, which breaks stuff.
 
 
 class TagInstanceModel(BaseModel):
@@ -222,3 +217,45 @@ class UserModelIn(BaseModel):
     id: str
     active: bool
     role_ids: list[str]
+
+
+class AuditModel(BaseModel):
+    audit_table: str
+    audit_id: int
+    audit_client_id: str
+    audit_user_id: Optional[str]
+    audit_user_name: Optional[str]
+    audit_command: AuditCommand
+    audit_timestamp: str
+
+
+class CollectionAuditModel(AuditModel):
+    id: str
+    name: Optional[str]
+    doi_key: Optional[str]
+    provider_id: Optional[str]
+
+
+class CollectionTagAuditModel(AuditModel):
+    id: str
+    collection_id: str
+    tag_id: str
+    user_id: Optional[str]
+    data: Optional[dict[str, Any]]
+
+
+class RecordAuditModel(AuditModel):
+    id: str
+    doi: Optional[str]
+    sid: Optional[str]
+    metadata: Optional[dict[str, Any]]
+    collection_id: Optional[str]
+    schema_id: Optional[str]
+
+
+class RecordTagAuditModel(AuditModel):
+    id: str
+    record_id: str
+    tag_id: str
+    user_id: Optional[str]
+    data: Optional[dict[str, Any]]

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from jschon import JSON, JSONSchema
-from sqlalchemy import select
+from sqlalchemy import literal_column, select, union_all
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPCollectionTag, ODPScope
@@ -12,10 +12,10 @@ from odp.api.lib.auth import Authorize, Authorized, TagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_metadata_schema, get_tag_schema
 from odp.api.lib.utils import output_tag_instance_model
-from odp.api.models import CatalogRecordModel, PublishedRecordModel, RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
+from odp.api.models import AuditModel, CatalogRecordModel, PublishedRecordModel, RecordModel, RecordModelIn, TagInstanceModel, TagInstanceModelIn
 from odp.db import Session
 from odp.db.models import (AuditCommand, CatalogRecord, Collection, CollectionTag, PublishedDOI, Record, RecordAudit, RecordTag, RecordTagAudit,
-                           SchemaType, Tag, TagCardinality, TagType)
+                           SchemaType, Tag, TagCardinality, TagType, User)
 
 router = APIRouter()
 
@@ -544,3 +544,57 @@ async def get_catalog_record(
         raise HTTPException(HTTP_403_FORBIDDEN)
 
     return output_catalog_record_model(catalog_record)
+
+
+@router.get(
+    '/{record_id}/audit',
+    response_model=Page[AuditModel],
+)
+async def list_audit_records(
+        record_id: str,
+        auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
+        paginator: Paginator = Depends(),
+):
+    if not (record := Session.get(Record, record_id)):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
+        raise HTTPException(HTTP_403_FORBIDDEN)
+
+    audit_subq = union_all(
+        select(
+            literal_column("'record_audit'").label('table'),
+            RecordAudit.id,
+            RecordAudit.client_id,
+            RecordAudit.user_id,
+            RecordAudit.command,
+            RecordAudit.timestamp
+        ).where(RecordAudit._id == record_id),
+        select(
+            literal_column("'record_tag_audit'").label('table'),
+            RecordTagAudit.id,
+            RecordTagAudit.client_id,
+            RecordTagAudit.user_id,
+            RecordTagAudit.command,
+            RecordTagAudit.timestamp
+        ).where(RecordTagAudit._record_id == record_id)
+    ).subquery()
+
+    stmt = (
+        select(audit_subq, User.name.label('user_name')).
+        outerjoin(User, audit_subq.c.user_id == User.id)
+    )
+
+    paginator.sort = 'timestamp'
+    return paginator.paginate(
+        stmt,
+        lambda row: AuditModel(
+            audit_table=row.table,
+            audit_id=row.id,
+            audit_client_id=row.client_id,
+            audit_user_id=row.user_id,
+            audit_user_name=row.user_name,
+            audit_command=row.command,
+            audit_timestamp=row.timestamp.isoformat(),
+        ),
+    )
