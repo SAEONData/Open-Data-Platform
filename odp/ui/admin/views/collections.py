@@ -27,11 +27,13 @@ def index():
 @api.client(ODPScope.COLLECTION_READ)
 def view(id):
     collection = api.get(f'/collection/{id}')
+    audit_records = api.get(f'/collection/{id}/audit')
     return render_template(
         'collection_view.html',
         collection=collection,
         ready_tag=get_tag_instance(collection, ODPCollectionTag.READY),
         frozen_tag=get_tag_instance(collection, ODPCollectionTag.FROZEN),
+        audit_records=audit_records,
     )
 
 

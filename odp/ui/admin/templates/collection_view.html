@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% from 'macros.html' import render_info, render_buttons, render_button_prompt_form,
+    render_table, obj_link, obj_links %}
 
 {% block web_title %}
     {{ super() }} |
@@ -8,56 +10,80 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_info, render_buttons, render_button_prompt_form, obj_link, obj_links %}
-    {% call(prop) render_info(collection, 'Name', 'Provider', 'Projects', 'DOI key', 'Records',
-            'Ready', 'Frozen', 'Timestamp') %}
-        {% if prop == 'Name' %}
-            {{ collection.name }}
-        {% elif prop == 'Provider' %}
-            {{ obj_link('providers', collection.provider_id) }}
-        {% elif prop == 'Projects' %}
-            {{ obj_links('projects', collection.project_ids, newlines=True) }}
-        {% elif prop == 'DOI key' %}
-            {{ collection.doi_key if collection.doi_key }}
-        {% elif prop == 'Records' %}
-            <a href="{{ url_for('records.index', collection=collection.id) }}" class="text-decoration-none">
-                {{ collection.record_count }}
-            </a>
-        {% elif prop == 'Ready' %}
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                Info
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#audit-log" type="button" role="tab">
+                Audit Log
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div id="info" class="tab-pane fade show active" role="tabpanel">
+            {% call(prop) render_info(collection, 'Name', 'Provider', 'Projects', 'DOI key', 'Records',
+                    'Ready', 'Frozen', 'Timestamp') %}
+                {% if prop == 'Name' %}
+                    {{ collection.name }}
+                {% elif prop == 'Provider' %}
+                    {{ obj_link('providers', collection.provider_id) }}
+                {% elif prop == 'Projects' %}
+                    {{ obj_links('projects', collection.project_ids, newlines=True) }}
+                {% elif prop == 'DOI key' %}
+                    {{ collection.doi_key if collection.doi_key }}
+                {% elif prop == 'Records' %}
+                    <a href="{{ url_for('records.index', collection=collection.id) }}" class="text-decoration-none">
+                        {{ collection.record_count }}
+                    </a>
+                {% elif prop == 'Ready' %}
+                    {% if ready_tag %}
+                        {{ ready_tag.timestamp|timestamp }} by {{ obj_link('users', ready_tag.user_id, ready_tag.user_name) }}
+                    {% endif %}
+                {% elif prop == 'Frozen' %}
+                    {% if frozen_tag %}
+                        {{ frozen_tag.timestamp|timestamp }} by {{ obj_link('users', frozen_tag.user_id, frozen_tag.user_name) }}
+                    {% endif %}
+                {% elif prop == 'Timestamp' %}
+                    {{ collection.timestamp|timestamp }}
+                {% endif %}
+            {% endcall %}
             {% if ready_tag %}
-                {{ ready_tag.timestamp|timestamp }} by {{ obj_link('users', ready_tag.user_id, ready_tag.user_name) }}
+                {% set ready_btn = ['unready'] %}
+            {% else %}
+                {% set ready_btn = ['ready'] %}
             {% endif %}
-        {% elif prop == 'Frozen' %}
             {% if frozen_tag %}
-                {{ frozen_tag.timestamp|timestamp }} by {{ obj_link('users', frozen_tag.user_id, frozen_tag.user_name) }}
+                {% set freeze_btn = ['unfreeze'] %}
+            {% else %}
+                {% set freeze_btn = ['freeze'] %}
             {% endif %}
-        {% elif prop == 'Timestamp' %}
-            {{ collection.timestamp|timestamp }}
-        {% endif %}
-    {% endcall %}
-    {% if ready_tag %}
-        {% set ready_btn = ['unready'] %}
-    {% else %}
-        {% set ready_btn = ['ready'] %}
-    {% endif %}
-    {% if frozen_tag %}
-        {% set freeze_btn = ['unfreeze'] %}
-    {% else %}
-        {% set freeze_btn = ['freeze'] %}
-    {% endif %}
-    {% call(btn) render_buttons(collection, edit=True, delete=True, custom=ready_btn + freeze_btn) %}
-        {% if btn == 'ready' %}
-            {{ render_button_prompt_form('.tag_ready', collection.id, 'Ready', 'success',
-                'Are you sure you want to tag the collection as ready for publication?') }}
-        {% elif btn == 'unready' %}
-            {{ render_button_prompt_form('.untag_ready', collection.id, 'Un-ready', 'warning',
-                'Are you sure you want to remove the ready for publication tag?') }}
-        {% elif btn == 'freeze' %}
-            {{ render_button_prompt_form('.tag_frozen', collection.id, 'Freeze', 'warning',
-                'Are you sure you want to freeze the collection?') }}
-        {% elif btn == 'unfreeze' %}
-            {{ render_button_prompt_form('.untag_frozen', collection.id, 'Un-freeze', 'success',
-                'Are you sure you want to un-freeze the collection?') }}
-        {% endif %}
-    {% endcall %}
+            {% call(btn) render_buttons(collection, edit=True, delete=True, custom=ready_btn + freeze_btn) %}
+                {% if btn == 'ready' %}
+                    {{ render_button_prompt_form('.tag_ready', collection.id, 'Ready', 'success',
+                        'Are you sure you want to tag the collection as ready for publication?') }}
+                {% elif btn == 'unready' %}
+                    {{ render_button_prompt_form('.untag_ready', collection.id, 'Un-ready', 'warning',
+                        'Are you sure you want to remove the ready for publication tag?') }}
+                {% elif btn == 'freeze' %}
+                    {{ render_button_prompt_form('.tag_frozen', collection.id, 'Freeze', 'warning',
+                        'Are you sure you want to freeze the collection?') }}
+                {% elif btn == 'unfreeze' %}
+                    {{ render_button_prompt_form('.untag_frozen', collection.id, 'Un-freeze', 'success',
+                        'Are you sure you want to un-freeze the collection?') }}
+                {% endif %}
+            {% endcall %}
+        </div>
+        <div id="audit-log" class="tab-pane fade" role="tabpanel">
+            {% call(audit_record) render_table(audit_records, 'Table', 'Command', 'User', 'Client', 'Timestamp', hide_id=True) %}
+                <td>{{ audit_record.table }}</td>
+                <td>{{ audit_record.command }}</td>
+                <td>{{ obj_link('users', audit_record.user_id, audit_record.user_name) }}</td>
+                <td>{{ obj_link('clients', audit_record.client_id) }}</td>
+                <td>{{ audit_record.timestamp|timestamp }}</td>
+            {% endcall %}
+        </div>
+    </div>
 {% endblock %}
