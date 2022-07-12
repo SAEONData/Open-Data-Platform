@@ -3,7 +3,7 @@
 {% block web_title %}
     {{ super() }} |
     {% block heading %}
-        Record Audit: {{ audit.record_doi or audit.record_sid or audit.record_id }}
+        {{ audit.tag_id }} Audit: {{ audit.collection_name or audit.collection_id }}
     {% endblock %}
 {% endblock %}
 
@@ -15,8 +15,8 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#metadata" type="button" role="tab">
-                Metadata
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#data" type="button" role="tab">
+                Tag Data
             </button>
         </li>
     </ul>
@@ -32,17 +32,13 @@
                 {% set action = 'Deleted' %}
             {% endif %}
 
-            {% call(prop) render_info(audit, 'Id', 'DOI', 'SID', 'Collection', 'Schema', action, hide_id=True) %}
-                {% if prop == 'Id' %}
-                    {{ audit.record_id }}
-                {% elif prop == 'DOI' %}
-                    {{ audit.record_doi if audit.record_doi }}
-                {% elif prop == 'SID' %}
-                    {{ audit.record_sid if audit.record_sid }}
-                {% elif prop == 'Collection' %}
-                    {{ obj_link('collections', audit.record_collection_id) }}
-                {% elif prop == 'Schema' %}
-                    {{ obj_link('schemas', audit.record_schema_id) }}
+            {% call(prop) render_info(audit, 'Collection id', 'Tag id', 'Tag owner', action, hide_id=True) %}
+                {% if prop == 'Collection id' %}
+                    {{ obj_link('collections', audit.collection_tag_collection_id) }}
+                {% elif prop == 'Tag id' %}
+                    {{ obj_link('tags', audit.tag_id) }}
+                {% elif prop == 'Tag owner' %}
+                    {{ obj_link('users', audit.collection_tag_user_id, audit.collection_tag_user_name) }}
                 {% elif prop == action %}
                     {{ audit.timestamp|timestamp }} by
                     {% if audit.user_id %}
@@ -52,9 +48,9 @@
                 {% endif %}
             {% endcall %}
         </div>
-        <div id="metadata" class="tab-pane fade" role="tabpanel">
+        <div id="data" class="tab-pane fade" role="tabpanel">
             <pre class="m-3">
-                {{- audit.record_metadata|format_json -}}
+                {{- audit.collection_tag_data|format_json -}}
             </pre>
         </div>
     </div>

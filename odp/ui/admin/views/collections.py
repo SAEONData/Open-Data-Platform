@@ -146,3 +146,17 @@ def get_new_doi(id):
         return {'doi': api.get(f'/collection/{id}/doi/new')}
     except api.ODPAPIError as e:
         return e.error_detail
+
+
+@bp.route('/<id>/audit/<collection_audit_id>')
+@api.client(ODPScope.COLLECTION_READ)
+def view_audit_detail(id, collection_audit_id):
+    audit_detail = api.get(f'/collection/{id}/collection_audit/{collection_audit_id}')
+    return render_template('collection_audit_view.html', audit=audit_detail)
+
+
+@bp.route('/<id>/tag_audit/<collection_tag_audit_id>')
+@api.client(ODPScope.COLLECTION_READ)
+def view_tag_audit_detail(id, collection_tag_audit_id):
+    audit_detail = api.get(f'/collection/{id}/collection_tag_audit/{collection_tag_audit_id}')
+    return render_template('collection_tag_audit_view.html', audit=audit_detail)

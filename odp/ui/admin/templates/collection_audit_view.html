@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Collection Audit: {{ audit.collection_name or audit.collection_id }}
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_info, obj_link %}
+
+    {% if audit.command == 'insert' %}
+        {% set action = 'Created' %}
+    {% elif audit.command == 'update' %}
+        {% set action = 'Updated' %}
+    {% elif audit.command == 'delete' %}
+        {% set action = 'Deleted' %}
+    {% endif %}
+
+    {% call(prop) render_info(audit, 'Id', 'Name', 'Provider', 'DOI key', action, hide_id=True) %}
+        {% if prop == 'Id' %}
+            {{ audit.collection_id }}
+        {% elif prop == 'Name' %}
+            {{ audit.collection_name if audit.collection_name }}
+        {% elif prop == 'Provider' %}
+            {{ obj_link('providers', audit.collection_provider_id) }}
+        {% elif prop == 'DOI key' %}
+            {{ audit.collection_doi_key if audit.collection_doi_key }}
+        {% elif prop == action %}
+            {{ audit.timestamp|timestamp }} by
+            {% if audit.user_id %}
+                {{ obj_link('users', audit.user_id, audit.user_name) }} using
+            {% endif %}
+            {{ obj_link('clients', audit.client_id) }}
+        {% endif %}
+    {% endcall %}
+{% endblock %}

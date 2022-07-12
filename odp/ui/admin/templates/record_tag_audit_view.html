@@ -3,7 +3,7 @@
 {% block web_title %}
     {{ super() }} |
     {% block heading %}
-        {{ audit.tag_id }} Audit: {{ audit.record_doi or audit.record_sid }}
+        {{ audit.tag_id }} Audit: {{ audit.record_doi or audit.record_sid or audit.record_id }}
     {% endblock %}
 {% endblock %}
 
