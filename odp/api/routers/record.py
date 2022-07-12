@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from jschon import JSON, JSONSchema
 from sqlalchemy import literal_column, null, select, union_all
+from sqlalchemy.orm import aliased
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPCollectionTag, ODPScope
@@ -669,9 +670,17 @@ async def get_record_tag_audit_detail(
         if record.collection_id not in auth.collection_ids:
             raise HTTPException(HTTP_403_FORBIDDEN)
 
+    audit_user_alias = aliased(User)
+    tag_user_alias = aliased(User)
+
     if not (row := Session.execute(
-        select(RecordTagAudit, User.name.label('user_name')).
-        outerjoin(User, RecordTagAudit.user_id == User.id).
+        select(
+            RecordTagAudit,
+            audit_user_alias.name.label('audit_user_name'),
+            tag_user_alias.name.label('tag_user_name')
+        ).
+        outerjoin(audit_user_alias, RecordTagAudit.user_id == audit_user_alias.id).
+        outerjoin(tag_user_alias, RecordTagAudit._user_id == tag_user_alias.id).
         where(RecordTagAudit.id == record_tag_audit_id).
         where(RecordTagAudit._record_id == record_id)
     ).one_or_none()):
@@ -683,11 +692,12 @@ async def get_record_tag_audit_detail(
         audit_id=row.RecordTagAudit.id,
         client_id=row.RecordTagAudit.client_id,
         user_id=row.RecordTagAudit.user_id,
-        user_name=row.user_name,
+        user_name=row.audit_user_name,
         command=row.RecordTagAudit.command,
         timestamp=row.RecordTagAudit.timestamp.isoformat(),
         record_tag_id=row.RecordTagAudit._id,
         record_tag_record_id=row.RecordTagAudit._record_id,
         record_tag_user_id=row.RecordTagAudit._user_id,
+        record_tag_user_name=row.tag_user_name,
         record_tag_data=row.RecordTagAudit._data,
     )

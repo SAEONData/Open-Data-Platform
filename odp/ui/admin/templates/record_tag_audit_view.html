@@ -38,7 +38,7 @@
                 {% elif prop == 'Tag id' %}
                     {{ obj_link('tags', audit.tag_id) }}
                 {% elif prop == 'Tag owner' %}
-                    {{ audit.record_tag_user_id if audit.record_tag_user_id }}
+                    {{ obj_link('users', audit.record_tag_user_id, audit.record_tag_user_name) }}
                 {% elif prop == action %}
                     {{ audit.timestamp|timestamp }} by
                     {% if audit.user_id %}

@@ -4,6 +4,7 @@ from random import randint
 from fastapi import APIRouter, Depends, HTTPException
 from jschon import JSON, JSONSchema
 from sqlalchemy import func, literal_column, null, select, union_all
+from sqlalchemy.orm import aliased
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import DOI_PREFIX, ODPScope
@@ -456,9 +457,17 @@ async def get_collection_tag_audit_detail(
     if auth.collection_ids != '*' and collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
+    audit_user_alias = aliased(User)
+    tag_user_alias = aliased(User)
+
     if not (row := Session.execute(
-        select(CollectionTagAudit, User.name.label('user_name')).
-        outerjoin(User, CollectionTagAudit.user_id == User.id).
+        select(
+            CollectionTagAudit,
+            audit_user_alias.name.label('audit_user_name'),
+            tag_user_alias.name.label('tag_user_name')
+        ).
+        outerjoin(audit_user_alias, CollectionTagAudit.user_id == audit_user_alias.id).
+        outerjoin(tag_user_alias, CollectionTagAudit._user_id == tag_user_alias.id).
         where(CollectionTagAudit.id == collection_tag_audit_id).
         where(CollectionTagAudit._collection_id == collection_id)
     ).one_or_none()):
@@ -470,11 +479,12 @@ async def get_collection_tag_audit_detail(
         audit_id=row.CollectionTagAudit.id,
         client_id=row.CollectionTagAudit.client_id,
         user_id=row.CollectionTagAudit.user_id,
-        user_name=row.user_name,
+        user_name=row.audit_user_name,
         command=row.CollectionTagAudit.command,
         timestamp=row.CollectionTagAudit.timestamp.isoformat(),
         collection_tag_id=row.CollectionTagAudit._id,
         collection_tag_collection_id=row.CollectionTagAudit._collection_id,
         collection_tag_user_id=row.CollectionTagAudit._user_id,
+        collection_tag_user_name=row.tag_user_name,
         collection_tag_data=row.CollectionTagAudit._data,
     )

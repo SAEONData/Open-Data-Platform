@@ -241,6 +241,7 @@ class CollectionTagAuditModel(AuditModel):
     collection_tag_id: str
     collection_tag_collection_id: str
     collection_tag_user_id: Optional[str]
+    collection_tag_user_name: Optional[str]
     collection_tag_data: Optional[dict[str, Any]]
 
 
@@ -257,4 +258,5 @@ class RecordTagAuditModel(AuditModel):
     record_tag_id: str
     record_tag_record_id: str
     record_tag_user_id: Optional[str]
+    record_tag_user_name: Optional[str]
     record_tag_data: Optional[dict[str, Any]]
