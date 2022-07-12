@@ -237,3 +237,10 @@ def untag_embargo(id, tag_instance_id):
 def view_catalog_record(id, catalog_id):
     catalog_record = api.get(f'/record/{id}/catalog/{catalog_id}')
     return render_template('catalog_record_view.html', catalog_record=catalog_record)
+
+
+@bp.route('/<id>/audit/<record_audit_id>')
+@api.client(ODPScope.RECORD_READ)
+def view_audit_detail(id, record_audit_id):
+    audit_detail = api.get(f'/record/{id}/record_audit/{record_audit_id}')
+    return render_template('record_audit_view.html', audit_detail=audit_detail)

@@ -132,10 +132,18 @@
             {% endcall %}
         </div>
         <div id="audit-log" class="tab-pane fade" role="tabpanel">
-            {% call(audit_record) render_table(audit_records, 'Table', 'Command', 'Tag', 'User', 'Client', 'Timestamp', hide_id=True) %}
+            {% call(audit_record) render_table(audit_records, 'Table', 'Command', 'Detail', 'User', 'Client', 'Timestamp', hide_id=True) %}
                 <td>{{ audit_record.table }}</td>
                 <td>{{ audit_record.command }}</td>
-                <td>{{ obj_link('tags', audit_record.tag_id) }}</td>
+                <td>
+                    {% if audit_record.table == 'record' %}
+                        <a href="{{ url_for('.view_audit_detail', id=record.id, record_audit_id=audit_record.audit_id) }}" class="text-decoration-none">
+                            Record
+                        </a>
+                    {% else %}
+                        {{ audit_record.tag_id }}
+                    {% endif %}
+                </td>
                 <td>{{ obj_link('users', audit_record.user_id, audit_record.user_name) }}</td>
                 <td>{{ obj_link('clients', audit_record.client_id) }}</td>
                 <td>{{ audit_record.timestamp|timestamp }}</td>

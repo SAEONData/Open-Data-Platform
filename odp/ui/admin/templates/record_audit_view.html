@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Record Audit: {{ audit_detail.record_doi or audit_detail.record_sid }}
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                Info
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#metadata" type="button" role="tab">
+                Metadata
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div id="info" class="tab-pane fade show active" role="tabpanel">
+            {% from 'macros.html' import render_info, obj_link %}
+
+            {% if audit_detail.command == 'insert' %}
+                {% set action = 'Created' %}
+            {% elif audit_detail.command == 'update' %}
+                {% set action = 'Updated' %}
+            {% elif audit_detail.command == 'delete' %}
+                {% set action = 'Deleted' %}
+            {% endif %}
+
+            {% call(prop) render_info(audit_detail, 'DOI', 'SID', 'Collection', 'Schema', action) %}
+                {% if prop == 'DOI' %}
+                    {{ audit_detail.record_doi if audit_detail.record_doi }}
+                {% elif prop == 'SID' %}
+                    {{ audit_detail.record_sid if audit_detail.record_sid }}
+                {% elif prop == 'Collection' %}
+                    {{ obj_link('collections', audit_detail.record_collection_id) }}
+                {% elif prop == 'Schema' %}
+                    {{ obj_link('schemas', audit_detail.record_schema_id) }}
+                {% elif prop == action %}
+                    {{ audit_detail.timestamp|timestamp }} by
+                    {% if audit_detail.user_id %}
+                        {{ obj_link('users', audit_detail.user_id, audit_detail.user_name) }} using
+                    {% endif %}
+                    {{ obj_link('clients', audit_detail.client_id) }}
+                {% endif %}
+            {% endcall %}
+        </div>
+        <div id="metadata" class="tab-pane fade" role="tabpanel">
+            <pre class="m-3">
+                {{- audit_detail.record_metadata|format_json -}}
+            </pre>
+        </div>
+    </div>
+{% endblock %}
