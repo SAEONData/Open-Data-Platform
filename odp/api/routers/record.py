@@ -608,7 +608,7 @@ async def get_record_audit_log(
     '/{record_id}/record_audit/{record_audit_id}',
     response_model=RecordAuditModel,
 )
-async def get_record_audit_entry(
+async def get_record_audit_detail(
         record_id: str,
         record_audit_id: int,
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
@@ -649,7 +649,7 @@ async def get_record_audit_entry(
     '/{record_id}/record_tag_audit/{record_tag_audit_id}',
     response_model=RecordTagAuditModel,
 )
-async def get_record_tag_audit_entry(
+async def get_record_tag_audit_detail(
         record_id: str,
         record_tag_audit_id: int,
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),

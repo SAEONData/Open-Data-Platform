@@ -415,7 +415,7 @@ async def get_collection_audit_log(
     '/{collection_id}/collection_audit/{collection_audit_id}',
     response_model=CollectionAuditModel,
 )
-async def get_collection_audit_entry(
+async def get_collection_audit_detail(
         collection_id: str,
         collection_audit_id: int,
         auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_READ)),
@@ -451,7 +451,7 @@ async def get_collection_audit_entry(
     '/{collection_id}/collection_tag_audit/{collection_tag_audit_id}',
     response_model=CollectionTagAuditModel,
 )
-async def get_collection_tag_audit_entry(
+async def get_collection_tag_audit_detail(
         collection_id: str,
         collection_tag_audit_id: int,
         auth: Authorized = Depends(Authorize(ODPScope.COLLECTION_READ)),
