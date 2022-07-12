@@ -6,3 +6,7 @@
     height: 24px;
     width: 24px;
 }
+
+pre {
+    white-space: pre-wrap;
+}
