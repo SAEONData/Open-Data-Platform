@@ -146,7 +146,9 @@
 {% endmacro %}
 
 {% macro render_info(obj) %}
-{# Render object info in a table. Example usage:
+{# Render object info in a table.
+    To disable automatic id field rendering, pass kwarg hide_id=True.
+    Example usage:
     {% call(prop) render_info(project, 'Name', 'Collections') %}
         {% if prop == 'Name' %}
             {{ project.name }}
@@ -157,10 +159,12 @@
 #}
     <table class="table">
         <tbody>
-            <tr>
-                <th scope="row">Id</th>
-                <td>{{ obj.id }}</td>
-            </tr>
+            {% if not kwargs.get('hide_id') %}
+                <tr>
+                    <th scope="row">Id</th>
+                    <td>{{ obj.id }}</td>
+                </tr>
+            {% endif %}
             {% for prop in varargs %}
                 <tr>
                     <th scope="row">{{ prop }}</th>

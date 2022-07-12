@@ -32,8 +32,10 @@
                 {% set action = 'Deleted' %}
             {% endif %}
 
-            {% call(prop) render_info(audit, 'DOI', 'SID', 'Collection', 'Schema', action) %}
-                {% if prop == 'DOI' %}
+            {% call(prop) render_info(audit, 'Id', 'DOI', 'SID', 'Collection', 'Schema', action, hide_id=True) %}
+                {% if prop == 'Id' %}
+                    {{ audit.record_id }}
+                {% elif prop == 'DOI' %}
                     {{ audit.record_doi if audit.record_doi }}
                 {% elif prop == 'SID' %}
                     {{ audit.record_sid if audit.record_sid }}

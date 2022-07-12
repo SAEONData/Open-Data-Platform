@@ -32,7 +32,7 @@
                 {% set action = 'Deleted' %}
             {% endif %}
 
-            {% call(prop) render_info(audit, 'Record id', 'Tag id', 'Tag owner', action) %}
+            {% call(prop) render_info(audit, 'Record id', 'Tag id', 'Tag owner', action, hide_id=True) %}
                 {% if prop == 'Record id' %}
                     {{ obj_link('records', audit.record_tag_record_id) }}
                 {% elif prop == 'Tag id' %}

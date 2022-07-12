@@ -28,7 +28,7 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% from 'macros.html' import render_info, obj_link %}
-            {% call(prop) render_info(catalog_record, 'Catalog', 'Record id', 'Published', 'Timestamp') %}
+            {% call(prop) render_info(catalog_record, 'Catalog', 'Record id', 'Published', 'Timestamp', hide_id=True) %}
                 {% if prop == 'Catalog' %}
                     {{ obj_link('catalogs', catalog_record.catalog_id) }}
                 {% elif prop == 'Record id' %}
