@@ -141,7 +141,9 @@
                             Record
                         </a>
                     {% else %}
-                        {{ audit_record.tag_id }}
+                        <a href="{{ url_for('.view_tag_audit_detail', id=record.id, record_tag_audit_id=audit_record.audit_id) }}" class="text-decoration-none">
+                            {{ audit_record.tag_id }}
+                        </a>
                     {% endif %}
                 </td>
                 <td>{{ obj_link('users', audit_record.user_id, audit_record.user_name) }}</td>

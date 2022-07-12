@@ -243,4 +243,11 @@ def view_catalog_record(id, catalog_id):
 @api.client(ODPScope.RECORD_READ)
 def view_audit_detail(id, record_audit_id):
     audit_detail = api.get(f'/record/{id}/record_audit/{record_audit_id}')
-    return render_template('record_audit_view.html', audit_detail=audit_detail)
+    return render_template('record_audit_view.html', audit=audit_detail)
+
+
+@bp.route('/<id>/tag_audit/<record_tag_audit_id>')
+@api.client(ODPScope.RECORD_READ)
+def view_tag_audit_detail(id, record_tag_audit_id):
+    audit_detail = api.get(f'/record/{id}/record_tag_audit/{record_tag_audit_id}')
+    return render_template('record_tag_audit_view.html', audit=audit_detail)
