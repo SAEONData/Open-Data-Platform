@@ -556,11 +556,14 @@ async def get_record_audit_log(
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
         paginator: Paginator = Depends(),
 ):
-    if not (record := Session.get(Record, record_id)):
-        raise HTTPException(HTTP_404_NOT_FOUND)
+    # allow retrieving the audit log for a deleted record,
+    # except if auth is collection-specific
+    if auth.collection_ids != '*':
+        if not (record := Session.get(Record, record_id)):
+            raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
-        raise HTTPException(HTTP_403_FORBIDDEN)
+        if record.collection_id not in auth.collection_ids:
+            raise HTTPException(HTTP_403_FORBIDDEN)
 
     audit_subq = union_all(
         select(
@@ -613,11 +616,14 @@ async def get_record_audit_detail(
         record_audit_id: int,
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
 ):
-    if not (record := Session.get(Record, record_id)):
-        raise HTTPException(HTTP_404_NOT_FOUND)
+    # allow retrieving the audit detail for a deleted record,
+    # except if auth is collection-specific
+    if auth.collection_ids != '*':
+        if not (record := Session.get(Record, record_id)):
+            raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
-        raise HTTPException(HTTP_403_FORBIDDEN)
+        if record.collection_id not in auth.collection_ids:
+            raise HTTPException(HTTP_403_FORBIDDEN)
 
     if not (row := Session.execute(
         select(RecordAudit, User.name.label('user_name')).
@@ -654,11 +660,14 @@ async def get_record_tag_audit_detail(
         record_tag_audit_id: int,
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
 ):
-    if not (record := Session.get(Record, record_id)):
-        raise HTTPException(HTTP_404_NOT_FOUND)
+    # allow retrieving the audit detail for a deleted record,
+    # except if auth is collection-specific
+    if auth.collection_ids != '*':
+        if not (record := Session.get(Record, record_id)):
+            raise HTTPException(HTTP_404_NOT_FOUND)
 
-    if auth.collection_ids != '*' and record.collection_id not in auth.collection_ids:
-        raise HTTPException(HTTP_403_FORBIDDEN)
+        if record.collection_id not in auth.collection_ids:
+            raise HTTPException(HTTP_403_FORBIDDEN)
 
     if not (row := Session.execute(
         select(RecordTagAudit, User.name.label('user_name')).

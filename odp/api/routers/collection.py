@@ -366,9 +366,6 @@ async def get_collection_audit_log(
     if auth.collection_ids != '*' and collection_id not in auth.collection_ids:
         raise HTTPException(HTTP_403_FORBIDDEN)
 
-    if not Session.get(Collection, collection_id):
-        raise HTTPException(HTTP_404_NOT_FOUND)
-
     audit_subq = union_all(
         select(
             literal_column("'collection'").label('table'),
