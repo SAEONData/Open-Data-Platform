@@ -679,7 +679,6 @@ async def get_record_tag_audit_detail(
         timestamp=row.RecordTagAudit.timestamp.isoformat(),
         record_tag_id=row.RecordTagAudit._id,
         record_tag_record_id=row.RecordTagAudit._record_id,
-        record_tag_tag_id=row.RecordTagAudit._tag_id,
         record_tag_user_id=row.RecordTagAudit._user_id,
         record_tag_data=row.RecordTagAudit._data,
     )

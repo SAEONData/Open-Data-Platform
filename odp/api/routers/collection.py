@@ -478,7 +478,6 @@ async def get_collection_tag_audit_detail(
         timestamp=row.CollectionTagAudit.timestamp.isoformat(),
         collection_tag_id=row.CollectionTagAudit._id,
         collection_tag_collection_id=row.CollectionTagAudit._collection_id,
-        collection_tag_tag_id=row.CollectionTagAudit._tag_id,
         collection_tag_user_id=row.CollectionTagAudit._user_id,
         collection_tag_data=row.CollectionTagAudit._data,
     )

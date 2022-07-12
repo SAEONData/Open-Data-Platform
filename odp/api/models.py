@@ -240,7 +240,6 @@ class CollectionAuditModel(AuditModel):
 class CollectionTagAuditModel(AuditModel):
     collection_tag_id: str
     collection_tag_collection_id: str
-    collection_tag_tag_id: str
     collection_tag_user_id: Optional[str]
     collection_tag_data: Optional[dict[str, Any]]
 
@@ -257,6 +256,5 @@ class RecordAuditModel(AuditModel):
 class RecordTagAuditModel(AuditModel):
     record_tag_id: str
     record_tag_record_id: str
-    record_tag_tag_id: str
     record_tag_user_id: Optional[str]
     record_tag_data: Optional[dict[str, Any]]
