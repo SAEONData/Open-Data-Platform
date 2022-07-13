@@ -98,8 +98,8 @@ class ClientForm(BaseForm):
     )
 
     def validate_secret(self, field):
-        if field.data and len(field.data) < 6:
-            raise ValidationError('Client secret must be at least 6 characters long.')
+        if field.data and len(field.data) < 16:
+            raise ValidationError('Client secret must be at least 16 characters long.')
 
     def validate_scope_ids(self, field):
         if not field.data:

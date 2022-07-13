@@ -188,7 +188,7 @@ def test_create_client(api, client_batch, scopes, collection_auth):
     r = api(scopes, api_client_collection).post('/client/', json=dict(
         id=client.id,
         name=fake.catch_phrase(),
-        secret=fake.password(),
+        secret=fake.password(length=16),
         scope_ids=scope_ids(client),
         collection_id=client.collection_id,
         grant_types=[],
@@ -231,7 +231,7 @@ def test_create_client_conflict(api, client_batch, collection_auth):
     r = api(scopes, api_client_collection).post('/client/', json=dict(
         id=client.id,
         name=fake.catch_phrase(),
-        secret=fake.password(),
+        secret=fake.password(length=16),
         scope_ids=scope_ids(client),
         collection_id=client.collection_id,
         grant_types=[],
@@ -281,7 +281,7 @@ def test_update_client(api, client_batch, scopes, collection_auth):
     r = api(scopes, api_client_collection).put('/client/', json=dict(
         id=client.id,
         name=fake.catch_phrase(),
-        secret=fake.password(),
+        secret=fake.password(length=16),
         scope_ids=scope_ids(client),
         collection_id=client.collection_id,
         grant_types=[],
@@ -324,7 +324,7 @@ def test_update_client_not_found(api, client_batch, collection_auth):
     r = api(scopes, api_client_collection).put('/client/', json=dict(
         id=client.id,
         name=fake.catch_phrase(),
-        secret=fake.password(),
+        secret=fake.password(length=16),
         scope_ids=scope_ids(client),
         collection_id=client.collection_id,
         grant_types=[],

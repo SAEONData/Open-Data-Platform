@@ -77,7 +77,7 @@ class ClientModel(BaseModel):
 
 class ClientModelIn(ClientModel):
     id: str = Field(..., regex=ID_REGEX)
-    secret: str = Field(None, min_length=6)
+    secret: str = Field(None, min_length=16)
 
 
 class CollectionModel(BaseModel):
