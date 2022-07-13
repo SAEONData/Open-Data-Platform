@@ -82,6 +82,7 @@ async def list_records(
     return paginator.paginate(
         stmt,
         lambda row: output_record_model(row.Record),
+        custom_sort='collection.id, record.doi, record.sid',
     )
 
 
