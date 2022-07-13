@@ -3,19 +3,10 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "properties": {
-        "start": {"type": ["string", "null"], "format": "date"},
+        "start": {"type": "string", "format": "date"},
         "end": {"type": ["string", "null"], "format": "date"},
         "comment": {"type": "string"}
     },
-    "anyOf": [
-        {
-            "properties": {"start": {"type": "string"}},
-            "required": ["start"]
-        },
-        {
-            "properties": {"end": {"type": "string"}},
-            "required": ["end"]
-        }
-    ],
+    "required": ["start", "end"],
     "additionalProperties": false
 }

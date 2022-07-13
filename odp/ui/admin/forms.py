@@ -202,7 +202,6 @@ class RecordTagQCForm(BaseForm):
 class RecordTagEmbargoForm(BaseForm):
     start = DateStringField(
         label='Start date',
-        validators=[optional()],
     )
     end = DateStringField(
         label='End date',

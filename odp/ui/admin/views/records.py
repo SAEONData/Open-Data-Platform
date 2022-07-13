@@ -198,24 +198,21 @@ def tag_embargo(id):
         form = RecordTagEmbargoForm()
 
     if request.method == 'POST' and form.validate():
-        if not form.start.data and not form.end.data:
-            flash('Please specify a start and/or end date.', category='error')
-        else:
-            try:
-                api.post(f'/record/{id}/tag', dict(
-                    tag_id=ODPRecordTag.EMBARGO,
-                    data={
-                        'start': form.start.data.isoformat() if form.start.data else None,
-                        'end': form.end.data.isoformat() if form.end.data else None,
-                        'comment': form.comment.data,
-                    },
-                ))
-                flash(f'{ODPRecordTag.EMBARGO} tag has been set.', category='success')
-                return redirect(url_for('.view', id=id))
+        try:
+            api.post(f'/record/{id}/tag', dict(
+                tag_id=ODPRecordTag.EMBARGO,
+                data={
+                    'start': form.start.data.isoformat(),
+                    'end': form.end.data.isoformat() if form.end.data else None,
+                    'comment': form.comment.data,
+                },
+            ))
+            flash(f'{ODPRecordTag.EMBARGO} tag has been set.', category='success')
+            return redirect(url_for('.view', id=id))
 
-            except api.ODPAPIError as e:
-                if response := api.handle_error(e):
-                    return response
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
 
     return render_template('record_tag_embargo.html', record=record, form=form)
 

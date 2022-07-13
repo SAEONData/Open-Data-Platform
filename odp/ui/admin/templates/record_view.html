@@ -73,7 +73,7 @@
                     {% endfor %}
                 {% elif prop == 'Dataset Embargo' %}
                     {% for embargo_tag in embargo_tags['items'] %}
-                        From {{ embargo_tag.data.start|date if embargo_tag.data.start else '(no start date)' }}
+                        From {{ embargo_tag.data.start|date }}
                         to {{ embargo_tag.data.end|date if embargo_tag.data.end else '(no end date)' }}
                         set by {{ obj_link('users', embargo_tag.user_id, embargo_tag.user_name) }}<br/>
                     {% endfor %}
