@@ -4,6 +4,8 @@
 #
 #    pip-compile
 #
+-e git+https://github.com/marksparkza/jschon.git#egg=jschon
+    # via -r requirements.in
 alembic==1.8.0
     # via -r requirements.in
 anyio==3.6.1
@@ -83,8 +85,6 @@ itsdangerous==2.0.1
     #   flask-wtf
 jinja2==3.1.2
     # via flask
-jschon==0.8.5
-    # via -r requirements.in
 mako==1.2.1
     # via alembic
 markupsafe==2.1.1
