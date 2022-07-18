@@ -15,11 +15,6 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#validity" type="button" role="tab">
-                Validity
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#published-record" type="button" role="tab">
                 Published Record
             </button>
@@ -39,11 +34,6 @@
                     {{ catalog_record.timestamp|timestamp }}
                 {% endif %}
             {% endcall %}
-        </div>
-        <div id="validity" class="tab-pane fade" role="tabpanel">
-            <pre class="m-3">
-                {{- catalog_record.validity|format_json -}}
-            </pre>
         </div>
         <div id="published-record" class="tab-pane fade" role="tabpanel">
             <pre class="m-3">

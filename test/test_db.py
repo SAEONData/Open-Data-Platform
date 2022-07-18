@@ -30,9 +30,8 @@ def test_db_setup():
 
 def test_create_catalog():
     catalog = CatalogFactory()
-    result = Session.execute(select(Catalog, Schema).join(Schema)).one()
-    assert (result.Catalog.id, result.Catalog.schema_id, result.Catalog.schema_type, result.Schema.uri) \
-           == (catalog.id, catalog.schema_id, catalog.schema_type, catalog.schema.uri)
+    result = Session.execute(select(Catalog)).scalar_one()
+    assert result.id == catalog.id
 
 
 def test_create_client():

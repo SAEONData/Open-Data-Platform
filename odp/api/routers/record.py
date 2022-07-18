@@ -52,7 +52,6 @@ def output_catalog_record_model(catalog_record: CatalogRecord) -> CatalogRecordM
         catalog_id=catalog_record.catalog_id,
         record_id=catalog_record.record_id,
         timestamp=catalog_record.timestamp.isoformat(),
-        validity=catalog_record.validity,
         published=catalog_record.published,
         published_record=(PublishedRecordModel(**catalog_record.published_record)
                           if catalog_record.published else None),

@@ -26,9 +26,6 @@ class TagInstanceModelIn(BaseModel):
 
 class CatalogModel(BaseModel):
     id: str
-    schema_id: str
-    schema_uri: str
-    schema_: dict[str, Any]
 
 
 class PublishedMetadataModel(BaseModel):
@@ -57,7 +54,6 @@ class CatalogRecordModel(BaseModel):
     catalog_id: str
     record_id: str
     timestamp: str
-    validity: dict[str, Any]
     published: bool
     published_record: Optional[PublishedRecordModel]
 

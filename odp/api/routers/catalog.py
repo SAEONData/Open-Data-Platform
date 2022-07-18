@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-from jschon import URI
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND
 
@@ -9,7 +8,6 @@ from odp.api.lib.paging import Page, Paginator
 from odp.api.models import CatalogModel, PublishedRecordModel
 from odp.db import Session
 from odp.db.models import Catalog, CatalogRecord
-from odp.lib.schema import schema_catalog
 
 router = APIRouter()
 
@@ -26,9 +24,6 @@ async def list_catalogs(
         select(Catalog),
         lambda row: CatalogModel(
             id=row.Catalog.id,
-            schema_id=row.Catalog.schema_id,
-            schema_uri=row.Catalog.schema.uri,
-            schema_=schema_catalog.get_schema(URI(row.Catalog.schema.uri)).value,
         )
     )
 
@@ -46,9 +41,6 @@ async def get_catalog(
 
     return CatalogModel(
         id=catalog.id,
-        schema_id=catalog.schema_id,
-        schema_uri=catalog.schema.uri,
-        schema_=schema_catalog.get_schema(URI(catalog.schema.uri)).value,
     )
 
 
@@ -69,8 +61,8 @@ async def list_published_records(
         where(CatalogRecord.catalog_id == catalog_id).
         where(CatalogRecord.published)
     )
-    paginator.sort = 'record_id'
 
+    paginator.sort = 'record_id'
     return paginator.paginate(
         stmt,
         lambda row: PublishedRecordModel(**row.CatalogRecord.published_record),

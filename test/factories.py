@@ -40,10 +40,6 @@ def schema_uri_from_type(schema):
             'https://odp.saeon.ac.za/schema/tag/record/qc',
             'https://odp.saeon.ac.za/schema/tag/record/embargo',
         ))
-    elif schema.type == 'catalog':
-        return choice((
-            'https://odp.saeon.ac.za/schema/catalog/saeon',
-        ))
     else:
         return fake.uri()
 
@@ -67,7 +63,7 @@ class SchemaFactory(ODPModelFactory):
         model = Schema
 
     id = factory.Sequence(lambda n: f'{fake.word()}.{n}')
-    type = factory.LazyFunction(lambda: choice(('catalog', 'metadata', 'tag')))
+    type = factory.LazyFunction(lambda: choice(('metadata', 'tag')))
     uri = factory.LazyAttribute(schema_uri_from_type)
     md5 = ''
     timestamp = factory.LazyFunction(lambda: datetime.now(timezone.utc))
@@ -78,7 +74,6 @@ class CatalogFactory(ODPModelFactory):
         model = Catalog
 
     id = factory.Sequence(lambda n: f'{fake.slug()}.{n}')
-    schema = factory.SubFactory(SchemaFactory, type='catalog')
 
 
 class ProviderFactory(ODPModelFactory):
