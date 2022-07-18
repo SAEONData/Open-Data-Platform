@@ -133,6 +133,7 @@ class RecordModel(BaseModel):
     validity: dict[str, Any]
     timestamp: str
     tags: list[TagInstanceModel]
+    published_catalog_ids: list[str]
 
 
 class RecordModelIn(BaseModel):

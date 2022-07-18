@@ -39,6 +39,11 @@ def output_record_model(record: Record) -> RecordModel:
                  output_tag_instance_model(record_tag)
                  for record_tag in record.tags
              ],
+        published_catalog_ids=[
+            catalog_record.catalog_id
+            for catalog_record in record.catalog_records
+            if catalog_record.published
+        ]
     )
 
 

@@ -31,7 +31,7 @@
         </form>
     </div>
     {% call(record) render_table(records, 'Identifier', 'Title', 'Collection', 'Schema', 'Valid',
-            hide_id=True, filter_=filter_) %}
+            'Published', hide_id=True, filter_=filter_) %}
         <th scope="row">{{ obj_link('records', record.id, record.doi or record.sid) }}</th>
         <td>
             {% if record.schema_id == 'SAEON.DataCite4' %}
@@ -45,5 +45,14 @@
         <td>{{ obj_link('collections', record.collection_id) }}</td>
         <td>{{ obj_link('schemas', record.schema_id) }}</td>
         <td>{{ '&#9989;'|safe if record.validity.valid else '&#10060;'|safe }}</td>
+        <td>
+            {% for catalog_id in record.published_catalog_ids %}
+                {% if catalog_id == 'SAEON' %}
+                    <a href="{{ url_for('.view_catalog_record', id=record.id, catalog_id=catalog_id) }}">
+                        <img src="{{ url_for('static', filename='nrf-favicon.ico') }}" height="20">
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </td>
     {% endcall %}
 {% endblock %}
