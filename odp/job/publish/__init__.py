@@ -108,8 +108,9 @@ class Publisher:
         if (result := publication_schema.evaluate(record_json)).valid:
             catalog_record.validity = result.output('flag')
             catalog_record.published = True
-            catalog_record.published_record = self._create_published_record(record_model).dict()
+            self._process_embargoes(record_model)
             self._save_published_doi(record_model)
+            catalog_record.published_record = self._create_published_record(record_model).dict()
         else:
             catalog_record.validity = result.output('detailed')
             catalog_record.published = False
@@ -135,7 +136,6 @@ class Publisher:
 
     def _create_published_metadata(self, record_model: RecordModel) -> list[PublishedMetadataModel]:
         """Create the published metadata outputs for a record."""
-        self._process_embargo_tags(record_model)
         return [
             PublishedMetadataModel(
                 schema_id=record_model.schema_id,
@@ -143,7 +143,18 @@ class Publisher:
             )
         ]
 
-    def _process_embargo_tags(self, record_model: RecordModel) -> None:
+    def _create_published_tags(self, record_model: RecordModel) -> list[PublishedTagInstanceModel]:
+        """Create the published tags for a record."""
+        return [
+            PublishedTagInstanceModel(
+                tag_id=tag_instance.tag_id,
+                data=tag_instance.data,
+                user_name=tag_instance.user_name,
+                timestamp=tag_instance.timestamp,
+            ) for tag_instance in record_model.tags if tag_instance.public
+        ]
+
+    def _process_embargoes(self, record_model: RecordModel) -> None:
         """Check if a record is currently subject to an embargo and, if so,
         strip out download links / embedded datasets from the metadata."""
         current_date = date.today()
@@ -179,17 +190,6 @@ class Publisher:
                         item['linkage'] = None
                 except KeyError:
                     pass
-
-    def _create_published_tags(self, record_model: RecordModel) -> list[PublishedTagInstanceModel]:
-        """Create the published tags for a record."""
-        return [
-            PublishedTagInstanceModel(
-                tag_id=tag_instance.tag_id,
-                data=tag_instance.data,
-                user_name=tag_instance.user_name,
-                timestamp=tag_instance.timestamp,
-            ) for tag_instance in record_model.tags if tag_instance.public
-        ]
 
     def _save_published_doi(self, record_model: RecordModel) -> None:
         """Permanently save a DOI when it is first published."""
