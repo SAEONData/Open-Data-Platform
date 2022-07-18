@@ -4,7 +4,6 @@ from enum import Enum
 class SchemaType(str, Enum):
     metadata = 'metadata'
     tag = 'tag'
-    catalog = 'catalog'
 
     def __repr__(self):
         return repr(self.value)

@@ -53,9 +53,5 @@ class ODPTagSchema(str, Enum):
     RECORD_MIGRATED = 'Tag.Record.Migrated'
 
 
-class ODPCatalogSchema(str, Enum):
-    SAEON = 'Catalog.SAEON'
-
-
 class ODPCatalog(str, Enum):
     SAEON = 'SAEON'

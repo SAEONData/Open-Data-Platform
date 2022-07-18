@@ -19,6 +19,5 @@ class CatalogRecord(Base):
     record = relationship('Record', viewonly=True)
 
     timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
-    validity = Column(JSONB, nullable=False)
     published = Column(Boolean, nullable=False)
     published_record = Column(JSONB)

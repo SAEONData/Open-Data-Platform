@@ -1,15 +1,13 @@
 import logging
 from datetime import date, datetime
 
-from jschon import JSON, URI
 from sqlalchemy import func, or_, select
 
-from odp import ODPMetadataSchema, ODPRecordTag
+from odp import ODPCollectionTag, ODPMetadataSchema, ODPRecordTag
 from odp.api.models import PublishedMetadataModel, PublishedRecordModel, PublishedTagInstanceModel, RecordModel
 from odp.api.routers.record import output_record_model
 from odp.db import Session
-from odp.db.models import Catalog, CatalogRecord, Collection, PublishedDOI, Record, RecordTag
-from odp.lib.schema import schema_catalog
+from odp.db.models import CatalogRecord, Collection, PublishedDOI, Record, RecordTag
 
 logger = logging.getLogger(__name__)
 
@@ -37,22 +35,18 @@ class Publisher:
 
         * there is no corresponding catalog_record entry; or
         * the record has any embargo tags; or
-        * catalog_record.timestamp is less than any of the following:
+        * catalog_record.timestamp is less than any of:
 
-          * catalog.schema.timestamp
           * collection.timestamp
           * record.timestamp
 
         :return: a list of (record_id, timestamp) tuples, where
             timestamp is that of the latest contributing change
         """
-        catalog = Session.get(Catalog, self.catalog_id)
-
         records_subq = (
             select(
                 Record.id.label('record_id'),
                 func.greatest(
-                    catalog.schema.timestamp,
                     Collection.timestamp,
                     Record.timestamp,
                 ).label('max_timestamp')
@@ -95,24 +89,18 @@ class Publisher:
         The catalog_record entry is stamped with the `timestamp` of the latest
         contributing change (from catalog/record/record_tag/collection_tag).
         """
-        catalog = Session.get(Catalog, self.catalog_id)
-        record = Session.get(Record, record_id)
         catalog_record = (Session.get(CatalogRecord, (self.catalog_id, record_id)) or
                           CatalogRecord(catalog_id=self.catalog_id, record_id=record_id))
 
+        record = Session.get(Record, record_id)
         record_model = output_record_model(record)
-        record_json = JSON(record_model.dict())
 
-        publication_schema = schema_catalog.get_schema(URI(catalog.schema.uri))
-
-        if (result := publication_schema.evaluate(record_json)).valid:
-            catalog_record.validity = result.output('flag')
-            catalog_record.published = True
+        if self._can_publish_record(record_model):
             self._process_embargoes(record_model)
             self._save_published_doi(record_model)
+            catalog_record.published = True
             catalog_record.published_record = self._create_published_record(record_model).dict()
         else:
-            catalog_record.validity = result.output('detailed')
             catalog_record.published = False
             catalog_record.published_record = None
 
@@ -121,6 +109,44 @@ class Publisher:
         Session.commit()
 
         return catalog_record.published
+
+    def _can_publish_record(self, record_model: RecordModel) -> bool:
+        # if the record was migrated with a status of published, and there have
+        # been no subsequent changes to the record, then it can be published
+        if any(
+                (tag for tag in record_model.tags
+                 if tag.tag_id == ODPRecordTag.MIGRATED and tag.data['published'] and
+                    datetime.fromisoformat(tag.timestamp) >= datetime.fromisoformat(record_model.timestamp))
+        ):
+            return True
+
+        # if the record is invalid against the metadata schema, then it cannot be published
+        if not record_model.validity['valid']:
+            return False
+
+        # if the collection is not tagged as ready, then the record cannot be published
+        if not any(
+                (tag for tag in record_model.tags
+                 if tag.tag_id == ODPCollectionTag.READY)
+        ):
+            return False
+
+        # if the record has any QC tags with a status of failed, then it cannot be published
+        if any(
+                (tag for tag in record_model.tags
+                 if tag.tag_id == ODPRecordTag.QC and not tag.data['pass_'])
+        ):
+            return False
+
+        # if the record does not have any QC tags with a status of passed, then it cannot be published
+        if not any(
+                (tag for tag in record_model.tags
+                 if tag.tag_id == ODPRecordTag.QC and tag.data['pass_'])
+        ):
+            return False
+
+        # all checks have passed; the record can be published
+        return True
 
     def _create_published_record(self, record_model: RecordModel) -> PublishedRecordModel:
         """Create the published form of a record."""

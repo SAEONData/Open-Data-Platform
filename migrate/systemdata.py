@@ -27,7 +27,7 @@ sys.path.append(str(rootdir))
 dotenv_path = pathlib.Path.cwd() / '.env'
 load_dotenv(dotenv_path)
 
-from odp import ODPCatalog, ODPCatalogSchema, ODPCollectionTag, ODPMetadataSchema, ODPRecordTag, ODPScope, ODPTagSchema
+from odp import ODPCatalog, ODPCollectionTag, ODPMetadataSchema, ODPRecordTag, ODPScope, ODPTagSchema
 from odp.db import Base, Session, engine
 from odp.db.models import Catalog, Client, Role, Schema, SchemaType, Scope, ScopeType, Tag, User, UserRole
 from odp.lib.hydra import GrantType, HydraAdminAPI, HydraScope, ResponseType
@@ -172,8 +172,7 @@ def init_schemas():
         schema_data = yaml.safe_load(f)
 
     for schema_id in (schema_ids := [s.value for s in ODPMetadataSchema] +
-                                    [s.value for s in ODPTagSchema] +
-                                    [s.value for s in ODPCatalogSchema]):
+                                    [s.value for s in ODPTagSchema]):
         schema_spec = schema_data[schema_id]
         schema_type = schema_spec['type']
         schema = Session.get(Schema, (schema_id, schema_type)) or Schema(id=schema_id, type=schema_type)
@@ -230,18 +229,9 @@ def init_roles():
 
 def init_catalogs():
     """Create or update catalog definitions."""
-    with open(datadir / 'catalogs.yml') as f:
-        catalog_data = yaml.safe_load(f)
-
     for catalog_id in (catalog_ids := [c.value for c in ODPCatalog]):
-        catalog_spec = catalog_data[catalog_id]
         catalog = Session.get(Catalog, catalog_id) or Catalog(id=catalog_id)
-        catalog.schema_id = catalog_spec['schema_id']
-        catalog.schema_type = SchemaType.catalog
         catalog.save()
-
-    if orphaned_yml_catalogs := [catalog_id for catalog_id in catalog_data if catalog_id not in catalog_ids]:
-        print(f'Warning: orphaned catalog definitions in catalogs.yml {orphaned_yml_catalogs}')
 
     if orphaned_db_catalogs := Session.execute(select(Catalog.id).where(Catalog.id.not_in(catalog_ids))).scalars().all():
         print(f'Warning: orphaned catalog definitions in catalog table {orphaned_db_catalogs}')

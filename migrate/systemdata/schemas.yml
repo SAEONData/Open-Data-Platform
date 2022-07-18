@@ -21,7 +21,3 @@ Tag.Record.Migrated:
 Tag.Generic:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/generic
-
-Catalog.SAEON:
-  type: catalog
-  uri: https://odp.saeon.ac.za/schema/catalog/saeon
