@@ -1,7 +1,29 @@
-import requests
+from typing import Any, Optional
 
-from odp.api_old.models.datacite import DataciteRecordIn, DataciteRecord, DataciteRecordList
+import requests
+from pydantic import AnyHttpUrl, BaseModel, Field
+
 from odp.lib.exceptions import DataciteError
+from odp.lib.formats import DOI_REGEX
+
+
+class DataciteRecordIn(BaseModel):
+    doi: str = Field(..., regex=DOI_REGEX)
+    url: AnyHttpUrl = Field(..., description="The metadata landing page in the ODP")
+    metadata: dict[str, Any]
+
+
+class DataciteRecord(BaseModel):
+    doi: str
+    url: Optional[AnyHttpUrl]
+    metadata: dict[str, Any]
+
+
+class DataciteRecordList(BaseModel):
+    total_records: int
+    total_pages: int
+    this_page: int
+    records: list[DataciteRecord]
 
 
 class DataciteClient:
