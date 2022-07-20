@@ -56,3 +56,4 @@ class ODPTagSchema(str, Enum):
 
 class ODPCatalog(str, Enum):
     SAEON = 'SAEON'
+    DATACITE = 'DataCite'

@@ -12,6 +12,7 @@ sys.path.append(str(rootdir))
 from odp import ODPCatalog
 from odp.db import Session
 from odp.db.models import Catalog
+from odp.job.publish.datacite import DataCitePublisher
 from odp.job.publish.saeon import SAEONPublisher
 from odp.lib.logging import init_logging
 
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 publishers = {
     ODPCatalog.SAEON: SAEONPublisher,
+    ODPCatalog.DATACITE: DataCitePublisher,
 }
 
 

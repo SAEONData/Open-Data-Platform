@@ -1,10 +1,12 @@
 import logging
 from datetime import date, datetime
+from typing import final
 
+from pydantic import BaseModel
 from sqlalchemy import func, or_, select
 
 from odp import ODPCollectionTag, ODPMetadataSchema, ODPRecordTag
-from odp.api.models import PublishedMetadataModel, PublishedRecordModel, PublishedTagInstanceModel, RecordModel
+from odp.api.models import RecordModel
 from odp.api.routers.record import output_record_model
 from odp.db import Session
 from odp.db.models import CatalogRecord, Collection, PublishedDOI, Record, RecordTag
@@ -16,6 +18,7 @@ class Publisher:
     def __init__(self, catalog_id: str) -> None:
         self.catalog_id = catalog_id
 
+    @final
     def run(self) -> None:
         records = self._select_records()
         logger.info(f'{self.catalog_id} catalog: {(total := len(records))} records selected for evaluation')
@@ -27,6 +30,7 @@ class Publisher:
         if total:
             logger.info(f'{self.catalog_id} catalog: {published} records published; {total - published} records hidden')
 
+    @final
     def _select_records(self) -> list[tuple[str, datetime]]:
         """Select records to be evaluated for publication to, or
         retraction from, a catalog.
@@ -82,9 +86,9 @@ class Publisher:
 
         return Session.execute(stmt).all()
 
+    @final
     def _evaluate_record(self, record_id: str, timestamp: datetime) -> bool:
-        """Evaluate a record model (API) against the publication schema for
-        a catalog, and commit the result to the catalog_record table.
+        """Evaluate a record and commit the result to the catalog_record table.
 
         The catalog_record entry is stamped with the `timestamp` of the latest
         contributing change (from catalog/record/record_tag/collection_tag).
@@ -95,11 +99,11 @@ class Publisher:
         record = Session.get(Record, record_id)
         record_model = output_record_model(record)
 
-        if self._can_publish_record(record_model):
+        if self.can_publish_record(record_model):
             self._process_embargoes(record_model)
             self._save_published_doi(record_model)
             catalog_record.published = True
-            catalog_record.published_record = self._create_published_record(record_model).dict()
+            catalog_record.published_record = self.create_published_record(record_model).dict()
         else:
             catalog_record.published = False
             catalog_record.published_record = None
@@ -110,7 +114,12 @@ class Publisher:
 
         return catalog_record.published
 
-    def _can_publish_record(self, record_model: RecordModel) -> bool:
+    def can_publish_record(self, record_model: RecordModel) -> bool:
+        """Determine whether or not a record can be published.
+
+        Universal rules are defined here; derived Publisher classes
+        may extend these with catalog-specific rules.
+        """
         # if the record was migrated with a status of published, and there have
         # been no subsequent changes to the record, then it can be published
         if any(
@@ -148,41 +157,15 @@ class Publisher:
         # all checks have passed; the record can be published
         return True
 
-    def _create_published_record(self, record_model: RecordModel) -> PublishedRecordModel:
+    def create_published_record(self, record_model: RecordModel) -> BaseModel:
         """Create the published form of a record."""
-        return PublishedRecordModel(
-            id=record_model.id,
-            doi=record_model.doi,
-            sid=record_model.sid,
-            collection_id=record_model.collection_id,
-            metadata=self._create_published_metadata(record_model),
-            tags=self._create_published_tags(record_model),
-            timestamp=record_model.timestamp,
-        )
+        raise NotImplementedError
 
-    def _create_published_metadata(self, record_model: RecordModel) -> list[PublishedMetadataModel]:
-        """Create the published metadata outputs for a record."""
-        return [
-            PublishedMetadataModel(
-                schema_id=record_model.schema_id,
-                metadata=record_model.metadata,
-            )
-        ]
-
-    def _create_published_tags(self, record_model: RecordModel) -> list[PublishedTagInstanceModel]:
-        """Create the published tags for a record."""
-        return [
-            PublishedTagInstanceModel(
-                tag_id=tag_instance.tag_id,
-                data=tag_instance.data,
-                user_name=tag_instance.user_name,
-                timestamp=tag_instance.timestamp,
-            ) for tag_instance in record_model.tags if tag_instance.public
-        ]
-
-    def _process_embargoes(self, record_model: RecordModel) -> None:
-        """Check if a record is currently subject to an embargo and, if so,
-        strip out download links / embedded datasets from the metadata."""
+    @staticmethod
+    def _process_embargoes(record_model: RecordModel) -> None:
+        """Check if a record is currently subject to an embargo and, if so, update
+        the given `record_model`, stripping out download links / embedded datasets
+        from the metadata."""
         current_date = date.today()
         embargoed = False
 
@@ -217,7 +200,8 @@ class Publisher:
                 except KeyError:
                     pass
 
-    def _save_published_doi(self, record_model: RecordModel) -> None:
+    @staticmethod
+    def _save_published_doi(record_model: RecordModel) -> None:
         """Permanently save a DOI when it is first published."""
         if record_model.doi and not Session.get(PublishedDOI, record_model.doi):
             published_doi = PublishedDOI(doi=record_model.doi)
