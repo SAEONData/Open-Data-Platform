@@ -4,7 +4,7 @@
     "type": "object",
     "translations": [
         {
-            "t9nScheme": "saeon/datacite4",
+            "t9nScheme": "saeon/datacite-4",
             "t9nTarget": "",
             "t9nConst": {
                 "schemaVersion": "http://datacite.org/schema/kernel-4"
@@ -17,7 +17,7 @@
             "pattern": "^10\\.\\d{4,}(\\.\\d+)*/[-._;()/:a-zA-Z0-9]+$",
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/doi"
                 }
             ]
@@ -26,7 +26,7 @@
             "type": "string",
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/titles",
                     "t9nArray": {
                         "t9nObject": {
@@ -41,7 +41,7 @@
             "format": "date",
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/publicationYear",
                     "t9nFilter": "date-to-year"
                 }
@@ -78,7 +78,7 @@
                 },
                 "translations": [
                     {
-                        "t9nScheme": "saeon/datacite4",
+                        "t9nScheme": "saeon/datacite-4",
                         "t9nTarget": "/publisher",
                         "t9nCondition": {
                             "properties": {
@@ -88,7 +88,7 @@
                         "t9nSource": "0/organizationName"
                     },
                     {
-                        "t9nScheme": "saeon/datacite4",
+                        "t9nScheme": "saeon/datacite-4",
                         "t9nTarget": "/creators",
                         "t9nCondition": {
                             "properties": {
@@ -118,7 +118,7 @@
                         }
                     },
                     {
-                        "t9nScheme": "saeon/datacite4",
+                        "t9nScheme": "saeon/datacite-4",
                         "t9nTarget": "/contributors",
                         "t9nCondition": {
                             "properties": {
@@ -229,7 +229,7 @@
                     },
                     "translations": [
                         {
-                            "t9nScheme": "saeon/datacite4",
+                            "t9nScheme": "saeon/datacite-4",
                             "t9nTarget": "/geoLocations",
                             "t9nArray": {
                                 "t9nObject": {
@@ -271,7 +271,7 @@
                             "type": "number",
                             "translations": [
                                 {
-                                    "t9nScheme": "saeon/datacite4",
+                                    "t9nScheme": "saeon/datacite-4",
                                     "t9nTarget": "/subjects",
                                     "t9nArray": {
                                         "t9nObject": {
@@ -286,7 +286,7 @@
                             "type": "number",
                             "translations": [
                                 {
-                                    "t9nScheme": "saeon/datacite4",
+                                    "t9nScheme": "saeon/datacite-4",
                                     "t9nTarget": "/subjects",
                                     "t9nArray": {
                                         "t9nObject": {
@@ -301,7 +301,7 @@
                             "type": "string",
                             "translations": [
                                 {
-                                    "t9nScheme": "saeon/datacite4",
+                                    "t9nScheme": "saeon/datacite-4",
                                     "t9nTarget": "/subjects",
                                     "t9nArray": {
                                         "t9nObject": {
@@ -316,7 +316,7 @@
                             "type": "string",
                             "translations": [
                                 {
-                                    "t9nScheme": "saeon/datacite4",
+                                    "t9nScheme": "saeon/datacite-4",
                                     "t9nTarget": "/subjects",
                                     "t9nArray": {
                                         "t9nObject": {
@@ -340,7 +340,7 @@
                     "additionalProperties": false,
                     "translations": [
                         {
-                            "t9nScheme": "saeon/datacite4",
+                            "t9nScheme": "saeon/datacite-4",
                             "t9nTarget": "/dates",
                             "t9nArray": {
                                 "t9nObject": {
@@ -370,7 +370,7 @@
             "uniqueItems": true,
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/subjects",
                     "t9nArray": {
                         "t9nObject": {
@@ -388,7 +388,7 @@
             "type": "string",
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/descriptions",
                     "t9nArray": {
                         "t9nObject": {
@@ -414,7 +414,7 @@
             "uniqueItems": true,
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/formats",
                     "t9nArray": {"t9nConcat": ["0/formatName", "0/formatVersion"], "t9nSep": " "}
                 }
@@ -427,7 +427,7 @@
             "uniqueItems": true,
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/subjects",
                     "t9nArray": {
                         "t9nObject": {
@@ -448,7 +448,7 @@
             "additionalProperties": false,
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/subjects",
                     "t9nArray": {
                         "t9nObject": {
@@ -463,7 +463,7 @@
             "type": "string",
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/descriptions",
                     "t9nArray": {
                         "t9nObject": {
@@ -482,7 +482,7 @@
                 "translations": [
                     {
                         "$comment": "case 1: Download link with an (optional) application profile specifying a single file type",
-                        "t9nScheme": "saeon/datacite4",
+                        "t9nScheme": "saeon/datacite-4",
                         "t9nTarget": "/immutableResource",
                         "t9nCondition": {
                             "properties": {
@@ -502,7 +502,7 @@
                     },
                     {
                         "$comment": "case 2: Download link with an application profile that specifies a list of file types, implying an archive",
-                        "t9nScheme": "saeon/datacite4",
+                        "t9nScheme": "saeon/datacite-4",
                         "t9nTarget": "/immutableResource",
                         "t9nCondition": {
                             "properties": {
@@ -524,7 +524,7 @@
                     },
                     {
                         "$comment": "case 3: Query link with an (optional) application profile constrained to the serverType vocabulary",
-                        "t9nScheme": "saeon/datacite4",
+                        "t9nScheme": "saeon/datacite-4",
                         "t9nTarget": "/linkedResources",
                         "t9nCondition": {
                             "properties": {
@@ -543,7 +543,7 @@
                     },
                     {
                         "$comment": "case 4: Other supported types of linked resource",
-                        "t9nScheme": "saeon/datacite4",
+                        "t9nScheme": "saeon/datacite-4",
                         "t9nTarget": "/linkedResources",
                         "t9nCondition": {
                             "properties": {
@@ -574,7 +574,7 @@
             "type": "string",
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/identifiers",
                     "t9nArray": {
                         "t9nObject": {
@@ -604,7 +604,7 @@
             "format": "datetime",
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/dates",
                     "t9nArray": {
                         "t9nObject": {
@@ -619,7 +619,7 @@
             "type": "string",
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/descriptions",
                     "t9nArray": {
                         "t9nObject": {
@@ -634,7 +634,7 @@
             "$ref": "#/$defs/scopeCode",
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/types",
                     "t9nObject": {
                         "resourceType": {},
@@ -668,7 +668,7 @@
             "uniqueItems": true,
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/subjects",
                     "t9nArray": {
                         "t9nObject": {
@@ -693,7 +693,7 @@
             "uniqueItems": true,
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/subjects",
                     "t9nArray": {
                         "t9nObject": {
@@ -725,7 +725,7 @@
                         "uniqueItems": true,
                         "translations": [
                             {
-                                "t9nScheme": "saeon/datacite4",
+                                "t9nScheme": "saeon/datacite-4",
                                 "t9nTarget": "/subjects",
                                 "t9nArray": {
                                     "t9nObject": {
@@ -742,7 +742,7 @@
                         "uniqueItems": true,
                         "translations": [
                             {
-                                "t9nScheme": "saeon/datacite4",
+                                "t9nScheme": "saeon/datacite-4",
                                 "t9nTarget": "/subjects",
                                 "t9nArray": {
                                     "t9nObject": {
@@ -759,7 +759,7 @@
                         "uniqueItems": true,
                         "translations": [
                             {
-                                "t9nScheme": "saeon/datacite4",
+                                "t9nScheme": "saeon/datacite-4",
                                 "t9nTarget": "/subjects",
                                 "t9nArray": {
                                     "t9nObject": {
@@ -774,7 +774,7 @@
                         "$ref": "#/$defs/classificationCode",
                         "translations": [
                             {
-                                "t9nScheme": "saeon/datacite4",
+                                "t9nScheme": "saeon/datacite-4",
                                 "t9nTarget": "/subjects",
                                 "t9nArray": {
                                     "t9nObject": {
@@ -795,7 +795,7 @@
             "maxItems": 1,
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/rightsList",
                     "t9nArray": {
                         "t9nObject": {
@@ -821,7 +821,7 @@
             "uniqueItems": true,
             "translations": [
                 {
-                    "t9nScheme": "saeon/datacite4",
+                    "t9nScheme": "saeon/datacite-4",
                     "t9nTarget": "/relatedIdentifiers",
                     "t9nArray": {
                         "t9nObject": {

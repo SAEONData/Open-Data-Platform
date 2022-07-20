@@ -30,8 +30,9 @@ def _sanitize_id(val):
 def schema_uri_from_type(schema):
     if schema.type == 'metadata':
         return choice((
-            'https://odp.saeon.ac.za/schema/metadata/saeon/datacite4',
+            'https://odp.saeon.ac.za/schema/metadata/saeon/datacite-4',
             'https://odp.saeon.ac.za/schema/metadata/saeon/iso19115',
+            'https://odp.saeon.ac.za/schema/metadata/datacite/kernel-4.3',
         ))
     elif schema.type == 'tag':
         return choice((

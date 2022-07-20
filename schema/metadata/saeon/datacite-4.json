@@ -1,0 +1,105 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id":"https://odp.saeon.ac.za/schema/metadata/saeon/datacite-4",
+    "$ref": "https://odp.saeon.ac.za/schema/metadata/datacite/kernel-4.3",
+    "type": "object",
+    "properties": {
+        "immutableResource": {
+            "type": "object",
+            "properties": {
+                "resourceName": {"type": "string"},
+                "resourceDescription": {"type": "string"},
+                "resourceDownload": {"$ref": "#/$defs/fileDownload"},
+                "resourceData": {}
+            },
+            "oneOf": [
+                {"required": ["resourceDownload"]},
+                {"required": ["resourceData"]}
+            ],
+            "additionalProperties": false
+        },
+        "linkedResources": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "resourceName": {"type": "string"},
+                    "resourceDescription": {"type": "string"},
+                    "resourceURL": {"type": "string", "format": "url"},
+                    "resourceFormat": {"type": "string"},
+                    "linkedResourceType": {"$ref": "#/$defs/linkedResourceType"},
+                    "serverType": {"$ref": "#/$defs/serverType"}
+                },
+                "required": ["linkedResourceType", "resourceURL"],
+                "additionalProperties": false
+            },
+            "uniqueItems": true
+        },
+        "originalMetadata": {
+            "type": "string"
+        },
+        "additionalFields": {
+            "type": "object"
+        },
+        "schemaVersion": {
+            "type": "string",
+            "const": "http://datacite.org/schema/kernel-4"
+        },
+        "fileIdentifier": {
+            "type": "string"
+        }
+    },
+    "unevaluatedProperties": false,
+    "required": [
+        "creators",
+        "titles",
+        "publisher",
+        "publicationYear",
+        "subjects",
+        "dates",
+        "types",
+        "rightsList",
+        "descriptions",
+        "schemaVersion"
+    ],
+    "$defs": {
+        "linkedResourceType": {
+            "type": "string",
+            "enum": [
+                "Information",
+                "OfflineAccess",
+                "ConditionalAccess",
+                "Query",
+                "Metadata",
+                "Ethics",
+                "QualityAssessment"
+            ]
+        },
+        "serverType": {
+            "type": "string",
+            "enum": [
+                "GeoServer",
+                "Esri",
+                "THREDDS"
+            ]
+        },
+        "fileDownload": {
+            "type": "object",
+            "properties": {
+                "downloadURL": {"type": "string", "format": "uri"},
+                "fileFormat": {"type": "string"},
+                "fileName": {"type": "string"},
+                "fileSize": {"type": "integer"},
+                "fileChecksum": {"type": "string"},
+                "checksumAlgorithm": {"type": "string"},
+                "archive": {"type": "boolean"},
+                "archivedFormats": {"type": "array", "items": {"type": "string"}}
+            },
+            "required": ["downloadURL"],
+            "dependencies": {
+                "fileChecksum": ["checksumAlgorithm"]
+            },
+            "additionalProperties": false
+        }
+    }
+}

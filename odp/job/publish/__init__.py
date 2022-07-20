@@ -197,7 +197,7 @@ class Publisher:
         if not embargoed:
             return
 
-        if record_model.schema_id == ODPMetadataSchema.SAEON_DATACITE4:
+        if record_model.schema_id == ODPMetadataSchema.SAEON_DATACITE_4:
             try:
                 if 'resourceDownload' in record_model.metadata['immutableResource']:
                     record_model.metadata['immutableResource']['resourceDownload']['downloadURL'] = None

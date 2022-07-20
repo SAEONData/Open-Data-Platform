@@ -1,10 +1,14 @@
-SAEON.DataCite4:
+SAEON.DataCite.4:
   type: metadata
-  uri: https://odp.saeon.ac.za/schema/metadata/saeon/datacite4
+  uri: https://odp.saeon.ac.za/schema/metadata/saeon/datacite-4
 
 SAEON.ISO19115:
   type: metadata
   uri: https://odp.saeon.ac.za/schema/metadata/saeon/iso19115
+
+DataCite.4.3:
+  type: metadata
+  uri: https://odp.saeon.ac.za/schema/metadata/datacite/kernel-4.3
 
 Tag.Record.QC:
   type: tag
