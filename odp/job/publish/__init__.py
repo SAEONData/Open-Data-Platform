@@ -120,6 +120,13 @@ class Publisher:
         Universal rules are defined here; derived Publisher classes
         may extend these with catalog-specific rules.
         """
+        # if the collection is not tagged as ready, then the record cannot be published
+        if not any(
+                (tag for tag in record_model.tags
+                 if tag.tag_id == ODPCollectionTag.READY)
+        ):
+            return False
+
         # if the record was migrated with a status of published, and there have
         # been no subsequent changes to the record, then it can be published
         if any(
@@ -131,13 +138,6 @@ class Publisher:
 
         # if the record is invalid against the metadata schema, then it cannot be published
         if not record_model.validity['valid']:
-            return False
-
-        # if the collection is not tagged as ready, then the record cannot be published
-        if not any(
-                (tag for tag in record_model.tags
-                 if tag.tag_id == ODPCollectionTag.READY)
-        ):
             return False
 
         # if the record has any QC tags with a status of failed, then it cannot be published
