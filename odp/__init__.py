@@ -28,6 +28,9 @@ class ODPScope(str, Enum):
     TAG_READ = 'odp.tag:read'
     USER_ADMIN = 'odp.user:admin'
     USER_READ = 'odp.user:read'
+    VOCABULARY_INFRASTRUCTURE = 'odp.vocabulary:infrastructure'
+    VOCABULARY_PROJECT = 'odp.vocabulary:project'
+    VOCABULARY_READ = 'odp.vocabulary:read'
 
 
 class ODPCollectionTag(str, Enum):
@@ -57,3 +60,8 @@ class ODPTagSchema(str, Enum):
 class ODPCatalog(str, Enum):
     SAEON = 'SAEON'
     DATACITE = 'DataCite'
+
+
+class ODPVocabulary(str, Enum):
+    INFRASTRUCTURE = 'Infrastructure'
+    PROJECT = 'Project'

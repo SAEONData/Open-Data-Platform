@@ -19,3 +19,4 @@ from .tag import Tag
 from .types import AuditCommand, SchemaType, ScopeType, TagCardinality, TagType
 from .user import User
 from .user_role import UserRole
+from .vocabulary import Vocabulary, VocabularyTerm, VocabularyTermAudit

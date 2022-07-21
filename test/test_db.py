@@ -4,9 +4,9 @@ import migrate.systemdata
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import (Catalog, Client, ClientScope, Collection, CollectionTag, Project, ProjectCollection, Provider, Record, RecordTag, Role,
-                           RoleScope, Schema, Scope, ScopeType, Tag, User, UserRole)
+                           RoleScope, Schema, Scope, ScopeType, Tag, User, UserRole, Vocabulary, VocabularyTerm)
 from test.factories import (CatalogFactory, ClientFactory, CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory, RecordFactory,
-                            RecordTagFactory, RoleFactory, SchemaFactory, ScopeFactory, TagFactory, UserFactory)
+                            RecordTagFactory, RoleFactory, SchemaFactory, ScopeFactory, TagFactory, UserFactory, VocabularyFactory)
 
 
 def test_db_setup():
@@ -139,7 +139,8 @@ def test_create_scope():
 def test_create_tag():
     tag = TagFactory()
     result = Session.execute(select(Tag, Scope).join(Scope)).one()
-    assert (result.Tag.id, result.Tag.type, result.Tag.cardinality, result.Tag.public, result.Tag.schema_id, result.Tag.scope_id, result.Tag.scope_type) \
+    assert (result.Tag.id, result.Tag.type, result.Tag.cardinality, result.Tag.public, result.Tag.schema_id, result.Tag.scope_id,
+            result.Tag.scope_type) \
            == (tag.id, tag.type, tag.cardinality, tag.public, tag.schema_id, tag.scope.id, ScopeType.odp)
 
 
@@ -156,3 +157,23 @@ def test_create_user_with_roles():
     result = Session.execute(select(UserRole)).scalars()
     assert [(row.user_id, row.role_id) for row in result] \
            == [(user.id, role.id) for role in roles]
+
+
+def test_create_vocabulary():
+    vocabulary = VocabularyFactory()
+    result = Session.execute(select(Vocabulary, VocabularyTerm).join(VocabularyTerm))
+    assert [(
+        row.Vocabulary.id,
+        row.Vocabulary.scope_id,
+        row.Vocabulary.schema_id,
+        row.VocabularyTerm.vocabulary_id,
+        row.VocabularyTerm.term_id,
+        row.VocabularyTerm.data
+    ) for row in result] == [(
+        vocabulary.id,
+        vocabulary.scope_id,
+        vocabulary.schema_id,
+        term.vocabulary_id,
+        term.term_id,
+        term.data,
+    ) for term in vocabulary.terms]

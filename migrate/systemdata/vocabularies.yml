@@ -1,0 +1,7 @@
+Infrastructure:
+  scope_id: odp.vocabulary:infrastructure
+  schema_id: Vocabulary.Infrastructure
+
+Project:
+  scope_id: odp.vocabulary:project
+  schema_id: Vocabulary.Project

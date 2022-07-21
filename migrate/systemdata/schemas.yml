@@ -25,3 +25,11 @@ Tag.Record.Migrated:
 Tag.Generic:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/generic
+
+Vocabulary.Infrastructure:
+  type: vocabulary
+  uri: https://odp.saeon.ac.za/schema/vocabulary/infrastructure
+
+Vocabulary.Project:
+  type: vocabulary
+  uri: https://odp.saeon.ac.za/schema/vocabulary/project
