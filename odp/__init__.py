@@ -11,6 +11,7 @@ class ODPScope(str, Enum):
     CLIENT_READ = 'odp.client:read'
     COLLECTION_ADMIN = 'odp.collection:admin'
     COLLECTION_READ = 'odp.collection:read'
+    COLLECTION_PROJECT = 'odp.collection:project'
     PROJECT_ADMIN = 'odp.project:admin'
     PROJECT_READ = 'odp.project:read'
     PROVIDER_ADMIN = 'odp.provider:admin'
@@ -36,6 +37,8 @@ class ODPScope(str, Enum):
 class ODPCollectionTag(str, Enum):
     READY = 'Collection.Ready'
     FROZEN = 'Collection.Frozen'
+    INFRASTRUCTURE = 'Collection.Infrastructure'
+    PROJECT = 'Collection.Project'
 
 
 class ODPRecordTag(str, Enum):
@@ -52,6 +55,8 @@ class ODPMetadataSchema(str, Enum):
 
 class ODPTagSchema(str, Enum):
     GENERIC = 'Tag.Generic'
+    COLLECTION_INFRASTRUCTURE = 'Tag.Collection.Infrastructure'
+    COLLECTION_PROJECT = 'Tag.Collection.Project'
     RECORD_QC = 'Tag.Record.QC'
     RECORD_EMBARGO = 'Tag.Record.Embargo'
     RECORD_MIGRATED = 'Tag.Record.Migrated'

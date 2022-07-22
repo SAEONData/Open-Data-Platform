@@ -10,6 +10,14 @@ DataCite.4.3:
   type: metadata
   uri: https://odp.saeon.ac.za/schema/metadata/datacite/kernel-4.3
 
+Tag.Collection.Infrastructure:
+  type: tag
+  uri: https://odp.saeon.ac.za/schema/tag/collection/infrastructure
+
+Tag.Collection.Project:
+  type: tag
+  uri: https://odp.saeon.ac.za/schema/tag/collection/project
+
 Tag.Record.QC:
   type: tag
   uri: https://odp.saeon.ac.za/schema/tag/record/qc

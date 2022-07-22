@@ -12,6 +12,20 @@ Collection.Frozen:
   scope_id: odp.collection:admin
   schema_id: Tag.Generic
 
+Collection.Infrastructure:
+  type: collection
+  cardinality: multi
+  public: False
+  scope_id: odp.collection:admin
+  schema_id: Tag.Collection.Infrastructure
+
+Collection.Project:
+  type: collection
+  cardinality: multi
+  public: True
+  scope_id: odp.collection:project
+  schema_id: Tag.Collection.Project
+
 Record.Migrated:
   type: record
   cardinality: one

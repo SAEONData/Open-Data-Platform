@@ -41,6 +41,8 @@ def schema_uri_from_type(schema):
             'https://odp.saeon.ac.za/schema/tag/record/migrated',
             'https://odp.saeon.ac.za/schema/tag/record/qc',
             'https://odp.saeon.ac.za/schema/tag/record/embargo',
+            'https://odp.saeon.ac.za/schema/tag/collection/infrastructure',
+            'https://odp.saeon.ac.za/schema/tag/collection/project',
         ))
     elif schema.type == 'vocabulary':
         return choice((

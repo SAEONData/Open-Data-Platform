@@ -1,0 +1,11 @@
+{
+    "$id": "https://odp.saeon.ac.za/schema/tag/collection/project",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "project": {"type": "string", "vocabulary": "Project"},
+        "comment": {"type": "string"}
+    },
+    "required": ["project"],
+    "additionalProperties": false
+}
