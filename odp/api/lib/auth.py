@@ -10,7 +10,7 @@ from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
-from odp.api.models import TagInstanceModelIn, VocabularyTermModelIn
+from odp.api.models import TagInstanceModelIn
 from odp.config import config
 from odp.db import Session
 from odp.db.models import CollectionTag, RecordTag, Scope, ScopeType, Tag, TagType, Vocabulary
@@ -127,7 +127,7 @@ class UntagAuthorize(BaseAuthorize):
 
 
 class VocabularyAuthorize(BaseAuthorize):
-    async def __call__(self, request: Request, vocabulary_id: str, term_in: VocabularyTermModelIn) -> Authorized:
+    async def __call__(self, request: Request, vocabulary_id: str) -> Authorized:
         if not (vocabulary_scope_id := Session.execute(
                 select(Vocabulary.scope_id).
                 where(Vocabulary.id == vocabulary_id)
