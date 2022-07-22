@@ -10,10 +10,10 @@ from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPScope
-from odp.api.models import TagInstanceModelIn
+from odp.api.models import TagInstanceModelIn, VocabularyTermModelIn
 from odp.config import config
 from odp.db import Session
-from odp.db.models import CollectionTag, RecordTag, Scope, ScopeType, Tag, TagType
+from odp.db.models import CollectionTag, RecordTag, Scope, ScopeType, Tag, TagType, Vocabulary
 from odp.lib.auth import get_client_permissions, get_user_permissions
 from odp.lib.hydra import HydraAdminAPI, OAuth2TokenIntrospection
 
@@ -124,6 +124,17 @@ class UntagAuthorize(BaseAuthorize):
             raise HTTPException(HTTP_404_NOT_FOUND)
 
         return _authorize_request(request, tag_scope_id)
+
+
+class VocabularyAuthorize(BaseAuthorize):
+    async def __call__(self, request: Request, vocabulary_id: str, term_in: VocabularyTermModelIn) -> Authorized:
+        if not (vocabulary_scope_id := Session.execute(
+                select(Vocabulary.scope_id).
+                where(Vocabulary.id == vocabulary_id)
+        ).scalar_one_or_none()):
+            raise HTTPException(HTTP_404_NOT_FOUND)
+
+        return _authorize_request(request, vocabulary_scope_id)
 
 
 def select_scopes(

@@ -96,18 +96,6 @@ class CollectionModelIn(BaseModel):
     provider_id: str
 
 
-class ProjectModel(BaseModel):
-    id: str
-    name: str
-    collection_ids: list[str]
-
-
-class ProjectModelIn(BaseModel):
-    id: str = Field(..., regex=ID_REGEX)
-    name: str
-    collection_ids: list[str]
-
-
 class ProviderModel(BaseModel):
     id: str
     name: str
@@ -216,6 +204,25 @@ class UserModelIn(BaseModel):
     role_ids: list[str]
 
 
+class VocabularyTermModel(BaseModel):
+    id: str
+    data: dict[str, Any]
+
+
+class VocabularyTermModelIn(BaseModel):
+    id: str = Field(..., regex=ID_REGEX)
+    data: dict[str, Any]
+
+
+class VocabularyModel(BaseModel):
+    id: str
+    scope_id: str
+    schema_id: str
+    schema_uri: str
+    schema_: dict[str, Any]
+    terms: list[VocabularyTermModel]
+
+
 class AuditModel(BaseModel):
     table: str
     tag_id: Optional[str]
@@ -257,3 +264,9 @@ class RecordTagAuditModel(AuditModel):
     record_tag_user_id: Optional[str]
     record_tag_user_name: Optional[str]
     record_tag_data: Optional[dict[str, Any]]
+
+
+class VocabularyTermAuditModel(AuditModel):
+    vocabulary_id: str
+    term_id: str
+    data: dict[str, Any]
