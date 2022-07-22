@@ -27,9 +27,9 @@ sys.path.append(str(rootdir))
 dotenv_path = pathlib.Path.cwd() / '.env'
 load_dotenv(dotenv_path)
 
-from odp import ODPCatalog, ODPCollectionTag, ODPMetadataSchema, ODPRecordTag, ODPScope, ODPTagSchema
+from odp import ODPCatalog, ODPCollectionTag, ODPMetadataSchema, ODPRecordTag, ODPScope, ODPTagSchema, ODPVocabulary, ODPVocabularySchema
 from odp.db import Base, Session, engine
-from odp.db.models import Catalog, Client, Role, Schema, SchemaType, Scope, ScopeType, Tag, User, UserRole
+from odp.db.models import Catalog, Client, Role, Schema, SchemaType, Scope, ScopeType, Tag, User, UserRole, Vocabulary
 from odp.lib.hydra import GrantType, HydraAdminAPI, HydraScope, ResponseType
 from odp.lib.schema import schema_md5
 
@@ -172,7 +172,8 @@ def init_schemas():
         schema_data = yaml.safe_load(f)
 
     for schema_id in (schema_ids := [s.value for s in ODPMetadataSchema] +
-                                    [s.value for s in ODPTagSchema]):
+                                    [s.value for s in ODPTagSchema] +
+                                    [s.value for s in ODPVocabularySchema]):
         schema_spec = schema_data[schema_id]
         schema_type = schema_spec['type']
         schema = Session.get(Schema, (schema_id, schema_type)) or Schema(id=schema_id, type=schema_type)
@@ -214,6 +215,31 @@ def init_tags():
 
     if orphaned_db_tags := Session.execute(select(Tag.id).where(Tag.id.not_in(tag_ids))).scalars().all():
         print(f'Warning: orphaned tag definitions in tag table {orphaned_db_tags}')
+
+
+def init_vocabularies():
+    """Create or update vocabulary definitions.
+
+    This does not create any vocabulary terms; terms are audited
+    so any changes need to be made using the API.
+    """
+    with open(datadir / 'vocabularies.yml') as f:
+        vocabulary_data = yaml.safe_load(f)
+
+    for vocabulary_id in (vocabulary_ids := [v.value for v in ODPVocabulary]):
+        vocabulary_spec = vocabulary_data[vocabulary_id]
+        vocabulary = Session.get(Vocabulary, vocabulary_id) or Vocabulary(id=vocabulary_id)
+        vocabulary.scope_id = vocabulary_spec['scope_id']
+        vocabulary.scope_type = ScopeType.odp
+        vocabulary.schema_id = vocabulary_spec['schema_id']
+        vocabulary.schema_type = SchemaType.vocabulary
+        vocabulary.save()
+
+    if orphaned_yml_vocabularies := [vocabulary_id for vocabulary_id in vocabulary_data if vocabulary_id not in vocabulary_ids]:
+        print(f'Warning: orphaned vocabulary definitions in vocabularies.yml {orphaned_yml_vocabularies}')
+
+    if orphaned_db_vocabularies := Session.execute(select(Vocabulary.id).where(Vocabulary.id.not_in(vocabulary_ids))).scalars().all():
+        print(f'Warning: orphaned vocabulary definitions in vocabulary table {orphaned_db_vocabularies}')
 
 
 def init_roles():
@@ -269,6 +295,7 @@ if __name__ == '__main__':
         init_admin_user()
         init_schemas()
         init_tags()
+        init_vocabularies()
         init_roles()
         init_catalogs()
 

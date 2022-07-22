@@ -65,3 +65,8 @@ class ODPCatalog(str, Enum):
 class ODPVocabulary(str, Enum):
     INFRASTRUCTURE = 'Infrastructure'
     PROJECT = 'Project'
+
+
+class ODPVocabularySchema(str, Enum):
+    INFRASTRUCTURE = 'Vocabulary.Infrastructure'
+    PROJECT = 'Vocabulary.Project'
