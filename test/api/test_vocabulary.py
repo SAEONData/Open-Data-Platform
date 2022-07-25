@@ -5,8 +5,8 @@ from sqlalchemy import select
 
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import SchemaType, Scope, ScopeType, Vocabulary, VocabularyTerm
-from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden, assert_not_found
+from odp.db.models import SchemaType, Scope, ScopeType, Vocabulary, VocabularyTerm, VocabularyTermAudit
+from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden, assert_new_timestamp, assert_not_found
 from test.factories import SchemaFactory, VocabularyFactory, VocabularyTermFactory
 
 
@@ -55,6 +55,23 @@ def assert_db_state(vocabularies):
             assert trow.vocabulary_id == terms[m].vocabulary_id == row.id
             assert trow.term_id == terms[m].term_id
             assert trow.data == terms[m].data
+
+
+def assert_audit_log(command, term):
+    """Verify that the vocabulary term audit table contains the given entry."""
+    result = Session.execute(select(VocabularyTermAudit)).scalar_one_or_none()
+    assert result.client_id == 'odp.test'
+    assert result.user_id is None
+    assert result.command == command
+    assert_new_timestamp(result.timestamp)
+    assert result._vocabulary_id == term.vocabulary.id
+    assert result._term_id == term.term_id
+    assert result._data == term.data | {'id': term.term_id}
+
+
+def assert_no_audit_log():
+    """Verify that no audit log entries have been created."""
+    assert Session.execute(select(VocabularyTermAudit)).first() is None
 
 
 def assert_json_result(response, json, vocabulary):
@@ -146,9 +163,11 @@ def test_create_term(api, vocabulary_batch, scopes):
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_vocab_batch)
+        assert_audit_log('insert', term)
     else:
         assert_forbidden(r)
         assert_db_state(vocabulary_batch)
+        assert_no_audit_log()
 
 
 def test_create_term_conflict():
@@ -185,9 +204,11 @@ def test_update_term(api, vocabulary_batch, scopes):
     if authorized:
         assert_empty_result(r)
         assert_db_state(modified_vocab_batch)
+        assert_audit_log('update', term)
     else:
         assert_forbidden(r)
         assert_db_state(vocabulary_batch)
+        assert_no_audit_log()
 
 
 def test_update_term_not_found():
@@ -210,17 +231,20 @@ def test_delete_term(api, vocabulary_batch, scopes):
 
     modified_vocab_batch = vocabulary_batch.copy()
     modified_vocab = prepare_project_vocabulary(modified_vocab_batch[2])
-    deleted_term_id = modified_vocab.terms[2].term_id
+    deleted_term = modified_vocab.terms[2]
     del modified_vocab.terms[2]
 
-    r = client.delete(f'/vocabulary/{modified_vocab.id}/{deleted_term_id}')
+    r = client.delete(f'/vocabulary/{modified_vocab.id}/{deleted_term.term_id}')
 
     if authorized:
         assert_empty_result(r)
+        # check audit log first because assert_db_state expires the deleted item
+        assert_audit_log('delete', deleted_term)
         assert_db_state(modified_vocab_batch)
     else:
         assert_forbidden(r)
         assert_db_state(vocabulary_batch)
+        assert_no_audit_log()
 
 
 def test_delete_term_not_found():

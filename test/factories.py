@@ -240,7 +240,7 @@ class VocabularyTermFactory(ODPModelFactory):
 
     vocabulary = None
     term_id = factory.Sequence(lambda n: id_from_fake('word', n))
-    data = {}
+    data = factory.LazyAttribute(lambda t: {'id': t.term_id})
 
 
 class VocabularyFactory(ODPModelFactory):
