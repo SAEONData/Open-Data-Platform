@@ -165,14 +165,18 @@ def test_create_vocabulary():
     assert [(
         row.Vocabulary.id,
         row.Vocabulary.scope_id,
+        row.Vocabulary.scope_type,
         row.Vocabulary.schema_id,
+        row.Vocabulary.schema_type,
         row.VocabularyTerm.vocabulary_id,
         row.VocabularyTerm.term_id,
         row.VocabularyTerm.data
     ) for row in result] == [(
         vocabulary.id,
         vocabulary.scope_id,
+        'odp',
         vocabulary.schema_id,
+        'vocabulary',
         term.vocabulary_id,
         term.term_id,
         term.data,
