@@ -17,11 +17,17 @@ def vocabulary_batch():
     return [VocabularyFactory() for _ in range(randint(3, 5))]
 
 
-@pytest.fixture
-def vocabulary_batch_no_terms():
-    """Create and commit a batch of Vocabulary instances,
-    without any associated terms."""
-    return [VocabularyFactory(terms=[]) for _ in range(randint(3, 5))]
+def prepare_project_vocabulary(vocab):
+    """Update a factory-generated vocabulary to be an ODP Project vocabulary."""
+    vocab.scope = Session.get(Scope, (ODPScope.VOCABULARY_PROJECT, ScopeType.odp)) or \
+                  Scope(id=ODPScope.VOCABULARY_PROJECT, type=ScopeType.odp)
+    vocab.schema = SchemaFactory(
+        type=SchemaType.vocabulary,
+        uri='https://odp.saeon.ac.za/schema/vocabulary/project',
+    )
+    vocab.save()
+    Session.commit()
+    return vocab
 
 
 def term_ids(vocabulary):
@@ -115,18 +121,6 @@ def test_get_vocabulary_not_found(api, vocabulary_batch):
     assert_db_state(vocabulary_batch)
 
 
-def prepare_project_vocabulary(vocab):
-    vocab.scope = Session.get(Scope, (ODPScope.VOCABULARY_PROJECT, ScopeType.odp)) or \
-                  Scope(id=ODPScope.VOCABULARY_PROJECT, type=ScopeType.odp)
-    vocab.schema = SchemaFactory(
-        type=SchemaType.vocabulary,
-        uri='https://odp.saeon.ac.za/schema/vocabulary/project',
-    )
-    vocab.save()
-    Session.commit()
-    return vocab
-
-
 @pytest.mark.parametrize('scopes', [
     [ODPScope.VOCABULARY_PROJECT],
     [],
@@ -201,4 +195,33 @@ def test_update_term_not_found():
 
 
 def test_update_term_invalid():
+    pass  # todo
+
+
+@pytest.mark.parametrize('scopes', [
+    [ODPScope.VOCABULARY_PROJECT],
+    [],
+    all_scopes,
+    all_scopes_excluding(ODPScope.VOCABULARY_PROJECT),
+])
+def test_delete_term(api, vocabulary_batch, scopes):
+    authorized = ODPScope.VOCABULARY_PROJECT in scopes
+    client = api(scopes)
+
+    modified_vocab_batch = vocabulary_batch.copy()
+    modified_vocab = prepare_project_vocabulary(modified_vocab_batch[2])
+    deleted_term_id = modified_vocab.terms[2].term_id
+    del modified_vocab.terms[2]
+
+    r = client.delete(f'/vocabulary/{modified_vocab.id}/{deleted_term_id}')
+
+    if authorized:
+        assert_empty_result(r)
+        assert_db_state(modified_vocab_batch)
+    else:
+        assert_forbidden(r)
+        assert_db_state(vocabulary_batch)
+
+
+def test_delete_term_not_found():
     pass  # todo

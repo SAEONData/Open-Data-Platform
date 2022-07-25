@@ -128,3 +128,27 @@ async def update_term(
             _term_id=term.term_id,
             _data=term.data,
         ).save()
+
+
+@router.delete(
+    '/{vocabulary_id}/{term_id}',
+)
+async def delete_term(
+        vocabulary_id: str,
+        term_id: str,
+        auth: Authorized = Depends(VocabularyAuthorize()),
+):
+    if not (term := Session.get(VocabularyTerm, (vocabulary_id, term_id))):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    term.delete()
+
+    VocabularyTermAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=AuditCommand.delete,
+        timestamp=datetime.now(timezone.utc),
+        _vocabulary_id=term.vocabulary_id,
+        _term_id=term.term_id,
+        _data=term.data,
+    ).save()
