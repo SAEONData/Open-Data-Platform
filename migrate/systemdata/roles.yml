@@ -3,7 +3,6 @@ SAEON.Staff:
     - odp.catalog:read
     - odp.client:read
     - odp.collection:read
-    - odp.project:read
     - odp.provider:read
     - odp.record:read
     - odp.role:read

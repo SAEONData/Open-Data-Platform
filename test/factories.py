@@ -7,7 +7,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from faker import Faker
 
 from odp.db import Session
-from odp.db.models import (Catalog, Client, Collection, CollectionTag, Project, Provider, Record, RecordTag, Role, Schema, Scope, Tag, User,
+from odp.db.models import (Catalog, Client, Collection, CollectionTag, Provider, Record, RecordTag, Role, Schema, Scope, Tag, User,
                            Vocabulary, VocabularyTerm)
 
 fake = Faker()
@@ -167,22 +167,6 @@ class CollectionTagFactory(ODPModelFactory):
     user = factory.SubFactory(UserFactory)
     data = {}
     timestamp = factory.LazyFunction(lambda: datetime.now(timezone.utc))
-
-
-class ProjectFactory(ODPModelFactory):
-    class Meta:
-        model = Project
-
-    id = factory.LazyAttribute(id_from_name)
-    name = factory.Sequence(lambda n: f'{fake.catch_phrase()}.{n}')
-
-    @factory.post_generation
-    def collections(obj, create, collections):
-        if collections:
-            for collection in collections:
-                obj.collections.append(collection)
-            if create:
-                Session.commit()
 
 
 class RecordFactory(ODPModelFactory):

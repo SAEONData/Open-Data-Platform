@@ -81,7 +81,6 @@ class CollectionModel(BaseModel):
     name: str
     doi_key: Optional[str]
     provider_id: str
-    project_ids: list[str]
     record_count: int
     tags: list[TagInstanceModel]
     client_ids: list[str]

@@ -12,8 +12,6 @@ class ODPScope(str, Enum):
     COLLECTION_ADMIN = 'odp.collection:admin'
     COLLECTION_READ = 'odp.collection:read'
     COLLECTION_PROJECT = 'odp.collection:project'
-    PROJECT_ADMIN = 'odp.project:admin'
-    PROJECT_READ = 'odp.project:read'
     PROVIDER_ADMIN = 'odp.provider:admin'
     PROVIDER_READ = 'odp.provider:read'
     RECORD_ADMIN = 'odp.record:admin'

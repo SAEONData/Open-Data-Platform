@@ -19,10 +19,6 @@ class Collection(Base):
     provider_id = Column(String, ForeignKey('provider.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
     provider = relationship('Provider')
 
-    # view of associated projects via many-to-many project_collection relation
-    collection_projects = relationship('ProjectCollection', viewonly=True)
-    projects = association_proxy('collection_projects', 'project')
-
     # view of associated tags (one-to-many)
     tags = relationship('CollectionTag', viewonly=True)
 

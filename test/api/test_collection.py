@@ -11,27 +11,13 @@ from odp.db.models import Collection, CollectionAudit, CollectionTag, Collection
 from odp.lib.formats import DOI_REGEX
 from test.api import (CollectionAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
                       assert_not_found, assert_unprocessable)
-from test.factories import (ClientFactory, CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory, RoleFactory, SchemaFactory,
-                            TagFactory)
+from test.factories import ClientFactory, CollectionFactory, CollectionTagFactory, ProviderFactory, RoleFactory, SchemaFactory, TagFactory
 
 
 @pytest.fixture
 def collection_batch():
     """Create and commit a batch of Collection instances,
-    with associated projects, clients and roles."""
-    collections = [CollectionFactory() for _ in range(randint(3, 5))]
-    ProjectFactory.create_batch(randint(0, 3), collections=collections)
-    for collection in collections:
-        ClientFactory.create_batch(randint(0, 3), collection=collection)
-        RoleFactory.create_batch(randint(0, 3), collection=collection)
-    return collections
-
-
-@pytest.fixture
-def collection_batch_no_projects():
-    """Create and commit a batch of Collection instances
-    without projects, for testing the update API - we cannot
-    assign projects to collections, only the other way around."""
+    with associated clients and roles."""
     collections = [CollectionFactory() for _ in range(randint(3, 5))]
     for collection in collections:
         ClientFactory.create_batch(randint(0, 3), collection=collection)
@@ -47,10 +33,6 @@ def collection_build(**id):
         provider=(provider := ProviderFactory()),
         provider_id=provider.id,
     )
-
-
-def project_ids(collection):
-    return tuple(sorted(project.id for project in collection.projects))
 
 
 def client_ids(collection):
@@ -74,7 +56,6 @@ def assert_db_state(collections):
         assert row.doi_key == collections[n].doi_key
         assert row.provider_id == collections[n].provider_id
         assert_new_timestamp(row.timestamp)
-        assert project_ids(row) == project_ids(collections[n])
         assert client_ids(row) == client_ids(collections[n])
         assert role_ids(row) == role_ids(collections[n])
 
@@ -149,7 +130,6 @@ def assert_json_collection_result(response, json, collection):
     assert json['name'] == collection.name
     assert json['doi_key'] == collection.doi_key
     assert json['provider_id'] == collection.provider_id
-    assert tuple(sorted(json['project_ids'])) == project_ids(collection)
     assert tuple(sorted(cid for cid in json['client_ids'] if cid != 'odp.test')) == client_ids(collection)
     assert tuple(sorted(json['role_ids'])) == role_ids(collection)
     assert_new_timestamp(datetime.fromisoformat(json['timestamp']))
@@ -332,22 +312,22 @@ def test_create_collection_conflict(api, collection_batch, collection_auth):
     all_scopes,
     all_scopes_excluding(ODPScope.COLLECTION_ADMIN),
 ])
-def test_update_collection(api, collection_batch_no_projects, scopes, collection_auth):
+def test_update_collection(api, collection_batch, scopes, collection_auth):
     authorized = ODPScope.COLLECTION_ADMIN in scopes and \
                  collection_auth in (CollectionAuth.NONE, CollectionAuth.MATCH)
 
     if collection_auth == CollectionAuth.MATCH:
-        api_client_collection = collection_batch_no_projects[2]
+        api_client_collection = collection_batch[2]
     elif collection_auth == CollectionAuth.MISMATCH:
-        api_client_collection = collection_batch_no_projects[1]
+        api_client_collection = collection_batch[1]
     else:
         api_client_collection = None
 
-    modified_collection_batch = collection_batch_no_projects.copy()
+    modified_collection_batch = collection_batch.copy()
     modified_collection_batch[2] = (collection := collection_build(
-        id=collection_batch_no_projects[2].id,
-        clients=collection_batch_no_projects[2].clients,
-        roles=collection_batch_no_projects[2].roles,
+        id=collection_batch[2].id,
+        clients=collection_batch[2].clients,
+        roles=collection_batch[2].roles,
     ))
 
     r = api(scopes, api_client_collection).put('/collection/', json=dict(
@@ -363,18 +343,18 @@ def test_update_collection(api, collection_batch_no_projects, scopes, collection
         assert_audit_log('update', collection)
     else:
         assert_forbidden(r)
-        assert_db_state(collection_batch_no_projects)
+        assert_db_state(collection_batch)
         assert_no_audit_log()
 
 
-def test_update_collection_not_found(api, collection_batch_no_projects, collection_auth):
+def test_update_collection_not_found(api, collection_batch, collection_auth):
     scopes = [ODPScope.COLLECTION_ADMIN]
     authorized = collection_auth == CollectionAuth.NONE
 
     if collection_auth == CollectionAuth.NONE:
         api_client_collection = None
     else:
-        api_client_collection = collection_batch_no_projects[2]
+        api_client_collection = collection_batch[2]
 
     collection = collection_build(id='foo')
 
@@ -390,7 +370,7 @@ def test_update_collection_not_found(api, collection_batch_no_projects, collecti
     else:
         assert_forbidden(r)
 
-    assert_db_state(collection_batch_no_projects)
+    assert_db_state(collection_batch)
     assert_no_audit_log()
 
 

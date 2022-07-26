@@ -26,7 +26,6 @@ def output_collection_model(result) -> CollectionModel:
         name=result.Collection.name,
         doi_key=result.Collection.doi_key,
         provider_id=result.Collection.provider_id,
-        project_ids=[project.id for project in result.Collection.projects],
         record_count=result.count,
         tags=[
             output_tag_instance_model(collection_tag)

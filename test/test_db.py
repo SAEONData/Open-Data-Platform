@@ -3,9 +3,9 @@ from sqlalchemy import select
 import migrate.systemdata
 from odp import ODPScope
 from odp.db import Session
-from odp.db.models import (Catalog, Client, ClientScope, Collection, CollectionTag, Project, ProjectCollection, Provider, Record, RecordTag, Role,
+from odp.db.models import (Catalog, Client, ClientScope, Collection, CollectionTag, Provider, Record, RecordTag, Role,
                            RoleScope, Schema, Scope, ScopeType, Tag, User, UserRole, Vocabulary, VocabularyTerm)
-from test.factories import (CatalogFactory, ClientFactory, CollectionFactory, CollectionTagFactory, ProjectFactory, ProviderFactory, RecordFactory,
+from test.factories import (CatalogFactory, ClientFactory, CollectionFactory, CollectionTagFactory, ProviderFactory, RecordFactory,
                             RecordTagFactory, RoleFactory, SchemaFactory, ScopeFactory, TagFactory, UserFactory, VocabularyFactory)
 
 
@@ -67,20 +67,6 @@ def test_create_collection_tag():
     result = Session.execute(select(CollectionTag).join(Collection).join(Tag)).scalar_one()
     assert (result.collection_id, result.tag_id, result.tag_type, result.user_id, result.data) \
            == (collection_tag.collection.id, collection_tag.tag.id, 'collection', collection_tag.user.id, collection_tag.data)
-
-
-def test_create_project():
-    project = ProjectFactory()
-    result = Session.execute(select(Project)).scalar_one()
-    assert (result.id, result.name) == (project.id, project.name)
-
-
-def test_create_project_with_collections():
-    collections = CollectionFactory.create_batch(5)
-    project = ProjectFactory(collections=collections)
-    result = Session.execute(select(ProjectCollection)).scalars()
-    assert [(row.project_id, row.collection_id) for row in result] \
-           == [(project.id, collection.id) for collection in collections]
 
 
 def test_create_provider():
