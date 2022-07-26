@@ -125,21 +125,6 @@ class CollectionForm(BaseForm):
     )
 
 
-class ProjectForm(BaseForm):
-    id = StringField(
-        label='Project id',
-        filters=[lambda s: s.strip() if s else s],
-        validators=[data_required()],
-    )
-    name = StringField(
-        label='Project name',
-        validators=[data_required()],
-    )
-    collection_ids = MultiCheckboxField(
-        label='Collections',
-    )
-
-
 class ProviderForm(BaseForm):
     id = StringField(
         label='Provider id',

@@ -10,10 +10,9 @@
 {% block content %}
     {% from 'macros.html' import render_table, render_buttons, obj_link, obj_links %}
     {{ render_buttons(create=True) }}
-    {% call(collection) render_table(collections, 'Name', 'Provider', 'Projects', 'Records') %}
+    {% call(collection) render_table(collections, 'Name', 'Provider', 'Records') %}
         <td>{{ collection.name }}</td>
         <td>{{ obj_link('providers', collection.provider_id) }}</td>
-        <td>{{ obj_links('projects', collection.project_ids) }}</td>
         <td>
             <a href="{{ url_for('records.index', collection=collection.id) }}" class="text-decoration-none">
                 {{ collection.record_count }}

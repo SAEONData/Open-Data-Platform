@@ -24,14 +24,12 @@
     </ul>
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
-            {% call(prop) render_info(collection, 'Name', 'Provider', 'Projects', 'DOI key', 'Records',
+            {% call(prop) render_info(collection, 'Name', 'Provider', 'DOI key', 'Records',
                     'Ready', 'Frozen', 'Timestamp') %}
                 {% if prop == 'Name' %}
                     {{ collection.name }}
                 {% elif prop == 'Provider' %}
                     {{ obj_link('providers', collection.provider_id) }}
-                {% elif prop == 'Projects' %}
-                    {{ obj_links('projects', collection.project_ids, newlines=True) }}
                 {% elif prop == 'DOI key' %}
                     {{ collection.doi_key if collection.doi_key }}
                 {% elif prop == 'Records' %}
