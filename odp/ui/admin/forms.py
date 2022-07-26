@@ -234,3 +234,18 @@ class UserForm(BaseForm):
     role_ids = MultiCheckboxField(
         label='Roles',
     )
+
+
+class VocabularyTermProjectForm(BaseForm):
+    id = StringField(
+        label='Project id',
+        filters=[lambda s: s.strip() if s else s],
+        validators=[data_required()],
+    )
+    title = StringField(
+        label='Project title',
+        validators=[data_required()],
+    )
+    description = StringField(
+        label='Project description',
+    )

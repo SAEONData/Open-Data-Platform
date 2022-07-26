@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% from 'macros.html' import render_info, render_buttons, render_table,
-    render_tag_instance_delete_form, obj_link %}
+    render_item_delete_form, obj_link %}
 
 {% block web_title %}
     {{ super() }} |
@@ -97,7 +97,7 @@
                 <td>{{ qc_tag.data.comment }}</td>
                 <td>{{ obj_link('users', qc_tag.user_id, qc_tag.user_name) }}</td>
                 <td>{{ qc_tag.timestamp|timestamp }}</td>
-                <td class="text-end">{{ render_tag_instance_delete_form('.untag_qc', record.id, qc_tag.id) }}</td>
+                <td class="text-end">{{ render_item_delete_form('.untag_qc', record.id, qc_tag.id, 'tag') }}</td>
             {% endcall %}
             <div class="btn-toolbar justify-content-between mt-4">
                 <a href="{{ url_for('.tag_qc', id=record.id) }}" class="btn btn-outline-success btn-action">
@@ -112,7 +112,7 @@
                 <td>{{ embargo_tag.data.comment }}</td>
                 <td>{{ obj_link('users', embargo_tag.user_id, embargo_tag.user_name) }}</td>
                 <td>{{ embargo_tag.timestamp|timestamp }}</td>
-                <td class="text-end">{{ render_tag_instance_delete_form('.untag_embargo', record.id, embargo_tag.id) }}</td>
+                <td class="text-end">{{ render_item_delete_form('.untag_embargo', record.id, embargo_tag.id, 'tag') }}</td>
             {% endcall %}
             <div class="btn-toolbar justify-content-between mt-4">
                 <a href="{{ url_for('.tag_embargo', id=record.id) }}" class="btn btn-outline-success btn-action">

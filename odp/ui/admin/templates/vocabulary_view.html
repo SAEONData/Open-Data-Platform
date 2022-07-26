@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'macros.html' import render_info, render_table, render_item_delete_form %}
 
 {% block web_title %}
     {{ super() }} |
@@ -10,7 +11,12 @@
 {% block content %}
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#terms" type="button" role="tab">
+                Terms
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
                 Info
             </button>
         </li>
@@ -21,8 +27,21 @@
         </li>
     </ul>
     <div class="tab-content">
-        <div id="info" class="tab-pane fade show active" role="tabpanel">
-            {% from 'macros.html' import render_info %}
+        <div id="terms" class="tab-pane fade show active" role="tabpanel">
+            {% if vocabulary.id == 'Project' %}
+                {% call(term) render_table(terms, 'Title', 'Description', '', '') %}
+                    <td>{{ term.data.title }}</td>
+                    <td>{{ term.data.description }}</td>
+                    <td class="text-end">{{ render_item_delete_form('.delete_project_term', vocabulary.id, term.id, 'term') }}</td>
+                {% endcall %}
+                <div class="btn-toolbar justify-content-between mt-4">
+                    <a href="{{ url_for('.create_project_term') }}" class="btn btn-outline-success btn-action">
+                        Add Project
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        <div id="info" class="tab-pane fade" role="tabpanel">
             {% call(prop) render_info(vocabulary, 'Scope', 'Schema URI') %}
                 {% if prop == 'Scope' %}
                     {{ vocabulary.scope_id }}
