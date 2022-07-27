@@ -179,11 +179,15 @@
 {% endmacro %}
 
 {% macro render_form(form, obj, col2_fields) %}
+{# Render a form and populate fields from obj, if provided.
+    To override the default submit target, pass kwarg submit_to='.func'.
+#}
+    {% set submit_to = kwargs.get('submit_to') %}
     {% if obj %}
-        {% set submit_target = url_for('.edit', id=obj.id) %}
+        {% set submit_target = url_for(submit_to or '.edit', id=obj.id) %}
         {% set cancel_target = url_for('.view', id=obj.id) %}
     {% else %}
-        {% set submit_target = url_for('.create') %}
+        {% set submit_target = url_for(submit_to or '.create') %}
         {% set cancel_target = url_for('.index') %}
     {% endif %}
     <form action="{{ submit_target }}" method="post">
