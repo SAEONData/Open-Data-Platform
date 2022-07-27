@@ -28,7 +28,10 @@
     </ul>
     <div class="tab-content">
         <div id="terms" class="tab-pane fade show active" role="tabpanel">
-            {% if vocabulary.id == 'Project' %}
+            {% if vocabulary.id == 'Infrastructure' %}
+                {{ render_terms(terms, '.create_infrastructure_term', '.edit_infrastructure_term', '.delete_infrastructure_term',
+                   name='Name', description='Description') }}
+            {% elif vocabulary.id == 'Project' %}
                 {{ render_terms(terms, '.create_project_term', '.edit_project_term', '.delete_project_term',
                    title='Title', description='Description') }}
             {% endif %}

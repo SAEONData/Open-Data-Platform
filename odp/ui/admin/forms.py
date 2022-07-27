@@ -236,6 +236,21 @@ class UserForm(BaseForm):
     )
 
 
+class VocabularyTermInfrastructureForm(BaseForm):
+    id = StringField(
+        label='Infrastructure id',
+        filters=[lambda s: s.strip() if s else s],
+        validators=[data_required(), length(min=2)],
+    )
+    name = StringField(
+        label='Infrastructure name',
+        validators=[data_required()],
+    )
+    description = StringField(
+        label='Infrastructure description',
+    )
+
+
 class VocabularyTermProjectForm(BaseForm):
     id = StringField(
         label='Project id',

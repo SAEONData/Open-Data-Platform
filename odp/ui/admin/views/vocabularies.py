@@ -2,7 +2,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from odp import ODPScope, ODPVocabulary
 from odp.ui import api
-from odp.ui.admin.forms import VocabularyTermProjectForm
+from odp.ui.admin.forms import VocabularyTermInfrastructureForm, VocabularyTermProjectForm
 
 bp = Blueprint('vocabularies', __name__)
 
@@ -28,60 +28,99 @@ def view(id):
     return render_template('vocabulary_view.html', vocabulary=vocabulary, terms=terms)
 
 
+@bp.route(f'/{ODPVocabulary.INFRASTRUCTURE}/new', methods=('GET', 'POST'))
+@api.client(ODPScope.VOCABULARY_INFRASTRUCTURE)
+def create_infrastructure_term():
+    return _create_term(ODPVocabulary.INFRASTRUCTURE.value, VocabularyTermInfrastructureForm, 'name', 'description')
+
+
+@bp.route(f'/{ODPVocabulary.INFRASTRUCTURE}/<id>/edit', methods=('GET', 'POST'))
+@api.client(ODPScope.VOCABULARY_INFRASTRUCTURE)
+def edit_infrastructure_term(id):
+    return _edit_term(ODPVocabulary.INFRASTRUCTURE.value, id, VocabularyTermInfrastructureForm, 'name', 'description')
+
+
+@bp.route(f'/{ODPVocabulary.INFRASTRUCTURE}/<id>/delete', methods=('POST',))
+@api.client(ODPScope.VOCABULARY_INFRASTRUCTURE, fallback_to_referrer=True)
+def delete_infrastructure_term(id):
+    return _delete_term(ODPVocabulary.INFRASTRUCTURE.value, id)
+
+
 @bp.route(f'/{ODPVocabulary.PROJECT}/new', methods=('GET', 'POST'))
 @api.client(ODPScope.VOCABULARY_PROJECT)
 def create_project_term():
-    vocabulary = api.get(f'/vocabulary/{ODPVocabulary.PROJECT}')
-    form = VocabularyTermProjectForm(request.form)
-
-    if request.method == 'POST' and form.validate():
-        try:
-            api.post(f'/vocabulary/{ODPVocabulary.PROJECT}/', dict(
-                id=(id := form.id.data),
-                data={
-                    'title': form.title.data,
-                    'description': form.description.data,
-                },
-            ))
-            flash(f'{ODPVocabulary.PROJECT} {id} has been created.', category='success')
-            return redirect(url_for('.view', id=ODPVocabulary.PROJECT.value))
-
-        except api.ODPAPIError as e:
-            if response := api.handle_error(e):
-                return response
-
-    return render_template('vocabulary_term_project.html', vocabulary=vocabulary, form=form)
+    return _create_term(ODPVocabulary.PROJECT.value, VocabularyTermProjectForm, 'title', 'description')
 
 
 @bp.route(f'/{ODPVocabulary.PROJECT}/<id>/edit', methods=('GET', 'POST'))
 @api.client(ODPScope.VOCABULARY_PROJECT)
 def edit_project_term(id):
-    vocabulary = api.get(f'/vocabulary/{ODPVocabulary.PROJECT}')
-    term = next((t for t in vocabulary['terms'] if t['id'] == id), None)
-    form = VocabularyTermProjectForm(request.form, data=term['data'])
-
-    if request.method == 'POST' and form.validate():
-        try:
-            api.put(f'/vocabulary/{ODPVocabulary.PROJECT}/', dict(
-                id=form.id.data,
-                data={
-                    'title': form.title.data,
-                    'description': form.description.data,
-                },
-            ))
-            flash(f'{ODPVocabulary.PROJECT} {id} has been updated.', category='success')
-            return redirect(url_for('.view', id=ODPVocabulary.PROJECT.value))
-
-        except api.ODPAPIError as e:
-            if response := api.handle_error(e):
-                return response
-
-    return render_template('vocabulary_term_project.html', vocabulary=vocabulary, term=term, form=form)
+    return _edit_term(ODPVocabulary.PROJECT.value, id, VocabularyTermProjectForm, 'title', 'description')
 
 
 @bp.route(f'/{ODPVocabulary.PROJECT}/<id>/delete', methods=('POST',))
 @api.client(ODPScope.VOCABULARY_PROJECT, fallback_to_referrer=True)
 def delete_project_term(id):
-    api.delete(f'/vocabulary/{ODPVocabulary.PROJECT}/{id}')
-    flash(f'{ODPVocabulary.PROJECT} {id} has been deleted.', category='success')
-    return redirect(url_for('.view', id=ODPVocabulary.PROJECT.value))
+    return _delete_term(ODPVocabulary.PROJECT.value, id)
+
+
+def _create_term(vocab_id, form_cls, *data_fields):
+    vocabulary = api.get(f'/vocabulary/{vocab_id}')
+    form = form_cls(request.form)
+
+    if request.method == 'POST' and form.validate():
+        try:
+            api.post(f'/vocabulary/{vocab_id}/', dict(
+                id=(id := form.id.data),
+                data={
+                    field: form[field].data
+                    for field in data_fields
+                },
+            ))
+            flash(f'{vocab_id} {id} has been created.', category='success')
+            return redirect(url_for('.view', id=vocab_id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
+
+    return render_template(
+        f'vocabulary_term_{vocab_id.lower()}.html',
+        vocabulary=vocabulary,
+        form=form,
+    )
+
+
+def _edit_term(vocab_id, term_id, form_cls, *data_fields):
+    vocabulary = api.get(f'/vocabulary/{vocab_id}')
+    term = next((t for t in vocabulary['terms'] if t['id'] == term_id), None)
+    form = form_cls(request.form, data=term['data'])
+
+    if request.method == 'POST' and form.validate():
+        try:
+            api.put(f'/vocabulary/{vocab_id}/', dict(
+                id=form.id.data,
+                data={
+                    field: form[field].data
+                    for field in data_fields
+                },
+            ))
+            flash(f'{vocab_id} {term_id} has been updated.', category='success')
+            return redirect(url_for('.view', id=vocab_id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
+
+    return render_template(
+        f'vocabulary_term_{vocab_id.lower()}.html',
+        vocabulary=vocabulary,
+        term=term,
+        form=form,
+    )
+
+
+def _delete_term(vocab_id, term_id):
+    api.delete(f'/vocabulary/{vocab_id}/{term_id}')
+    flash(f'{vocab_id} {term_id} has been deleted.', category='success')
+    return redirect(url_for('.view', id=vocab_id))
