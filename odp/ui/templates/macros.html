@@ -36,6 +36,7 @@
 
 {% macro render_table(result) %}
 {# Render a paginated list result in a table.
+    Column titles can be passed in via kwarg columns=[...] or via varargs.
     To disable automatic id column rendering, pass kwarg hide_id=True.
     Filter params can be appended to paging URLs via the kwarg filter_, e.g. filter_='&collection=CSAG&collection=DFFE'
     Example usage:
@@ -50,7 +51,7 @@
                 {% if not kwargs.get('hide_id') %}
                     <th scope="col">Id</th>
                 {% endif %}
-                {% for col in varargs %}
+                {% for col in kwargs.get('columns') or varargs %}
                     <th scope="col">{{ col }}</th>
                 {% endfor %}
             </tr>

@@ -29,23 +29,8 @@
     <div class="tab-content">
         <div id="terms" class="tab-pane fade show active" role="tabpanel">
             {% if vocabulary.id == 'Project' %}
-                {% call(term) render_table(terms, 'Id', 'Title', 'Description', '', hide_id=True) %}
-                    <th>
-                        <a href="{{ url_for('.edit_project_term', id=term.id) }}" class="text-decoration-none">
-                            {{ term.id }}
-                        </a>
-                    </th>
-                    <td>{{ term.data.title }}</td>
-                    <td>{{ term.data.description }}</td>
-                    <td class="text-end">
-                        {{ render_item_delete_form('.delete_project_term', 'term', id=term.id) }}
-                    </td>
-                {% endcall %}
-                <div class="btn-toolbar justify-content-between mt-4">
-                    <a href="{{ url_for('.create_project_term') }}" class="btn btn-outline-success btn-action">
-                        Add
-                    </a>
-                </div>
+                {{ render_terms(terms, '.create_project_term', '.edit_project_term', '.delete_project_term',
+                   title='Title', description='Description') }}
             {% endif %}
         </div>
         <div id="info" class="tab-pane fade" role="tabpanel">
@@ -64,3 +49,26 @@
         </div>
     </div>
 {% endblock %}
+
+{% macro render_terms(terms, create_view, edit_view, delete_view) %}
+    {% set cols = ['Id'] + kwargs.values()|list + [''] %}
+    {% set fields = kwargs.keys() %}
+    {% call(term) render_table(terms, columns=cols, hide_id=True) %}
+        <th>
+            <a href="{{ url_for(edit_view, id=term.id) }}" class="text-decoration-none">
+                {{ term.id }}
+            </a>
+        </th>
+        {% for field in fields %}
+            <td>{{ term.data[field] }}</td>
+        {% endfor %}
+        <td class="text-end">
+            {{ render_item_delete_form(delete_view, 'term', id=term.id) }}
+        </td>
+    {% endcall %}
+    <div class="btn-toolbar justify-content-between mt-4">
+        <a href="{{ url_for(create_view) }}" class="btn btn-outline-success btn-action">
+            Add
+        </a>
+    </div>
+{% endmacro %}
