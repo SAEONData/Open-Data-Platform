@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        {% if term %}
+            Project: {{ term.data.title }}
+        {% else %}
+            Add Project
+        {% endif %}
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_form %}
+    {% set target = '.edit_project_term' if term else '.create_project_term' %}
+    {{ render_form(form, term, submit_to=target) }}
+{% endblock %}
