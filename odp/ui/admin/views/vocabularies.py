@@ -44,7 +44,7 @@ def create_project_term():
                 },
             ))
             flash(f'{ODPVocabulary.PROJECT} {term_id} has been created.', category='success')
-            return redirect(url_for('.view', id=ODPVocabulary.PROJECT))
+            return redirect(url_for('.view', id=ODPVocabulary.PROJECT.value))
 
         except api.ODPAPIError as e:
             if response := api.handle_error(e):
@@ -53,9 +53,9 @@ def create_project_term():
     return render_template('vocabulary_term_project.html', vocabulary=vocabulary, form=form)
 
 
-@bp.route('/<id>/<item_id>/delete', methods=('POST',))
+@bp.route(f'/{ODPVocabulary.PROJECT}/<term_id>/delete', methods=('POST',))
 @api.client(ODPScope.VOCABULARY_PROJECT, fallback_to_referrer=True)
-def delete_project_term(id, item_id):
-    api.delete(f'/vocabulary/{id}/{item_id}')
-    flash(f'{id} {item_id} has been deleted.', category='success')
-    return redirect(url_for('.view', id=id))
+def delete_project_term(term_id):
+    api.delete(f'/vocabulary/{ODPVocabulary.PROJECT}/{term_id}')
+    flash(f'{ODPVocabulary.PROJECT} {term_id} has been deleted.', category='success')
+    return redirect(url_for('.view', id=ODPVocabulary.PROJECT.value))

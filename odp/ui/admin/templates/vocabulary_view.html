@@ -32,7 +32,7 @@
                 {% call(term) render_table(terms, 'Title', 'Description', '', '') %}
                     <td>{{ term.data.title }}</td>
                     <td>{{ term.data.description }}</td>
-                    <td class="text-end">{{ render_item_delete_form('.delete_project_term', vocabulary.id, term.id, 'term') }}</td>
+                    <td class="text-end">{{ render_item_delete_form('.delete_project_term', 'term', term_id=term.id) }}</td>
                 {% endcall %}
                 <div class="btn-toolbar justify-content-between mt-4">
                     <a href="{{ url_for('.create_project_term') }}" class="btn btn-outline-success btn-action">
