@@ -9,5 +9,5 @@
 
 {% block content %}
     {% from 'macros.html' import render_form %}
-    {{ render_form(form, record, submit_to='.tag_qc') }}
+    {{ render_form(form, record, submit_target=url_for('.tag_qc', id=record.id)) }}
 {% endblock %}

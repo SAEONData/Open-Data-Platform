@@ -13,6 +13,7 @@
 
 {% block content %}
     {% from 'macros.html' import render_form %}
-    {% set target = '.edit_project_term' if term else '.create_project_term' %}
-    {{ render_form(form, term, submit_to=target) }}
+    {{ render_form(form, term,
+       submit_target=url_for('.edit_project_term', id=term.id) if term else url_for('.create_project_term'),
+       cancel_target=url_for('.view', id=vocabulary.id)) }}
 {% endblock %}

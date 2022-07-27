@@ -180,16 +180,15 @@
 
 {% macro render_form(form, obj, col2_fields) %}
 {# Render a form and populate fields from obj, if provided.
-    To override the default submit target, pass kwarg submit_to='.func'.
+    To override the default submit target, pass submit_target=url.
+    To override the default cancel target, pass cancel_target=url.
 #}
-    {% set submit_to = kwargs.get('submit_to') %}
-    {% if obj %}
-        {% set submit_target = url_for(submit_to or '.edit', id=obj.id) %}
-        {% set cancel_target = url_for('.view', id=obj.id) %}
-    {% else %}
-        {% set submit_target = url_for(submit_to or '.create') %}
-        {% set cancel_target = url_for('.index') %}
-    {% endif %}
+    {% set submit_target = kwargs.get('submit_target') or
+        (url_for('.edit', id=obj.id) if obj else url_for('.create'))
+    %}
+    {% set cancel_target = kwargs.get('cancel_target') or
+        (url_for('.view', id=obj.id) if obj else url_for('.index'))
+    %}
     <form action="{{ submit_target }}" method="post">
         {{ form.csrf_token }}
         <div class="row">
