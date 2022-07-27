@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Flask, session
 from wtforms import BooleanField, DateField, Form, RadioField, SelectField, SelectMultipleField, StringField, TextAreaField, ValidationError
 from wtforms.csrf.session import SessionCSRF
-from wtforms.validators import data_required, input_required, optional, regexp
+from wtforms.validators import data_required, input_required, length, optional, regexp
 from wtforms.widgets import CheckboxInput, ListWidget
 
 from odp.lib.formats import DOI_REGEX, SID_REGEX
@@ -59,7 +59,7 @@ class ClientForm(BaseForm):
     id = StringField(
         label='Client id',
         filters=[lambda s: s.strip() if s else s],
-        validators=[data_required()],
+        validators=[data_required(), length(min=2)],
     )
     name = StringField(
         label='Client name',
@@ -110,7 +110,7 @@ class CollectionForm(BaseForm):
     id = StringField(
         label='Collection id',
         filters=[lambda s: s.strip() if s else s],
-        validators=[data_required()],
+        validators=[data_required(), length(min=2)],
     )
     name = StringField(
         label='Collection name',
@@ -129,7 +129,7 @@ class ProviderForm(BaseForm):
     id = StringField(
         label='Provider id',
         filters=[lambda s: s.strip() if s else s],
-        validators=[data_required()],
+        validators=[data_required(), length(min=2)],
     )
     name = StringField(
         label='Provider name',
@@ -205,7 +205,7 @@ class RoleForm(BaseForm):
     id = StringField(
         label='Role id',
         filters=[lambda s: s.strip() if s else s],
-        validators=[data_required()],
+        validators=[data_required(), length(min=2)],
     )
     collection_id = SelectField(
         label='Collection',
@@ -240,7 +240,7 @@ class VocabularyTermProjectForm(BaseForm):
     id = StringField(
         label='Project id',
         filters=[lambda s: s.strip() if s else s],
-        validators=[data_required()],
+        validators=[data_required(), length(min=2)],
     )
     title = StringField(
         label='Project title',
