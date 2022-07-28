@@ -37,8 +37,6 @@ def view(id):
     catalog_records = api.get(f'/record/{id}/catalog')
     audit_records = api.get(f'/record/{id}/audit')
 
-    migrated_tag = next((tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.MIGRATED), None)
-
     qc_tags = {
         'items': (items := [tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.QC]),
         'total': len(items),
@@ -56,7 +54,7 @@ def view(id):
     return render_template(
         'record_view.html',
         record=record,
-        migrated_tag=migrated_tag,
+        migrated_tag=utils.get_tag_instance(record, ODPRecordTag.MIGRATED),
         qc_tags=qc_tags,
         embargo_tags=embargo_tags,
         catalog_records=catalog_records,

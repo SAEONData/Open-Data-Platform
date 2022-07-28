@@ -8,13 +8,6 @@ from odp.ui.admin.views import utils
 bp = Blueprint('collections', __name__)
 
 
-def get_tag_instance(collection, tag_id):
-    return next(
-        (tag for tag in collection['tags'] if tag['tag_id'] == tag_id),
-        None
-    )
-
-
 @bp.route('/')
 @api.client(ODPScope.COLLECTION_READ)
 def index():
@@ -31,8 +24,8 @@ def view(id):
     return render_template(
         'collection_view.html',
         collection=collection,
-        ready_tag=get_tag_instance(collection, ODPCollectionTag.READY),
-        frozen_tag=get_tag_instance(collection, ODPCollectionTag.FROZEN),
+        ready_tag=utils.get_tag_instance(collection, ODPCollectionTag.READY),
+        frozen_tag=utils.get_tag_instance(collection, ODPCollectionTag.FROZEN),
         audit_records=audit_records,
     )
 

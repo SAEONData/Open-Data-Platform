@@ -3,6 +3,12 @@ from markupsafe import Markup
 from odp.ui import api
 
 
+def get_tag_instance(obj, tag_id):
+    return next(
+        (tag for tag in obj['tags'] if tag['tag_id'] == tag_id), None
+    )
+
+
 def populate_collection_choices(field, include_none=False):
     collections = api.get('/collection/')['items']
     field.choices = [('', '(None)')] if include_none else []
