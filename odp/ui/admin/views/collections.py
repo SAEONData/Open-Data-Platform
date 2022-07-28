@@ -21,11 +21,14 @@ def index():
 def view(id):
     collection = api.get(f'/collection/{id}')
     audit_records = api.get(f'/collection/{id}/audit')
+
     return render_template(
         'collection_view.html',
         collection=collection,
         ready_tag=utils.get_tag_instance(collection, ODPCollectionTag.READY),
         frozen_tag=utils.get_tag_instance(collection, ODPCollectionTag.FROZEN),
+        infrastructure_tags=utils.get_tag_instances(collection, ODPCollectionTag.INFRASTRUCTURE),
+        project_tags=utils.get_tag_instances(collection, ODPCollectionTag.PROJECT),
         audit_records=audit_records,
     )
 

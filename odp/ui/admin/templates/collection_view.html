@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% from 'macros.html' import render_info, render_buttons, render_button_prompt_form,
-    render_table, obj_link, obj_links %}
+    render_table, obj_link %}
 
 {% block web_title %}
     {{ super() }} |
@@ -25,7 +25,7 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% call(prop) render_info(collection, 'Name', 'Provider', 'DOI key', 'Records',
-                    'Ready', 'Frozen', 'Timestamp') %}
+                    'Ready', 'Frozen', 'Timestamp', 'Projects', 'Infrastructures') %}
                 {% if prop == 'Name' %}
                     {{ collection.name }}
                 {% elif prop == 'Provider' %}
@@ -46,6 +46,14 @@
                     {% endif %}
                 {% elif prop == 'Timestamp' %}
                     {{ collection.timestamp|timestamp }}
+                {% elif prop == 'Projects' %}
+                    {% for tag in project_tags['items']|sort(attribute='data.project') %}
+                        {{ tag.data.project }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                {% elif prop == 'Infrastructures' %}
+                    {% for tag in infrastructure_tags['items']|sort(attribute='data.infrastructure') %}
+                        {{ tag.data.infrastructure }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
                 {% endif %}
             {% endcall %}
             {% if ready_tag %}
