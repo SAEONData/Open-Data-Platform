@@ -4,9 +4,29 @@ from odp.ui import api
 
 
 def get_tag_instance(obj, tag_id):
+    """Get a single tag instance (with cardinality 'one')
+    for a record or collection."""
     return next(
         (tag for tag in obj['tags'] if tag['tag_id'] == tag_id), None
     )
+
+
+def get_tag_instances(obj, tag_id):
+    """Get a page result of tag instances (with cardinality
+    'user' or 'multi') for a record or collection."""
+    return pagify(
+        [tag for tag in obj['tags'] if tag['tag_id'] == tag_id]
+    )
+
+
+def pagify(item_list):
+    """Convert a flat object list to a page result."""
+    return {
+        'items': item_list,
+        'total': len(item_list),
+        'page': 1,
+        'pages': 1,
+    }
 
 
 def populate_collection_choices(field, include_none=False):

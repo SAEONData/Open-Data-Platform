@@ -3,6 +3,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from odp import ODPScope, ODPVocabulary
 from odp.ui import api
 from odp.ui.admin.forms import VocabularyTermInfrastructureForm, VocabularyTermProjectForm
+from odp.ui.admin.views import utils
 
 bp = Blueprint('vocabularies', __name__)
 
@@ -19,13 +20,11 @@ def index():
 @api.client(ODPScope.VOCABULARY_READ)
 def view(id):
     vocabulary = api.get(f'/vocabulary/{id}')
-    terms = {
-        'items': (items := vocabulary['terms']),
-        'total': len(items),
-        'page': 1,
-        'pages': 1,
-    }
-    return render_template('vocabulary_view.html', vocabulary=vocabulary, terms=terms)
+    return render_template(
+        'vocabulary_view.html',
+        vocabulary=vocabulary,
+        terms=utils.pagify(vocabulary['terms']),
+    )
 
 
 @bp.route(f'/{ODPVocabulary.INFRASTRUCTURE}/new', methods=('GET', 'POST'))

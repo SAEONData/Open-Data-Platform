@@ -37,26 +37,12 @@ def view(id):
     catalog_records = api.get(f'/record/{id}/catalog')
     audit_records = api.get(f'/record/{id}/audit')
 
-    qc_tags = {
-        'items': (items := [tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.QC]),
-        'total': len(items),
-        'page': 1,
-        'pages': 1,
-    }
-
-    embargo_tags = {
-        'items': (items := [tag for tag in record['tags'] if tag['tag_id'] == ODPRecordTag.EMBARGO]),
-        'total': len(items),
-        'page': 1,
-        'pages': 1,
-    }
-
     return render_template(
         'record_view.html',
         record=record,
         migrated_tag=utils.get_tag_instance(record, ODPRecordTag.MIGRATED),
-        qc_tags=qc_tags,
-        embargo_tags=embargo_tags,
+        qc_tags=utils.get_tag_instances(record, ODPRecordTag.QC),
+        embargo_tags=utils.get_tag_instances(record, ODPRecordTag.EMBARGO),
         catalog_records=catalog_records,
         audit_records=audit_records,
     )
