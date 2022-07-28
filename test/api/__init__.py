@@ -46,9 +46,14 @@ def assert_conflict(response, message):
     assert response.json() == {'detail': message}
 
 
-def assert_unprocessable(response, message):
+def assert_unprocessable(response, message=None, **kwargs):
+    # kwargs are key-value pairs expected within 'detail'
     assert response.status_code == 422
-    assert response.json() == {'detail': message}
+    error_detail = response.json()['detail']
+    if message is not None:
+        assert error_detail == message
+    for k, v in kwargs.items():
+        assert error_detail[k] == v
 
 
 def assert_new_timestamp(timestamp):

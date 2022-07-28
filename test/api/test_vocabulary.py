@@ -6,8 +6,9 @@ from sqlalchemy import select
 from odp import ODPScope
 from odp.db import Session
 from odp.db.models import SchemaType, Scope, ScopeType, Vocabulary, VocabularyTerm, VocabularyTermAudit
-from test.api import all_scopes, all_scopes_excluding, assert_empty_result, assert_forbidden, assert_new_timestamp, assert_not_found
-from test.factories import SchemaFactory, VocabularyFactory, VocabularyTermFactory
+from test.api import (all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
+                      assert_not_found, assert_unprocessable)
+from test.factories import SchemaFactory, VocabularyFactory, VocabularyTermFactory, fake
 
 
 @pytest.fixture
@@ -170,12 +171,30 @@ def test_create_term(api, vocabulary_batch, scopes):
         assert_no_audit_log()
 
 
-def test_create_term_conflict():
-    pass  # todo
+def test_create_term_conflict(api, vocabulary_batch):
+    scopes = [ODPScope.VOCABULARY_PROJECT]
+    client = api(scopes)
+    vocab = prepare_project_vocabulary(vocabulary_batch[2])
+    r = client.post(f'/vocabulary/{vocab.id}/', json=dict(
+        id=vocab.terms[1].term_id,
+        data={'title': 'Some Project'},
+    ))
+    assert_conflict(r, 'Term already exists in vocabulary')
+    assert_db_state(vocabulary_batch)
+    assert_no_audit_log()
 
 
-def test_create_term_invalid():
-    pass  # todo
+def test_create_term_invalid(api, vocabulary_batch):
+    scopes = [ODPScope.VOCABULARY_PROJECT]
+    client = api(scopes)
+    vocab = prepare_project_vocabulary(vocabulary_batch[2])
+    r = client.post(f'/vocabulary/{vocab.id}/', json=dict(
+        id=fake.word(),
+        data={'name': 'Project should have a title not a name'},
+    ))
+    assert_unprocessable(r, valid=False)
+    assert_db_state(vocabulary_batch)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes', [
@@ -211,12 +230,30 @@ def test_update_term(api, vocabulary_batch, scopes):
         assert_no_audit_log()
 
 
-def test_update_term_not_found():
-    pass  # todo
+def test_update_term_not_found(api, vocabulary_batch):
+    scopes = [ODPScope.VOCABULARY_PROJECT]
+    client = api(scopes)
+    vocab = prepare_project_vocabulary(vocabulary_batch[2])
+    r = client.put(f'/vocabulary/{vocab.id}/', json=dict(
+        id=fake.word(),
+        data={'title': 'Some Project'},
+    ))
+    assert_not_found(r)
+    assert_db_state(vocabulary_batch)
+    assert_no_audit_log()
 
 
-def test_update_term_invalid():
-    pass  # todo
+def test_update_term_invalid(api, vocabulary_batch):
+    scopes = [ODPScope.VOCABULARY_PROJECT]
+    client = api(scopes)
+    vocab = prepare_project_vocabulary(vocabulary_batch[2])
+    r = client.put(f'/vocabulary/{vocab.id}/', json=dict(
+        id=vocab.terms[1].term_id,
+        data={'name': 'Project should have a title not a name'},
+    ))
+    assert_unprocessable(r, valid=False)
+    assert_db_state(vocabulary_batch)
+    assert_no_audit_log()
 
 
 @pytest.mark.parametrize('scopes', [
@@ -247,5 +284,11 @@ def test_delete_term(api, vocabulary_batch, scopes):
         assert_no_audit_log()
 
 
-def test_delete_term_not_found():
-    pass  # todo
+def test_delete_term_not_found(api, vocabulary_batch):
+    scopes = [ODPScope.VOCABULARY_PROJECT]
+    client = api(scopes)
+    vocab = prepare_project_vocabulary(vocabulary_batch[2])
+    r = client.delete(f'/vocabulary/{vocab.id}/{fake.word()}')
+    assert_not_found(r)
+    assert_db_state(vocabulary_batch)
+    assert_no_audit_log()
