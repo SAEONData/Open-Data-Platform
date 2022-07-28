@@ -47,13 +47,9 @@
                 {% elif prop == 'Timestamp' %}
                     {{ collection.timestamp|timestamp }}
                 {% elif prop == 'Projects' %}
-                    {% for tag in project_tags['items']|sort(attribute='data.project') %}
-                        {{ tag.data.project }}{% if not loop.last %}, {% endif %}
-                    {% endfor %}
+                    {{ project_tags['items']|map(attribute='data.project')|sort|join(', ') }}
                 {% elif prop == 'Infrastructures' %}
-                    {% for tag in infrastructure_tags['items']|sort(attribute='data.infrastructure') %}
-                        {{ tag.data.infrastructure }}{% if not loop.last %}, {% endif %}
-                    {% endfor %}
+                    {{ infrastructure_tags['items']|map(attribute='data.infrastructure')|sort|join(', ') }}
                 {% endif %}
             {% endcall %}
             {% if ready_tag %}
