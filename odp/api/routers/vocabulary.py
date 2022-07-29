@@ -31,19 +31,19 @@ def output_vocabulary_model(vocabulary: Vocabulary) -> VocabularyModel:
     )
 
 
-def output_audit_model(result) -> VocabularyTermAuditModel:
+def output_audit_model(row) -> VocabularyTermAuditModel:
     return VocabularyTermAuditModel(
         table='vocabulary_term',
         tag_id=None,
-        audit_id=result.id,
-        client_id=result.client_id,
-        user_id=result.user_id,
-        user_name=result.user_name,
-        command=result.command,
-        timestamp=result.timestamp.isoformat(),
-        vocabulary_id=result._vocabulary_id,
-        term_id=result._term_id,
-        data=result._data,
+        audit_id=row.VocabularyTermAudit.id,
+        client_id=row.VocabularyTermAudit.client_id,
+        user_id=row.VocabularyTermAudit.user_id,
+        user_name=row.user_name,
+        command=row.VocabularyTermAudit.command,
+        timestamp=row.VocabularyTermAudit.timestamp.isoformat(),
+        vocabulary_id=row.VocabularyTermAudit._vocabulary_id,
+        term_id=row.VocabularyTermAudit._term_id,
+        data=row.VocabularyTermAudit._data,
     )
 
 

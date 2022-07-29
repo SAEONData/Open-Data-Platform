@@ -20,11 +20,21 @@ def index():
 @api.client(ODPScope.VOCABULARY_READ)
 def view(id):
     vocabulary = api.get(f'/vocabulary/{id}')
+    audit_records = api.get(f'/vocabulary/{id}/audit')
+
     return render_template(
         'vocabulary_view.html',
         vocabulary=vocabulary,
         terms=utils.pagify(vocabulary['terms']),
+        audit_records=audit_records,
     )
+
+
+@bp.route('/<id>/audit/<audit_id>')
+@api.client(ODPScope.VOCABULARY_READ)
+def view_audit_detail(id, audit_id):
+    audit_detail = api.get(f'/vocabulary/{id}/audit/{audit_id}')
+    return render_template('vocabulary_audit_view.html', audit=audit_detail)
 
 
 @bp.route(f'/{ODPVocabulary.INFRASTRUCTURE}/new', methods=('GET', 'POST'))

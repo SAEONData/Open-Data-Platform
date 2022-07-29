@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% from 'macros.html' import render_info, render_table, render_item_delete_form %}
+{% from 'macros.html' import render_info, render_table, render_audit_table, render_item_delete_form %}
 
 {% block web_title %}
     {{ super() }} |
@@ -23,6 +23,11 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#schema" type="button" role="tab">
                 Schema
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#audit-log" type="button" role="tab">
+                Audit Log
             </button>
         </li>
     </ul>
@@ -49,6 +54,13 @@
             <pre class="m-3">
                 {{- vocabulary.schema_|format_json -}}
             </pre>
+        </div>
+        <div id="audit-log" class="tab-pane fade" role="tabpanel">
+            {% call(audit_record) render_audit_table(audit_records) %}
+                <a href="{{ url_for('.view_audit_detail', id=vocabulary.id, audit_id=audit_record.audit_id) }}" class="text-decoration-none">
+                    {{ audit_record.term_id }}
+                </a>
+            {% endcall %}
         </div>
     </div>
 {% endblock %}

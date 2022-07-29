@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Vocabulary Audit: {{ audit.vocabulary_id }}
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_info, obj_link %}
+
+    {% if audit.command == 'insert' %}
+        {% set action = 'Created' %}
+    {% elif audit.command == 'update' %}
+        {% set action = 'Updated' %}
+    {% elif audit.command == 'delete' %}
+        {% set action = 'Deleted' %}
+    {% endif %}
+
+    {% call(prop) render_info(audit, 'Term id', 'Term data', action, hide_id=True) %}
+        {% if prop == 'Term id' %}
+            {{ audit.term_id }}
+        {% elif prop == 'Term data' %}
+            <pre>{{- audit.data|format_json -}}</pre>
+        {% elif prop == action %}
+            {{ audit.timestamp|timestamp }} by
+            {% if audit.user_id %}
+                {{ obj_link('users', audit.user_id, audit.user_name) }} using
+            {% endif %}
+            {{ obj_link('clients', audit.client_id) }}
+        {% endif %}
+    {% endcall %}
+{% endblock %}
