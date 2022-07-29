@@ -111,7 +111,7 @@ def handle_error(e: ODPAPIError):
     the error message and let the caller decide what to do."""
 
     if e.status_code == 401:
-        flash('An authentication error occurred. Please log in again to continue.', category='error')
+        flash('Your session has expired. Please log in again to continue.', category='error')
         return redirect(url_for('hydra.logout'))
 
     if e.status_code == 403:
