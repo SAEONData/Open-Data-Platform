@@ -69,7 +69,7 @@ def _create_term(vocab_id, form_cls, *data_fields):
 
     if request.method == 'POST' and form.validate():
         try:
-            api.post(f'/vocabulary/{vocab_id}/', dict(
+            api.post(f'/vocabulary/{vocab_id}/term', dict(
                 id=(id := form.id.data),
                 data={
                     field: form[field].data
@@ -97,7 +97,7 @@ def _edit_term(vocab_id, term_id, form_cls, *data_fields):
 
     if request.method == 'POST' and form.validate():
         try:
-            api.put(f'/vocabulary/{vocab_id}/', dict(
+            api.put(f'/vocabulary/{vocab_id}/term', dict(
                 id=form.id.data,
                 data={
                     field: form[field].data
@@ -120,6 +120,6 @@ def _edit_term(vocab_id, term_id, form_cls, *data_fields):
 
 
 def _delete_term(vocab_id, term_id):
-    api.delete(f'/vocabulary/{vocab_id}/{term_id}')
+    api.delete(f'/vocabulary/{vocab_id}/term/{term_id}')
     flash(f'{vocab_id} {term_id} has been deleted.', category='success')
     return redirect(url_for('.view', id=vocab_id))
