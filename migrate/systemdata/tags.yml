@@ -26,6 +26,13 @@ Collection.Project:
   scope_id: odp.collection:project
   schema_id: Tag.Collection.Project
 
+Collection.NotIndexed:
+  type: collection
+  cardinality: one
+  public: True
+  scope_id: odp.collection:noindex
+  schema_id: Tag.Generic
+
 Record.Migrated:
   type: record
   cardinality: one
@@ -46,3 +53,10 @@ Record.Embargo:
   public: True
   scope_id: odp.record:embargo
   schema_id: Tag.Record.Embargo
+
+Record.NotIndexed:
+  type: record
+  cardinality: one
+  public: True
+  scope_id: odp.record:noindex
+  schema_id: Tag.Generic

@@ -12,6 +12,7 @@ class ODPScope(str, Enum):
     COLLECTION_ADMIN = 'odp.collection:admin'
     COLLECTION_READ = 'odp.collection:read'
     COLLECTION_PROJECT = 'odp.collection:project'
+    COLLECTION_NOINDEX = 'odp.collection:noindex'
     PROVIDER_ADMIN = 'odp.provider:admin'
     PROVIDER_READ = 'odp.provider:read'
     RECORD_ADMIN = 'odp.record:admin'
@@ -20,6 +21,7 @@ class ODPScope(str, Enum):
     RECORD_QC = 'odp.record:qc'
     RECORD_EMBARGO = 'odp.record:embargo'
     RECORD_MIGRATE = 'odp.record:migrate'
+    RECORD_NOINDEX = 'odp.record:noindex'
     ROLE_ADMIN = 'odp.role:admin'
     ROLE_READ = 'odp.role:read'
     SCHEMA_READ = 'odp.schema:read'
@@ -37,12 +39,14 @@ class ODPCollectionTag(str, Enum):
     FROZEN = 'Collection.Frozen'
     INFRASTRUCTURE = 'Collection.Infrastructure'
     PROJECT = 'Collection.Project'
+    NOTINDEXED = 'Collection.NotIndexed'
 
 
 class ODPRecordTag(str, Enum):
     QC = 'Record.QC'
     EMBARGO = 'Record.Embargo'
     MIGRATED = 'Record.Migrated'
+    NOTINDEXED = 'Record.NotIndexed'
 
 
 class ODPMetadataSchema(str, Enum):
