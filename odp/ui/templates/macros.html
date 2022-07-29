@@ -106,6 +106,32 @@
     </div>
 {% endmacro %}
 
+{% macro render_tag_table(obj, tags, tag_view, untag_view) %}
+{# Render a paginated list of tag instances for a record or collection.
+    Use kwargs to specify field='Column heading' pairs.
+    Example usage:
+        {{ render_tag_table(collection, project_tags, '.tag_project', '.untag_project',
+           project='Project', comment='Comment') }}
+#}
+    {% set cols = kwargs.values()|list + ['User', 'Timestamp', ''] %}
+    {% set fields = kwargs.keys() %}
+    {% call(tag_instance) render_table(tags, columns=cols, hide_id=True) %}
+        {% for field in fields %}
+            <td>{{ tag_instance.data[field] }}</td>
+        {% endfor %}
+        <td>{{ obj_link('users', tag_instance.user_id, tag_instance.user_name) }}</td>
+        <td>{{ tag_instance.timestamp|timestamp }}</td>
+        <td class="text-end">
+            {{ render_item_delete_form(untag_view, 'tag', id=obj.id, tag_instance_id=tag_instance.id) }}
+        </td>
+    {% endcall %}
+    <div class="btn-toolbar justify-content-between mt-4">
+        <a href="{{ url_for(tag_view, id=obj.id) }}" class="btn btn-outline-success btn-action">
+            Tag
+        </a>
+    </div>
+{% endmacro %}
+
 {% macro render_buttons(obj, create=False, edit=False, delete=False, custom=[]) %}
     <div class="btn-toolbar justify-content-between mt-4">
         {% if create %}

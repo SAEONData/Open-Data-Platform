@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% from 'macros.html' import render_info, render_buttons, render_table,
+{% from 'macros.html' import render_info, render_buttons, render_table, render_tag_table,
     render_item_delete_form, obj_link %}
 
 {% block web_title %}
@@ -92,33 +92,12 @@
             </pre>
         </div>
         <div id="tag-qc" class="tab-pane fade" role="tabpanel">
-            {% call(qc_tag) render_table(qc_tags, 'Pass', 'Comment', 'User', 'Timestamp', '', hide_id=True) %}
-                <td>{{ qc_tag.data.pass_ }}</td>
-                <td>{{ qc_tag.data.comment }}</td>
-                <td>{{ obj_link('users', qc_tag.user_id, qc_tag.user_name) }}</td>
-                <td>{{ qc_tag.timestamp|timestamp }}</td>
-                <td class="text-end">{{ render_item_delete_form('.untag_qc', 'tag', id=record.id, tag_instance_id=qc_tag.id) }}</td>
-            {% endcall %}
-            <div class="btn-toolbar justify-content-between mt-4">
-                <a href="{{ url_for('.tag_qc', id=record.id) }}" class="btn btn-outline-success btn-action">
-                    Tag
-                </a>
-            </div>
+            {{ render_tag_table(record, qc_tags, '.tag_qc', '.untag_qc',
+               pass_='Pass', comment='Comment') }}
         </div>
         <div id="tag-embargo" class="tab-pane fade" role="tabpanel">
-            {% call(embargo_tag) render_table(embargo_tags, 'Start date', 'End date', 'Comment', 'User', 'Timestamp', '', hide_id=True) %}
-                <td>{{ embargo_tag.data.start }}</td>
-                <td>{{ embargo_tag.data.end }}</td>
-                <td>{{ embargo_tag.data.comment }}</td>
-                <td>{{ obj_link('users', embargo_tag.user_id, embargo_tag.user_name) }}</td>
-                <td>{{ embargo_tag.timestamp|timestamp }}</td>
-                <td class="text-end">{{ render_item_delete_form('.untag_embargo', 'tag', id=record.id, tag_instance_id=embargo_tag.id) }}</td>
-            {% endcall %}
-            <div class="btn-toolbar justify-content-between mt-4">
-                <a href="{{ url_for('.tag_embargo', id=record.id) }}" class="btn btn-outline-success btn-action">
-                    Tag
-                </a>
-            </div>
+            {{ render_tag_table(record, embargo_tags, '.tag_embargo', '.untag_embargo',
+               start='Start date', end='End date', comment='Comment') }}
         </div>
         <div id="catalog-records" class="tab-pane fade" role="tabpanel">
             {% call(catalog_record) render_table(catalog_records, 'Catalog', 'Published', 'Timestamp', hide_id=True) %}

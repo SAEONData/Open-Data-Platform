@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% from 'macros.html' import render_info, render_buttons, render_button_prompt_form,
-    render_table, render_item_delete_form, obj_link %}
+    render_table, render_tag_table, render_item_delete_form, obj_link %}
 
 {% block web_title %}
     {{ super() }} |
@@ -89,32 +89,12 @@
             {% endcall %}
         </div>
         <div id="projects" class="tab-pane fade" role="tabpanel">
-            {% call(project_tag) render_table(project_tags, 'Project', 'Comment', 'User', 'Timestamp', '', hide_id=True) %}
-                <td>{{ project_tag.data.project }}</td>
-                <td>{{ project_tag.data.comment }}</td>
-                <td>{{ obj_link('users', project_tag.user_id, project_tag.user_name) }}</td>
-                <td>{{ project_tag.timestamp|timestamp }}</td>
-                <td class="text-end">{{ render_item_delete_form('.untag_project', 'tag', id=collection.id, tag_instance_id=project_tag.id) }}</td>
-            {% endcall %}
-            <div class="btn-toolbar justify-content-between mt-4">
-                <a href="{{ url_for('.tag_project', id=collection.id) }}" class="btn btn-outline-success btn-action">
-                    Tag
-                </a>
-            </div>
+            {{ render_tag_table(collection, project_tags, '.tag_project', '.untag_project',
+               project='Project', comment='Comment') }}
         </div>
         <div id="infrastructures" class="tab-pane fade" role="tabpanel">
-            {% call(infrastructure_tag) render_table(infrastructure_tags, 'Infrastructure', 'Comment', 'User', 'Timestamp', '', hide_id=True) %}
-                <td>{{ infrastructure_tag.data.infrastructure }}</td>
-                <td>{{ infrastructure_tag.data.comment }}</td>
-                <td>{{ obj_link('users', infrastructure_tag.user_id, infrastructure_tag.user_name) }}</td>
-                <td>{{ infrastructure_tag.timestamp|timestamp }}</td>
-                <td class="text-end">{{ render_item_delete_form('.untag_infrastructure', 'tag', id=collection.id, tag_instance_id=infrastructure_tag.id) }}</td>
-            {% endcall %}
-            <div class="btn-toolbar justify-content-between mt-4">
-                <a href="{{ url_for('.tag_infrastructure', id=collection.id) }}" class="btn btn-outline-success btn-action">
-                    Tag
-                </a>
-            </div>
+            {{ render_tag_table(collection, infrastructure_tags, '.tag_infrastructure', '.untag_infrastructure',
+               infrastructure='Infrastructure', comment='Comment') }}
         </div>
         <div id="audit-log" class="tab-pane fade" role="tabpanel">
             {% call(audit_record) render_table(audit_records, 'Table', 'Command', 'Detail', 'User', 'Client', 'Timestamp', hide_id=True) %}
