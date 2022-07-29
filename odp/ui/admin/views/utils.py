@@ -70,3 +70,12 @@ def populate_role_choices(field):
         (role['id'], role['id'])
         for role in roles
     ]
+
+
+def populate_vocabulary_term_choices(field, vocabulary_id, include_none=False):
+    vocabulary = api.get(f'/vocabulary/{vocabulary_id}')
+    field.choices = [('', '(None)')] if include_none else []
+    field.choices += [
+        (term['id'], term['id'])
+        for term in vocabulary['terms']
+    ]

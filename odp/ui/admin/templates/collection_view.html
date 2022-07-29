@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% from 'macros.html' import render_info, render_buttons, render_button_prompt_form,
-    render_table, obj_link %}
+    render_table, render_item_delete_form, obj_link %}
 
 {% block web_title %}
     {{ super() }} |
@@ -14,6 +14,11 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
                 Info
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#projects" type="button" role="tab">
+                Projects
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -77,6 +82,20 @@
                         'Are you sure you want to un-freeze the collection?') }}
                 {% endif %}
             {% endcall %}
+        </div>
+        <div id="projects" class="tab-pane fade" role="tabpanel">
+            {% call(project_tag) render_table(project_tags, 'Project', 'Comment', 'User', 'Timestamp', '', hide_id=True) %}
+                <td>{{ project_tag.data.project }}</td>
+                <td>{{ project_tag.data.comment }}</td>
+                <td>{{ obj_link('users', project_tag.user_id, project_tag.user_name) }}</td>
+                <td>{{ project_tag.timestamp|timestamp }}</td>
+                <td class="text-end">{{ render_item_delete_form('.untag_project', 'tag', id=collection.id, tag_instance_id=project_tag.id) }}</td>
+            {% endcall %}
+            <div class="btn-toolbar justify-content-between mt-4">
+                <a href="{{ url_for('.tag_project', id=collection.id) }}" class="btn btn-outline-success btn-action">
+                    Tag
+                </a>
+            </div>
         </div>
         <div id="audit-log" class="tab-pane fade" role="tabpanel">
             {% call(audit_record) render_table(audit_records, 'Table', 'Command', 'Detail', 'User', 'Client', 'Timestamp', hide_id=True) %}

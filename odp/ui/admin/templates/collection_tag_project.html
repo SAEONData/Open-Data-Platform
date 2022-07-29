@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Collection: {{ collection.name }}
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_form %}
+    {{ render_form(form, collection, submit_target=url_for('.tag_project', id=collection.id)) }}
+{% endblock %}

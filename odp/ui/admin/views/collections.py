@@ -1,8 +1,8 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 
-from odp import ODPCollectionTag, ODPScope
+from odp import ODPCollectionTag, ODPScope, ODPVocabulary
 from odp.ui import api
-from odp.ui.admin.forms import CollectionForm
+from odp.ui.admin.forms import CollectionForm, CollectionTagProjectForm
 from odp.ui.admin.views import utils
 
 bp = Blueprint('collections', __name__)
@@ -106,7 +106,7 @@ def tag_ready(id):
 @api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
 def untag_ready(id):
     collection = api.get(f'/collection/{id}')
-    if ready_tag := get_tag_instance(collection, ODPCollectionTag.READY):
+    if ready_tag := utils.get_tag_instance(collection, ODPCollectionTag.READY):
         api.delete(f'/collection/admin/{id}/tag/{ready_tag["id"]}')
         flash(f'{ODPCollectionTag.READY} tag has been removed.', category='success')
 
@@ -128,10 +128,54 @@ def tag_frozen(id):
 @api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
 def untag_frozen(id):
     collection = api.get(f'/collection/{id}')
-    if frozen_tag := get_tag_instance(collection, ODPCollectionTag.FROZEN):
+    if frozen_tag := utils.get_tag_instance(collection, ODPCollectionTag.FROZEN):
         api.delete(f'/collection/admin/{id}/tag/{frozen_tag["id"]}')
         flash(f'{ODPCollectionTag.FROZEN} tag has been removed.', category='success')
 
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/tag/project', methods=('GET', 'POST',))
+@api.client(ODPScope.COLLECTION_PROJECT, fallback_to_referrer=True)
+def tag_project(id):
+    collection = api.get(f'/collection/{id}')
+
+    if request.method == 'POST':
+        form = CollectionTagProjectForm(request.form)
+    else:
+        # project tag has cardinality 'multi', so this will always be an insert
+        form = CollectionTagProjectForm()
+
+    utils.populate_vocabulary_term_choices(form.project, ODPVocabulary.PROJECT, include_none=True)
+
+    if request.method == 'POST' and form.validate():
+        try:
+            api.post(f'/collection/{id}/tag', dict(
+                tag_id=ODPCollectionTag.PROJECT,
+                data={
+                    'project': form.project.data,
+                    'comment': form.comment.data,
+                },
+            ))
+            flash(f'{ODPCollectionTag.PROJECT} tag has been set.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
+
+    return render_template('collection_tag_project.html', collection=collection, form=form)
+
+
+@bp.route('/<id>/untag/project/<tag_instance_id>', methods=('POST',))
+@api.client(ODPScope.COLLECTION_PROJECT, ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
+def untag_project(id, tag_instance_id):
+    api_route = '/collection/'
+    if ODPScope.COLLECTION_ADMIN in g.user_permissions:
+        api_route += 'admin/'
+
+    api.delete(f'{api_route}{id}/tag/{tag_instance_id}')
+    flash(f'{ODPCollectionTag.PROJECT} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
 
 
