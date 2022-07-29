@@ -60,7 +60,7 @@ async def get_vocabulary(
 
 
 @router.post(
-    '/{vocabulary_id}/',
+    '/{vocabulary_id}/term',
 )
 async def create_term(
         vocabulary_id: str,
@@ -97,7 +97,7 @@ async def create_term(
 
 
 @router.put(
-    '/{vocabulary_id}/',
+    '/{vocabulary_id}/term',
 )
 async def update_term(
         vocabulary_id: str,
@@ -131,7 +131,7 @@ async def update_term(
 
 
 @router.delete(
-    '/{vocabulary_id}/{term_id}',
+    '/{vocabulary_id}/term/{term_id}',
 )
 async def delete_term(
         vocabulary_id: str,

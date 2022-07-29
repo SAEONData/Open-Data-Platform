@@ -156,7 +156,7 @@ def test_create_term(api, vocabulary_batch, scopes):
         data={'title': 'Some Project'},
     )]
 
-    r = client.post(f'/vocabulary/{modified_vocab.id}/', json=dict(
+    r = client.post(f'/vocabulary/{modified_vocab.id}/term', json=dict(
         id=term.term_id,
         data=term.data,
     ))
@@ -175,7 +175,7 @@ def test_create_term_conflict(api, vocabulary_batch):
     scopes = [ODPScope.VOCABULARY_PROJECT]
     client = api(scopes)
     vocab = prepare_project_vocabulary(vocabulary_batch[2])
-    r = client.post(f'/vocabulary/{vocab.id}/', json=dict(
+    r = client.post(f'/vocabulary/{vocab.id}/term', json=dict(
         id=vocab.terms[1].term_id,
         data={'title': 'Some Project'},
     ))
@@ -188,7 +188,7 @@ def test_create_term_invalid(api, vocabulary_batch):
     scopes = [ODPScope.VOCABULARY_PROJECT]
     client = api(scopes)
     vocab = prepare_project_vocabulary(vocabulary_batch[2])
-    r = client.post(f'/vocabulary/{vocab.id}/', json=dict(
+    r = client.post(f'/vocabulary/{vocab.id}/term', json=dict(
         id=fake.word(),
         data={'name': 'Project should have a title not a name'},
     ))
@@ -215,7 +215,7 @@ def test_update_term(api, vocabulary_batch, scopes):
         data={'title': 'Some Project'},
     ))
 
-    r = client.put(f'/vocabulary/{modified_vocab.id}/', json=dict(
+    r = client.put(f'/vocabulary/{modified_vocab.id}/term', json=dict(
         id=term.term_id,
         data=term.data,
     ))
@@ -234,7 +234,7 @@ def test_update_term_not_found(api, vocabulary_batch):
     scopes = [ODPScope.VOCABULARY_PROJECT]
     client = api(scopes)
     vocab = prepare_project_vocabulary(vocabulary_batch[2])
-    r = client.put(f'/vocabulary/{vocab.id}/', json=dict(
+    r = client.put(f'/vocabulary/{vocab.id}/term', json=dict(
         id=fake.word(),
         data={'title': 'Some Project'},
     ))
@@ -247,7 +247,7 @@ def test_update_term_invalid(api, vocabulary_batch):
     scopes = [ODPScope.VOCABULARY_PROJECT]
     client = api(scopes)
     vocab = prepare_project_vocabulary(vocabulary_batch[2])
-    r = client.put(f'/vocabulary/{vocab.id}/', json=dict(
+    r = client.put(f'/vocabulary/{vocab.id}/term', json=dict(
         id=vocab.terms[1].term_id,
         data={'name': 'Project should have a title not a name'},
     ))
@@ -271,7 +271,7 @@ def test_delete_term(api, vocabulary_batch, scopes):
     deleted_term = modified_vocab.terms[2]
     del modified_vocab.terms[2]
 
-    r = client.delete(f'/vocabulary/{modified_vocab.id}/{deleted_term.term_id}')
+    r = client.delete(f'/vocabulary/{modified_vocab.id}/term/{deleted_term.term_id}')
 
     if authorized:
         assert_empty_result(r)
@@ -288,7 +288,7 @@ def test_delete_term_not_found(api, vocabulary_batch):
     scopes = [ODPScope.VOCABULARY_PROJECT]
     client = api(scopes)
     vocab = prepare_project_vocabulary(vocabulary_batch[2])
-    r = client.delete(f'/vocabulary/{vocab.id}/{fake.word()}')
+    r = client.delete(f'/vocabulary/{vocab.id}/term/{fake.word()}')
     assert_not_found(r)
     assert_db_state(vocabulary_batch)
     assert_no_audit_log()
