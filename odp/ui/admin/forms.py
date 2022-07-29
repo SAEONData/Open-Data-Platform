@@ -125,6 +125,16 @@ class CollectionForm(BaseForm):
     )
 
 
+class CollectionTagInfrastructureForm(BaseForm):
+    infrastructure = SelectField(
+        label='Infrastructure id',
+        validators=[input_required()],
+    )
+    comment = StringField(
+        label='Comment',
+    )
+
+
 class CollectionTagProjectForm(BaseForm):
     project = SelectField(
         label='Project id',

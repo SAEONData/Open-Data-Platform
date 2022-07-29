@@ -22,6 +22,11 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#infrastructures" type="button" role="tab">
+                Infrastructures
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#audit-log" type="button" role="tab">
                 Audit Log
             </button>
@@ -93,6 +98,20 @@
             {% endcall %}
             <div class="btn-toolbar justify-content-between mt-4">
                 <a href="{{ url_for('.tag_project', id=collection.id) }}" class="btn btn-outline-success btn-action">
+                    Tag
+                </a>
+            </div>
+        </div>
+        <div id="infrastructures" class="tab-pane fade" role="tabpanel">
+            {% call(infrastructure_tag) render_table(infrastructure_tags, 'Infrastructure', 'Comment', 'User', 'Timestamp', '', hide_id=True) %}
+                <td>{{ infrastructure_tag.data.infrastructure }}</td>
+                <td>{{ infrastructure_tag.data.comment }}</td>
+                <td>{{ obj_link('users', infrastructure_tag.user_id, infrastructure_tag.user_name) }}</td>
+                <td>{{ infrastructure_tag.timestamp|timestamp }}</td>
+                <td class="text-end">{{ render_item_delete_form('.untag_infrastructure', 'tag', id=collection.id, tag_instance_id=infrastructure_tag.id) }}</td>
+            {% endcall %}
+            <div class="btn-toolbar justify-content-between mt-4">
+                <a href="{{ url_for('.tag_infrastructure', id=collection.id) }}" class="btn btn-outline-success btn-action">
                     Tag
                 </a>
             </div>

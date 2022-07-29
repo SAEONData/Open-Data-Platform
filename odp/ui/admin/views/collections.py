@@ -2,7 +2,7 @@ from flask import Blueprint, flash, g, redirect, render_template, request, url_f
 
 from odp import ODPCollectionTag, ODPScope, ODPVocabulary
 from odp.ui import api
-from odp.ui.admin.forms import CollectionForm, CollectionTagProjectForm
+from odp.ui.admin.forms import CollectionForm, CollectionTagInfrastructureForm, CollectionTagProjectForm
 from odp.ui.admin.views import utils
 
 bp = Blueprint('collections', __name__)
@@ -138,45 +138,43 @@ def untag_frozen(id):
 @bp.route('/<id>/tag/project', methods=('GET', 'POST',))
 @api.client(ODPScope.COLLECTION_PROJECT, fallback_to_referrer=True)
 def tag_project(id):
-    collection = api.get(f'/collection/{id}')
-
-    if request.method == 'POST':
-        form = CollectionTagProjectForm(request.form)
-    else:
-        # project tag has cardinality 'multi', so this will always be an insert
-        form = CollectionTagProjectForm()
-
-    utils.populate_vocabulary_term_choices(form.project, ODPVocabulary.PROJECT, include_none=True)
-
-    if request.method == 'POST' and form.validate():
-        try:
-            api.post(f'/collection/{id}/tag', dict(
-                tag_id=ODPCollectionTag.PROJECT,
-                data={
-                    'project': form.project.data,
-                    'comment': form.comment.data,
-                },
-            ))
-            flash(f'{ODPCollectionTag.PROJECT} tag has been set.', category='success')
-            return redirect(url_for('.view', id=id))
-
-        except api.ODPAPIError as e:
-            if response := api.handle_error(e):
-                return response
-
-    return render_template('collection_tag_project.html', collection=collection, form=form)
+    return _tag_vocabulary_term(
+        id,
+        ODPCollectionTag.PROJECT,
+        ODPVocabulary.PROJECT,
+        CollectionTagProjectForm,
+    )
 
 
 @bp.route('/<id>/untag/project/<tag_instance_id>', methods=('POST',))
 @api.client(ODPScope.COLLECTION_PROJECT, ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
 def untag_project(id, tag_instance_id):
-    api_route = '/collection/'
-    if ODPScope.COLLECTION_ADMIN in g.user_permissions:
-        api_route += 'admin/'
+    return _untag_vocabulary_term(
+        id,
+        ODPCollectionTag.PROJECT,
+        tag_instance_id,
+    )
 
-    api.delete(f'{api_route}{id}/tag/{tag_instance_id}')
-    flash(f'{ODPCollectionTag.PROJECT} tag has been removed.', category='success')
-    return redirect(url_for('.view', id=id))
+
+@bp.route('/<id>/tag/infrastructure', methods=('GET', 'POST',))
+@api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
+def tag_infrastructure(id):
+    return _tag_vocabulary_term(
+        id,
+        ODPCollectionTag.INFRASTRUCTURE,
+        ODPVocabulary.INFRASTRUCTURE,
+        CollectionTagInfrastructureForm,
+    )
+
+
+@bp.route('/<id>/untag/infrastructure/<tag_instance_id>', methods=('POST',))
+@api.client(ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
+def untag_infrastructure(id, tag_instance_id):
+    return _untag_vocabulary_term(
+        id,
+        ODPCollectionTag.INFRASTRUCTURE,
+        tag_instance_id,
+    )
 
 
 @bp.route('/<id>/doi/new')
@@ -200,3 +198,45 @@ def view_audit_detail(id, collection_audit_id):
 def view_tag_audit_detail(id, collection_tag_audit_id):
     audit_detail = api.get(f'/collection/{id}/collection_tag_audit/{collection_tag_audit_id}')
     return render_template('collection_tag_audit_view.html', audit=audit_detail)
+
+
+def _tag_vocabulary_term(collection_id, tag_id, vocab_id, form_cls):
+    collection = api.get(f'/collection/{collection_id}')
+    vocab_field = vocab_id.lower()
+
+    if request.method == 'POST':
+        form = form_cls(request.form)
+    else:
+        # vocabulary tags have cardinality 'multi', so this will
+        # always be an insert - i.e. don't populate form for update
+        form = form_cls()
+
+    utils.populate_vocabulary_term_choices(form[vocab_field], vocab_id, include_none=True)
+
+    if request.method == 'POST' and form.validate():
+        try:
+            api.post(f'/collection/{collection_id}/tag', dict(
+                tag_id=tag_id,
+                data={
+                    vocab_field: form[vocab_field].data,
+                    'comment': form.comment.data,
+                },
+            ))
+            flash(f'{tag_id} tag has been set.', category='success')
+            return redirect(url_for('.view', id=collection_id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
+
+    return render_template(f'collection_tag_{vocab_field}.html', collection=collection, form=form)
+
+
+def _untag_vocabulary_term(collection_id, tag_id, tag_instance_id):
+    api_route = '/collection/'
+    if ODPScope.COLLECTION_ADMIN in g.user_permissions:
+        api_route += 'admin/'
+
+    api.delete(f'{api_route}{collection_id}/tag/{tag_instance_id}')
+    flash(f'{tag_id} tag has been removed.', category='success')
+    return redirect(url_for('.view', id=collection_id))
