@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% from 'macros.html' import render_info, render_buttons, render_button_prompt_form,
-    render_table, render_tag_table, render_item_delete_form, obj_link %}
+    render_table, render_tag_table, render_audit_table, render_item_delete_form, obj_link %}
 
 {% block web_title %}
     {{ super() }} |
@@ -97,23 +97,16 @@
                infrastructure='Infrastructure', comment='Comment') }}
         </div>
         <div id="audit-log" class="tab-pane fade" role="tabpanel">
-            {% call(audit_record) render_table(audit_records, 'Table', 'Command', 'Detail', 'User', 'Client', 'Timestamp', hide_id=True) %}
-                <td>{{ audit_record.table }}</td>
-                <td>{{ audit_record.command }}</td>
-                <td>
-                    {% if audit_record.table == 'collection' %}
-                        <a href="{{ url_for('.view_audit_detail', id=collection.id, collection_audit_id=audit_record.audit_id) }}" class="text-decoration-none">
-                            Collection
-                        </a>
-                    {% elif audit_record.table == 'collection_tag' %}
-                        <a href="{{ url_for('.view_tag_audit_detail', id=collection.id, collection_tag_audit_id=audit_record.audit_id) }}" class="text-decoration-none">
-                            {{ audit_record.tag_id }}
-                        </a>
-                    {% endif %}
-                </td>
-                <td>{{ obj_link('users', audit_record.user_id, audit_record.user_name) }}</td>
-                <td>{{ obj_link('clients', audit_record.client_id) }}</td>
-                <td>{{ audit_record.timestamp|timestamp }}</td>
+            {% call(audit_record) render_audit_table(audit_records) %}
+                {% if audit_record.table == 'collection' %}
+                    <a href="{{ url_for('.view_audit_detail', id=collection.id, collection_audit_id=audit_record.audit_id) }}" class="text-decoration-none">
+                        Collection
+                    </a>
+                {% elif audit_record.table == 'collection_tag' %}
+                    <a href="{{ url_for('.view_tag_audit_detail', id=collection.id, collection_tag_audit_id=audit_record.audit_id) }}" class="text-decoration-none">
+                        {{ audit_record.tag_id }}
+                    </a>
+                {% endif %}
             {% endcall %}
         </div>
     </div>

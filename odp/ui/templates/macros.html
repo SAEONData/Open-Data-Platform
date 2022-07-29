@@ -132,6 +132,23 @@
     </div>
 {% endmacro %}
 
+{% macro render_audit_table(audit_records) %}
+{# Render a paginated list of audit records.
+    The callback is for filling in the content of the 'Detail' column for a given audit_record.
+#}
+    {% set orig_caller = caller %}
+    {% call(audit_record) render_table(audit_records, 'Table', 'Command', 'Detail', 'User', 'Client', 'Timestamp', hide_id=True) %}
+        <td>{{ audit_record.table }}</td>
+        <td>{{ audit_record.command }}</td>
+        <td>
+            {{ orig_caller(audit_record) }}
+        </td>
+        <td>{{ obj_link('users', audit_record.user_id, audit_record.user_name) }}</td>
+        <td>{{ obj_link('clients', audit_record.client_id) }}</td>
+        <td>{{ audit_record.timestamp|timestamp }}</td>
+    {% endcall %}
+{% endmacro %}
+
 {% macro render_buttons(obj, create=False, edit=False, delete=False, custom=[]) %}
     <div class="btn-toolbar justify-content-between mt-4">
         {% if create %}
