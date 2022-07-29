@@ -8,50 +8,31 @@
 {% endblock %}
 
 {% block content %}
-    <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
-                Info
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#data" type="button" role="tab">
-                Tag Data
-            </button>
-        </li>
-    </ul>
-    <div class="tab-content">
-        <div id="info" class="tab-pane fade show active" role="tabpanel">
-            {% from 'macros.html' import render_info, obj_link %}
+    {% from 'macros.html' import render_info, obj_link %}
 
-            {% if audit.command == 'insert' %}
-                {% set action = 'Created' %}
-            {% elif audit.command == 'update' %}
-                {% set action = 'Updated' %}
-            {% elif audit.command == 'delete' %}
-                {% set action = 'Deleted' %}
+    {% if audit.command == 'insert' %}
+        {% set action = 'Created' %}
+    {% elif audit.command == 'update' %}
+        {% set action = 'Updated' %}
+    {% elif audit.command == 'delete' %}
+        {% set action = 'Deleted' %}
+    {% endif %}
+
+    {% call(prop) render_info(audit, 'Record id', 'Tag id', 'Tag data', 'Tag owner', action, hide_id=True) %}
+        {% if prop == 'Record id' %}
+            {{ obj_link('records', audit.record_tag_record_id) }}
+        {% elif prop == 'Tag id' %}
+            {{ obj_link('tags', audit.tag_id) }}
+        {% elif prop == 'Tag data' %}
+            <pre>{{- audit.record_tag_data|format_json -}}</pre>
+        {% elif prop == 'Tag owner' %}
+            {{ obj_link('users', audit.record_tag_user_id, audit.record_tag_user_name) }}
+        {% elif prop == action %}
+            {{ audit.timestamp|timestamp }} by
+            {% if audit.user_id %}
+                {{ obj_link('users', audit.user_id, audit.user_name) }} using
             {% endif %}
-
-            {% call(prop) render_info(audit, 'Record id', 'Tag id', 'Tag owner', action, hide_id=True) %}
-                {% if prop == 'Record id' %}
-                    {{ obj_link('records', audit.record_tag_record_id) }}
-                {% elif prop == 'Tag id' %}
-                    {{ obj_link('tags', audit.tag_id) }}
-                {% elif prop == 'Tag owner' %}
-                    {{ obj_link('users', audit.record_tag_user_id, audit.record_tag_user_name) }}
-                {% elif prop == action %}
-                    {{ audit.timestamp|timestamp }} by
-                    {% if audit.user_id %}
-                        {{ obj_link('users', audit.user_id, audit.user_name) }} using
-                    {% endif %}
-                    {{ obj_link('clients', audit.client_id) }}
-                {% endif %}
-            {% endcall %}
-        </div>
-        <div id="data" class="tab-pane fade" role="tabpanel">
-            <pre class="m-3">
-                {{- audit.record_tag_data|format_json -}}
-            </pre>
-        </div>
-    </div>
+            {{ obj_link('clients', audit.client_id) }}
+        {% endif %}
+    {% endcall %}
 {% endblock %}
