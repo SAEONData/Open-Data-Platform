@@ -9,9 +9,9 @@ from odp import ODPScope
 from odp.api.lib.auth import Authorize, Authorized, VocabularyAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_vocabulary_schema
-from odp.api.models import VocabularyModel, VocabularyTermModel, VocabularyTermModelIn
+from odp.api.models import VocabularyModel, VocabularyTermAuditModel, VocabularyTermModel, VocabularyTermModelIn
 from odp.db import Session
-from odp.db.models import AuditCommand, Vocabulary, VocabularyTerm, VocabularyTermAudit
+from odp.db.models import AuditCommand, User, Vocabulary, VocabularyTerm, VocabularyTermAudit
 from odp.lib.schema import schema_catalog
 
 router = APIRouter()
@@ -28,6 +28,22 @@ def output_vocabulary_model(vocabulary: Vocabulary) -> VocabularyModel:
             id=term.term_id,
             data=term.data,
         ) for term in vocabulary.terms]
+    )
+
+
+def output_audit_model(result) -> VocabularyTermAuditModel:
+    return VocabularyTermAuditModel(
+        table='vocabulary_term',
+        tag_id=None,
+        audit_id=result.id,
+        client_id=result.client_id,
+        user_id=result.user_id,
+        user_name=result.user_name,
+        command=result.command,
+        timestamp=result.timestamp.isoformat(),
+        vocabulary_id=result._vocabulary_id,
+        term_id=result._term_id,
+        data=result._data,
     )
 
 
@@ -152,3 +168,45 @@ async def delete_term(
         _term_id=term.term_id,
         _data=term.data,
     ).save()
+
+
+@router.get(
+    '/{vocabulary_id}/audit',
+    response_model=Page[VocabularyTermAuditModel],
+    dependencies=[Depends(Authorize(ODPScope.VOCABULARY_READ))],
+)
+async def get_vocabulary_audit_log(
+        vocabulary_id: str,
+        paginator: Paginator = Depends(),
+):
+    stmt = (
+        select(VocabularyTermAudit, User.name.label('user_name')).
+        outerjoin(User, VocabularyTermAudit.user_id == User.id).
+        where(VocabularyTermAudit._vocabulary_id == vocabulary_id)
+    )
+
+    paginator.sort = 'timestamp'
+    return paginator.paginate(
+        stmt,
+        lambda row: output_audit_model(row),
+    )
+
+
+@router.get(
+    '/{vocabulary_id}/audit/{audit_id}',
+    response_model=VocabularyTermAuditModel,
+    dependencies=[Depends(Authorize(ODPScope.VOCABULARY_READ))],
+)
+async def get_vocabulary_audit_detail(
+        vocabulary_id: str,
+        audit_id: int,
+):
+    if not (row := Session.execute(
+            select(VocabularyTermAudit, User.name.label('user_name')).
+            outerjoin(User, VocabularyTermAudit.user_id == User.id).
+            where(VocabularyTermAudit._vocabulary_id == vocabulary_id).
+            where(VocabularyTermAudit.id == audit_id)
+    ).one_or_none()):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    return output_audit_model(row)
