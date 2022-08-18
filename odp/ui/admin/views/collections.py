@@ -27,6 +27,7 @@ def view(id):
         collection=collection,
         ready_tag=utils.get_tag_instance(collection, ODPCollectionTag.READY),
         frozen_tag=utils.get_tag_instance(collection, ODPCollectionTag.FROZEN),
+        notindexed_tag=utils.get_tag_instance(collection, ODPCollectionTag.NOTINDEXED),
         infrastructure_tags=utils.get_tag_instances(collection, ODPCollectionTag.INFRASTRUCTURE),
         project_tags=utils.get_tag_instances(collection, ODPCollectionTag.PROJECT),
         audit_records=audit_records,
@@ -131,6 +132,28 @@ def untag_frozen(id):
     if frozen_tag := utils.get_tag_instance(collection, ODPCollectionTag.FROZEN):
         api.delete(f'/collection/admin/{id}/tag/{frozen_tag["id"]}')
         flash(f'{ODPCollectionTag.FROZEN} tag has been removed.', category='success')
+
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/tag/notindexed', methods=('POST',))
+@api.client(ODPScope.COLLECTION_NOINDEX, fallback_to_referrer=True)
+def tag_notindexed(id):
+    api.post(f'/collection/{id}/tag', dict(
+        tag_id=ODPCollectionTag.NOTINDEXED,
+        data={},
+    ))
+    flash(f'{ODPCollectionTag.NOTINDEXED} tag has been set.', category='success')
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/untag/notindexed', methods=('POST',))
+@api.client(ODPScope.COLLECTION_NOINDEX, ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
+def untag_notindexed(id):
+    collection = api.get(f'/collection/{id}')
+    if notindexed_tag := utils.get_tag_instance(collection, ODPCollectionTag.NOTINDEXED):
+        api.delete(f'/collection/admin/{id}/tag/{notindexed_tag["id"]}')
+        flash(f'{ODPCollectionTag.NOTINDEXED} tag has been removed.', category='success')
 
     return redirect(url_for('.view', id=id))
 
