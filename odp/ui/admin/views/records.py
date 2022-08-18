@@ -41,6 +41,7 @@ def view(id):
         'record_view.html',
         record=record,
         migrated_tag=utils.get_tag_instance(record, ODPRecordTag.MIGRATED),
+        notindexed_tag=utils.get_tag_instance(record, ODPRecordTag.NOTINDEXED),
         qc_tags=utils.get_tag_instances(record, ODPRecordTag.QC),
         embargo_tags=utils.get_tag_instances(record, ODPRecordTag.EMBARGO),
         catalog_records=catalog_records,
@@ -210,6 +211,28 @@ def untag_embargo(id, tag_instance_id):
 
     api.delete(f'{api_route}{id}/tag/{tag_instance_id}')
     flash(f'{ODPRecordTag.EMBARGO} tag has been removed.', category='success')
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/tag/notindexed', methods=('POST',))
+@api.client(ODPScope.RECORD_NOINDEX, fallback_to_referrer=True)
+def tag_notindexed(id):
+    api.post(f'/record/{id}/tag', dict(
+        tag_id=ODPRecordTag.NOTINDEXED,
+        data={},
+    ))
+    flash(f'{ODPRecordTag.NOTINDEXED} tag has been set.', category='success')
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/untag/notindexed', methods=('POST',))
+@api.client(ODPScope.RECORD_NOINDEX, ODPScope.RECORD_ADMIN, fallback_to_referrer=True)
+def untag_notindexed(id):
+    record = api.get(f'/record/{id}')
+    if notindexed_tag := utils.get_tag_instance(record, ODPRecordTag.NOTINDEXED):
+        api.delete(f'/record/admin/{id}/tag/{notindexed_tag["id"]}')
+        flash(f'{ODPRecordTag.NOTINDEXED} tag has been removed.', category='success')
+
     return redirect(url_for('.view', id=id))
 
 

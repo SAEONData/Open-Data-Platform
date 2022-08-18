@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% from 'macros.html' import render_info, render_buttons, render_table, render_tag_table,
-    render_audit_table, render_item_delete_form, obj_link %}
+    render_audit_table, render_item_delete_form, render_button_prompt_form, obj_link %}
 
 {% block web_title %}
     {{ super() }} |
@@ -49,7 +49,7 @@
     </ul>
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
-            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Migrated', 'Timestamp',
+            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Migrated', 'Indexed', 'Timestamp',
                     'Quality Control', 'Dataset Embargo') %}
                 {% if prop == 'DOI' %}
                     {{ record.doi if record.doi }}
@@ -63,6 +63,12 @@
                     {% if migrated_tag %}
                         {{ migrated_tag.timestamp|timestamp }} from ODP v1 with a status of
                         {{ 'Published' if migrated_tag.data.published else 'Not Published' }}
+                    {% endif %}
+                {% elif prop == 'Indexed' %}
+                    {% if notindexed_tag %}
+                        False: tagged as not searchable at {{ notindexed_tag.timestamp|timestamp }} by {{ obj_link('users', notindexed_tag.user_id, notindexed_tag.user_name) }}
+                    {% else %}
+                        True
                     {% endif %}
                 {% elif prop == 'Timestamp' %}
                     {{ record.timestamp|timestamp }}
@@ -79,7 +85,22 @@
                     {% endfor %}
                 {% endif %}
             {% endcall %}
-            {{ render_buttons(record, edit=True, delete=True) }}
+
+            {% if notindexed_tag %}
+                {% set noindex_btn = ['index'] %}
+            {% else %}
+                {% set noindex_btn = ['unindex'] %}
+            {% endif %}
+
+            {% call(btn) render_buttons(record, edit=True, delete=True, custom=noindex_btn) %}
+                {% if btn == 'unindex' %}
+                    {{ render_button_prompt_form('.tag_notindexed', record.id, 'Un-index', 'warning',
+                        'Are you sure you want to tag the record as not searchable?') }}
+                {% elif btn == 'index' %}
+                    {{ render_button_prompt_form('.untag_notindexed', record.id, 'Index', 'success',
+                        'Are you sure you want the record to be searchable?') }}
+                {% endif %}
+            {% endcall %}
         </div>
         <div id="metadata" class="tab-pane fade" role="tabpanel">
             <pre class="m-3">
