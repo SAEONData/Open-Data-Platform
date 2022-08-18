@@ -5,13 +5,14 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from jschon import LocalSource, URI, create_catalog
-from jschon.translation import translation_filter
+from jschon_translation import catalog as translation_catalog, translation_filter
 
-schema_catalog = create_catalog('2020-12', 'translation')
+schema_catalog = create_catalog('2020-12')
 schema_catalog.add_uri_source(
     URI('https://odp.saeon.ac.za/schema/'),
     LocalSource(Path(__file__).parent.parent.parent / 'schema', suffix='.json'),
 )
+translation_catalog.initialize(schema_catalog)
 
 
 def schema_md5(uri: str) -> str:
