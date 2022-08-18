@@ -49,8 +49,8 @@
     </ul>
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
-            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Migrated', 'Indexed', 'Timestamp',
-                    'Quality Control', 'Dataset Embargo') %}
+            {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Migrated', 'Indexed',
+                    'Quality Control', 'Dataset Embargo', 'Timestamp') %}
                 {% if prop == 'DOI' %}
                     {{ record.doi if record.doi }}
                 {% elif prop == 'SID' %}
@@ -70,8 +70,6 @@
                     {% else %}
                         True
                     {% endif %}
-                {% elif prop == 'Timestamp' %}
-                    {{ record.timestamp|timestamp }}
                 {% elif prop == 'Quality Control' %}
                     {% for qc_tag in qc_tags['items'] %}
                         {{ qc_tag.data.pass_|replace('True', 'Passed')|replace('False', 'Failed') }}
@@ -83,6 +81,8 @@
                         to {{ embargo_tag.data.end|date if embargo_tag.data.end else '(no end date)' }}
                         set by {{ obj_link('users', embargo_tag.user_id, embargo_tag.user_name) }}<br/>
                     {% endfor %}
+                {% elif prop == 'Timestamp' %}
+                    {{ record.timestamp|timestamp }}
                 {% endif %}
             {% endcall %}
 

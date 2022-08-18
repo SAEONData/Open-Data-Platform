@@ -35,7 +35,7 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% call(prop) render_info(collection, 'Name', 'Provider', 'DOI key', 'Records',
-                    'Ready', 'Frozen', 'Indexed', 'Timestamp', 'Projects', 'Infrastructures') %}
+                    'Ready', 'Frozen', 'Indexed', 'Projects', 'Infrastructures', 'Timestamp') %}
                 {% if prop == 'Name' %}
                     {{ collection.name }}
                 {% elif prop == 'Provider' %}
@@ -60,12 +60,12 @@
                     {% else %}
                         True
                     {% endif %}
-                {% elif prop == 'Timestamp' %}
-                    {{ collection.timestamp|timestamp }}
                 {% elif prop == 'Projects' %}
                     {{ project_tags['items']|map(attribute='data.project')|sort|join(', ') }}
                 {% elif prop == 'Infrastructures' %}
                     {{ infrastructure_tags['items']|map(attribute='data.infrastructure')|sort|join(', ') }}
+                {% elif prop == 'Timestamp' %}
+                    {{ collection.timestamp|timestamp }}
                 {% endif %}
             {% endcall %}
 
