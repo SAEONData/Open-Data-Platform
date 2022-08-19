@@ -60,3 +60,10 @@ Record.NotIndexed:
   public: True
   scope_id: odp.record:noindex
   schema_id: Tag.Generic
+
+Record.Retracted:
+  type: record
+  cardinality: one
+  public: False
+  scope_id: odp.record:retract
+  schema_id: Tag.Generic
