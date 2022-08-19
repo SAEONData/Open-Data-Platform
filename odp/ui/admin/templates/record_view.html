@@ -50,7 +50,7 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% call(prop) render_info(record, 'DOI', 'SID', 'Collection', 'Schema', 'Migrated', 'Indexed',
-                    'Quality Control', 'Dataset Embargo', 'Timestamp') %}
+                    'Quality Control', 'Dataset Embargo', 'Retracted', 'Timestamp') %}
                 {% if prop == 'DOI' %}
                     {{ record.doi if record.doi }}
                 {% elif prop == 'SID' %}
@@ -81,6 +81,10 @@
                         to {{ embargo_tag.data.end|date if embargo_tag.data.end else '(no end date)' }}
                         set by {{ obj_link('users', embargo_tag.user_id, embargo_tag.user_name) }}<br/>
                     {% endfor %}
+                {% elif prop == 'Retracted' %}
+                    {% if retracted_tag %}
+                        {{ retracted_tag.timestamp|timestamp }} by {{ obj_link('users', retracted_tag.user_id, retracted_tag.user_name) }}
+                    {% endif %}
                 {% elif prop == 'Timestamp' %}
                     {{ record.timestamp|timestamp }}
                 {% endif %}
@@ -92,13 +96,26 @@
                 {% set noindex_btn = ['unindex'] %}
             {% endif %}
 
-            {% call(btn) render_buttons(record, edit=True, delete=True, custom=noindex_btn) %}
+            {% if retracted_tag %}
+                {% set retract_btn = ['unretract'] %}
+            {% else %}
+                {% set retract_btn = ['retract'] %}
+            {% endif %}
+
+            {% call(btn) render_buttons(record, edit=True, delete=True, custom=noindex_btn + retract_btn) %}
                 {% if btn == 'unindex' %}
                     {{ render_button_prompt_form('.tag_notindexed', record.id, 'Un-index', 'warning',
                         'Are you sure you want to tag the record as not searchable?') }}
                 {% elif btn == 'index' %}
                     {{ render_button_prompt_form('.untag_notindexed', record.id, 'Index', 'success',
                         'Are you sure you want the record to be searchable?') }}
+
+                {% elif btn == 'retract' %}
+                    {{ render_button_prompt_form('.tag_retracted', record.id, 'Retract', 'danger',
+                        'Are you sure you want to retract the record from public catalogs?') }}
+                {% elif btn == 'unretract' %}
+                    {{ render_button_prompt_form('.untag_retracted', record.id, 'Un-retract', 'success',
+                        'Are you sure you want to cancel the record retraction?') }}
                 {% endif %}
             {% endcall %}
         </div>

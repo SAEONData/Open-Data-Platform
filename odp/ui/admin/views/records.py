@@ -42,6 +42,7 @@ def view(id):
         record=record,
         migrated_tag=utils.get_tag_instance(record, ODPRecordTag.MIGRATED),
         notindexed_tag=utils.get_tag_instance(record, ODPRecordTag.NOTINDEXED),
+        retracted_tag=utils.get_tag_instance(record, ODPRecordTag.RETRACTED),
         qc_tags=utils.get_tag_instances(record, ODPRecordTag.QC),
         embargo_tags=utils.get_tag_instances(record, ODPRecordTag.EMBARGO),
         catalog_records=catalog_records,
@@ -228,10 +229,40 @@ def tag_notindexed(id):
 @bp.route('/<id>/untag/notindexed', methods=('POST',))
 @api.client(ODPScope.RECORD_NOINDEX, ODPScope.RECORD_ADMIN, fallback_to_referrer=True)
 def untag_notindexed(id):
+    api_route = '/record/'
+    if ODPScope.RECORD_ADMIN in g.user_permissions:
+        api_route += 'admin/'
+
     record = api.get(f'/record/{id}')
     if notindexed_tag := utils.get_tag_instance(record, ODPRecordTag.NOTINDEXED):
-        api.delete(f'/record/admin/{id}/tag/{notindexed_tag["id"]}')
+        api.delete(f'{api_route}{id}/tag/{notindexed_tag["id"]}')
         flash(f'{ODPRecordTag.NOTINDEXED} tag has been removed.', category='success')
+
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/tag/retracted', methods=('POST',))
+@api.client(ODPScope.RECORD_RETRACT, fallback_to_referrer=True)
+def tag_retracted(id):
+    api.post(f'/record/{id}/tag', dict(
+        tag_id=ODPRecordTag.RETRACTED,
+        data={},
+    ))
+    flash(f'{ODPRecordTag.RETRACTED} tag has been set.', category='success')
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/untag/retracted', methods=('POST',))
+@api.client(ODPScope.RECORD_RETRACT, ODPScope.RECORD_ADMIN, fallback_to_referrer=True)
+def untag_retracted(id):
+    api_route = '/record/'
+    if ODPScope.RECORD_ADMIN in g.user_permissions:
+        api_route += 'admin/'
+
+    record = api.get(f'/record/{id}')
+    if retracted_tag := utils.get_tag_instance(record, ODPRecordTag.RETRACTED):
+        api.delete(f'{api_route}{id}/tag/{retracted_tag["id"]}')
+        flash(f'{ODPRecordTag.RETRACTED} tag has been removed.', category='success')
 
     return redirect(url_for('.view', id=id))
 

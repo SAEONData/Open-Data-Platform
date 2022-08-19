@@ -150,9 +150,13 @@ def tag_notindexed(id):
 @bp.route('/<id>/untag/notindexed', methods=('POST',))
 @api.client(ODPScope.COLLECTION_NOINDEX, ODPScope.COLLECTION_ADMIN, fallback_to_referrer=True)
 def untag_notindexed(id):
+    api_route = '/collection/'
+    if ODPScope.COLLECTION_ADMIN in g.user_permissions:
+        api_route += 'admin/'
+
     collection = api.get(f'/collection/{id}')
     if notindexed_tag := utils.get_tag_instance(collection, ODPCollectionTag.NOTINDEXED):
-        api.delete(f'/collection/admin/{id}/tag/{notindexed_tag["id"]}')
+        api.delete(f'{api_route}{id}/tag/{notindexed_tag["id"]}')
         flash(f'{ODPCollectionTag.NOTINDEXED} tag has been removed.', category='success')
 
     return redirect(url_for('.view', id=id))
