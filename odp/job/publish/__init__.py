@@ -154,6 +154,13 @@ class Publisher:
         ):
             return False
 
+        # if the record has a retracted tag, then it cannot be published
+        if any(
+                (tag for tag in record_model.tags
+                 if tag.tag_id == ODPRecordTag.RETRACTED)
+        ):
+            return False
+
         # all checks have passed; the record can be published
         return True
 
