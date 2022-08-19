@@ -1,0 +1,16 @@
+{
+    "title": "A meta-schema describing the syntax of custom ODP keywords",
+    "$id": "https://odp.saeon.ac.za/schema/__meta__/vocab",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$vocabulary": {
+        "https://odp.saeon.ac.za/schema/__meta__": true
+    },
+    "$dynamicAnchor": "meta",
+    "type": ["object", "boolean"],
+    "properties": {
+        "vocabulary": {
+            "$comment": "An ODP vocabulary id. The keyword constrains an instance to the values allowed by the referenced vocabulary.",
+            "type": "string"
+        }
+    }
+}
