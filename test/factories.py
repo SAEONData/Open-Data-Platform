@@ -77,6 +77,21 @@ class SchemaFactory(ODPModelFactory):
     md5 = ''
     timestamp = factory.LazyFunction(lambda: datetime.now(timezone.utc))
 
+    @factory.post_generation
+    def create_vocabulary_for_tag_schema(obj, create, extracted):
+        """Create vocabulary objects as needed for tag schemas, so that
+        ``vocabulary`` keyword references work."""
+        if obj.type == 'tag':
+            for vocab_id in 'Infrastructure', 'Project':
+                if obj.uri.endswith(vocab_id.lower()) and not Session.get(Vocabulary, vocab_id):
+                    VocabularyFactory(
+                        id=vocab_id,
+                        schema=SchemaFactory(
+                            id=factory.Sequence(lambda n: f'vocab-schema-{fake.word()}.{n}'),
+                            type='vocabulary',
+                        )
+                    )
+
 
 class CatalogFactory(ODPModelFactory):
     class Meta:

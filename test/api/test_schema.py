@@ -22,7 +22,10 @@ def schema_batch():
 def assert_db_state(schemas):
     """Verify that the DB schema table contains the given schema batch."""
     Session.expire_all()
-    result = Session.execute(select(Schema)).scalars().all()
+    result = Session.execute(
+        select(Schema).
+        where(Schema.id.notlike('vocab-schema-%'))  # ignore schemas created by vocabulary factories
+    ).scalars().all()
     assert set((row.id, row.type, row.uri) for row in result) \
            == set((schema.id, schema.type, schema.uri) for schema in schemas)
 
@@ -37,8 +40,8 @@ def assert_json_result(response, json, schema):
 
 def assert_json_results(response, json, schemas):
     """Verify that the API result list matches the given schema batch."""
-    items = json['items']
-    assert json['total'] == len(items) == len(schemas)
+    items = [j for j in json['items'] if not j['id'].startswith('vocab-schema-')]
+    assert len(items) == len(schemas)
     items.sort(key=lambda i: i['id'])
     schemas.sort(key=lambda s: s.id)
     for n, schema in enumerate(schemas):
