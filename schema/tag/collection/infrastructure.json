@@ -1,6 +1,6 @@
 {
     "$id": "https://odp.saeon.ac.za/schema/tag/collection/infrastructure",
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$schema": "https://odp.saeon.ac.za/schema/__meta__/schema",
     "type": "object",
     "properties": {
         "infrastructure": {"type": "string", "vocabulary": "Infrastructure"},

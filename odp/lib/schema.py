@@ -4,15 +4,62 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
-from jschon import LocalSource, URI, create_catalog
+from jschon import JSON, JSONSchemaError, LocalSource, URI, create_catalog
+from jschon.jsonschema import JSONSchema, Result
+from jschon.vocabulary import Keyword
 from jschon_translation import catalog as translation_catalog, translation_filter
 
+from odp.db import Session
+from odp.db.models import Vocabulary, VocabularyTerm
+
+
+class VocabularyKeyword(Keyword):
+    """``vocabulary`` keyword implementation
+
+    The keyword's value is an ODP vocabulary id.
+
+    Validation passes if the instance is a term in
+    the referenced vocabulary.
+    """
+
+    key = 'vocabulary'
+    instance_types = 'string',
+
+    def __init__(self, parentschema: JSONSchema, value: str):
+        super().__init__(parentschema, value)
+        if not Session.get(Vocabulary, value):
+            raise JSONSchemaError(f'Unknown vocabulary {value!r}')
+
+    def evaluate(self, instance: JSON, result: Result) -> None:
+        if Session.get(VocabularyTerm, (self.json.data, instance.data)):
+            result.annotate(self.json.data)
+        else:
+            result.fail(f'Vocabulary {self.json.data!r} does not contain the term {instance.data!r}')
+
+
 schema_catalog = create_catalog('2020-12')
+translation_catalog.initialize(schema_catalog)
+
 schema_catalog.add_uri_source(
     URI('https://odp.saeon.ac.za/schema/'),
     LocalSource(Path(__file__).parent.parent.parent / 'schema', suffix='.json'),
 )
-translation_catalog.initialize(schema_catalog)
+schema_catalog.create_vocabulary(
+    URI('https://odp.saeon.ac.za/schema/__meta__'),
+    VocabularyKeyword,
+)
+schema_catalog.create_metaschema(
+    URI('https://odp.saeon.ac.za/schema/__meta__/schema'),
+    URI("https://json-schema.org/draft/2020-12/vocab/core"),
+    URI("https://json-schema.org/draft/2020-12/vocab/applicator"),
+    URI("https://json-schema.org/draft/2020-12/vocab/unevaluated"),
+    URI("https://json-schema.org/draft/2020-12/vocab/validation"),
+    URI("https://json-schema.org/draft/2020-12/vocab/format-annotation"),
+    URI("https://json-schema.org/draft/2020-12/vocab/meta-data"),
+    URI("https://json-schema.org/draft/2020-12/vocab/content"),
+    URI("https://jschon.dev/ext/translation"),
+    URI('https://odp.saeon.ac.za/schema/__meta__'),
+)
 
 
 def schema_md5(uri: str) -> str:
