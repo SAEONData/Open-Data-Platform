@@ -79,6 +79,10 @@ def test_vocabulary_keyword_invalid_term(vocab_id):
 def test_vocabulary_keyword_unknown_vocab(vocab_id):
     with catalog.session() as session:
         vocab_key = vocab_id.lower()
+        tag_schema = catalog.get_schema(URI(f'https://odp.saeon.ac.za/schema/tag/collection/{vocab_key}'), session=session)
+        tag_json = JSON({
+            vocab_key: 'foo'
+        })
         with pytest.raises(JSONSchemaError) as excinfo:
-            catalog.get_schema(URI(f'https://odp.saeon.ac.za/schema/tag/collection/{vocab_key}'), session=session)
+            tag_schema.evaluate(tag_json)
         assert str(excinfo.value) == f'Unknown vocabulary {vocab_id!r}'

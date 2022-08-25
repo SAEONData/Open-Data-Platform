@@ -25,16 +25,14 @@ class VocabularyKeyword(Keyword):
     key = 'vocabulary'
     instance_types = 'string',
 
-    def __init__(self, parentschema: JSONSchema, value: str):
-        super().__init__(parentschema, value)
-        if not Session.get(Vocabulary, value):
-            raise JSONSchemaError(f'Unknown vocabulary {value!r}')
-
     def evaluate(self, instance: JSON, result: Result) -> None:
-        if Session.get(VocabularyTerm, (self.json.data, instance.data)):
-            result.annotate(self.json.data)
+        if not Session.get(Vocabulary, vocab_id := self.json.data):
+            raise JSONSchemaError(f'Unknown vocabulary {vocab_id!r}')
+
+        if Session.get(VocabularyTerm, (vocab_id, instance.data)):
+            result.annotate(vocab_id)
         else:
-            result.fail(f'Vocabulary {self.json.data!r} does not contain the term {instance.data!r}')
+            result.fail(f'Vocabulary {vocab_id !r} does not contain the term {instance.data!r}')
 
 
 schema_catalog = create_catalog('2020-12')
