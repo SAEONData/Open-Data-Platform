@@ -41,6 +41,10 @@ class PublishedTagInstanceModel(BaseModel):
 
 
 class PublishedRecordModel(BaseModel):
+    pass
+
+
+class PublishedSAEONRecordModel(PublishedRecordModel):
     id: str
     doi: Optional[str]
     sid: Optional[str]
@@ -50,12 +54,18 @@ class PublishedRecordModel(BaseModel):
     timestamp: str
 
 
+class PublishedDataCiteRecordModel(PublishedRecordModel):
+    doi: str
+    url: Optional[AnyHttpUrl]
+    metadata: dict[str, Any]
+
+
 class CatalogRecordModel(BaseModel):
     catalog_id: str
     record_id: str
     timestamp: str
     published: bool
-    published_record: Optional[PublishedRecordModel]
+    published_record: Optional[PublishedSAEONRecordModel | PublishedDataCiteRecordModel]
 
 
 class ClientModel(BaseModel):

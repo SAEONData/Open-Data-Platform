@@ -1,8 +1,7 @@
 from jschon import JSON, URI
-from pydantic import BaseModel
 
 from odp import ODPMetadataSchema
-from odp.api.models import PublishedMetadataModel, PublishedRecordModel, PublishedTagInstanceModel, RecordModel
+from odp.api.models import PublishedMetadataModel, PublishedRecordModel, PublishedSAEONRecordModel, PublishedTagInstanceModel, RecordModel
 from odp.db import Session
 from odp.db.models import Schema, SchemaType
 from odp.job.publish import Publisher
@@ -11,9 +10,9 @@ from odp.lib.schema import schema_catalog
 
 class SAEONPublisher(Publisher):
 
-    def create_published_record(self, record_model: RecordModel) -> BaseModel:
+    def create_published_record(self, record_model: RecordModel) -> PublishedRecordModel:
         """Create the published form of a record."""
-        return PublishedRecordModel(
+        return PublishedSAEONRecordModel(
             id=record_model.id,
             doi=record_model.doi,
             sid=record_model.sid,

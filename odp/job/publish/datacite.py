@@ -1,13 +1,11 @@
 from jschon import JSON, URI
-from pydantic import BaseModel
 
 from odp import ODPMetadataSchema
-from odp.api.models import RecordModel
+from odp.api.models import PublishedDataCiteRecordModel, PublishedRecordModel, RecordModel
 from odp.config import config
 from odp.db import Session
 from odp.db.models import Schema, SchemaType
 from odp.job.publish import Publisher
-from odp.lib.datacite import DataciteRecordIn
 from odp.lib.schema import schema_catalog
 
 
@@ -26,7 +24,7 @@ class DataCitePublisher(Publisher):
                 super().can_publish_record(record_model)
         )
 
-    def create_published_record(self, record_model: RecordModel) -> BaseModel:
+    def create_published_record(self, record_model: RecordModel) -> PublishedRecordModel:
         """Create the published form of a record."""
         if record_model.schema_id == ODPMetadataSchema.SAEON_DATACITE_4:
             datacite_metadata = record_model.metadata
@@ -40,7 +38,7 @@ class DataCitePublisher(Publisher):
         else:
             raise NotImplementedError
 
-        return DataciteRecordIn(
+        return PublishedDataCiteRecordModel(
             doi=record_model.doi,
             url=f'{self.doi_base_url}/{record_model.doi}',
             metadata=datacite_metadata,

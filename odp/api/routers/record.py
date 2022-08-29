@@ -12,9 +12,9 @@ from odp import ODPCollectionTag, ODPScope
 from odp.api.lib.auth import Authorize, Authorized, TagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_metadata_schema, get_tag_schema
-from odp.api.lib.utils import output_tag_instance_model
-from odp.api.models import (AuditModel, CatalogRecordModel, PublishedRecordModel, RecordAuditModel, RecordModel, RecordModelIn, RecordTagAuditModel,
-                            TagInstanceModel, TagInstanceModelIn)
+from odp.api.lib.utils import output_published_record_model, output_tag_instance_model
+from odp.api.models import (AuditModel, CatalogRecordModel, RecordAuditModel, RecordModel, RecordModelIn, RecordTagAuditModel, TagInstanceModel,
+                            TagInstanceModelIn)
 from odp.db import Session
 from odp.db.models import (AuditCommand, CatalogRecord, Collection, CollectionTag, PublishedDOI, Record, RecordAudit, RecordTag, RecordTagAudit,
                            SchemaType, Tag, TagCardinality, TagType, User)
@@ -53,8 +53,7 @@ def output_catalog_record_model(catalog_record: CatalogRecord) -> CatalogRecordM
         record_id=catalog_record.record_id,
         timestamp=catalog_record.timestamp.isoformat(),
         published=catalog_record.published,
-        published_record=(PublishedRecordModel(**catalog_record.published_record)
-                          if catalog_record.published else None),
+        published_record=output_published_record_model(catalog_record),
     )
 
 

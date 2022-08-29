@@ -2,11 +2,10 @@ import logging
 from datetime import date, datetime
 from typing import final
 
-from pydantic import BaseModel
 from sqlalchemy import func, or_, select
 
 from odp import ODPCollectionTag, ODPMetadataSchema, ODPRecordTag
-from odp.api.models import RecordModel
+from odp.api.models import PublishedRecordModel, RecordModel
 from odp.api.routers.record import output_record_model
 from odp.db import Session
 from odp.db.models import CatalogRecord, Collection, PublishedDOI, Record, RecordTag
@@ -164,7 +163,7 @@ class Publisher:
         # all checks have passed; the record can be published
         return True
 
-    def create_published_record(self, record_model: RecordModel) -> BaseModel:
+    def create_published_record(self, record_model: RecordModel) -> PublishedRecordModel:
         """Create the published form of a record."""
         raise NotImplementedError
 

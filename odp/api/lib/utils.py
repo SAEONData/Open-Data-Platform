@@ -1,5 +1,8 @@
-from odp.api.models import TagInstanceModel
-from odp.db.models import CollectionTag, RecordTag
+from typing import Optional
+
+from odp import ODPCatalog
+from odp.api.models import PublishedDataCiteRecordModel, PublishedRecordModel, PublishedSAEONRecordModel, TagInstanceModel
+from odp.db.models import CatalogRecord, CollectionTag, RecordTag
 
 
 def output_tag_instance_model(tag_instance: CollectionTag | RecordTag) -> TagInstanceModel:
@@ -13,3 +16,14 @@ def output_tag_instance_model(tag_instance: CollectionTag | RecordTag) -> TagIns
         cardinality=tag_instance.tag.cardinality,
         public=tag_instance.tag.public,
     )
+
+
+def output_published_record_model(catalog_record: CatalogRecord) -> Optional[PublishedRecordModel]:
+    if not catalog_record.published:
+        return None
+
+    if catalog_record.catalog_id == ODPCatalog.SAEON:
+        return PublishedSAEONRecordModel(**catalog_record.published_record)
+
+    if catalog_record.catalog_id == ODPCatalog.DATACITE:
+        return PublishedDataCiteRecordModel(**catalog_record.published_record)
