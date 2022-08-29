@@ -3,13 +3,18 @@ from pydantic import BaseModel
 
 from odp import ODPMetadataSchema
 from odp.api.models import RecordModel
+from odp.config import config
 from odp.db import Session
 from odp.db.models import Schema, SchemaType
 from odp.job.publish import Publisher
+from odp.lib.datacite import DataciteRecordIn
 from odp.lib.schema import schema_catalog
 
 
 class DataCitePublisher(Publisher):
+    def __init__(self, catalog_id: str) -> None:
+        super().__init__(catalog_id)
+        self.doi_base_url = config.DATACITE.DOI_BASE_URL
 
     def can_publish_record(self, record_model: RecordModel) -> bool:
         """Determine whether or not a record can be published.
@@ -31,3 +36,12 @@ class DataCitePublisher(Publisher):
             iso19115_schema = schema_catalog.get_schema(URI(schema.uri))
             result = iso19115_schema.evaluate(JSON(record_model.metadata))
             datacite_metadata = result.output('translation', scheme='saeon/datacite-4', ignore_validity=True)
+
+        else:
+            raise NotImplementedError
+
+        return DataciteRecordIn(
+            doi=record_model.doi,
+            url=f'{self.doi_base_url}/{record_model.doi}',
+            metadata=datacite_metadata,
+        )

@@ -19,9 +19,9 @@ class DataciteConfig(BaseConfig):
     # Note: DataCite's test API should be used in non-production environments
     API_URL: AnyHttpUrl
 
-    USERNAME: str    # DataCite account username
-    PASSWORD: str    # DataCite account password
-    DOI_LANDING_PAGE_BASE_URL: AnyHttpUrl  # base URL for DOI back-links
+    USERNAME: str             # DataCite account username
+    PASSWORD: str             # DataCite account password
+    DOI_BASE_URL: AnyHttpUrl  # base URL for DOI back-links
 
     _subconfig = {
         'PUBLISH': DatacitePublishConfig,
