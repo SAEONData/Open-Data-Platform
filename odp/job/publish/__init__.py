@@ -91,7 +91,7 @@ class Publisher:
         """Evaluate a record and commit the result to the catalog_record table.
 
         The catalog_record entry is stamped with the `timestamp` of the latest
-        contributing change (from catalog/record/record_tag/collection_tag).
+        contributing change (from record / collection).
         """
         catalog_record = (Session.get(CatalogRecord, (self.catalog_id, record_id)) or
                           CatalogRecord(catalog_id=self.catalog_id, record_id=record_id))
