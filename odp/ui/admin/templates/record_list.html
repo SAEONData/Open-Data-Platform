@@ -47,11 +47,13 @@
         <td>{{ '&#9989;'|safe if record.validity.valid else '&#10060;'|safe }}</td>
         <td>
             {% for catalog_id in record.published_catalog_ids %}
-                {% if catalog_id == 'SAEON' %}
-                    <a href="{{ url_for('.view_catalog_record', id=record.id, catalog_id=catalog_id) }}">
+                <a href="{{ url_for('.view_catalog_record', id=record.id, catalog_id=catalog_id) }}">
+                    {% if catalog_id == 'SAEON' %}
                         <img src="{{ url_for('static', filename='nrf-favicon.ico') }}" height="20">
-                    </a>
-                {% endif %}
+                    {% elif catalog_id == 'DataCite' %}
+                        <img src="{{ url_for('static', filename='datacite-logo.svg') }}" height="20">
+                    {% endif %}
+                </a>
             {% endfor %}
         </td>
     {% endcall %}
