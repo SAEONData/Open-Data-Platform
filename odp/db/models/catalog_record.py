@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, String, TIMESTAMP
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -21,3 +21,8 @@ class CatalogRecord(Base):
     timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
     published = Column(Boolean, nullable=False)
     published_record = Column(JSONB)
+
+    # external catalog integration
+    synced = Column(Boolean)
+    error = Column(String)
+    error_count = Column(Integer)

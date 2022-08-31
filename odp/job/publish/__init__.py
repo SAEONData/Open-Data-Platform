@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 class Publisher:
     def __init__(self, catalog_id: str) -> None:
         self.catalog_id = catalog_id
+        self.external = False
+        self.max_attempts = 3
 
     @final
     def run(self) -> None:
@@ -28,6 +30,9 @@ class Publisher:
 
         if total:
             logger.info(f'{self.catalog_id} catalog: {published} records published; {total - published} records hidden')
+
+        if self.external:
+            self._sync_external()
 
     @final
     def _select_records(self) -> list[tuple[str, datetime]]:
@@ -106,6 +111,11 @@ class Publisher:
         else:
             catalog_record.published = False
             catalog_record.published_record = None
+
+        if self.external:
+            catalog_record.synced = False
+            catalog_record.error = None
+            catalog_record.error_count = 0
 
         catalog_record.timestamp = timestamp
         catalog_record.save()
@@ -212,3 +222,37 @@ class Publisher:
         if record_model.doi and not Session.get(PublishedDOI, record_model.doi):
             published_doi = PublishedDOI(doi=record_model.doi)
             published_doi.save()
+
+    @final
+    def _sync_external(self) -> None:
+        """Synchronize with an external catalog."""
+        unsynced_catalog_records = Session.execute(
+            select(CatalogRecord).
+            where(CatalogRecord.catalog_id == self.catalog_id).
+            where(CatalogRecord.synced == False).
+            where(CatalogRecord.error_count < self.max_attempts)
+        ).scalars().all()
+
+        logger.info(f'{self.catalog_id} catalog: {(total := len(unsynced_catalog_records))} records selected for external sync')
+        synced = 0
+
+        for catalog_record in unsynced_catalog_records:
+            try:
+                self.synchronize_record(catalog_record.record_id)
+                catalog_record.synced = True
+                catalog_record.error = None
+                catalog_record.error_count = 0
+                synced += 1
+            except Exception as e:
+                catalog_record.error = str(e)
+                catalog_record.error_count += 1
+
+            catalog_record.save()
+            Session.commit()
+
+        if total:
+            logger.info(f'{self.catalog_id} catalog: {synced} records synced; {total - synced} errors')
+
+    def synchronize_record(self, record_id: str) -> None:
+        """Create / update / delete a record on an external catalog."""
+        pass

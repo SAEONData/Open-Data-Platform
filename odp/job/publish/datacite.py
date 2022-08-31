@@ -12,6 +12,7 @@ from odp.lib.schema import schema_catalog
 class DataCitePublisher(Publisher):
     def __init__(self, catalog_id: str) -> None:
         super().__init__(catalog_id)
+        self.external = True
         self.doi_base_url = config.DATACITE.DOI_BASE_URL
 
     def can_publish_record(self, record_model: RecordModel) -> bool:
@@ -43,3 +44,7 @@ class DataCitePublisher(Publisher):
             url=f'{self.doi_base_url}/{record_model.doi}',
             metadata=datacite_metadata,
         )
+
+    def synchronize_record(self, record_id: str) -> None:
+        """Create / update / delete a record on the DataCite platform."""
+        pass
