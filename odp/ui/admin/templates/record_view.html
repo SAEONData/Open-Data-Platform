@@ -37,6 +37,11 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tag-notes" type="button" role="tab">
+                Notes
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#catalog-records" type="button" role="tab">
                 Catalog Records
             </button>
@@ -136,6 +141,10 @@
         <div id="tag-embargo" class="tab-pane fade" role="tabpanel">
             {{ render_tag_table(record, embargo_tags, '.tag_embargo', '.untag_embargo',
                start='Start date', end='End date', comment='Comment') }}
+        </div>
+        <div id="tag-notes" class="tab-pane fade" role="tabpanel">
+            {{ render_tag_table(record, note_tags, '.tag_note', '.untag_note',
+               comment='Note') }}
         </div>
         <div id="catalog-records" class="tab-pane fade" role="tabpanel">
             {% call(catalog_record) render_table(catalog_records, 'Catalog', 'Published', 'Timestamp', hide_id=True) %}

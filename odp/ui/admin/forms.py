@@ -195,6 +195,12 @@ class RecordFilterForm(BaseForm):
     )
 
 
+class RecordTagNoteForm(BaseForm):
+    comment = TextAreaField(
+        label='Note',
+    )
+
+
 class RecordTagQCForm(BaseForm):
     pass_ = BooleanField(
         label='Pass',

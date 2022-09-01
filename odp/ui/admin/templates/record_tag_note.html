@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Record: {{ record.doi or record.sid }}
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_form %}
+    {{ render_form(form, record, submit_target=url_for('.tag_note', id=record.id)) }}
+{% endblock %}

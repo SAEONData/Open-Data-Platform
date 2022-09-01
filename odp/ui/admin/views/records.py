@@ -1,11 +1,10 @@
 import json
 
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
-from flask_login import current_user
 
 from odp import ODPRecordTag, ODPScope
 from odp.ui import api
-from odp.ui.admin.forms import RecordFilterForm, RecordForm, RecordTagEmbargoForm, RecordTagQCForm
+from odp.ui.admin.forms import RecordFilterForm, RecordForm, RecordTagEmbargoForm, RecordTagNoteForm, RecordTagQCForm
 from odp.ui.admin.views import utils
 
 bp = Blueprint('records', __name__)
@@ -45,6 +44,7 @@ def view(id):
         retracted_tag=utils.get_tag_instance(record, ODPRecordTag.RETRACTED),
         qc_tags=utils.get_tag_instances(record, ODPRecordTag.QC),
         embargo_tags=utils.get_tag_instances(record, ODPRecordTag.EMBARGO),
+        note_tags=utils.get_tag_instances(record, ODPRecordTag.NOTE),
         catalog_records=catalog_records,
         audit_records=audit_records,
     )
@@ -134,11 +134,7 @@ def tag_qc(id):
     if request.method == 'POST':
         form = RecordTagQCForm(request.form)
     else:
-        record_tag = next(
-            (tag for tag in record['tags']
-             if tag['tag_id'] == ODPRecordTag.QC and tag['user_id'] == current_user.id),
-            None
-        )
+        record_tag = utils.get_tag_instance(record, ODPRecordTag.QC, user=True)
         form = RecordTagQCForm(data=record_tag['data'] if record_tag else None)
 
     if request.method == 'POST' and form.validate():
@@ -169,6 +165,47 @@ def untag_qc(id, tag_instance_id):
 
     api.delete(f'{api_route}{id}/tag/{tag_instance_id}')
     flash(f'{ODPRecordTag.QC} tag has been removed.', category='success')
+    return redirect(url_for('.view', id=id))
+
+
+@bp.route('/<id>/tag/note', methods=('GET', 'POST'))
+@api.client(ODPScope.RECORD_NOTE)
+def tag_note(id):
+    record = api.get(f'/record/{id}')
+
+    if request.method == 'POST':
+        form = RecordTagNoteForm(request.form)
+    else:
+        record_tag = utils.get_tag_instance(record, ODPRecordTag.NOTE, user=True)
+        form = RecordTagNoteForm(data=record_tag['data'] if record_tag else None)
+
+    if request.method == 'POST' and form.validate():
+        try:
+            api.post(f'/record/{id}/tag', dict(
+                tag_id=ODPRecordTag.NOTE,
+                data={
+                    'comment': form.comment.data,
+                },
+            ))
+            flash(f'{ODPRecordTag.NOTE} tag has been set.', category='success')
+            return redirect(url_for('.view', id=id))
+
+        except api.ODPAPIError as e:
+            if response := api.handle_error(e):
+                return response
+
+    return render_template('record_tag_note.html', record=record, form=form)
+
+
+@bp.route('/<id>/untag/note/<tag_instance_id>', methods=('POST',))
+@api.client(ODPScope.RECORD_NOTE, ODPScope.RECORD_ADMIN, fallback_to_referrer=True)
+def untag_note(id, tag_instance_id):
+    api_route = '/record/'
+    if ODPScope.RECORD_ADMIN in g.user_permissions:
+        api_route += 'admin/'
+
+    api.delete(f'{api_route}{id}/tag/{tag_instance_id}')
+    flash(f'{ODPRecordTag.NOTE} tag has been removed.', category='success')
     return redirect(url_for('.view', id=id))
 
 

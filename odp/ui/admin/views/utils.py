@@ -1,13 +1,19 @@
 from markupsafe import Markup
 
 from odp.ui import api
+from flask_login import current_user
 
 
-def get_tag_instance(obj, tag_id):
-    """Get a single tag instance (with cardinality 'one')
-    for a record or collection."""
+def get_tag_instance(obj, tag_id, user=False):
+    """Get a single tag instance for a record or collection.
+
+    The tag should have cardinality 'one' or 'user'; if 'user',
+    set `user=True` to get the tag instance for the current user.
+    """
     return next(
-        (tag for tag in obj['tags'] if tag['tag_id'] == tag_id), None
+        (tag for tag in obj['tags'] if tag['tag_id'] == tag_id and (
+            not user or tag['user_id'] == current_user.id
+        )), None
     )
 
 
