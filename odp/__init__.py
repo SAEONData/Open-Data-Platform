@@ -23,6 +23,7 @@ class ODPScope(str, Enum):
     RECORD_MIGRATE = 'odp.record:migrate'
     RECORD_NOINDEX = 'odp.record:noindex'
     RECORD_RETRACT = 'odp.record:retract'
+    RECORD_NOTE = 'odp.record:note'
     ROLE_ADMIN = 'odp.role:admin'
     ROLE_READ = 'odp.role:read'
     SCHEMA_READ = 'odp.schema:read'
@@ -49,6 +50,7 @@ class ODPRecordTag(str, Enum):
     MIGRATED = 'Record.Migrated'
     NOTINDEXED = 'Record.NotIndexed'
     RETRACTED = 'Record.Retracted'
+    NOTE = 'Record.Note'
 
 
 class ODPMetadataSchema(str, Enum):

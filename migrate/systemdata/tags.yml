@@ -67,3 +67,10 @@ Record.Retracted:
   public: False
   scope_id: odp.record:retract
   schema_id: Tag.Generic
+
+Record.Note:
+  type: record
+  cardinality: user
+  public: False
+  scope_id: odp.record:note
+  schema_id: Tag.Generic
