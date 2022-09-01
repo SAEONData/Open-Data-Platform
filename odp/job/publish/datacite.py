@@ -1,11 +1,12 @@
 from jschon import JSON, URI
 
-from odp import ODPMetadataSchema
+from odp import DOI_PREFIX, ODPMetadataSchema
 from odp.api.models import PublishedDataCiteRecordModel, PublishedRecordModel, RecordModel
 from odp.config import config
 from odp.db import Session
-from odp.db.models import Schema, SchemaType
+from odp.db.models import CatalogRecord, Schema, SchemaType
 from odp.job.publish import Publisher
+from odp.lib.datacite import DataciteClient, DataciteRecordIn
 from odp.lib.schema import schema_catalog
 
 
@@ -13,6 +14,12 @@ class DataCitePublisher(Publisher):
     def __init__(self, catalog_id: str) -> None:
         super().__init__(catalog_id)
         self.external = True
+        self.datacite = DataciteClient(
+            api_url=config.DATACITE.API_URL,
+            username=config.DATACITE.USERNAME,
+            password=config.DATACITE.PASSWORD,
+            doi_prefix=DOI_PREFIX,
+        )
         self.doi_base_url = config.DATACITE.DOI_BASE_URL
 
     def can_publish_record(self, record_model: RecordModel) -> bool:
@@ -47,4 +54,8 @@ class DataCitePublisher(Publisher):
 
     def synchronize_record(self, record_id: str) -> None:
         """Create / update / delete a record on the DataCite platform."""
-        pass
+        catalog_record = Session.get(CatalogRecord, (self.catalog_id, record_id))
+        if catalog_record.published:
+            self.datacite.publish_doi(DataciteRecordIn(**catalog_record.published_record))
+        elif doi := catalog_record.record.doi:
+            self.datacite.unpublish_doi(doi)
