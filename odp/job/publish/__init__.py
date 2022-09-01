@@ -244,7 +244,7 @@ class Publisher:
                 catalog_record.error_count = 0
                 synced += 1
             except Exception as e:
-                catalog_record.error = str(e)
+                catalog_record.error = repr(e)
                 catalog_record.error_count += 1
 
             catalog_record.save()

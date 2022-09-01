@@ -1,5 +1,11 @@
 class ODPException(Exception):
-    pass
+    def __repr__(self):
+        """Return `repr(self)`."""
+        params = ', '.join([
+            f'{attr}={value!r}'
+            for attr, value in self.__dict__.items()
+        ])
+        return f'{self.__class__.__name__}({params})'
 
 
 class ODPIdentityError(ODPException):
@@ -98,14 +104,14 @@ class ODPDomainNameConflict(ODPInstitutionError):
 class DataciteError(ODPException):
     """ Exception raised when a request to the DataCite API fails """
 
-    def __init__(self, *args, **kwargs):
-        self.status_code = kwargs.pop('status_code')
-        self.error_detail = kwargs.pop('error_detail', str(args))
+    def __init__(self, status_code, error_detail=None):
+        self.status_code = status_code
+        self.error_detail = error_detail
 
 
 class MediaRepositoryError(ODPException):
     """ Exception raised when a request to the Media repository fails """
 
-    def __init__(self, *args, **kwargs):
-        self.status_code = kwargs.pop('status_code')
-        self.error_detail = kwargs.pop('error_detail', str(args))
+    def __init__(self, status_code, error_detail=None):
+        self.status_code = status_code
+        self.error_detail = error_detail
