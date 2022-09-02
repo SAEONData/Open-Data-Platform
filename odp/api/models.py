@@ -26,6 +26,7 @@ class TagInstanceModelIn(BaseModel):
 
 class CatalogModel(BaseModel):
     id: str
+    record_count: int
 
 
 class PublishedMetadataModel(BaseModel):

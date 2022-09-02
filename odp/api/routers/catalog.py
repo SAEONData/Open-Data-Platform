@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import and_, func, select
 from starlette.status import HTTP_404_NOT_FOUND
 
 from odp import ODPScope
@@ -21,10 +21,17 @@ router = APIRouter()
 async def list_catalogs(
         paginator: Paginator = Depends(),
 ):
+    stmt = (
+        select(Catalog, func.count(CatalogRecord.catalog_id)).
+        outerjoin(CatalogRecord, and_(Catalog.id == CatalogRecord.catalog_id, CatalogRecord.published)).
+        group_by(Catalog)
+    )
+
     return paginator.paginate(
-        select(Catalog),
+        stmt,
         lambda row: CatalogModel(
             id=row.Catalog.id,
+            record_count=row.count,
         )
     )
 
@@ -37,11 +44,19 @@ async def list_catalogs(
 async def get_catalog(
         catalog_id: str,
 ):
-    if not (catalog := Session.get(Catalog, catalog_id)):
+    stmt = (
+        select(Catalog, func.count(CatalogRecord.catalog_id)).
+        outerjoin(CatalogRecord, and_(Catalog.id == CatalogRecord.catalog_id, CatalogRecord.published)).
+        group_by(Catalog).
+        where(Catalog.id == catalog_id)
+    )
+
+    if not (result := Session.execute(stmt).one_or_none()):
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     return CatalogModel(
-        id=catalog.id,
+        id=result.Catalog.id,
+        record_count=result.count,
     )
 
 
