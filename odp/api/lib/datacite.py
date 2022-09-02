@@ -1,14 +1,12 @@
+from odp import DOI_PREFIX
 from odp.config import config
 from odp.lib.datacite import DataciteClient
 
 
-def get_datacite_client() -> DataciteClient:
-    """
-    DataCite API dependency.
-    """
+async def get_datacite_client() -> DataciteClient:
     return DataciteClient(
         api_url=config.DATACITE.API_URL,
-        doi_prefix=config.DATACITE.DOI_PREFIX,
         username=config.DATACITE.USERNAME,
         password=config.DATACITE.PASSWORD,
+        doi_prefix=DOI_PREFIX,
     )

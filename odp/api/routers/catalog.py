@@ -1,14 +1,19 @@
+from typing import Any, Optional
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import and_, func, select
-from starlette.status import HTTP_404_NOT_FOUND
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp import ODPScope
+from odp import ODPCatalog, ODPScope
 from odp.api.lib.auth import Authorize
+from odp.api.lib.datacite import get_datacite_client
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.utils import output_published_record_model
 from odp.api.models import CatalogModel, PublishedDataCiteRecordModel, PublishedSAEONRecordModel
 from odp.db import Session
 from odp.db.models import Catalog, CatalogRecord
+from odp.lib.datacite import DataciteClient
+from odp.lib.exceptions import DataciteError
 
 router = APIRouter()
 
@@ -83,3 +88,35 @@ async def list_published_records(
         stmt,
         lambda row: output_published_record_model(row.CatalogRecord),
     )
+
+
+@router.get(
+    '/{catalog_id}/external/{record_id}',
+    response_model=Optional[dict[str, Any]],
+    dependencies=[Depends(Authorize(ODPScope.CATALOG_READ))],
+)
+async def get_external_published_record(
+        catalog_id: str,
+        record_id: str,
+        datacite: DataciteClient = Depends(get_datacite_client),
+):
+    if not Session.get(Catalog, catalog_id):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    if catalog_id == ODPCatalog.DATACITE:
+        stmt = (
+            select(CatalogRecord).
+            where(CatalogRecord.catalog_id == catalog_id).
+            where(CatalogRecord.record_id == record_id).
+            where(CatalogRecord.published)
+        )
+
+        if not (catalog_record := Session.execute(stmt).scalar_one_or_none()):
+            raise HTTPException(HTTP_404_NOT_FOUND)
+
+        try:
+            return datacite.get_doi(catalog_record.record.doi)
+        except DataciteError as e:
+            raise HTTPException(e.status_code, e.error_detail) from e
+
+    raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Not an external catalog')
