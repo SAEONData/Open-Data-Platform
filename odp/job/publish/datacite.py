@@ -5,7 +5,7 @@ from odp.api.models import PublishedDataCiteRecordModel, PublishedRecordModel, R
 from odp.config import config
 from odp.db import Session
 from odp.db.models import CatalogRecord, Schema, SchemaType
-from odp.job.publish import Publisher
+from odp.job.publish import NotPublishedReason, PublishedReason, Publisher
 from odp.lib.datacite import DataciteClient, DataciteRecordIn
 from odp.lib.schema import schema_catalog
 
@@ -22,15 +22,21 @@ class DataCitePublisher(Publisher):
         )
         self.doi_base_url = config.DATACITE.DOI_BASE_URL
 
-    def can_publish_record(self, record_model: RecordModel) -> bool:
-        """Determine whether or not a record can be published.
+    def evaluate_record(self, record_model: RecordModel) -> tuple[bool, list[PublishedReason | NotPublishedReason]]:
+        """Evaluate whether a record can be published.
 
         Only records with DOIs can be published to DataCite.
+
+        :return: tuple(can_publish: bool, reasons: list)
         """
-        return (
-                record_model.doi and
-                super().can_publish_record(record_model)
-        )
+        can_publish, reasons = super().evaluate_record(record_model)
+
+        if not record_model.doi:
+            if can_publish:
+                return False, [NotPublishedReason.NO_DOI]
+            return False, reasons + [NotPublishedReason.NO_DOI]
+
+        return can_publish, reasons
 
     def create_published_record(self, record_model: RecordModel) -> PublishedRecordModel:
         """Create the published form of a record."""
@@ -52,7 +58,7 @@ class DataCitePublisher(Publisher):
             metadata=datacite_metadata,
         )
 
-    def synchronize_record(self, record_id: str) -> None:
+    def sync_external_record(self, record_id: str) -> None:
         """Create / update / delete a record on the DataCite platform."""
         catalog_record = Session.get(CatalogRecord, (self.catalog_id, record_id))
         if catalog_record.published:

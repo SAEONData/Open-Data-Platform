@@ -1,5 +1,6 @@
 import logging
 from datetime import date, datetime
+from enum import Enum
 from typing import final
 
 from sqlalchemy import func, or_, select
@@ -11,6 +12,21 @@ from odp.db import Session
 from odp.db.models import CatalogRecord, Collection, PublishedDOI, Record, RecordTag
 
 logger = logging.getLogger(__name__)
+
+
+class PublishedReason(str, Enum):
+    QC_PASSED = 'QC passed'
+    COLLECTION_READY = 'collection ready'
+    MIGRATED_PUBLISHED = 'migrated published'
+
+
+class NotPublishedReason(str, Enum):
+    QC_FAILED = 'QC failed'
+    COLLECTION_NOT_READY = 'collection not ready'
+    METADATA_INVALID = 'metadata invalid'
+    RECORD_RETRACTED = 'record retracted'
+    MIGRATED_NOT_PUBLISHED = 'migrated not published'
+    NO_DOI = 'no DOI'
 
 
 class Publisher:
@@ -26,7 +42,7 @@ class Publisher:
 
         published = 0
         for record_id, timestamp in records:
-            published += self._evaluate_record(record_id, timestamp)
+            published += self._sync_catalog_record(record_id, timestamp)
 
         if total:
             logger.info(f'{self.catalog_id} catalog: {published} records published; {total - published} records hidden')
@@ -91,8 +107,9 @@ class Publisher:
         return Session.execute(stmt).all()
 
     @final
-    def _evaluate_record(self, record_id: str, timestamp: datetime) -> bool:
-        """Evaluate a record and commit the result to the catalog_record table.
+    def _sync_catalog_record(self, record_id: str, timestamp: datetime) -> bool:
+        """Synchronize a catalog_record entry with the current state of the
+        corresponding record.
 
         The catalog_record entry is stamped with the `timestamp` of the latest
         contributing change (from record / collection).
@@ -103,7 +120,8 @@ class Publisher:
         record = Session.get(Record, record_id)
         record_model = output_record_model(record)
 
-        if self.can_publish_record(record_model):
+        can_publish, reasons = self.evaluate_record(record_model)
+        if can_publish:
             self._process_embargoes(record_model)
             self._save_published_doi(record_model)
             catalog_record.published = True
@@ -117,61 +135,71 @@ class Publisher:
             catalog_record.error = None
             catalog_record.error_count = 0
 
+        catalog_record.reason = ' | '.join(reasons)
         catalog_record.timestamp = timestamp
         catalog_record.save()
         Session.commit()
 
         return catalog_record.published
 
-    def can_publish_record(self, record_model: RecordModel) -> bool:
-        """Determine whether or not a record can be published.
+    def evaluate_record(self, record_model: RecordModel) -> tuple[bool, list[PublishedReason | NotPublishedReason]]:
+        """Evaluate whether a record can be published.
 
         Universal rules are defined here; derived Publisher classes
         may extend these with catalog-specific rules.
+
+        :return: tuple(can_publish: bool, reasons: list)
         """
-        # if the collection is not tagged as ready, then the record cannot be published
-        if not any(
-                (tag for tag in record_model.tags
-                 if tag.tag_id == ODPCollectionTag.READY)
-        ):
-            return False
+        # tag for a record migrated without any subsequent changes
+        migrated_tag = next(
+            (tag for tag in record_model.tags if tag.tag_id == ODPRecordTag.MIGRATED and
+             datetime.fromisoformat(tag.timestamp) >= datetime.fromisoformat(record_model.timestamp)),
+            None
+        )
+        collection_ready = any(
+            (tag for tag in record_model.tags if tag.tag_id == ODPCollectionTag.READY)
+        )
+        qc_passed = any(
+            (tag for tag in record_model.tags if tag.tag_id == ODPRecordTag.QC and tag.data['pass_'])
+        ) and not any(
+            (tag for tag in record_model.tags if tag.tag_id == ODPRecordTag.QC and not tag.data['pass_'])
+        )
+        retracted = any(
+            (tag for tag in record_model.tags if tag.tag_id == ODPRecordTag.RETRACTED)
+        )
+        metadata_valid = record_model.validity['valid']
 
-        # if the record was migrated with a status of published, and there have
-        # been no subsequent changes to the record, then it can be published
-        if any(
-                (tag for tag in record_model.tags
-                 if tag.tag_id == ODPRecordTag.MIGRATED and tag.data['published'] and
-                    datetime.fromisoformat(tag.timestamp) >= datetime.fromisoformat(record_model.timestamp))
-        ):
-            return True
+        published_reasons = []
+        not_published_reasons = []
 
-        # if the record is invalid against the metadata schema, then it cannot be published
-        if not record_model.validity['valid']:
-            return False
+        # collection readiness applies to both migrated and non-migrated records
+        if collection_ready:
+            published_reasons += [PublishedReason.COLLECTION_READY]
+        else:
+            not_published_reasons += [NotPublishedReason.COLLECTION_NOT_READY]
 
-        # if the record has any QC tags with a status of failed, then it cannot be published
-        if any(
-                (tag for tag in record_model.tags
-                 if tag.tag_id == ODPRecordTag.QC and not tag.data['pass_'])
-        ):
-            return False
+        if migrated_tag:
+            if migrated_tag.data['published']:
+                published_reasons += [PublishedReason.MIGRATED_PUBLISHED]
+            else:
+                not_published_reasons += [NotPublishedReason.MIGRATED_NOT_PUBLISHED]
 
-        # if the record does not have any QC tags with a status of passed, then it cannot be published
-        if not any(
-                (tag for tag in record_model.tags
-                 if tag.tag_id == ODPRecordTag.QC and tag.data['pass_'])
-        ):
-            return False
+        else:
+            if qc_passed:
+                published_reasons += [PublishedReason.QC_PASSED]
+            else:
+                not_published_reasons += [NotPublishedReason.QC_FAILED]
 
-        # if the record has a retracted tag, then it cannot be published
-        if any(
-                (tag for tag in record_model.tags
-                 if tag.tag_id == ODPRecordTag.RETRACTED)
-        ):
-            return False
+            if retracted:
+                not_published_reasons += [NotPublishedReason.RECORD_RETRACTED]
 
-        # all checks have passed; the record can be published
-        return True
+            if not metadata_valid:
+                not_published_reasons += [NotPublishedReason.METADATA_INVALID]
+
+        if not_published_reasons:
+            return False, not_published_reasons
+
+        return True, published_reasons
 
     def create_published_record(self, record_model: RecordModel) -> PublishedRecordModel:
         """Create the published form of a record."""
@@ -238,7 +266,7 @@ class Publisher:
 
         for catalog_record in unsynced_catalog_records:
             try:
-                self.synchronize_record(catalog_record.record_id)
+                self.sync_external_record(catalog_record.record_id)
                 catalog_record.synced = True
                 catalog_record.error = None
                 catalog_record.error_count = 0
@@ -253,6 +281,6 @@ class Publisher:
         if total:
             logger.info(f'{self.catalog_id} catalog: {synced} records synced; {total - synced} errors')
 
-    def synchronize_record(self, record_id: str) -> None:
+    def sync_external_record(self, record_id: str) -> None:
         """Create / update / delete a record on an external catalog."""
         pass

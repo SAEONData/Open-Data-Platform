@@ -18,9 +18,10 @@ class CatalogRecord(Base):
     catalog = relationship('Catalog', viewonly=True)
     record = relationship('Record', viewonly=True)
 
-    timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
     published = Column(Boolean, nullable=False)
     published_record = Column(JSONB)
+    reason = Column(String)
+    timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
 
     # external catalog integration
     synced = Column(Boolean)
