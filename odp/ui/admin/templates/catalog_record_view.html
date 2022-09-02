@@ -23,13 +23,15 @@
     <div class="tab-content">
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% from 'macros.html' import render_info, obj_link %}
-            {% call(prop) render_info(catalog_record, 'Catalog', 'Record id', 'Published', 'Timestamp', hide_id=True) %}
+            {% call(prop) render_info(catalog_record, 'Catalog', 'Record id', 'Published', 'Reason', 'Timestamp', hide_id=True) %}
                 {% if prop == 'Catalog' %}
                     {{ obj_link('catalogs', catalog_record.catalog_id) }}
                 {% elif prop == 'Record id' %}
                     {{ obj_link('records', catalog_record.record_id) }}
                 {% elif prop == 'Published' %}
                     {{ catalog_record.published }}
+                {% elif prop == 'Reason' %}
+                    {{ catalog_record.reason }}
                 {% elif prop == 'Timestamp' %}
                     {{ catalog_record.timestamp|timestamp }}
                 {% endif %}

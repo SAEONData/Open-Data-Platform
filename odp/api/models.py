@@ -64,9 +64,10 @@ class PublishedDataCiteRecordModel(PublishedRecordModel):
 class CatalogRecordModel(BaseModel):
     catalog_id: str
     record_id: str
-    timestamp: str
     published: bool
     published_record: Optional[PublishedSAEONRecordModel | PublishedDataCiteRecordModel]
+    reason: str
+    timestamp: str
 
 
 class ClientModel(BaseModel):

@@ -51,9 +51,10 @@ def output_catalog_record_model(catalog_record: CatalogRecord) -> CatalogRecordM
     return CatalogRecordModel(
         catalog_id=catalog_record.catalog_id,
         record_id=catalog_record.record_id,
-        timestamp=catalog_record.timestamp.isoformat(),
         published=catalog_record.published,
         published_record=output_published_record_model(catalog_record),
+        reason=catalog_record.reason,
+        timestamp=catalog_record.timestamp.isoformat(),
     )
 
 
