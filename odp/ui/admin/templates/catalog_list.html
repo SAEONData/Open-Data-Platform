@@ -9,5 +9,7 @@
 
 {% block content %}
     {% from 'macros.html' import render_table %}
-    {{ render_table(catalogs) }}
+    {% call(catalog) render_table(catalogs, 'Published records') %}
+        <td>{{ catalog.record_count }}</td>
+    {% endcall %}
 {% endblock %}

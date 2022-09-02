@@ -9,6 +9,9 @@
 
 {% block content %}
     {% from 'macros.html' import render_info %}
-    {% call(prop) render_info(catalog) %}
+    {% call(prop) render_info(catalog, 'Published records') %}
+        {% if prop == 'Published records' %}
+            {{ catalog.record_count }}
+        {% endif %}
     {% endcall %}
 {% endblock %}
