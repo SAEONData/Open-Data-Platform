@@ -4,11 +4,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from jschon import JSON, JSONSchema
-from sqlalchemy import literal_column, null, or_, select, union_all
+from sqlalchemy import and_, literal_column, null, or_, select, union_all
 from sqlalchemy.orm import aliased
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp import ODPCollectionTag, ODPScope
+from odp import ODPCollectionTag, ODPMetadataSchema, ODPScope
 from odp.api.lib.auth import Authorize, Authorized, TagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_metadata_schema, get_tag_schema
@@ -91,6 +91,18 @@ async def list_records(
             Record.id.ilike(f'%{identifier_q}%'),
             Record.doi.ilike(f'%{identifier_q}%'),
             Record.sid.ilike(f'%{identifier_q}%'),
+        ))
+
+    if title_q:
+        stmt = stmt.where(or_(
+            and_(
+                Record.schema_id == ODPMetadataSchema.SAEON_DATACITE_4,
+                Record.metadata_['titles'][0]['title'].astext.ilike(f'%{title_q}%')
+            ),
+            and_(
+                Record.schema_id == ODPMetadataSchema.SAEON_ISO19115,
+                Record.metadata_['title'].astext.ilike(f'%{title_q}%')
+            ),
         ))
 
     return paginator.paginate(
