@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from jschon import JSON, JSONSchema
-from sqlalchemy import literal_column, null, select, union_all
+from sqlalchemy import literal_column, null, or_, select, union_all
 from sqlalchemy.orm import aliased
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -82,8 +82,16 @@ async def list_records(
     )
     if auth.collection_ids != '*':
         stmt = stmt.where(Collection.id.in_(auth.collection_ids))
+
     if collection_id:
         stmt = stmt.where(Collection.id.in_(collection_id))
+
+    if identifier_q:
+        stmt = stmt.where(or_(
+            Record.id.ilike(f'%{identifier_q}%'),
+            Record.doi.ilike(f'%{identifier_q}%'),
+            Record.sid.ilike(f'%{identifier_q}%'),
+        ))
 
     return paginator.paginate(
         stmt,

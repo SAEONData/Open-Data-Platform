@@ -191,7 +191,7 @@ class RecordForm(BaseForm):
 
 class RecordFilterForm(BaseForm):
     id_q = StringField(
-        label='Search identifiers',
+        label='Search identifiers (Id, DOI and SID)',
     )
     title_q = StringField(
         label='Search titles',
