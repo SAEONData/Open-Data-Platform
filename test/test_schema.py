@@ -25,7 +25,7 @@ def test_translate_iso19115_to_datacite():
         output_json = catalog.load_json(URI('https://odp.saeon.ac.za/schema/metadata/saeon/datacite-4-example-translated'))
 
         result = input_schema.evaluate(JSON(input_json))
-        patch = result.output('patch', scheme='saeon/datacite-4')
+        patch = result.output('translation-patch', scheme='saeon/datacite-4')
         translation = result.output('translation', scheme='saeon/datacite-4')
 
         assert JSONPatch(*patch).evaluate(None) == translation
