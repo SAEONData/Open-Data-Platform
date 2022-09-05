@@ -87,11 +87,14 @@ async def list_records(
         stmt = stmt.where(Collection.id.in_(collection_id))
 
     if identifier_q:
-        stmt = stmt.where(or_(
-            Record.id.ilike(f'%{identifier_q}%'),
-            Record.doi.ilike(f'%{identifier_q}%'),
-            Record.sid.ilike(f'%{identifier_q}%'),
-        ))
+        id_exprs = []
+        for id_term in identifier_q.split():
+            id_exprs += [
+                Record.id.ilike(f'%{id_term}%'),
+                Record.doi.ilike(f'%{id_term}%'),
+                Record.sid.ilike(f'%{id_term}%'),
+            ]
+        stmt = stmt.where(or_(*id_exprs))
 
     if title_q:
         stmt = stmt.where(or_(
