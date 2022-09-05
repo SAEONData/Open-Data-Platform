@@ -86,9 +86,9 @@ async def list_records(
     if collection_id:
         stmt = stmt.where(Collection.id.in_(collection_id))
 
-    if identifier_q:
+    if identifier_q and (id_terms := identifier_q.split()):
         id_exprs = []
-        for id_term in identifier_q.split():
+        for id_term in id_terms:
             id_exprs += [
                 Record.id.ilike(f'%{id_term}%'),
                 Record.doi.ilike(f'%{id_term}%'),
@@ -96,15 +96,23 @@ async def list_records(
             ]
         stmt = stmt.where(or_(*id_exprs))
 
-    if title_q:
+    if title_q and (title_terms := title_q.split()):
+        datacite_title_exprs = [
+            Record.metadata_['titles'][0]['title'].astext.ilike(f'%{title_term}%')
+            for title_term in title_terms
+        ]
+        iso19115_title_exprs = [
+            Record.metadata_['title'].astext.ilike(f'%{title_term}%')
+            for title_term in title_terms
+        ]
         stmt = stmt.where(or_(
             and_(
                 Record.schema_id == ODPMetadataSchema.SAEON_DATACITE_4,
-                Record.metadata_['titles'][0]['title'].astext.ilike(f'%{title_q}%')
+                *datacite_title_exprs,
             ),
             and_(
                 Record.schema_id == ODPMetadataSchema.SAEON_ISO19115,
-                Record.metadata_['title'].astext.ilike(f'%{title_q}%')
+                *iso19115_title_exprs,
             ),
         ))
 
