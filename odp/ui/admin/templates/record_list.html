@@ -19,11 +19,17 @@
     <div id="collapse-filter" class="container-fluid collapse">
         <form action="{{ url_for('.index') }}" method="get">
             <div class="row">
-                {% for field in filter_form if field.id != 'csrf_token' %}
-                    <div class="col">
-                        {{ render_field(field) }}
-                    </div>
-                {% endfor %}
+                <div class="col">
+                    {% for field in filter_form if field.id in ('id_q', 'title_q') %}
+                        <div class="row">
+                            {{ render_field(field) }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="col">
+                    {% set field = filter_form | selectattr('id', '==', 'collection') | first %}
+                    {{ render_field(field) }}
+                </div>
             </div>
             <button type="submit" class="btn btn-outline-info btn-action">
                 Apply

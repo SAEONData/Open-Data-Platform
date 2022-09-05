@@ -73,6 +73,8 @@ async def list_records(
         auth: Authorized = Depends(Authorize(ODPScope.RECORD_READ)),
         paginator: Paginator = Depends(),
         collection_id: list[str] = Query(None),
+        identifier_q: str = None,
+        title_q: str = None,
 ):
     stmt = (
         select(Record).

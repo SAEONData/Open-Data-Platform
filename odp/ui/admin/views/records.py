@@ -14,10 +14,18 @@ bp = Blueprint('records', __name__)
 @api.client(ODPScope.RECORD_READ)
 def index():
     page = request.args.get('page', 1)
+    id_q = request.args.get('id_q')
+    title_q = request.args.get('title_q')
     collection_ids = request.args.getlist('collection')
 
     api_filter = ''
     ui_filter = ''
+    if id_q:
+        api_filter += f'&identifier_q={id_q}'
+        ui_filter += f'&id_q={id_q}'
+    if title_q:
+        api_filter += f'&title_q={title_q}'
+        ui_filter += f'&title_q={title_q}'
     for collection_id in collection_ids:
         api_filter += f'&collection_id={collection_id}'
         ui_filter += f'&collection={collection_id}'
@@ -26,7 +34,12 @@ def index():
     utils.populate_collection_choices(filter_form.collection)
 
     records = api.get(f'/record/?page={page}{api_filter}')
-    return render_template('record_list.html', records=records, filter_=ui_filter, filter_form=filter_form)
+    return render_template(
+        'record_list.html',
+        records=records,
+        filter_=ui_filter,
+        filter_form=filter_form,
+    )
 
 
 @bp.route('/<id>')
