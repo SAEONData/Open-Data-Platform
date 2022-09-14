@@ -55,6 +55,25 @@ def create_audit_record(
     ).save()
 
 
+def create_tag_audit_record(
+        auth: Authorized,
+        collection_tag: CollectionTag,
+        timestamp: datetime,
+        command: AuditCommand,
+) -> None:
+    CollectionTagAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=command,
+        timestamp=timestamp,
+        _id=collection_tag.id,
+        _collection_id=collection_tag.collection_id,
+        _tag_id=collection_tag.tag_id,
+        _user_id=collection_tag.user_id,
+        _data=collection_tag.data,
+    ).save()
+
+
 @router.get(
     '/',
     response_model=Page[CollectionModel],
@@ -243,17 +262,7 @@ async def tag_collection(
         collection.timestamp = timestamp
         collection.save()
 
-        CollectionTagAudit(
-            client_id=auth.client_id,
-            user_id=auth.user_id,
-            command=command,
-            timestamp=timestamp,
-            _id=collection_tag.id,
-            _collection_id=collection_tag.collection_id,
-            _tag_id=collection_tag.tag_id,
-            _user_id=collection_tag.user_id,
-            _data=collection_tag.data,
-        ).save()
+        create_tag_audit_record(auth, collection_tag, timestamp, command)
 
     return output_tag_instance_model(collection_tag)
 
@@ -307,16 +316,7 @@ def _untag_collection(
     collection.timestamp = (timestamp := datetime.now(timezone.utc))
     collection.save()
 
-    CollectionTagAudit(
-        client_id=auth.client_id,
-        user_id=auth.user_id,
-        command=AuditCommand.delete,
-        timestamp=timestamp,
-        _id=collection_tag.id,
-        _collection_id=collection_tag.collection_id,
-        _tag_id=collection_tag.tag_id,
-        _user_id=collection_tag.user_id,
-    ).save()
+    create_tag_audit_record(auth, collection_tag, timestamp, AuditCommand.delete)
 
 
 @router.get(
