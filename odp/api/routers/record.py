@@ -85,6 +85,25 @@ def create_audit_record(
     ).save()
 
 
+def create_tag_audit_record(
+        auth: Authorized,
+        record_tag: RecordTag,
+        timestamp: datetime,
+        command: AuditCommand,
+) -> None:
+    RecordTagAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=command,
+        timestamp=timestamp,
+        _id=record_tag.id,
+        _record_id=record_tag.record_id,
+        _tag_id=record_tag.tag_id,
+        _user_id=record_tag.user_id,
+        _data=record_tag.data,
+    ).save()
+
+
 @router.get(
     '/',
     response_model=Page[RecordModel],
@@ -457,17 +476,7 @@ async def tag_record(
         record.timestamp = timestamp
         record.save()
 
-        RecordTagAudit(
-            client_id=auth.client_id,
-            user_id=auth.user_id,
-            command=command,
-            timestamp=timestamp,
-            _id=record_tag.id,
-            _record_id=record_tag.record_id,
-            _tag_id=record_tag.tag_id,
-            _user_id=record_tag.user_id,
-            _data=record_tag.data,
-        ).save()
+        create_tag_audit_record(auth, record_tag, timestamp, command)
 
     return output_tag_instance_model(record_tag)
 
@@ -521,16 +530,7 @@ def _untag_record(
     record.timestamp = (timestamp := datetime.now(timezone.utc))
     record.save()
 
-    RecordTagAudit(
-        client_id=auth.client_id,
-        user_id=auth.user_id,
-        command=AuditCommand.delete,
-        timestamp=timestamp,
-        _id=record_tag.id,
-        _record_id=record_tag.record_id,
-        _tag_id=record_tag.tag_id,
-        _user_id=record_tag.user_id,
-    ).save()
+    create_tag_audit_record(auth, record_tag, timestamp, AuditCommand.delete)
 
 
 @router.get(

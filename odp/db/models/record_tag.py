@@ -53,4 +53,4 @@ class RecordTagAudit(Base):
     _record_id = Column(String, nullable=False)
     _tag_id = Column(String, nullable=False)
     _user_id = Column(String)
-    _data = Column(JSONB)
+    _data = Column(JSONB, nullable=False)

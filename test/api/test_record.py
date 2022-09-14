@@ -125,12 +125,7 @@ def assert_tag_audit_log(*entries):
         assert row._record_id == entries[n]['record_id']
         assert row._tag_id == entries[n]['record_tag']['tag_id']
         assert row._user_id == entries[n]['record_tag'].get('user_id')
-        if row.command in ('insert', 'update'):
-            assert row._data == entries[n]['record_tag']['data']
-        elif row.command == 'delete':
-            assert row._data is None
-        else:
-            assert False
+        assert row._data == entries[n]['record_tag']['data']
 
 
 def assert_json_record_result(response, json, record):
