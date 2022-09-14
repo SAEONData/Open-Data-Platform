@@ -37,6 +37,24 @@ def output_collection_model(result) -> CollectionModel:
     )
 
 
+def create_audit_record(
+        auth: Authorized,
+        collection: Collection,
+        timestamp: datetime,
+        command: AuditCommand,
+) -> None:
+    CollectionAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=command,
+        timestamp=timestamp,
+        _id=collection.id,
+        _name=collection.name,
+        _doi_key=collection.doi_key,
+        _provider_id=collection.provider_id,
+    ).save()
+
+
 @router.get(
     '/',
     response_model=Page[CollectionModel],
@@ -105,17 +123,7 @@ async def create_collection(
         timestamp=(timestamp := datetime.now(timezone.utc)),
     )
     collection.save()
-
-    CollectionAudit(
-        client_id=auth.client_id,
-        user_id=auth.user_id,
-        command=AuditCommand.insert,
-        timestamp=timestamp,
-        _id=collection.id,
-        _name=collection.name,
-        _doi_key=collection.doi_key,
-        _provider_id=collection.provider_id,
-    ).save()
+    create_audit_record(auth, collection, timestamp, AuditCommand.insert)
 
 
 @router.put(
@@ -141,17 +149,7 @@ async def update_collection(
         collection.provider_id = collection_in.provider_id
         collection.timestamp = (timestamp := datetime.now(timezone.utc))
         collection.save()
-
-        CollectionAudit(
-            client_id=auth.client_id,
-            user_id=auth.user_id,
-            command=AuditCommand.update,
-            timestamp=timestamp,
-            _id=collection.id,
-            _name=collection.name,
-            _doi_key=collection.doi_key,
-            _provider_id=collection.provider_id,
-        ).save()
+        create_audit_record(auth, collection, timestamp, AuditCommand.update)
 
 
 @router.delete(
@@ -168,14 +166,7 @@ async def delete_collection(
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     collection.delete()
-
-    CollectionAudit(
-        client_id=auth.client_id,
-        user_id=auth.user_id,
-        command=AuditCommand.delete,
-        timestamp=datetime.now(timezone.utc),
-        _id=collection.id,
-    ).save()
+    create_audit_record(auth, collection, datetime.now(timezone.utc), AuditCommand.delete)
 
 
 @router.post(

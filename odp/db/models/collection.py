@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Enum, ForeignKey, Identity, Integer, String, TIMESTAMP
-from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
@@ -43,6 +42,6 @@ class CollectionAudit(Base):
     timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
 
     _id = Column(String, nullable=False)
-    _name = Column(String)
+    _name = Column(String, nullable=False)
     _doi_key = Column(String)
-    _provider_id = Column(String)
+    _provider_id = Column(String, nullable=False)

@@ -80,24 +80,16 @@ def assert_db_tag_state(collection_id, *collection_tags):
             assert row.data == collection_tag['data']
 
 
-def assert_audit_log(command, collection=None, collection_id=None):
+def assert_audit_log(command, collection):
     result = Session.execute(select(CollectionAudit)).scalar_one_or_none()
     assert result.client_id == 'odp.test'
     assert result.user_id is None
     assert result.command == command
     assert_new_timestamp(result.timestamp)
-    if command in ('insert', 'update'):
-        assert result._id == collection.id
-        assert result._name == collection.name
-        assert result._doi_key == collection.doi_key
-        assert result._provider_id == collection.provider_id
-    elif command == 'delete':
-        assert result._id == collection_id
-        assert result._name is None
-        assert result._doi_key is None
-        assert result._provider_id is None
-    else:
-        assert False
+    assert result._id == collection.id
+    assert result._name == collection.name
+    assert result._doi_key == collection.doi_key
+    assert result._provider_id == collection.provider_id
 
 
 def assert_no_audit_log():
@@ -392,14 +384,16 @@ def test_delete_collection(api, collection_batch, scopes, collection_auth):
         api_client_collection = None
 
     modified_collection_batch = collection_batch.copy()
+    deleted_collection = modified_collection_batch[2]
     del modified_collection_batch[2]
 
     r = api(scopes, api_client_collection).delete(f'/collection/{(collection_id := collection_batch[2].id)}')
 
     if authorized:
         assert_empty_result(r)
+        # check audit log first because assert_db_state expires the deleted item
+        assert_audit_log('delete', deleted_collection)
         assert_db_state(modified_collection_batch)
-        assert_audit_log('delete', collection_id=collection_id)
     else:
         assert_forbidden(r)
         assert_db_state(collection_batch)
