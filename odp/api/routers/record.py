@@ -65,6 +65,26 @@ def get_validity(metadata: dict[str, Any], schema: JSONSchema) -> Any:
     return result.output('detailed')
 
 
+def create_audit_record(
+        auth: Authorized,
+        record: Record,
+        timestamp: datetime,
+        command: AuditCommand,
+) -> None:
+    RecordAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=command,
+        timestamp=timestamp,
+        _id=record.id,
+        _doi=record.doi,
+        _sid=record.sid,
+        _metadata=record.metadata_,
+        _collection_id=record.collection_id,
+        _schema_id=record.schema_id,
+    ).save()
+
+
 @router.get(
     '/',
     response_model=Page[RecordModel],
@@ -204,18 +224,7 @@ def _create_record(
     )
     record.save()
 
-    RecordAudit(
-        client_id=auth.client_id,
-        user_id=auth.user_id,
-        command=AuditCommand.insert,
-        timestamp=timestamp,
-        _id=record.id,
-        _doi=record.doi,
-        _sid=record.sid,
-        _metadata=record.metadata_,
-        _collection_id=record.collection_id,
-        _schema_id=record.schema_id,
-    ).save()
+    create_audit_record(auth, record, timestamp, AuditCommand.insert)
 
     return output_record_model(record)
 
@@ -320,18 +329,7 @@ def _set_record(
         record.timestamp = (timestamp := datetime.now(timezone.utc))
         record.save()
 
-        RecordAudit(
-            client_id=auth.client_id,
-            user_id=auth.user_id,
-            command=AuditCommand.insert if create else AuditCommand.update,
-            timestamp=timestamp,
-            _id=record.id,
-            _doi=record.doi,
-            _sid=record.sid,
-            _metadata=record.metadata_,
-            _collection_id=record.collection_id,
-            _schema_id=record.schema_id,
-        ).save()
+        create_audit_record(auth, record, timestamp, AuditCommand.insert if create else AuditCommand.update)
 
     return output_record_model(record)
 
@@ -380,13 +378,7 @@ def _delete_record(
     if record.doi is not None and Session.get(PublishedDOI, record.doi):
         raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'The DOI has been published and cannot be deleted.')
 
-    RecordAudit(
-        client_id=auth.client_id,
-        user_id=auth.user_id,
-        command=AuditCommand.delete,
-        timestamp=datetime.now(timezone.utc),
-        _id=record.id,
-    ).save()
+    create_audit_record(auth, record, datetime.now(timezone.utc), AuditCommand.delete)
 
     record.delete()
 

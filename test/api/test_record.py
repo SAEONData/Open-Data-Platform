@@ -96,28 +96,18 @@ def assert_db_tag_state(record_id, *record_tags):
             assert row.data == record_tag['data']
 
 
-def assert_audit_log(command, record=None, record_id=None):
+def assert_audit_log(command, record):
     result = Session.execute(select(RecordAudit)).scalar_one_or_none()
     assert result.client_id == 'odp.test'
     assert result.user_id is None
     assert result.command == command
     assert_new_timestamp(result.timestamp)
-    if command in ('insert', 'update'):
-        assert result._id == record.id
-        assert result._doi == record.doi
-        assert result._sid == record.sid
-        assert result._metadata == record.metadata_
-        assert result._collection_id == record.collection_id
-        assert result._schema_id == record.schema_id
-    elif command == 'delete':
-        assert result._id == record_id
-        assert result._doi is None
-        assert result._sid is None
-        assert result._metadata is None
-        assert result._collection_id is None
-        assert result._schema_id is None
-    else:
-        assert False
+    assert result._id == record.id
+    assert result._doi == record.doi
+    assert result._sid == record.sid
+    assert result._metadata == record.metadata_
+    assert result._collection_id == record.collection_id
+    assert result._schema_id == record.schema_id
 
 
 def assert_no_audit_log():
@@ -664,6 +654,7 @@ def test_delete_record(api, record_batch_with_ids, admin_route, scopes, collecti
         PublishedDOI(doi=record_batch_with_ids[2].doi).save()
 
     modified_record_batch = record_batch_with_ids.copy()
+    deleted_record = modified_record_batch[2]
     del modified_record_batch[2]
 
     r = api(scopes, api_client_collection).delete(f'{route}{(record_id := record_batch_with_ids[2].id)}')
@@ -679,8 +670,9 @@ def test_delete_record(api, record_batch_with_ids, admin_route, scopes, collecti
             assert_no_audit_log()
         else:
             assert_empty_result(r)
+            # check audit log first because assert_db_state expires the deleted item
+            assert_audit_log('delete', deleted_record)
             assert_db_state(modified_record_batch)
-            assert_audit_log('delete', record_id=record_id)
     else:
         assert_forbidden(r)
         assert_db_state(record_batch_with_ids)
