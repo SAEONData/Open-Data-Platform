@@ -47,6 +47,18 @@ def output_audit_model(row) -> VocabularyTermAuditModel:
     )
 
 
+def create_audit_record(auth: Authorized, term: VocabularyTerm, command: AuditCommand) -> None:
+    VocabularyTermAudit(
+        client_id=auth.client_id,
+        user_id=auth.user_id,
+        command=command,
+        timestamp=datetime.now(timezone.utc),
+        _vocabulary_id=term.vocabulary_id,
+        _term_id=term.term_id,
+        _data=term.data,
+    ).save()
+
+
 @router.get(
     '/',
     response_model=Page[VocabularyModel],
@@ -100,16 +112,7 @@ async def create_term(
         data=term_in.data,
     )
     term.save()
-
-    VocabularyTermAudit(
-        client_id=auth.client_id,
-        user_id=auth.user_id,
-        command=AuditCommand.insert,
-        timestamp=datetime.now(timezone.utc),
-        _vocabulary_id=term.vocabulary_id,
-        _term_id=term.term_id,
-        _data=term.data,
-    ).save()
+    create_audit_record(auth, term, AuditCommand.insert)
 
 
 @router.put(
@@ -134,16 +137,7 @@ async def update_term(
 
         term.data = term_in.data
         term.save()
-
-        VocabularyTermAudit(
-            client_id=auth.client_id,
-            user_id=auth.user_id,
-            command=AuditCommand.update,
-            timestamp=datetime.now(timezone.utc),
-            _vocabulary_id=term.vocabulary_id,
-            _term_id=term.term_id,
-            _data=term.data,
-        ).save()
+        create_audit_record(auth, term, AuditCommand.update)
 
 
 @router.delete(
@@ -158,16 +152,7 @@ async def delete_term(
         raise HTTPException(HTTP_404_NOT_FOUND)
 
     term.delete()
-
-    VocabularyTermAudit(
-        client_id=auth.client_id,
-        user_id=auth.user_id,
-        command=AuditCommand.delete,
-        timestamp=datetime.now(timezone.utc),
-        _vocabulary_id=term.vocabulary_id,
-        _term_id=term.term_id,
-        _data=term.data,
-    ).save()
+    create_audit_record(auth, term, AuditCommand.delete)
 
 
 @router.get(
