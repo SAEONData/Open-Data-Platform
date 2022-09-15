@@ -247,9 +247,9 @@ class AuditModel(BaseModel):
 
 class CollectionAuditModel(AuditModel):
     collection_id: str
-    collection_name: Optional[str]
+    collection_name: str
     collection_doi_key: Optional[str]
-    collection_provider_id: Optional[str]
+    collection_provider_id: str
 
 
 class CollectionTagAuditModel(AuditModel):
@@ -257,16 +257,16 @@ class CollectionTagAuditModel(AuditModel):
     collection_tag_collection_id: str
     collection_tag_user_id: Optional[str]
     collection_tag_user_name: Optional[str]
-    collection_tag_data: Optional[dict[str, Any]]
+    collection_tag_data: dict[str, Any]
 
 
 class RecordAuditModel(AuditModel):
     record_id: str
     record_doi: Optional[str]
     record_sid: Optional[str]
-    record_metadata: Optional[dict[str, Any]]
-    record_collection_id: Optional[str]
-    record_schema_id: Optional[str]
+    record_metadata: dict[str, Any]
+    record_collection_id: str
+    record_schema_id: str
 
 
 class RecordTagAuditModel(AuditModel):
@@ -274,7 +274,7 @@ class RecordTagAuditModel(AuditModel):
     record_tag_record_id: str
     record_tag_user_id: Optional[str]
     record_tag_user_name: Optional[str]
-    record_tag_data: Optional[dict[str, Any]]
+    record_tag_data: dict[str, Any]
 
 
 class VocabularyTermAuditModel(AuditModel):
