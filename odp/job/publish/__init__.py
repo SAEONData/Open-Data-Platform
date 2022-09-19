@@ -6,6 +6,7 @@ from typing import final
 from sqlalchemy import func, or_, select
 
 from odp import ODPCollectionTag, ODPMetadataSchema, ODPRecordTag
+from odp.api.lib.utils import output_published_record_model
 from odp.api.models import PublishedRecordModel, RecordModel
 from odp.api.routers.record import output_record_model
 from odp.db import Session
@@ -293,14 +294,17 @@ class Publisher:
     @final
     def _create_index_data(self, catalog_record: CatalogRecord) -> None:
         """Write indexing data to a catalog record."""
-        catalog_record.full_text = self.create_full_text_index_data(catalog_record.published_record)
-        catalog_record.keywords = self.create_keyword_index_data(catalog_record.published_record)
-        if north_east_south_west := self.create_spatial_index_data(catalog_record.published_record):
+        published_record = output_published_record_model(catalog_record)
+        catalog_record.full_text = select(
+            func.to_tsvector(self.create_full_text_index_data(published_record))
+        ).scalar_subquery()
+        catalog_record.keywords = self.create_keyword_index_data(published_record)
+        if north_east_south_west := self.create_spatial_index_data(published_record):
             (catalog_record.spatial_north,
              catalog_record.spatial_east,
              catalog_record.spatial_south,
              catalog_record.spatial_west) = north_east_south_west
-        if start_end := self.create_temporal_index_data(catalog_record.published_record):
+        if start_end := self.create_temporal_index_data(published_record):
             (catalog_record.temporal_start,
              catalog_record.temporal_end) = start_end
 
