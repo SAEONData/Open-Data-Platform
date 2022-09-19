@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class PublishedReason(str, Enum):
     QC_PASSED = 'QC passed'
     COLLECTION_READY = 'collection ready'
-    MIGRATED_PUBLISHED = 'migrated published'
+    MIGRATED_PUBLISHED = 'migrated as published'
 
 
 class NotPublishedReason(str, Enum):
@@ -25,13 +25,14 @@ class NotPublishedReason(str, Enum):
     COLLECTION_NOT_READY = 'collection not ready'
     METADATA_INVALID = 'metadata invalid'
     RECORD_RETRACTED = 'record retracted'
-    MIGRATED_NOT_PUBLISHED = 'migrated not published'
+    MIGRATED_NOT_PUBLISHED = 'migrated as not published'
     NO_DOI = 'no DOI'
 
 
 class Publisher:
     def __init__(self, catalog_id: str) -> None:
         self.catalog_id = catalog_id
+        self.indexed = False
         self.external = False
         self.max_attempts = 3
 
@@ -126,9 +127,13 @@ class Publisher:
             self._save_published_doi(record_model)
             catalog_record.published = True
             catalog_record.published_record = self.create_published_record(record_model).dict()
+            if self.indexed:
+                self._create_index_data(catalog_record)
         else:
             catalog_record.published = False
             catalog_record.published_record = None
+            if self.indexed:
+                self._delete_index_data(catalog_record)
 
         if self.external:
             catalog_record.synced = False
@@ -283,4 +288,46 @@ class Publisher:
 
     def sync_external_record(self, record_id: str) -> None:
         """Create / update / delete a record on an external catalog."""
+        pass
+
+    @final
+    def _create_index_data(self, catalog_record: CatalogRecord) -> None:
+        """Write indexing data to a catalog record."""
+        catalog_record.full_text = self.create_full_text_index_data(catalog_record.published_record)
+        catalog_record.keywords = self.create_keyword_index_data(catalog_record.published_record)
+        if north_east_south_west := self.create_spatial_index_data(catalog_record.published_record):
+            (catalog_record.spatial_north,
+             catalog_record.spatial_east,
+             catalog_record.spatial_south,
+             catalog_record.spatial_west) = north_east_south_west
+        if start_end := self.create_temporal_index_data(catalog_record.published_record):
+            (catalog_record.temporal_start,
+             catalog_record.temporal_end) = start_end
+
+    @final
+    def _delete_index_data(self, catalog_record: CatalogRecord) -> None:
+        """Remove indexing data from a catalog record."""
+        catalog_record.full_text = None
+        catalog_record.keywords = None
+        catalog_record.spatial_north = None
+        catalog_record.spatial_east = None
+        catalog_record.spatial_south = None
+        catalog_record.spatial_west = None
+        catalog_record.temporal_start = None
+        catalog_record.temporal_end = None
+
+    def create_full_text_index_data(self, published_record: PublishedRecordModel) -> str:
+        """Create a string from metadata field values to be indexed for full text search."""
+        pass
+
+    def create_keyword_index_data(self, published_record: PublishedRecordModel) -> list[str]:
+        """Create an array of metadata keywords to be indexed for keyword search."""
+        pass
+
+    def create_spatial_index_data(self, published_record: PublishedRecordModel) -> tuple[float, float, float, float]:
+        """Create a N-E-S-W tuple of the spatial extent to be indexed for spatial search."""
+        pass
+
+    def create_temporal_index_data(self, published_record: PublishedRecordModel) -> tuple[datetime, datetime]:
+        """Create a start-end tuple of the temporal extent to be indexed for temporal search."""
         pass

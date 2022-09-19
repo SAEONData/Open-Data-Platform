@@ -1,5 +1,5 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, TIMESTAMP
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import ARRAY, Boolean, Column, DateTime, ForeignKey, Integer, Numeric, String, TIMESTAMP
+from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.orm import relationship
 
 from odp.db import Base
@@ -27,3 +27,13 @@ class CatalogRecord(Base):
     synced = Column(Boolean)
     error = Column(String)
     error_count = Column(Integer)
+
+    # internal catalog indexing
+    full_text = Column(TSVECTOR)
+    keywords = Column(ARRAY(String))
+    spatial_north = Column(Numeric)
+    spatial_east = Column(Numeric)
+    spatial_south = Column(Numeric)
+    spatial_west = Column(Numeric)
+    temporal_start = Column(DateTime)
+    temporal_end = Column(DateTime)

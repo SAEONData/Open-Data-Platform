@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from jschon import JSON, URI
 
 from odp import ODPMetadataSchema
@@ -9,6 +11,9 @@ from odp.lib.schema import schema_catalog
 
 
 class SAEONPublisher(Publisher):
+    def __init__(self, catalog_id: str) -> None:
+        super().__init__(catalog_id)
+        self.indexed = True
 
     def create_published_record(self, record_model: RecordModel) -> PublishedRecordModel:
         """Create the published form of a record."""
@@ -57,3 +62,19 @@ class SAEONPublisher(Publisher):
                 timestamp=tag_instance.timestamp,
             ) for tag_instance in record_model.tags if tag_instance.public
         ]
+
+    def create_full_text_index_data(self, published_record: PublishedRecordModel) -> str:
+        """Create a string from metadata field values to be indexed for full text search."""
+        pass
+
+    def create_keyword_index_data(self, published_record: PublishedRecordModel) -> list[str]:
+        """Create an array of metadata keywords to be indexed for keyword search."""
+        pass
+
+    def create_spatial_index_data(self, published_record: PublishedRecordModel) -> tuple[float, float, float, float]:
+        """Create a NESW tuple of spatial extents to be indexed for spatial search."""
+        pass
+
+    def create_temporal_index_data(self, published_record: PublishedRecordModel) -> tuple[datetime, datetime]:
+        """Create a start-end tuple of the temporal extent to be indexed for temporal search."""
+        pass
