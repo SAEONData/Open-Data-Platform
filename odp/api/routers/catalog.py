@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, select, text
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPCatalog, ODPScope
@@ -73,6 +73,7 @@ async def get_catalog(
 async def list_published_records(
         catalog_id: str,
         paginator: Paginator = Depends(),
+        text_q: str = None,
 ):
     if not Session.get(Catalog, catalog_id):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -82,6 +83,11 @@ async def list_published_records(
         where(CatalogRecord.catalog_id == catalog_id).
         where(CatalogRecord.published)
     )
+
+    if text_q and (text_q := text_q.strip()):
+        stmt = stmt.where(text(
+            "full_text @@ plainto_tsquery('english', :text_q)"
+        ).bindparams(text_q=text_q))
 
     paginator.sort = 'record_id'
     return paginator.paginate(

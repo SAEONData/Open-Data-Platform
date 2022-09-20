@@ -63,7 +63,7 @@ class SAEONPublisher(Publisher):
             ) for tag_instance in record_model.tags if tag_instance.public
         ]
 
-    def create_full_text_index_data(self, published_record: PublishedSAEONRecordModel) -> str:
+    def create_full_text_search_data(self, published_record: PublishedSAEONRecordModel) -> str:
         """Create a string from metadata field values to be indexed for full text search."""
         values = []
         datacite_metadata = next((
@@ -103,14 +103,14 @@ class SAEONPublisher(Publisher):
 
         return ' '.join(values)
 
-    def create_keyword_index_data(self, published_record: PublishedSAEONRecordModel) -> list[str]:
+    def create_keyword_search_data(self, published_record: PublishedSAEONRecordModel) -> list[str]:
         """Create an array of metadata keywords to be indexed for keyword search."""
         pass
 
-    def create_spatial_index_data(self, published_record: PublishedSAEONRecordModel) -> tuple[float, float, float, float]:
-        """Create a NESW tuple of spatial extents to be indexed for spatial search."""
+    def create_spatial_search_data(self, published_record: PublishedSAEONRecordModel) -> tuple[float, float, float, float]:
+        """Create a N-E-S-W tuple of the spatial extent to be indexed for spatial search."""
         pass
 
-    def create_temporal_index_data(self, published_record: PublishedSAEONRecordModel) -> tuple[datetime, datetime]:
+    def create_temporal_search_data(self, published_record: PublishedSAEONRecordModel) -> tuple[datetime, datetime]:
         """Create a start-end tuple of the temporal extent to be indexed for temporal search."""
         pass
