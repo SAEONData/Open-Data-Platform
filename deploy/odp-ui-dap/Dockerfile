@@ -9,4 +9,4 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 COPY odp odp/
 
-CMD ["gunicorn", "odp.ui.dap:create_app()", "--bind=0.0.0.0:4022", "--workers=4"]
+CMD ["gunicorn", "odp.ui.dap:create_app()", "--bind=0.0.0.0:4023", "--workers=4"]

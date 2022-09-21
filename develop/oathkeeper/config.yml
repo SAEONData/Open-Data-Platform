@@ -16,7 +16,7 @@ authenticators:
   cookie_session:
     enabled: true
     config:
-      check_session_url: http://dap.localhost:2022/session/check
+      check_session_url: http://dap.localhost:2023/session/check
       preserve_path: true
       only: [ session ]
 
@@ -33,7 +33,7 @@ errors:
     redirect:
       enabled: true
       config:
-        to: http://dap.localhost:2022/
+        to: http://dap.localhost:2023/
         when:
           - error: [ unauthorized ]
             request:

@@ -87,8 +87,8 @@ def init_admin_client():
     """Create or update the ODP Admin UI client."""
     client = Session.get(Client, ODP_UI_ADMIN_CLIENT_ID) or Client(id=ODP_UI_ADMIN_CLIENT_ID)
     client.scopes = [Session.get(Scope, (s.value, ScopeType.odp)) for s in ODPScope] + \
-                    [Session.get(Scope, (HydraScope.OPENID, ScopeType.oauth))] + \
-                    [Session.get(Scope, (HydraScope.OFFLINE_ACCESS, ScopeType.oauth))]
+                    [Session.get(Scope, (HydraScope.OPENID, ScopeType.oauth)),
+                     Session.get(Scope, (HydraScope.OFFLINE_ACCESS, ScopeType.oauth))]
     client.save()
 
     hydra_admin_api.create_or_update_client(
@@ -103,11 +103,31 @@ def init_admin_client():
     )
 
 
+def init_public_client():
+    """Create or update the ODP Public UI client."""
+    client = Session.get(Client, ODP_UI_PUBLIC_CLIENT_ID) or Client(id=ODP_UI_PUBLIC_CLIENT_ID)
+    client.scopes = [Session.get(Scope, (ODPScope.CATALOG_READ, ScopeType.odp)),
+                     Session.get(Scope, (HydraScope.OPENID, ScopeType.oauth)),
+                     Session.get(Scope, (HydraScope.OFFLINE_ACCESS, ScopeType.oauth))]
+    client.save()
+
+    hydra_admin_api.create_or_update_client(
+        id=ODP_UI_PUBLIC_CLIENT_ID,
+        name=ODP_UI_PUBLIC_CLIENT_NAME,
+        secret=ODP_UI_PUBLIC_CLIENT_SECRET,
+        scope_ids=[ODPScope.CATALOG_READ, HydraScope.OPENID, HydraScope.OFFLINE_ACCESS],
+        grant_types=[GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN],
+        response_types=[ResponseType.CODE],
+        redirect_uris=[ODP_UI_PUBLIC_LOGGED_IN_URL],
+        post_logout_redirect_uris=[ODP_UI_PUBLIC_LOGGED_OUT_URL],
+    )
+
+
 def init_dap_client():
     """Create or update the Data Access Portal client."""
     client = Session.get(Client, ODP_UI_DAP_CLIENT_ID) or Client(id=ODP_UI_DAP_CLIENT_ID)
-    client.scopes = [Session.get(Scope, (HydraScope.OPENID, ScopeType.oauth))] + \
-                    [Session.get(Scope, (HydraScope.OFFLINE_ACCESS, ScopeType.oauth))]
+    client.scopes = [Session.get(Scope, (HydraScope.OPENID, ScopeType.oauth)),
+                     Session.get(Scope, (HydraScope.OFFLINE_ACCESS, ScopeType.oauth))]
     client.save()
 
     hydra_admin_api.create_or_update_client(
@@ -272,6 +292,12 @@ if __name__ == '__main__':
     ODP_UI_ADMIN_LOGGED_IN_URL = os.getenv('ODP_UI_ADMIN_URL') + '/oauth2/logged_in'
     ODP_UI_ADMIN_LOGGED_OUT_URL = os.getenv('ODP_UI_ADMIN_URL') + '/oauth2/logged_out'
 
+    ODP_UI_PUBLIC_CLIENT_ID = os.getenv('ODP_UI_PUBLIC_CLIENT_ID')
+    ODP_UI_PUBLIC_CLIENT_SECRET = os.getenv('ODP_UI_PUBLIC_CLIENT_SECRET')
+    ODP_UI_PUBLIC_CLIENT_NAME = 'ODP Public UI'
+    ODP_UI_PUBLIC_LOGGED_IN_URL = os.getenv('ODP_UI_PUBLIC_URL') + '/oauth2/logged_in'
+    ODP_UI_PUBLIC_LOGGED_OUT_URL = os.getenv('ODP_UI_PUBLIC_URL') + '/oauth2/logged_out'
+
     ODP_UI_DAP_CLIENT_ID = os.getenv('ODP_UI_DAP_CLIENT_ID')
     ODP_UI_DAP_CLIENT_SECRET = os.getenv('ODP_UI_DAP_CLIENT_SECRET')
     ODP_UI_DAP_CLIENT_NAME = 'ODP Data Access Portal'
@@ -290,6 +316,7 @@ if __name__ == '__main__':
         init_standard_scopes()
         init_admin_role()
         init_admin_client()
+        init_public_client()
         init_dap_client()
         init_cli_client()
         init_admin_user()

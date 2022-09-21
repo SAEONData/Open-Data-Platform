@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block web_title %}
+    {{ super() }} |
+    {% block heading %}
+        Search the ODP catalogue
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    {% from 'macros.html' import render_table %}
+    <div class="container-fluid">
+        <form action="{{ url_for('.index') }}" method="get">
+            <div class="row">
+                <div class="col-11">
+                    {% set field = search_form | selectattr('id', '==', 'q') | first %}
+                    {{ field(class='form-control') }}
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-outline-info btn-action">
+                        Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% call(record) render_table(records, 'Identifier', 'Title', 'Collection', hide_id=True, filter_=filter_) %}
+        <th scope="row">{{ record.doi or record.sid }}</th>
+        <td>
+            {% set metadata = (record.metadata | selectattr('schema_id', '==', 'SAEON.DataCite.4') | first).metadata %}
+            {{ metadata.titles[0].title }}
+        </td>
+        <td>{{ record.collection_id }}</td>
+    {% endcall %}
+{% endblock %}

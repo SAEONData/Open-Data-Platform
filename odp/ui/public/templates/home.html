@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block heading %}
+    {% if current_user.is_authenticated %}
+        Search the ODP <a href="{{ url_for('catalog.index') }}">catalogue</a>
+    {% else %}
+        Welcome to the SAEON Open Data Platform!
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+    {% else %}
+        <p>Please <a href="{{ url_for('hydra.login') }}">log in</a> to continue.</p>
+    {% endif %}
+{% endblock %}

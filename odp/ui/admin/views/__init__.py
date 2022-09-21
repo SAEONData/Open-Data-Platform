@@ -1,7 +1,3 @@
-import json
-from datetime import datetime
-from zoneinfo import ZoneInfo
-
 from flask import Flask
 
 from odp.ui.admin.views import catalogs, clients, collections, home, providers, records, roles, schemas, tags, users, vocabularies
@@ -21,17 +17,3 @@ def init_app(app: Flask):
     app.register_blueprint(tags.bp, url_prefix='/tags')
     app.register_blueprint(users.bp, url_prefix='/users')
     app.register_blueprint(vocabularies.bp, url_prefix='/vocabularies')
-
-    @app.template_filter()
-    def format_json(obj):
-        return json.dumps(obj, indent=4, ensure_ascii=False)
-
-    @app.template_filter()
-    def timestamp(value):
-        dt = datetime.fromisoformat(value).astimezone(ZoneInfo('Africa/Johannesburg'))
-        return dt.strftime('%d %b %Y, %H:%M %Z')
-
-    @app.template_filter()
-    def date(value):
-        dt = datetime.strptime(value, '%Y-%m-%d')
-        return dt.strftime('%d %b %Y')

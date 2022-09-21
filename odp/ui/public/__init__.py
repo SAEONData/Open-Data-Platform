@@ -8,7 +8,7 @@ from odp import ODPScope
 from odp.config import config
 from odp.lib.hydra import HydraScope
 from odp.ui import auth, db, templates
-from odp.ui.admin import forms, views
+from odp.ui.public import forms, views
 
 
 def create_app():
@@ -17,18 +17,18 @@ def create_app():
     """
     app = Flask(__name__)
     app.config.update(
-        SECRET_KEY=config.ODP.UI.ADMIN.FLASK_KEY,
+        SECRET_KEY=config.ODP.UI.PUBLIC.FLASK_KEY,
         SESSION_COOKIE_SECURE=True,
         SESSION_COOKIE_SAMESITE='Lax',
-        CLIENT_ID=config.ODP.UI.ADMIN.CLIENT_ID,
-        CLIENT_SECRET=config.ODP.UI.ADMIN.CLIENT_SECRET,
-        CLIENT_SCOPE=[HydraScope.OPENID, HydraScope.OFFLINE_ACCESS] + [s.value for s in ODPScope],
-        API_URL=config.ODP.UI.ADMIN.API_URL,
+        CLIENT_ID=config.ODP.UI.PUBLIC.CLIENT_ID,
+        CLIENT_SECRET=config.ODP.UI.PUBLIC.CLIENT_SECRET,
+        CLIENT_SCOPE=[HydraScope.OPENID, HydraScope.OFFLINE_ACCESS, ODPScope.CATALOG_READ],
+        API_URL=config.ODP.UI.PUBLIC.API_URL,
     )
 
     ui_dir = Path(__file__).parent.parent
     app.jinja_loader = ChoiceLoader([
-        FileSystemLoader(ui_dir / 'admin' / 'templates'),
+        FileSystemLoader(ui_dir / 'public' / 'templates'),
         FileSystemLoader(ui_dir / 'templates'),
     ])
     app.static_folder = ui_dir / 'static'

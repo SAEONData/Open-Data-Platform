@@ -1,58 +1,14 @@
-import json
-from datetime import datetime
-
-from flask import Flask, session
-from wtforms import BooleanField, DateField, Form, RadioField, SelectField, SelectMultipleField, StringField, TextAreaField, ValidationError
-from wtforms.csrf.session import SessionCSRF
+from flask import Flask
+from wtforms import BooleanField, RadioField, SelectField, StringField, TextAreaField, ValidationError
 from wtforms.validators import data_required, input_required, length, optional, regexp
-from wtforms.widgets import CheckboxInput, ListWidget
 
 from odp.lib.formats import DOI_REGEX, SID_REGEX
 from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
+from odp.ui.forms import BaseForm, DateStringField, JSONTextField, MultiCheckboxField, StringListField, json_object
 
 
 def init_app(app: Flask):
-    BaseForm.Meta.csrf_secret = bytes(app.config['SECRET_KEY'], 'utf-8')
-
-
-def json_object(form, field):
-    """A JSONTextField validator that ensures the value is a JSON object."""
-    try:
-        obj = json.loads(field.data)
-        if not isinstance(obj, dict):
-            raise ValidationError('The value must be a JSON object.')
-    except json.JSONDecodeError:
-        raise ValidationError('Invalid JSON')
-
-
-class JSONTextField(TextAreaField):
-    def process_data(self, value):
-        self.data = json.dumps(value, indent=4, ensure_ascii=False)
-
-
-class MultiCheckboxField(SelectMultipleField):
-    widget = ListWidget(prefix_label=False)
-    option_widget = CheckboxInput()
-
-
-class StringListField(TextAreaField):
-    def process_data(self, value):
-        self.data = '\n'.join(value) if value is not None else None
-
-
-class DateStringField(DateField):
-    def process_data(self, value):
-        self.data = datetime.strptime(value, '%Y-%m-%d') if value is not None else None
-
-
-class BaseForm(Form):
-    class Meta:
-        csrf = True
-        csrf_class = SessionCSRF
-
-        @property
-        def csrf_context(self):
-            return session
+    BaseForm.init_app(app)
 
 
 class ClientForm(BaseForm):
