@@ -30,15 +30,9 @@ def test_translate_iso19115_to_datacite():
 
         assert JSONPatch(*patch).evaluate(None) == translation
 
-        # work in progress
-        # assert translation == output_json
-        assert translation.keys() == output_json.keys()
-        for k in translation:
-            if k == 'contributors':
-                # todo: resolve leftover empty arrays/objects when there are
-                #  no source values to fill them
-                continue
-            assert translation[k] == output_json[k]
+        translation = result.output('translation', scheme='saeon/datacite-4', clear_empties=True)
+
+        assert translation == output_json
 
 
 @pytest.mark.parametrize('vocab_id', ['Project', 'Infrastructure'])
