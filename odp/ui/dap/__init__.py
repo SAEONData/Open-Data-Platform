@@ -6,7 +6,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from odp.config import config
 from odp.lib.hydra import HydraScope
-from odp.ui import auth, db
+from odp.ui import auth, db, templates
 from odp.ui.dap import views
 
 
@@ -33,6 +33,7 @@ def create_app():
 
     db.init_app(app)
     auth.init_app(app)
+    templates.init_app(app)
     views.init_app(app)
 
     # trust the X-Forwarded-* headers set by the proxy server
