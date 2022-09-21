@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-    {% from 'macros.html' import render_table %}
+    {% from 'macros.html' import render_table, obj_link %}
     <div class="container-fluid">
         <form action="{{ url_for('.index') }}" method="get">
             <div class="row">
@@ -25,7 +25,7 @@
         </form>
     </div>
     {% call(record) render_table(records, 'Identifier', 'Title', 'Collection', hide_id=True, filter_=filter_) %}
-        <th scope="row">{{ record.doi or record.sid }}</th>
+        <th scope="row">{{ obj_link('catalog', record.doi or record.id) }}</th>
         <td>
             {% set metadata = (record.metadata | selectattr('schema_id', '==', 'SAEON.DataCite.4') | first).metadata %}
             {{ metadata.titles[0].title }}

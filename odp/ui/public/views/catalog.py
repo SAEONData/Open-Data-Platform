@@ -19,12 +19,20 @@ def index():
         api_filter += f'&text_q={text_q}'
         ui_filter += f'&q={text_q}'
 
-    search_form = SearchForm(request.args)
-
     records = api.get(f'/catalog/SAEON/records?page={page}{api_filter}')
     return render_template(
         'record_list.html',
         records=records,
         filter_=ui_filter,
-        search_form=search_form,
+        search_form=SearchForm(request.args),
+    )
+
+
+@bp.route('/<path:id>')
+@api.client(ODPScope.CATALOG_READ)
+def view(id):
+    record = api.get(f'/catalog/SAEON/records/{id}')
+    return render_template(
+        'record_view.html',
+        record=record,
     )

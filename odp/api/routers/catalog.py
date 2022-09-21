@@ -1,6 +1,8 @@
+import re
 from typing import Any, Optional
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy import and_, func, select, text
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -14,6 +16,7 @@ from odp.db import Session
 from odp.db.models import Catalog, CatalogRecord
 from odp.lib.datacite import DataciteClient
 from odp.lib.exceptions import DataciteError
+from odp.lib.formats import DOI_REGEX
 
 router = APIRouter()
 
@@ -73,7 +76,7 @@ async def get_catalog(
 async def list_published_records(
         catalog_id: str,
         paginator: Paginator = Depends(),
-        text_q: str = None,
+        text_q: str = Query(None, title='Search terms'),
 ):
     if not Session.get(Catalog, catalog_id):
         raise HTTPException(HTTP_404_NOT_FOUND)
@@ -94,6 +97,39 @@ async def list_published_records(
         stmt,
         lambda row: output_published_record_model(row.CatalogRecord),
     )
+
+
+@router.get(
+    '/{catalog_id}/records/{record_id:path}',
+    response_model=PublishedSAEONRecordModel | PublishedDataCiteRecordModel,
+    dependencies=[Depends(Authorize(ODPScope.CATALOG_READ))],
+)
+async def get_published_record(
+        catalog_id: str,
+        record_id: str = Path(..., title='UUID or DOI'),
+):
+    stmt = (
+        select(CatalogRecord).
+        where(CatalogRecord.catalog_id == catalog_id).
+        where(CatalogRecord.published)
+    )
+
+    try:
+        UUID(record_id, version=4)
+        stmt = stmt.where(CatalogRecord.record_id == record_id)
+
+    except ValueError:
+        if re.match(DOI_REGEX, record_id):
+            stmt = stmt.where(CatalogRecord.published_record.comparator.contains({
+                'doi': record_id
+            }))
+        else:
+            raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Invalid record identifier: expecting a UUID or DOI')
+
+    if not (catalog_record := Session.execute(stmt).scalar_one_or_none()):
+        raise HTTPException(HTTP_404_NOT_FOUND)
+
+    return output_published_record_model(catalog_record)
 
 
 @router.get(
