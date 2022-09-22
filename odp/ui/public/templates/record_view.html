@@ -1,11 +1,78 @@
 {% extends 'base.html' %}
+{% from 'macros.html' import render_info %}
+
+{% set metadata = (record.metadata | selectattr('schema_id', '==', 'SAEON.DataCite.4') | first).metadata %}
+{% set iso19115_metadata = record.metadata | selectattr('schema_id', '==', 'SAEON.ISO19115') | list %}
+{% if iso19115_metadata %}
+    {% set iso19115_metadata = (iso19115_metadata | first).metadata %}
+{% endif %}
 
 {% block web_title %}
     {{ super() }} |
     {% block heading %}
-        {{ record.doi or record.id }}
+        {{ metadata.titles[0].title }}
     {% endblock %}
 {% endblock %}
 
 {% block content %}
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                Detail
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#metadata" type="button" role="tab">
+                DataCite Metadata
+            </button>
+        </li>
+        {% if iso19115_metadata %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#iso19115-metadata" type="button" role="tab">
+                    ISO19115 Metadata
+                </button>
+            </li>
+        {% endif %}
+    </ul>
+    <div class="tab-content">
+        <div id="info" class="tab-pane fade show active" role="tabpanel">
+            {% call(prop) render_info(record,
+                'DOI',
+                'Keywords',
+                'Abstract',
+                'Methods',
+                'Authors',
+                'Contributors',
+                'Spatial extent',
+                'Temporal extent',
+                'Publisher',
+                'Publication year',
+                'License',
+                'Other identifiers',
+                'Related identifiers',
+            ) %}
+                {% if prop == 'DOI' %}
+                    {{ record.doi if record.doi }}
+                {% elif prop == 'Keywords' %}
+                    {{ metadata.subjects | map(attribute='subject') | join(', ') }}
+                {% elif prop == 'Abstract' %}
+                    {{ metadata.descriptions | selectattr('descriptionType', '==', 'Abstract') | map(attribute='description') | first }}
+                {% elif prop == 'Methods' %}
+                    {{ metadata.descriptions | selectattr('descriptionType', '==', 'Methods') | map(attribute='description') | first }}
+                {% endif %}
+            {% endcall %}
+        </div>
+        <div id="metadata" class="tab-pane fade" role="tabpanel">
+            <pre class="m-3">
+                {{- metadata|format_json -}}
+            </pre>
+        </div>
+        {% if iso19115_metadata %}
+            <div id="iso19115-metadata" class="tab-pane fade" role="tabpanel">
+                <pre class="m-3">
+                    {{- iso19115_metadata|format_json -}}
+                </pre>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}
