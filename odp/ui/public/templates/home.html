@@ -11,6 +11,10 @@
 {% block content %}
     {% if current_user.is_authenticated %}
     {% else %}
-        <p>Please <a href="{{ url_for('hydra.login') }}">log in</a> to continue.</p>
+        <p>
+            Please <a href="{{ url_for('hydra.signup') }}">sign up</a>
+            or <a href="{{ url_for('hydra.login') }}">log in</a>
+            to search and discover 3500+ datasets.
+        </p>
     {% endif %}
 {% endblock %}
