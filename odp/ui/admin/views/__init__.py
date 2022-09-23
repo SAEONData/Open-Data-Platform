@@ -1,7 +1,7 @@
 from flask import Flask
 
 from odp.ui.admin.views import catalogs, clients, collections, home, providers, records, roles, schemas, tags, users, vocabularies
-from odp.ui.views import hydra
+from odp_uilib.views import hydra
 
 
 def init_app(app: Flask):

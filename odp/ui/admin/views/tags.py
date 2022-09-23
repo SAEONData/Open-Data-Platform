@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request
 
 from odp import ODPScope
-from odp.ui import api
+from odp_uilib import api
 
 bp = Blueprint('tags', __name__)
 

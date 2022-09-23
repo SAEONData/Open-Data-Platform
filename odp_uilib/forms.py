@@ -7,6 +7,10 @@ from wtforms.csrf.session import SessionCSRF
 from wtforms.widgets import CheckboxInput, ListWidget
 
 
+def init_app(app: Flask):
+    BaseForm.Meta.csrf_secret = bytes(app.config['SECRET_KEY'], 'utf-8')
+
+
 class BaseForm(Form):
     class Meta:
         csrf = True
@@ -15,10 +19,6 @@ class BaseForm(Form):
         @property
         def csrf_context(self):
             return session
-
-    @staticmethod
-    def init_app(app: Flask):
-        BaseForm.Meta.csrf_secret = bytes(app.config['SECRET_KEY'], 'utf-8')
 
 
 class MultiCheckboxField(SelectMultipleField):

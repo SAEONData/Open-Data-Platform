@@ -1,13 +1,13 @@
 from functools import wraps
 
 from authlib.integrations.base_client.errors import OAuthError
-from flask import flash, url_for, redirect, request, g, current_app
+from flask import current_app, flash, g, redirect, request, url_for
 from flask_login import current_user
 from requests import RequestException
 
 from odp import ODPScope
 from odp.lib.auth import get_user_permissions
-from odp.ui.auth import oauth2
+from odp_uilib.auth import oauth2
 
 
 class ODPAPIError(Exception):

@@ -4,9 +4,9 @@ from flask import Flask
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+import odp_uilib
 from odp.config import config
 from odp.lib.hydra import HydraScope
-from odp.ui import auth, db, templates
 from odp.ui.dap import views
 
 
@@ -27,13 +27,11 @@ def create_app():
     ui_dir = Path(__file__).parent.parent
     app.jinja_loader = ChoiceLoader([
         FileSystemLoader(ui_dir / 'dap' / 'templates'),
-        FileSystemLoader(ui_dir / 'templates'),
+        FileSystemLoader(odp_uilib.TEMPLATE_DIR),
     ])
-    app.static_folder = ui_dir / 'static'
+    app.static_folder = odp_uilib.STATIC_DIR
 
-    db.init_app(app)
-    auth.init_app(app)
-    templates.init_app(app)
+    odp_uilib.init_app(app)
     views.init_app(app)
 
     # trust the X-Forwarded-* headers set by the proxy server
