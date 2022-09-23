@@ -18,7 +18,7 @@
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
-                Detail
+                Digital Object Record
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -38,27 +38,47 @@
         <div id="info" class="tab-pane fade show active" role="tabpanel">
             {% call(prop) render_info(record,
                 'DOI',
-                'Keywords',
-                'Abstract',
-                'Methods',
+                'Title',
                 'Authors',
                 'Contributors',
-                'Spatial extent',
-                'Temporal extent',
                 'Publisher',
-                'Publication year',
+                'Abstract',
+                'Methods',
+                'Spatial coverage',
+                'Temporal coverage',
+                'Keywords',
                 'License',
-                'Other identifiers',
-                'Related identifiers',
             ) %}
                 {% if prop == 'DOI' %}
                     {{ record.doi if record.doi }}
-                {% elif prop == 'Keywords' %}
-                    {{ metadata.subjects | map(attribute='subject') | join(', ') }}
+                {% elif prop == 'Title' %}
+                    {{ metadata.titles[0].title }}
+                {% elif prop == 'Authors' %}
+                    {% for creator in metadata.creators %}
+                        <p>{{ creator.name }}<br/>
+                            <small>{{ creator.affiliation | map(attribute='affiliation') | join('<br/>') }}</small>
+                        </p>
+                    {% endfor %}
+                {% elif prop == 'Contributors' %}
+                    {% for contributor in metadata.contributors %}
+                        <p>{{ contributor.name }} ({{ contributor.contributorType }})<br/>
+                            <small>{{ contributor.affiliation | map(attribute='affiliation') | join('<br/>') }}</small>
+                        </p>
+                    {% endfor %}
+                {% elif prop == 'Publisher' %}
+                    {{ metadata.publisher }} ({{ metadata.publicationYear }})
                 {% elif prop == 'Abstract' %}
                     {{ metadata.descriptions | selectattr('descriptionType', '==', 'Abstract') | map(attribute='description') | first }}
                 {% elif prop == 'Methods' %}
                     {{ metadata.descriptions | selectattr('descriptionType', '==', 'Methods') | map(attribute='description') | first }}
+                {% elif prop == 'Spatial coverage' %}
+
+                {% elif prop == 'Temporal coverage' %}
+
+                {% elif prop == 'Keywords' %}
+                    {{ metadata.subjects | map(attribute='subject') | join(', ') }}
+                {% elif prop == 'License' %}
+
                 {% endif %}
             {% endcall %}
         </div>
