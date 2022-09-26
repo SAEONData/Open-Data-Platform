@@ -14,7 +14,7 @@ from odp.db import Session
 from odp.db.models import Catalog
 from odp.job.publish.datacite import DataCitePublisher
 from odp.job.publish.saeon import SAEONPublisher
-from odp.lib.logging import init_logging
+from odplib.logging import init_logging
 
 init_logging()
 

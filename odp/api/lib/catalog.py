@@ -1,7 +1,7 @@
 from pydantic import constr
 
 from odplib.config import config
-from odp.lib.formats import DOI_REGEX
+from odplib.formats import DOI_REGEX
 
 
 async def get_catalog_ui_url(doi: constr(regex=DOI_REGEX)) -> str:

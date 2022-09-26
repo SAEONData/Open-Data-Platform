@@ -18,7 +18,7 @@ from odp.db import Session
 from odp.db.models import Catalog, CatalogRecord
 from odp.lib.datacite import DataciteClient
 from odp.lib.exceptions import DataciteError
-from odp.lib.formats import DOI_REGEX
+from odplib.formats import DOI_REGEX
 
 router = APIRouter()
 
