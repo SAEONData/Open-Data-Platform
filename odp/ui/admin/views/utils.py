@@ -1,7 +1,7 @@
 from flask_login import current_user
 from markupsafe import Markup
 
-from odp_uilib import api
+from odplib.ui import api
 
 
 def get_tag_instance(obj, tag_id, user=False):

@@ -4,7 +4,7 @@ from wtforms.validators import input_required
 from odp import ODPScope
 from odp.ui.admin.forms import ClientForm
 from odp.ui.admin.views import utils
-from odp_uilib import api
+from odplib.ui import api
 
 bp = Blueprint('clients', __name__)
 

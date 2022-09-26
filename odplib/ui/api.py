@@ -7,7 +7,7 @@ from requests import RequestException
 
 from odp import ODPScope
 from odp.lib.auth import get_user_permissions
-from odp_uilib.auth import oauth2
+from odplib.ui.auth import oauth2
 
 
 class ODPAPIError(Exception):

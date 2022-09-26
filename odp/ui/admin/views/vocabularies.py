@@ -3,7 +3,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from odp import ODPScope, ODPVocabulary
 from odp.ui.admin.forms import VocabularyTermInfrastructureForm, VocabularyTermProjectForm
 from odp.ui.admin.views import utils
-from odp_uilib import api
+from odplib.ui import api
 
 bp = Blueprint('vocabularies', __name__)
 

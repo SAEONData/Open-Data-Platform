@@ -1,7 +1,7 @@
 from flask import Flask
 
 from odp.ui.public.views import catalog, home
-from odp_uilib.views import hydra
+from odplib.ui.views import hydra
 
 
 def init_app(app: Flask):

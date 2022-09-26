@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, url_for
 
-from odp_uilib.auth import oauth2
+from odplib.ui.auth import oauth2
 
 bp = Blueprint('hydra', __name__)
 

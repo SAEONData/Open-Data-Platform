@@ -2,7 +2,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from odp import ODPScope
 from odp.ui.admin.forms import ProviderForm
-from odp_uilib import api
+from odplib.ui import api
 
 bp = Blueprint('providers', __name__)
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request
 
 from odp import ODPScope
-from odp_uilib import api
+from odplib.ui import api
 
 bp = Blueprint('schemas', __name__)
 
