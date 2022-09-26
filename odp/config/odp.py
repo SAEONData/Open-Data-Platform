@@ -90,17 +90,6 @@ class ODPMailConfig(BaseConfig):
     PASSWORD: str = None  # sender password
 
 
-class ODPPublishConfig(BaseConfig):
-    class Config:
-        env_prefix = 'ODP_PUBLISH_'
-
-    # minimum interval in minutes before re-checking an already harvested metadata record
-    HARVEST_CHECK_INTERVAL: int
-
-    # maximum number of records to harvest or sync in a publishing run
-    BATCH_SIZE: int
-
-
 class ODPConfig(BaseConfig):
     class Config:
         env_prefix = 'ODP_'
@@ -114,5 +103,4 @@ class ODPConfig(BaseConfig):
         'UI': ODPUIConfig,
         'IDENTITY': ODPIdentityConfig,
         'MAIL': ODPMailConfig,
-        'PUBLISH': ODPPublishConfig,
     }
