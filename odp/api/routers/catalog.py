@@ -3,11 +3,13 @@ from typing import Any, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi.responses import RedirectResponse
 from sqlalchemy import and_, func, select, text
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
 
 from odp import ODPCatalog, ODPScope
 from odp.api.lib.auth import Authorize
+from odp.api.lib.catalog import get_catalog_ui_url
 from odp.api.lib.datacite import get_datacite_client
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.utils import output_published_record_model
@@ -162,3 +164,12 @@ async def get_external_published_record(
             raise HTTPException(e.status_code, e.error_detail) from e
 
     raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, 'Not an external catalog')
+
+
+@router.get(
+    '/view/{doi:path}',
+)
+async def view_record(
+        redirect_url: str = Depends(get_catalog_ui_url),
+):
+    return RedirectResponse(redirect_url)

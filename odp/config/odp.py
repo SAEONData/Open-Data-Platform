@@ -37,6 +37,9 @@ class ODPAPIConfig(BaseConfig):
     # (optional) JSON-encoded list of allowed CORS origins; `["*"]` to allow any origin
     ALLOW_ORIGINS: List[Literal['*'] | AnyHttpUrl] = []
 
+    # catalog UI base URL; published DOIs resolve here
+    CATALOG_UI_URL: AnyHttpUrl
+
 
 class ODPUIAdminConfig(BaseConfig, OAuth2ClientConfigMixin):
     class Config:

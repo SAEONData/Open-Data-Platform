@@ -20,7 +20,7 @@ class DataCitePublisher(Publisher):
             password=config.DATACITE.PASSWORD,
             doi_prefix=DOI_PREFIX,
         )
-        self.doi_base_url = config.DATACITE.DOI_BASE_URL
+        self.doi_return_url = config.DATACITE.DOI_RETURN_URL
 
     def evaluate_record(self, record_model: RecordModel) -> tuple[bool, list[PublishedReason | NotPublishedReason]]:
         """Evaluate whether a record can be published.
@@ -54,7 +54,7 @@ class DataCitePublisher(Publisher):
 
         return PublishedDataCiteRecordModel(
             doi=record_model.doi,
-            url=f'{self.doi_base_url}/{record_model.doi}',
+            url=f'{self.doi_return_url}/{record_model.doi}',
             metadata=datacite_metadata,
         )
 

@@ -1,5 +1,4 @@
 from odp.config.base import BaseConfig
-from odp.config.catalogue import CatalogueConfig
 from odp.config.ckan import CKANConfig
 from odp.config.datacite import DataciteConfig
 from odp.config.google import GoogleConfig
@@ -16,7 +15,6 @@ class Config(BaseConfig):
         'ODP': ODPConfig,
         'HYDRA': HydraConfig,
         'CKAN': CKANConfig,
-        'CATALOGUE': CatalogueConfig,
         'DATACITE': DataciteConfig,
         'REDIS': RedisConfig,
         'MEDIA': MediaConfig,

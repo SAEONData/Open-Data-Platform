@@ -50,13 +50,13 @@ services:
       - ODP_ENV
       - ODP_API_PATH_PREFIX=/api
       - ODP_API_ALLOW_ORIGINS
+      - ODP_API_CATALOG_UI_URL
       - ODP_DB_HOST
       - ODP_DB_NAME
       - ODP_DB_USER
       - ODP_DB_PASS
       - HYDRA_ADMIN_URL
       - HYDRA_PUBLIC_URL
-      - CATALOGUE_METADATA_LANDING_PAGE_BASE_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - TZ
       - MEDIA_REPOSITORY_BASE_URL
