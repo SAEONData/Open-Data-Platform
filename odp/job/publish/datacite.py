@@ -2,7 +2,7 @@ from jschon import JSON, URI
 
 from odp import DOI_PREFIX, ODPMetadataSchema
 from odp.api.models import PublishedDataCiteRecordModel, PublishedRecordModel, RecordModel
-from odp.config import config
+from odplib.config import config
 from odp.db import Session
 from odp.db.models import CatalogRecord, Schema, SchemaType
 from odp.job.publish import NotPublishedReason, PublishedReason, Publisher

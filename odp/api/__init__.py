@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import odp
 from odp.api.routers import catalog, client, collection, provider, record, role, schema, scope, status, tag, user, vocabulary
-from odp.config import config
+from odplib.config import config
 from odp.db import Session
 
 app = FastAPI(

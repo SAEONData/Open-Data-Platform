@@ -3,8 +3,8 @@ from typing import List, Literal
 
 from pydantic import AnyHttpUrl, constr
 
-from odp.config import BaseConfig
-from odp.config.mixins import DBConfigMixin, OAuth2ClientConfigMixin
+from odplib.config import BaseConfig
+from odplib.config.mixins import DBConfigMixin, OAuth2ClientConfigMixin
 
 
 class ServerEnv(str, Enum):

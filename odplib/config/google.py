@@ -1,7 +1,7 @@
 from pydantic import AnyHttpUrl
 
-from odp.config import BaseConfig
-from odp.config.mixins import OAuth2ClientConfigMixin
+from odplib.config import BaseConfig
+from odplib.config.mixins import OAuth2ClientConfigMixin
 
 
 class GoogleConfig(BaseConfig, OAuth2ClientConfigMixin):

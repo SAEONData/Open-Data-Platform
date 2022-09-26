@@ -1,6 +1,6 @@
 from pydantic import AnyHttpUrl
 
-from odp.config import BaseConfig
+from odplib.config import BaseConfig
 
 
 class DataciteConfig(BaseConfig):

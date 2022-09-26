@@ -1,4 +1,4 @@
-from odp.config import BaseConfig
+from odplib.config import BaseConfig
 
 
 class RedisConfig(BaseConfig):

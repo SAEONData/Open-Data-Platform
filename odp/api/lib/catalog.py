@@ -1,6 +1,6 @@
 from pydantic import constr
 
-from odp.config import config
+from odplib.config import config
 from odp.lib.formats import DOI_REGEX
 
 

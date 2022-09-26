@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 
-from odp.config import config
+from odplib.config import config
 from odp.identity import hydra_admin
 from odp.identity.forms import LoginForm, VerifyEmailForm, ForgotPasswordForm
 from odp.identity.lib import validate_auto_login, validate_user_login, validate_forgot_password, get_user_profile_by_email

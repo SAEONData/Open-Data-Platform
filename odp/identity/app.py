@@ -2,7 +2,7 @@ from flask import Flask
 from flask_bootstrap import Bootstrap
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from odp.config import config
+from odplib.config import config
 from odp.identity import db, mail, views, google_oauth2
 
 

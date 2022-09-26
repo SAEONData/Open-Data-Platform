@@ -1,6 +1,6 @@
 import logging
 
-from odp.config import config
+from odplib.config import config
 
 
 def init_logging():

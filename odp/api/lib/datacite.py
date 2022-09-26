@@ -1,5 +1,5 @@
 from odp import DOI_PREFIX
-from odp.config import config
+from odplib.config import config
 from odp.lib.datacite import DataciteClient
 
 

@@ -2,7 +2,7 @@ import redis
 from authlib.integrations.flask_client import OAuth
 from flask_mail import Mail
 
-from odp.config import config
+from odplib.config import config
 from odp.lib.hydra_admin import HydraAdminClient
 
 mail = Mail()

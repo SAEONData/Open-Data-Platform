@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker, declarative_base
 
-from odp.config import config
+from odplib.config import config
 
 engine = create_engine(
     config.ODP.DB.URL,

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 
-from odp.config import config
+from odplib.config import config
 from odp.identity import hydra_admin
 from odp.identity.forms import SignupForm, VerifyEmailForm
 from odp.identity.lib import create_user_account, password_complexity_description

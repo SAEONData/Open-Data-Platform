@@ -4,7 +4,7 @@ from sqlalchemy_utils import create_database, drop_database
 
 import migrate.systemdata
 import odp.db
-from odp.config import config
+from odplib.config import config
 
 
 @pytest.fixture(scope='session', autouse=True)

@@ -5,7 +5,7 @@ from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import odplib.ui
-from odp.config import config
+from odplib.config import config
 from odp.lib.hydra import HydraScope
 from odp.ui.dap import views
 

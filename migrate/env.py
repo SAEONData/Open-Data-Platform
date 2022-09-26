@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import pool
 
 import odp.db.models
-from odp.config import config as odp_config
+from odplib.config import config as odp_config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -2,7 +2,7 @@ import redis
 from flask import Flask
 from flask_login import LoginManager
 
-from odp.config import config
+from odplib.config import config
 from odp.db import Session
 from odp.db.models import User
 from odp.lib.oauth2 import FlaskOAuth2Client

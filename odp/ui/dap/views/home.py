@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 
-from odp.config import config
+from odplib.config import config
 
 bp = Blueprint('home', __name__)
 
