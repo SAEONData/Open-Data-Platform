@@ -81,26 +81,6 @@ class HydraAdminError(ODPException):
         self.error_detail = kwargs.pop('error_detail', str(args))
 
 
-class ODPInstitutionError(ODPException):
-    pass
-
-
-class ODPInstitutionNotFound(ODPInstitutionError):
-    pass
-
-
-class ODPParentInstitutionNotFound(ODPInstitutionError):
-    pass
-
-
-class ODPInstitutionNameConflict(ODPInstitutionError):
-    pass
-
-
-class ODPDomainNameConflict(ODPInstitutionError):
-    pass
-
-
 class DataciteError(ODPException):
     """ Exception raised when a request to the DataCite API fails """
 
