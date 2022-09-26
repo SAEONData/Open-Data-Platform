@@ -1,9 +1,7 @@
 from odp.config.base import BaseConfig
-from odp.config.ckan import CKANConfig
 from odp.config.datacite import DataciteConfig
 from odp.config.google import GoogleConfig
 from odp.config.hydra import HydraConfig
-from odp.config.media import MediaConfig
 from odp.config.odp import ODPConfig
 from odp.config.redis import RedisConfig
 
@@ -14,10 +12,8 @@ class Config(BaseConfig):
     _subconfig = {
         'ODP': ODPConfig,
         'HYDRA': HydraConfig,
-        'CKAN': CKANConfig,
         'DATACITE': DataciteConfig,
         'REDIS': RedisConfig,
-        'MEDIA': MediaConfig,
         'GOOGLE': GoogleConfig,
     }
 

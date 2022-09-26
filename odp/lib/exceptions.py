@@ -107,11 +107,3 @@ class DataciteError(ODPException):
     def __init__(self, status_code, error_detail=None):
         self.status_code = status_code
         self.error_detail = error_detail
-
-
-class MediaRepositoryError(ODPException):
-    """ Exception raised when a request to the Media repository fails """
-
-    def __init__(self, status_code, error_detail=None):
-        self.status_code = status_code
-        self.error_detail = error_detail

@@ -59,9 +59,6 @@ services:
       - HYDRA_PUBLIC_URL
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - TZ
-      - MEDIA_REPOSITORY_BASE_URL
-      - MEDIA_USERNAME
-      - MEDIA_PASSWORD
       - PYTHONUNBUFFERED=1
     restart: always
 

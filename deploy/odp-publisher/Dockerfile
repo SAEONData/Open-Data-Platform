@@ -17,4 +17,4 @@ RUN mkfifo /tmp/stdout
 
 # ensure that the cron task gets our environment variables
 # `cat <> fifo` ensures that the fifo pipe stays open
-CMD env | grep -E 'ODP_|CKAN_|TZ' >> /etc/environment && cron -L 7 && cat <> /tmp/stdout
+CMD env | grep -E 'ODP_|TZ' >> /etc/environment && cron -L 7 && cat <> /tmp/stdout
