@@ -83,7 +83,7 @@ def init_admin_role():
     role.save()
 
 
-def init_admin_client():
+def init_admin_ui_client():
     """Create or update the ODP Admin UI client."""
     client = Session.get(Client, ODP_UI_ADMIN_CLIENT_ID) or Client(id=ODP_UI_ADMIN_CLIENT_ID)
     client.scopes = [Session.get(Scope, (s.value, ScopeType.odp)) for s in ODPScope] + \
@@ -103,7 +103,7 @@ def init_admin_client():
     )
 
 
-def init_public_client():
+def init_public_ui_client():
     """Create or update the ODP Public UI client."""
     client = Session.get(Client, ODP_UI_PUBLIC_CLIENT_ID) or Client(id=ODP_UI_PUBLIC_CLIENT_ID)
     client.scopes = [Session.get(Scope, (ODPScope.CATALOG_READ, ScopeType.odp)),
@@ -123,7 +123,7 @@ def init_public_client():
     )
 
 
-def init_dap_client():
+def init_dap_ui_client():
     """Create or update the Data Access Portal client."""
     client = Session.get(Client, ODP_UI_DAP_CLIENT_ID) or Client(id=ODP_UI_DAP_CLIENT_ID)
     client.scopes = [Session.get(Scope, (HydraScope.OPENID, ScopeType.oauth)),
@@ -142,17 +142,32 @@ def init_dap_client():
     )
 
 
-def init_cli_client():
-    """Create or update the Swagger UI client."""
-    client = Session.get(Client, ODP_CLI_CLIENT_ID) or Client(id=ODP_CLI_CLIENT_ID)
+def init_admin_cli_client():
+    """Create or update the ODP Admin system client."""
+    client = Session.get(Client, ODP_CLI_ADMIN_CLIENT_ID) or Client(id=ODP_CLI_ADMIN_CLIENT_ID)
     client.scopes = [Session.get(Scope, (s.value, ScopeType.odp)) for s in ODPScope]
     client.save()
 
     hydra_admin_api.create_or_update_client(
-        id=ODP_CLI_CLIENT_ID,
-        name=ODP_CLI_CLIENT_NAME,
-        secret=ODP_CLI_CLIENT_SECRET,
+        id=ODP_CLI_ADMIN_CLIENT_ID,
+        name=ODP_CLI_ADMIN_CLIENT_NAME,
+        secret=ODP_CLI_ADMIN_CLIENT_SECRET,
         scope_ids=[s.value for s in ODPScope],
+        grant_types=[GrantType.CLIENT_CREDENTIALS],
+    )
+
+
+def init_public_cli_client():
+    """Create or update the ODP Public system client."""
+    client = Session.get(Client, ODP_CLI_PUBLIC_CLIENT_ID) or Client(id=ODP_CLI_PUBLIC_CLIENT_ID)
+    client.scopes = [Session.get(Scope, (ODPScope.CATALOG_READ, ScopeType.odp))]
+    client.save()
+
+    hydra_admin_api.create_or_update_client(
+        id=ODP_CLI_PUBLIC_CLIENT_ID,
+        name=ODP_CLI_PUBLIC_CLIENT_NAME,
+        secret=ODP_CLI_PUBLIC_CLIENT_SECRET,
+        scope_ids=[ODPScope.CATALOG_READ],
         grant_types=[GrantType.CLIENT_CREDENTIALS],
     )
 
@@ -304,9 +319,13 @@ if __name__ == '__main__':
     ODP_UI_DAP_LOGGED_IN_URL = os.getenv('ODP_UI_DAP_URL') + '/oauth2/logged_in'
     ODP_UI_DAP_LOGGED_OUT_URL = os.getenv('ODP_UI_DAP_URL') + '/oauth2/logged_out'
 
-    ODP_CLI_CLIENT_ID = os.getenv('ODP_CLI_CLIENT_ID')
-    ODP_CLI_CLIENT_SECRET = os.getenv('ODP_CLI_CLIENT_SECRET')
-    ODP_CLI_CLIENT_NAME = 'Swagger UI / Scripting Client'
+    ODP_CLI_ADMIN_CLIENT_ID = os.getenv('ODP_CLI_ADMIN_CLIENT_ID')
+    ODP_CLI_ADMIN_CLIENT_SECRET = os.getenv('ODP_CLI_ADMIN_CLIENT_SECRET')
+    ODP_CLI_ADMIN_CLIENT_NAME = 'ODP Admin System Client'
+
+    ODP_CLI_PUBLIC_CLIENT_ID = os.getenv('ODP_CLI_PUBLIC_CLIENT_ID')
+    ODP_CLI_PUBLIC_CLIENT_SECRET = os.getenv('ODP_CLI_PUBLIC_CLIENT_SECRET')
+    ODP_CLI_PUBLIC_CLIENT_NAME = 'ODP Public System Client'
 
     hydra_admin_api = HydraAdminAPI(os.getenv('HYDRA_ADMIN_URL'))
 
@@ -315,11 +334,12 @@ if __name__ == '__main__':
         init_system_scopes()
         init_standard_scopes()
         init_admin_role()
-        init_admin_client()
-        init_public_client()
-        init_dap_client()
-        init_cli_client()
+        init_admin_ui_client()
+        init_admin_cli_client()
         init_admin_user()
+        init_public_ui_client()
+        init_public_cli_client()
+        init_dap_ui_client()
         init_schemas()
         init_tags()
         init_vocabularies()
