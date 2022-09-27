@@ -7,7 +7,7 @@ from requests import RequestException
 
 from odp import ODPScope
 from odp.lib.auth import get_user_permissions
-from odplib.ui.auth import oauth2
+from odplib.ui.auth import oauth2_ui_client
 
 
 class ODPAPIError(Exception):
@@ -34,9 +34,9 @@ def delete(path, **params):
 
 def _request(method, path, data, params):
     try:
-        r = oauth2.request(
+        r = oauth2_ui_client.request(
             method,
-            current_app.config['API_URL'] + path,
+            current_app.config['API_URL'] + path,  # todo: client should have attr api_url
             json=data,
             params=params,
         )

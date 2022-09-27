@@ -23,7 +23,10 @@ def create_app():
         CLIENT_ID=config.ODP.UI.ADMIN.CLIENT_ID,
         CLIENT_SECRET=config.ODP.UI.ADMIN.CLIENT_SECRET,
         CLIENT_SCOPE=[HydraScope.OPENID, HydraScope.OFFLINE_ACCESS] + [s.value for s in ODPScope],
-        API_URL=config.ODP.UI.ADMIN.API_URL,
+        SYSTEM_CLIENT_ID=config.ODP.CLI.ADMIN.CLIENT_ID,
+        SYSTEM_CLIENT_SECRET=config.ODP.CLI.ADMIN.CLIENT_SECRET,
+        SYSTEM_CLIENT_SCOPE=[s.value for s in ODPScope],
+        API_URL=config.ODP.UI.API_URL,
     )
 
     ui_dir = Path(__file__).parent.parent

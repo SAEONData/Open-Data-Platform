@@ -45,16 +45,14 @@ class ODPUIAdminConfig(BaseConfig, OAuth2ClientConfigMixin):
     class Config:
         env_prefix = 'ODP_UI_ADMIN_'
 
-    FLASK_KEY: str       # Flask secret key
-    API_URL: AnyHttpUrl  # URL of the ODP API
+    FLASK_KEY: str  # Flask secret key
 
 
 class ODPUIPublicConfig(BaseConfig, OAuth2ClientConfigMixin):
     class Config:
         env_prefix = 'ODP_UI_PUBLIC_'
 
-    FLASK_KEY: str       # Flask secret key
-    API_URL: AnyHttpUrl  # URL of the ODP API
+    FLASK_KEY: str  # Flask secret key
 
 
 class ODPUIDAPConfig(BaseConfig, OAuth2ClientConfigMixin):
@@ -66,10 +64,32 @@ class ODPUIDAPConfig(BaseConfig, OAuth2ClientConfigMixin):
 
 
 class ODPUIConfig(BaseConfig):
+    class Config:
+        env_prefix = 'ODP_UI_'
+
+    API_URL: AnyHttpUrl  # URL of the ODP API
+
     _subconfig = {
         'ADMIN': ODPUIAdminConfig,
         'PUBLIC': ODPUIPublicConfig,
         'DAP': ODPUIDAPConfig,
+    }
+
+
+class ODPCLIAdminConfig(BaseConfig, OAuth2ClientConfigMixin):
+    class Config:
+        env_prefix = 'ODP_CLI_ADMIN_'
+
+
+class ODPCLIPublicConfig(BaseConfig, OAuth2ClientConfigMixin):
+    class Config:
+        env_prefix = 'ODP_CLI_PUBLIC_'
+
+
+class ODPCLIConfig(BaseConfig):
+    _subconfig = {
+        'ADMIN': ODPCLIAdminConfig,
+        'PUBLIC': ODPCLIPublicConfig,
     }
 
 
@@ -104,6 +124,7 @@ class ODPConfig(BaseConfig):
         'API': ODPAPIConfig,
         'DB': ODPDBConfig,
         'UI': ODPUIConfig,
+        'CLI': ODPCLIConfig,
         'IDENTITY': ODPIdentityConfig,
         'MAIL': ODPMailConfig,
     }

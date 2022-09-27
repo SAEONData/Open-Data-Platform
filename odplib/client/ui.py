@@ -10,7 +10,7 @@ from odp.db import Session
 from odp.db.models import OAuth2Token, User
 
 
-class FlaskOAuth2Client:
+class OAuth2UIClient:
     def init_app(
             self, app,
             hydra_url: str,

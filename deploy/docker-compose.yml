@@ -76,7 +76,7 @@ services:
       - ODP_UI_ADMIN_FLASK_KEY
       - ODP_UI_ADMIN_CLIENT_ID
       - ODP_UI_ADMIN_CLIENT_SECRET
-      - ODP_UI_ADMIN_API_URL=${ODP_PUBLIC_URL}/api
+      - ODP_UI_API_URL=${ODP_PUBLIC_URL}/api
       - ODP_DB_HOST
       - ODP_DB_NAME
       - ODP_DB_USER
@@ -103,6 +103,7 @@ services:
       - ODP_UI_DAP_CLIENT_ID
       - ODP_UI_DAP_CLIENT_SECRET
       - ODP_UI_DAP_THREDDS_URL
+      - ODP_UI_API_URL=${ODP_PUBLIC_URL}/api
       - ODP_DB_HOST
       - ODP_DB_NAME
       - ODP_DB_USER
