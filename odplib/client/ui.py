@@ -1,27 +1,39 @@
 import secrets
 
+import requests
 from authlib.integrations.flask_client import OAuth
-from flask import redirect, request
+from flask import Flask, redirect, request
 from flask_login import current_user, login_user, logout_user
 from redis import Redis
 from sqlalchemy import select
 
 from odp.db import Session
 from odp.db.models import OAuth2Token, User
+from odplib.client import ODPClient
 
 
-class OAuth2UIClient:
-    def init_app(
-            self, app,
+class ODPUIClient(ODPClient):
+    """ODP client for a Flask app, providing signup, login and logout,
+    and API access with a logged in user's access token."""
+
+    def __init__(
+            self,
+            api_url: str,
             hydra_url: str,
             client_id: str,
             client_secret: str,
             scope: list[str],
             cache: Redis,
-    ):
-        self.hydra_url = hydra_url
-        self.client_id = client_id
-        self.oauth = OAuth(cache=cache, fetch_token=self._fetch_token, update_token=self._update_token)
+            app: Flask,
+    ) -> None:
+        super().__init__(api_url, hydra_url, client_id, client_secret, scope)
+        self.cache = cache
+        self.oauth = OAuth(
+            app=app,
+            cache=cache,
+            fetch_token=self._fetch_token,
+            update_token=self._update_token,
+        )
         self.oauth.register(
             name='hydra',
             access_token_url=f'{hydra_url}/oauth2/token',
@@ -31,7 +43,10 @@ class OAuth2UIClient:
             client_secret=client_secret,
             client_kwargs={'scope': ' '.join(scope)},
         )
-        self.oauth.init_app(app)
+
+    def _send_request(self, method: str, url: str, data: dict, params: dict) -> requests.Response:
+        """Send a request to the API with the user's access token."""
+        return self.oauth.hydra.request(method, url, json=data, params=params)
 
     def login_redirect(self, redirect_uri, **kwargs):
         """Return a redirect to the Hydra authorization endpoint."""
@@ -73,10 +88,6 @@ class OAuth2UIClient:
         if state_val == self.oauth.cache.get(key := self._state_key()):
             logout_user()
             self.oauth.cache.delete(key)
-
-    def request(self, method, url, **kwargs):
-        """Make a request with the user's access token."""
-        return self.oauth.hydra.request(method, url, **kwargs)
 
     def _state_key(self):
         return f'{__name__}.{self.client_id}.{current_user.id}.state'

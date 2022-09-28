@@ -1,63 +1,26 @@
 from functools import wraps
+from typing import Callable
 
-from authlib.integrations.base_client.errors import OAuthError
-from flask import current_app, flash, g, redirect, request, url_for
+from flask import Flask, current_app, flash, g, redirect, request, url_for
 from flask_login import current_user
-from requests import RequestException
 
 from odp import ODPScope
 from odp.lib.auth import get_user_permissions
-from odplib.ui.auth import oauth2_ui_client
+from odplib.client import ODPAPIError
+
+get: Callable
+post: Callable
+put: Callable
+delete: Callable
 
 
-class ODPAPIError(Exception):
-    def __init__(self, status_code, error_detail):
-        self.status_code = status_code
-        self.error_detail = error_detail
-
-
-def get(path, **params):
-    return _request('GET', path, None, params)
-
-
-def post(path, data, **params):
-    return _request('POST', path, data, params)
-
-
-def put(path, data, **params):
-    return _request('PUT', path, data, params)
-
-
-def delete(path, **params):
-    return _request('DELETE', path, None, params)
-
-
-def _request(method, path, data, params):
-    try:
-        r = oauth2_ui_client.request(
-            method,
-            current_app.config['API_URL'] + path,  # todo: client should have attr api_url
-            json=data,
-            params=params,
-        )
-        r.raise_for_status()
-        return r.json()
-
-    except RequestException as e:
-        if e.response is not None:
-            status_code = e.response.status_code
-            try:
-                error_detail = e.response.json()
-            except ValueError:
-                error_detail = e.response.text
-        else:
-            status_code = 503
-            error_detail = str(e)
-
-        raise ODPAPIError(status_code, error_detail) from e
-
-    except OAuthError as e:
-        raise ODPAPIError(401, str(e)) from e
+def init_app(app: Flask):
+    from odplib.ui import odp_ui_client
+    global get, post, put, delete
+    get = odp_ui_client.get
+    post = odp_ui_client.post
+    put = odp_ui_client.put
+    delete = odp_ui_client.delete
 
 
 def client(*scope: ODPScope, fallback_to_referrer=False):
