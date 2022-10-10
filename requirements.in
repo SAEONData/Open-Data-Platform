@@ -15,8 +15,8 @@ fastapi
 uvicorn
 python-multipart
 xmltodict
--e git+https://github.com/marksparkza/jschon.git#egg=jschon
--e git+https://github.com/marksparkza/jschon-translation.git#egg=jschon_translation
+jschon
+jschon_translation
 
 # UIs
 flask
