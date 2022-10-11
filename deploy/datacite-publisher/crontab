@@ -1,1 +1,0 @@
-*/DATACITE_PUBLISH_JOB_INTERVAL * * * * cd /srv/Open-Data-Platform && /usr/local/bin/python -m odp.publish.datacite >/tmp/stdout 2>&1
