@@ -16,15 +16,21 @@ class ODPSystemClient(ODPClient):
             scope: list[str],
     ):
         super().__init__(api_url, hydra_url, client_id, client_secret, scope)
-        self.token = OAuth2Session(
-            client_id=client_id,
-            client_secret=client_secret,
-            scope=' '.join(scope),
-        ).fetch_token(
-            url=f'{hydra_url}/oauth2/token',
-            grant_type='client_credentials',
-            timeout=10.0,
-        )
+        self._token = None
+
+    @property
+    def token(self) -> dict:
+        if self._token is None:
+            self._token = OAuth2Session(
+                client_id=self.client_id,
+                client_secret=self.client_secret,
+                scope=' '.join(self.scope),
+            ).fetch_token(
+                url=f'{self.hydra_url}/oauth2/token',
+                grant_type='client_credentials',
+                timeout=10.0,
+            )
+        return self._token
 
     def _send_request(self, method: str, url: str, data: dict, params: dict) -> requests.Response:
         return requests.request(
