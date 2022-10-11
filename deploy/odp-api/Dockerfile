@@ -8,6 +8,7 @@ WORKDIR /srv/Open-Data-Platform
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 COPY schema schema/
+COPY odplib odplib/
 COPY odp odp/
 
 CMD ["uvicorn", "odp.api:app", "--host", "0.0.0.0", "--port", "4020", "--workers", "4"]

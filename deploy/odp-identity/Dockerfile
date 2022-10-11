@@ -7,6 +7,7 @@ RUN if [ -n "${CA_CERT_URL}" ]; then update-ca-certificates; fi
 WORKDIR /srv/Open-Data-Platform
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
+COPY odplib odplib/
 COPY odp odp/
 
 CMD ["gunicorn", "odp.identity.app:create_app()", "--bind=0.0.0.0:4019", "--workers=4"]
