@@ -4,11 +4,10 @@ import redis
 from flask import Flask
 from flask_login import LoginManager
 
-from odp.db import Session
-from odp.db.models import User
 from odplib.client.system import ODPSystemClient
 from odplib.client.ui import ODPUIClient
 from odplib.config import config
+from odplib.localuser import LocalUser
 
 STATIC_DIR = Path(__file__).parent / 'static'
 TEMPLATE_DIR = Path(__file__).parent / 'templates'
@@ -56,4 +55,5 @@ def init_app(app: Flask):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return Session.get(User, user_id)
+    user = odp_system_client.get(f'/user/{user_id}')
+    return LocalUser(**user)
