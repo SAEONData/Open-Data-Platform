@@ -19,7 +19,7 @@ services:
         --id odp.test
         --secret secret
         --grant-types client_credentials
-        --scope odp.catalog:read,odp.client:admin,odp.client:read,odp.collection:admin,odp.collection:read,odp.collection:project,odp.collection:noindex,odp.provider:admin,odp.provider:read,odp.record:write,odp.record:admin,odp.record:read,odp.record:qc,odp.record:embargo,odp.record:migrate,odp.record:noindex,odp.record:retract,odp.record:note,odp.role:admin,odp.role:read,odp.schema:read,odp.scope:read,odp.tag:read,odp.user:admin,odp.user:read,odp.vocabulary:infrastructure,odp.vocabulary:project,odp.vocabulary:read
+        --scope odp.catalog:read,odp.client:admin,odp.client:read,odp.collection:admin,odp.collection:read,odp.collection:project,odp.collection:noindex,odp.provider:admin,odp.provider:read,odp.record:write,odp.record:admin,odp.record:read,odp.record:qc,odp.record:embargo,odp.record:migrate,odp.record:noindex,odp.record:retract,odp.record:note,odp.role:admin,odp.role:read,odp.schema:read,odp.scope:read,odp.tag:read,odp.token:read,odp.token:write,odp.user:admin,odp.user:read,odp.vocabulary:infrastructure,odp.vocabulary:project,odp.vocabulary:read
     environment:
       - HYDRA_ADMIN_URL=http://hydra:4445
     depends_on:

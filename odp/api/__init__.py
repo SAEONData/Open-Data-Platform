@@ -2,9 +2,9 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 import odp
-from odp.api.routers import catalog, client, collection, provider, record, role, schema, scope, status, tag, user, vocabulary
-from odplib.config import config
+from odp.api.routers import catalog, client, collection, provider, record, role, schema, scope, status, tag, token, user, vocabulary
 from odp.db import Session
+from odplib.config import config
 
 app = FastAPI(
     title="ODP API",
@@ -25,6 +25,7 @@ app.include_router(schema.router, prefix='/schema', tags=['Schema'])
 app.include_router(scope.router, prefix='/scope', tags=['Scope'])
 app.include_router(status.router, prefix='/status', tags=['Status'])
 app.include_router(tag.router, prefix='/tag', tags=['Tag'])
+app.include_router(token.router, prefix='/token', tags=['Token'])
 app.include_router(user.router, prefix='/user', tags=['User'])
 app.include_router(vocabulary.router, prefix='/vocabulary', tags=['Vocabulary'])
 
