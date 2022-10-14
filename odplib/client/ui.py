@@ -8,8 +8,9 @@ from redis import Redis
 from sqlalchemy import select
 
 from odp.db import Session
-from odp.db.models import OAuth2Token, User
+from odp.db.models import OAuth2Token
 from odplib.client import ODPClient
+from odplib.localuser import LocalUser
 
 
 class ODPUIClient(ODPClient):
@@ -68,8 +69,15 @@ class ODPUIClient(ODPClient):
         token_model.expires_at = token.get('expires_at')
         token_model.save()
 
-        user = Session.get(User, user_id)
-        login_user(user)
+        login_user(LocalUser(
+            id=user_id,
+            name=userinfo['name'],
+            email=userinfo['email'],
+            verified=userinfo['email_verified'],
+            picture=userinfo['picture'],
+            role_ids=userinfo['roles'],
+            active=True,  # we'll only get to this point if the user is active
+        ))
 
     def logout_redirect(self, redirect_uri):
         """Return a redirect to the Hydra endsession endpoint."""
