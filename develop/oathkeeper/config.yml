@@ -1,10 +1,10 @@
 serve:
   proxy:
-    port: 4455
+    port: 5555
   api:
-    port: 4456
+    port: 5556
   prometheus:
-    port: 4457
+    port: 5557
     host: localhost
     metrics_path: /metrics
 

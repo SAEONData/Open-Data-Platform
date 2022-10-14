@@ -1,4 +1,13 @@
-version: "3.5"
+networks:
+  odp-net:
+    name: odp-net
+    attachable: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+          ip_range: 172.28.5.0/24
+          gateway: 172.28.0.1
 
 services:
   odp-identity:
@@ -8,12 +17,17 @@ services:
       dockerfile: deploy/odp-identity/Dockerfile
       args:
         - CA_CERT_URL
-    network_mode: host
+    networks:
+      - odp-net
+    ports:
+      - "4019:4019"
+    extra_hosts:
+      - "${ODP_ADMIN_HOST}:172.28.0.1"
     environment:
       - ODP_ENV
       - FLASK_ENV=${ODP_ENV}
       - ODP_IDENTITY_FLASK_KEY
-      - ODP_DB_HOST
+      - ODP_DB_HOST=172.28.0.1
       - ODP_DB_NAME
       - ODP_DB_USER
       - ODP_DB_PASS
@@ -25,6 +39,7 @@ services:
       - ODP_IDENTITY_LOGIN_EXPIRY=2592000
       - ODP_IDENTITY_NCCRD_BRAND_CLIENT_ID
       - HYDRA_ADMIN_URL
+      - REDIS_HOST=redis
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
       - TZ
@@ -45,13 +60,18 @@ services:
       dockerfile: deploy/odp-api/Dockerfile
       args:
         - CA_CERT_URL
-    network_mode: host
+    networks:
+      - odp-net
+    ports:
+      - "4020:4020"
+    extra_hosts:
+      - "${ODP_ADMIN_HOST}:172.28.0.1"
     environment:
       - ODP_ENV
       - ODP_API_PATH_PREFIX=/api
       - ODP_API_ALLOW_ORIGINS
       - ODP_API_CATALOG_UI_URL
-      - ODP_DB_HOST
+      - ODP_DB_HOST=172.28.0.1
       - ODP_DB_NAME
       - ODP_DB_USER
       - ODP_DB_PASS
@@ -69,21 +89,27 @@ services:
       dockerfile: deploy/odp-ui-admin/Dockerfile
       args:
         - CA_CERT_URL
-    network_mode: host
+    networks:
+      - odp-net
+    ports:
+      - "4021:4021"
+    extra_hosts:
+      - "${ODP_PUBLIC_HOST}:172.28.0.1"
     environment:
       - ODP_ENV
       - FLASK_ENV=${ODP_ENV}
       - ODP_UI_ADMIN_FLASK_KEY
       - ODP_UI_ADMIN_CLIENT_ID
       - ODP_UI_ADMIN_CLIENT_SECRET
-      - ODP_UI_API_URL=${ODP_PUBLIC_URL}/api
+      - ODP_UI_API_URL=http://odp-api:4020
       - ODP_CLI_ADMIN_CLIENT_ID
       - ODP_CLI_ADMIN_CLIENT_SECRET
-      - ODP_DB_HOST
+      - ODP_DB_HOST=172.28.0.1
       - ODP_DB_NAME
       - ODP_DB_USER
       - ODP_DB_PASS
       - HYDRA_PUBLIC_URL
+      - REDIS_HOST=redis
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
       - TZ
@@ -97,7 +123,12 @@ services:
       dockerfile: deploy/odp-ui-dap/Dockerfile
       args:
         - CA_CERT_URL
-    network_mode: host
+    networks:
+      - odp-net
+    ports:
+      - "4023:4023"
+    extra_hosts:
+      - "${ODP_PUBLIC_HOST}:172.28.0.1"
     environment:
       - ODP_ENV
       - FLASK_ENV=${ODP_ENV}
@@ -105,14 +136,15 @@ services:
       - ODP_UI_DAP_CLIENT_ID
       - ODP_UI_DAP_CLIENT_SECRET
       - ODP_UI_DAP_THREDDS_URL
-      - ODP_UI_API_URL=${ODP_PUBLIC_URL}/api
+      - ODP_UI_API_URL=http://odp-api:4020
       - ODP_CLI_PUBLIC_CLIENT_ID
       - ODP_CLI_PUBLIC_CLIENT_SECRET
-      - ODP_DB_HOST
+      - ODP_DB_HOST=172.28.0.1
       - ODP_DB_NAME
       - ODP_DB_USER
       - ODP_DB_PASS
       - HYDRA_PUBLIC_URL
+      - REDIS_HOST=redis
       - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
       - TZ
@@ -122,14 +154,18 @@ services:
   hydra:
     container_name: hydra
     image: ${HYDRA_IMAGE}
-    network_mode: host
+    networks:
+      - odp-net
+    ports:
+      - "4444:4444"
+      - "4445:4445"
     environment:
-      - DSN=postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASS}@${HYDRA_DB_HOST}:5432/${HYDRA_DB_NAME}?sslmode=disable
+      - DSN=postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASS}@172.28.0.1:5432/${HYDRA_DB_NAME}?sslmode=disable
       - SECRETS_SYSTEM=${HYDRA_SYSTEM_SECRET}
-      - URLS_SELF_ISSUER=${ODP_PUBLIC_URL}/auth
-      - URLS_LOGIN=${ODP_PUBLIC_URL}/id/hydra/login
-      - URLS_CONSENT=${ODP_PUBLIC_URL}/id/hydra/consent
-      - URLS_LOGOUT=${ODP_PUBLIC_URL}/id/hydra/logout
+      - URLS_SELF_ISSUER=https://${ODP_PUBLIC_HOST}/auth
+      - URLS_LOGIN=https://${ODP_PUBLIC_HOST}/id/hydra/login
+      - URLS_CONSENT=https://${ODP_PUBLIC_HOST}/id/hydra/consent
+      - URLS_LOGOUT=https://${ODP_PUBLIC_HOST}/id/hydra/logout
       - LOG_LEAK_SENSITIVE_VALUES=true
       - SERVE_PUBLIC_CORS_ENABLED=true
       - SERVE_PUBLIC_CORS_ALLOWED_HEADERS=Authorization,Content-Type,X-Requested-With
@@ -142,15 +178,17 @@ services:
     container_name: hydra-migrate
     image: ${HYDRA_IMAGE}
     command: migrate sql -e --yes
-    network_mode: host
+    networks:
+      - odp-net
     environment:
-      - DSN=postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASS}@${HYDRA_DB_HOST}:5432/${HYDRA_DB_NAME}?sslmode=disable
+      - DSN=postgres://${HYDRA_DB_USER}:${HYDRA_DB_PASS}@172.28.0.1:5432/${HYDRA_DB_NAME}?sslmode=disable
     restart: on-failure
 
   redis:
     container_name: redis
     image: redis:6
-    network_mode: host
+    networks:
+      - odp-net
     restart: always
 
   oathkeeper:
@@ -162,5 +200,10 @@ services:
         - ODP_UI_DAP_URL
         - ODP_UI_DAP_THREDDS_URL
     command: serve --config /config.yml
-    network_mode: host
+    networks:
+      - odp-net
+    ports:
+      - "4455:4455"
+    extra_hosts:
+      - "${ODP_PUBLIC_HOST}:172.28.0.1"
     restart: always
