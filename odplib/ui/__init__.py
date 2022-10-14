@@ -1,9 +1,10 @@
 from pathlib import Path
 
 import redis
-from flask import Flask
+from flask import Flask, flash
 from flask_login import LoginManager
 
+from odplib.client import ODPAPIError
 from odplib.client.system import ODPSystemClient
 from odplib.client.ui import ODPUIClient
 from odplib.config import config
@@ -55,5 +56,11 @@ def init_app(app: Flask):
 
 @login_manager.user_loader
 def load_user(user_id):
-    user = odp_system_client.get(f'/user/{user_id}')
-    return LocalUser(**user)
+    try:
+        user = odp_system_client.get(f'/user/{user_id}')
+        if user['active'] and user['verified']:
+            return LocalUser(**user)
+    except ODPAPIError:
+        pass
+
+    flash('Error loading user account.', category='error')
