@@ -4,7 +4,6 @@ from .client import Client
 from .client_scope import ClientScope
 from .collection import Collection, CollectionAudit
 from .collection_tag import CollectionTag, CollectionTagAudit
-from .oauth2_token import OAuth2Token
 from .provider import Provider
 from .published_doi import PublishedDOI
 from .record import Record, RecordAudit
