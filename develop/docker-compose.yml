@@ -5,6 +5,8 @@ volumes:
     name: DEV-odp-data
   hydra-data:
     name: DEV-hydra-data
+  redis-data:
+    name: DEV-redis-data
 
 services:
   odp-db:
@@ -73,6 +75,8 @@ services:
     image: redis:6
     ports:
       - "1379:6379"
+    volumes:
+      - redis-data:/data
     restart: always
 
   oathkeeper:

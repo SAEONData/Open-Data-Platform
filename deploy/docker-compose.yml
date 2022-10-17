@@ -9,6 +9,10 @@ networks:
           ip_range: 172.28.5.0/24
           gateway: 172.28.0.1
 
+volumes:
+  redis-data:
+    name: redis-data
+
 services:
   odp-identity:
     container_name: odp-identity
@@ -189,6 +193,8 @@ services:
     image: redis:6
     networks:
       - odp-net
+    volumes:
+      - redis-data:/data
     restart: always
 
   oathkeeper:
