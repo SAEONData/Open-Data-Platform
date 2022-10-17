@@ -199,18 +199,6 @@ class TagModel(BaseModel):
     schema_: dict[str, Any]
 
 
-class TokenModel(BaseModel):
-    token_type: str
-    access_token: str
-    refresh_token: str
-    id_token: str
-    expires_at: int
-
-
-class TokenModelIn(TokenModel):
-    pass
-
-
 class UserModel(BaseModel):
     id: str
     email: str

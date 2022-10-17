@@ -29,8 +29,6 @@ class ODPScope(str, Enum):
     SCHEMA_READ = 'odp.schema:read'
     SCOPE_READ = 'odp.scope:read'
     TAG_READ = 'odp.tag:read'
-    TOKEN_READ = 'odp.token:read'
-    TOKEN_WRITE = 'odp.token:write'
     USER_ADMIN = 'odp.user:admin'
     USER_READ = 'odp.user:read'
     VOCABULARY_INFRASTRUCTURE = 'odp.vocabulary:infrastructure'
