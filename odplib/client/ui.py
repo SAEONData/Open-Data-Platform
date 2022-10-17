@@ -1,14 +1,13 @@
+import json
 import secrets
+from dataclasses import asdict
 
 import requests
 from authlib.integrations.flask_client import OAuth
 from flask import Flask, redirect, request
 from flask_login import current_user, login_user, logout_user
 from redis import Redis
-from sqlalchemy import select
 
-from odp.db import Session
-from odp.db.models import OAuth2Token
 from odplib.client import ODPClient
 from odplib.localuser import LocalUser
 
@@ -54,36 +53,30 @@ class ODPUIClient(ODPClient):
         return self.oauth.hydra.authorize_redirect(redirect_uri, **kwargs)
 
     def login_callback(self):
-        """Save the token and log the user in."""
+        """Cache the user object and user token, and log the user in locally."""
         token = self.oauth.hydra.authorize_access_token()
         userinfo = self.oauth.hydra.userinfo()
-        user_id = userinfo['sub']
 
-        if not (token_model := Session.get(OAuth2Token, (self.client_id, user_id))):
-            token_model = OAuth2Token(client_id=self.client_id, user_id=user_id)
-
-        token_model.token_type = token.get('token_type')
-        token_model.access_token = token.get('access_token')
-        token_model.refresh_token = token.get('refresh_token')
-        token_model.id_token = token.get('id_token')
-        token_model.expires_at = token.get('expires_at')
-        token_model.save()
-
-        login_user(LocalUser(
-            id=user_id,
+        localuser = LocalUser(
+            id=(user_id := userinfo['sub']),
             name=userinfo['name'],
             email=userinfo['email'],
             verified=userinfo['email_verified'],
             picture=userinfo['picture'],
             role_ids=userinfo['roles'],
             active=True,  # we'll only get to this point if the user is active
-        ))
+        )
+
+        self.cache.hset(self._token_key(user_id), mapping=token)
+        self.cache.set(self._user_key(user_id), json.dumps(asdict(localuser)))
+
+        login_user(localuser)
 
     def logout_redirect(self, redirect_uri):
         """Return a redirect to the Hydra endsession endpoint."""
         token = self.oauth.fetch_token('hydra')
         state_val = secrets.token_urlsafe()
-        self.oauth.cache.set(self._state_key(), state_val, ex=10)
+        self.cache.set(self._state_key(), state_val, ex=10)
         url = f'{self.hydra_url}/oauth2/sessions/logout' \
               f'?id_token_hint={token.get("id_token")}' \
               f'&post_logout_redirect_uri={redirect_uri}' \
@@ -93,33 +86,26 @@ class ODPUIClient(ODPClient):
     def logout_callback(self):
         """Log the user out."""
         state_val = request.args.get('state')
-        if state_val == self.oauth.cache.get(key := self._state_key()):
+        if state_val == self.cache.get(key := self._state_key()):
             logout_user()
-            self.oauth.cache.delete(key)
+            self.cache.delete(key)
+
+    def get_user(self, user_id):
+        """Return the cached user object."""
+        if serialized_user := self.cache.get(self._user_key(user_id)):
+            return LocalUser(**json.loads(serialized_user))
 
     def _state_key(self):
-        return f'{__name__}.{self.client_id}.{current_user.id}.state'
+        return f'{self.__class__.__name__}.{self.client_id}.{current_user.id}.state'
+
+    def _token_key(self, user_id):
+        return f'{self.__class__.__name__}.{self.client_id}.{user_id}.token'
+
+    def _user_key(self, user_id):
+        return f'{self.__class__.__name__}.{self.client_id}.{user_id}.user'
 
     def _fetch_token(self, hydra):
-        return Session.get(OAuth2Token, (self.client_id, current_user.id)).dict()
+        return self.cache.hgetall(self._token_key(current_user.id))
 
     def _update_token(self, hydra, token, refresh_token=None, access_token=None):
-        if refresh_token:
-            token_model = Session.execute(
-                select(OAuth2Token).
-                where(OAuth2Token.client_id == self.client_id).
-                where(OAuth2Token.refresh_token == refresh_token)
-            ).scalar_one()
-        elif access_token:
-            token_model = Session.execute(
-                select(OAuth2Token).
-                where(OAuth2Token.client_id == self.client_id).
-                where(OAuth2Token.access_token == access_token)
-            ).scalar_one()
-        else:
-            return
-
-        token_model.access_token = token.get('access_token')
-        token_model.refresh_token = token.get('refresh_token')
-        token_model.expires_at = token.get('expires_at')
-        token_model.save()
+        self.cache.hset(self._token_key(current_user.id), mapping=token)

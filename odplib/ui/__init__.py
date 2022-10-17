@@ -1,14 +1,12 @@
 from pathlib import Path
 
 import redis
-from flask import Flask, flash
+from flask import Flask
 from flask_login import LoginManager
 
-from odplib.client import ODPAPIError
 from odplib.client.system import ODPSystemClient
 from odplib.client.ui import ODPUIClient
 from odplib.config import config
-from odplib.localuser import LocalUser
 
 STATIC_DIR = Path(__file__).parent / 'static'
 TEMPLATE_DIR = Path(__file__).parent / 'templates'
@@ -20,7 +18,7 @@ odp_system_client: ODPSystemClient
 
 
 def init_app(app: Flask):
-    from . import api, db, forms, templates
+    from . import api, forms, templates
 
     global odp_ui_client
     odp_ui_client = ODPUIClient(
@@ -48,7 +46,6 @@ def init_app(app: Flask):
     )
 
     api.init_app(app)
-    db.init_app(app)
     forms.init_app(app)
     templates.init_app(app)
     login_manager.init_app(app)
@@ -56,11 +53,4 @@ def init_app(app: Flask):
 
 @login_manager.user_loader
 def load_user(user_id):
-    try:
-        user = odp_system_client.get(f'/user/{user_id}')
-        if user['active'] and user['verified']:
-            return LocalUser(**user)
-    except ODPAPIError:
-        pass
-
-    flash('Error loading user account.', category='error')
+    return odp_ui_client.get_user(user_id)
