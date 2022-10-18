@@ -7,7 +7,7 @@ from starlette.testclient import TestClient
 import odp.api
 import odplib.const
 from odp.db.models import TagCardinality
-from odp.lib.hydra import HydraAdminAPI
+from odplib.hydra.admin import HydraAdminAPI
 from test.api import CollectionAuth
 from test.factories import ClientFactory, ScopeFactory
 

@@ -13,9 +13,9 @@ from odp.api.models import TagInstanceModelIn
 from odp.db import Session
 from odp.db.models import CollectionTag, RecordTag, Scope, ScopeType, Tag, TagType, Vocabulary
 from odp.lib.auth import get_client_permissions, get_user_permissions
-from odp.lib.hydra import HydraAdminAPI, OAuth2TokenIntrospection
 from odplib.config import config
 from odplib.const import ODPScope
+from odplib.hydra.admin import HydraAdminAPI, OAuth2TokenIntrospection
 
 hydra_admin_api = HydraAdminAPI(config.HYDRA.ADMIN.URL)
 hydra_public_url = config.HYDRA.PUBLIC.URL

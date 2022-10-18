@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
 from typing import Iterable, Optional
 
 from ory_hydra_client import ApiClient, Configuration
@@ -10,45 +9,7 @@ from ory_hydra_client.exceptions import ApiException
 from ory_hydra_client.model.o_auth2_token_introspection import OAuth2TokenIntrospection
 from ory_hydra_client.model.string_slice_pipe_delimiter import StringSlicePipeDelimiter as StringArray
 
-
-class GrantType(str, Enum):
-    """Grant types supported by Hydra. 'implicit' is
-    excluded here, as it is insecure."""
-    AUTHORIZATION_CODE = 'authorization_code'
-    CLIENT_CREDENTIALS = 'client_credentials'
-    REFRESH_TOKEN = 'refresh_token'
-
-
-class ResponseType(str, Enum):
-    """Response types supported by Hydra."""
-    CODE = 'code'
-    CODE_IDTOKEN = 'code id_token'
-    IDTOKEN = 'id_token'
-    TOKEN = 'token'
-    TOKEN_IDTOKEN = 'token id_token'
-    TOKEN_IDTOKEN_CODE = 'token id_token code'
-
-
-class HydraScope(str, Enum):
-    """Standard scopes implemented by Hydra. 'offline' is
-    excluded here, as it is just an alias for 'offline_access'."""
-    OPENID = 'openid'
-    OFFLINE_ACCESS = 'offline_access'
-
-
-class StandardScope(str, Enum):
-    OPENID = 'openid'
-    OFFLINE = 'offline'
-    OFFLINE_ACCESS = 'offline_access'
-    PROFILE = 'profile'
-    EMAIL = 'email'
-    ADDRESS = 'address'
-    PHONE = 'phone'
-
-
-class TokenEndpointAuthMethod(str, Enum):
-    CLIENT_SECRET_BASIC = 'client_secret_basic'
-    CLIENT_SECRET_POST = 'client_secret_post'
+from odplib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
 
 
 @dataclass

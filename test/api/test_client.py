@@ -3,10 +3,10 @@ from random import randint
 import pytest
 from sqlalchemy import select
 
-from odplib.const import ODPScope
 from odp.db import Session
 from odp.db.models import Client
-from odp.lib.hydra import TokenEndpointAuthMethod
+from odplib.const import ODPScope
+from odplib.hydra import TokenEndpointAuthMethod
 from test.api import CollectionAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_not_found
 from test.factories import ClientFactory, CollectionFactory, ScopeFactory, fake
 
