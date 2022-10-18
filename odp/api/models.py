@@ -1,11 +1,17 @@
 import re
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import AnyHttpUrl, BaseModel, Field, root_validator, validator
 
 from odp.db.models import AuditCommand, TagCardinality
-from odplib.formats import DOI_REGEX, ID_REGEX, SID_REGEX
 from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
+from odplib.formats import DOI_REGEX, ID_REGEX, SID_REGEX
+
+
+class AccessTokenModel(BaseModel):
+    client_id: str
+    user_id: Optional[str]
+    permissions: dict[str, Literal['*'] | list[str]]
 
 
 class TagInstanceModel(BaseModel):

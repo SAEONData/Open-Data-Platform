@@ -1,11 +1,10 @@
 from functools import wraps
 from typing import Callable
 
-from flask import Flask, current_app, flash, g, redirect, request, url_for
+from flask import Flask, flash, g, redirect, request, url_for
 from flask_login import current_user
 
 from odp import ODPScope
-from odp.lib.auth import get_user_permissions
 from odplib.client import ODPAPIError
 
 get: Callable
@@ -40,12 +39,13 @@ def client(*scope: ODPScope, fallback_to_referrer=False):
                 flash('Please log in to access that page.')
                 return redirect(url_for('home.index'))
 
-            g.user_permissions = get_user_permissions(current_user.id, current_app.config['CLIENT_ID'])
-            if not any(s in g.user_permissions for s in scope):
-                flash('You do not have permission to access that page.', category='warning')
-                return redirect(request.referrer or url_for('home.index'))
-
             try:
+                token_data = get('/token/')
+                g.user_permissions = token_data['permissions']
+                if not any(s in g.user_permissions for s in scope):
+                    flash('You do not have permission to access that page.', category='warning')
+                    return redirect(request.referrer or url_for('home.index'))
+
                 # call the view function
                 return f(*args, **kwargs)
 

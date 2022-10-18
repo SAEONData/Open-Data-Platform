@@ -9,5 +9,6 @@ SAEON.Staff:
     - odp.schema:read
     - odp.scope:read
     - odp.tag:read
+    - odp.token:read
     - odp.user:read
     - odp.vocabulary:read
