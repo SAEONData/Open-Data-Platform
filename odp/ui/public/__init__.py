@@ -5,10 +5,10 @@ from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import odplib.ui
-from odp import ODPScope
-from odplib.config import config
 from odp.lib.hydra import HydraScope
 from odp.ui.public import forms, views
+from odplib.config import config
+from odplib.const import ODPScope
 
 
 def create_app():

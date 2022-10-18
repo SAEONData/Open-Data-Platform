@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 
-from odp import ODPScope
+from odplib.const import ODPScope
 
 
 class CollectionAuth(Enum):

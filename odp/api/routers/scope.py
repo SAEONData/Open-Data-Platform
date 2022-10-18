@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
 
-from odp import ODPScope
 from odp.api.lib.auth import Authorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.models import ScopeModel
 from odp.db.models import Scope
+from odplib.const import ODPScope
 
 router = APIRouter()
 

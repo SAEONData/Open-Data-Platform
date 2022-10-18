@@ -1,8 +1,8 @@
 from typing import Optional
 
-from odp import ODPCatalog
 from odp.api.models import PublishedDataCiteRecordModel, PublishedRecordModel, PublishedSAEONRecordModel, TagInstanceModel
 from odp.db.models import CatalogRecord, CollectionTag, RecordTag
+from odplib.const import ODPCatalog
 
 
 def output_tag_instance_model(tag_instance: CollectionTag | RecordTag) -> TagInstanceModel:

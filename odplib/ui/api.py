@@ -4,8 +4,8 @@ from typing import Callable
 from flask import Flask, flash, g, redirect, request, url_for
 from flask_login import current_user
 
-from odp import ODPScope
 from odplib.client import ODPAPIError
+from odplib.const import ODPScope
 
 get: Callable
 post: Callable

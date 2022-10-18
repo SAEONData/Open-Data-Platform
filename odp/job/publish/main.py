@@ -9,11 +9,11 @@ from sqlalchemy import select
 rootdir = pathlib.Path(__file__).parent.parent.parent.parent
 sys.path.append(str(rootdir))
 
-from odp import ODPCatalog
 from odp.db import Session
 from odp.db.models import Catalog
 from odp.job.publish.datacite import DataCitePublisher
 from odp.job.publish.saeon import SAEONPublisher
+from odplib.const import ODPCatalog
 from odplib.logging import init_logging
 
 init_logging()

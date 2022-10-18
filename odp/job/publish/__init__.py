@@ -5,12 +5,12 @@ from typing import final
 
 from sqlalchemy import func, or_, select
 
-from odp import ODPCollectionTag, ODPMetadataSchema, ODPRecordTag
 from odp.api.lib.utils import output_published_record_model
 from odp.api.models import PublishedRecordModel, RecordModel
 from odp.api.routers.record import output_record_model
 from odp.db import Session
 from odp.db.models import CatalogRecord, Collection, PublishedDOI, Record, RecordTag
+from odplib.const import ODPCollectionTag, ODPMetadataSchema, ODPRecordTag
 
 logger = logging.getLogger(__name__)
 

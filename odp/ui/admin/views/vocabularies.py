@@ -1,8 +1,8 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from odp import ODPScope, ODPVocabulary
 from odp.ui.admin.forms import VocabularyTermInfrastructureForm, VocabularyTermProjectForm
 from odp.ui.admin.views import utils
+from odplib.const import ODPScope, ODPVocabulary
 from odplib.ui import api
 
 bp = Blueprint('vocabularies', __name__)

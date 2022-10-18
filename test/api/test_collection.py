@@ -5,10 +5,9 @@ from random import randint
 import pytest
 from sqlalchemy import select
 
-from odp import ODPScope
 from odp.db import Session
 from odp.db.models import Collection, CollectionAudit, CollectionTag, CollectionTagAudit, Scope, ScopeType
-from odplib.const import DOI_REGEX
+from odplib.const import DOI_REGEX, ODPScope
 from test.api import (CollectionAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,
                       assert_not_found, assert_unprocessable)
 from test.factories import ClientFactory, CollectionFactory, CollectionTagFactory, ProviderFactory, RoleFactory, SchemaFactory, TagFactory

@@ -3,7 +3,7 @@ from random import randint
 import pytest
 from sqlalchemy import select
 
-from odp import ODPScope
+from odplib.const import ODPScope
 from odp.db import Session
 from odp.db.models import Client
 from odp.lib.hydra import TokenEndpointAuthMethod

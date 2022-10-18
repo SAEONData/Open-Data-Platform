@@ -5,7 +5,6 @@ from jschon import JSON, JSONSchema, URI
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp import ODPScope
 from odp.api.lib.auth import Authorize, Authorized, VocabularyAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_vocabulary_schema
@@ -13,6 +12,7 @@ from odp.api.models import VocabularyModel, VocabularyTermAuditModel, Vocabulary
 from odp.db import Session
 from odp.db.models import AuditCommand, User, Vocabulary, VocabularyTerm, VocabularyTermAudit
 from odp.lib.schema import schema_catalog
+from odplib.const import ODPScope
 
 router = APIRouter()
 

@@ -8,7 +8,6 @@ from sqlalchemy import and_, literal_column, null, or_, select, union_all
 from sqlalchemy.orm import aliased
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp import ODPCollectionTag, ODPMetadataSchema, ODPScope
 from odp.api.lib.auth import Authorize, Authorized, TagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_metadata_schema, get_tag_schema
@@ -18,6 +17,7 @@ from odp.api.models import (AuditModel, CatalogRecordModel, RecordAuditModel, Re
 from odp.db import Session
 from odp.db.models import (AuditCommand, CatalogRecord, Collection, CollectionTag, PublishedDOI, Record, RecordAudit, RecordTag, RecordTagAudit,
                            SchemaType, Tag, TagCardinality, TagType, User)
+from odplib.const import ODPCollectionTag, ODPMetadataSchema, ODPScope
 
 router = APIRouter()
 

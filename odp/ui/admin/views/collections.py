@@ -1,8 +1,8 @@
 from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 
-from odp import ODPCollectionTag, ODPScope, ODPVocabulary
 from odp.ui.admin.forms import CollectionForm, CollectionTagInfrastructureForm, CollectionTagProjectForm
 from odp.ui.admin.views import utils
+from odplib.const import ODPCollectionTag, ODPScope, ODPVocabulary
 from odplib.ui import api
 
 bp = Blueprint('collections', __name__)

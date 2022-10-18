@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
 import migrate.systemdata
-from odp import ODPScope
+from odplib.const import ODPScope
 from odp.db import Session
 from odp.db.models import (Catalog, Client, ClientScope, Collection, CollectionTag, Provider, Record, RecordTag, Role,
                            RoleScope, Schema, Scope, ScopeType, Tag, User, UserRole, Vocabulary, VocabularyTerm)

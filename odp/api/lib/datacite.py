@@ -1,6 +1,6 @@
-from odp import DOI_PREFIX
-from odplib.config import config
 from odp.lib.datacite import DataciteClient
+from odplib.config import config
+from odplib.const import DOI_PREFIX
 
 
 async def get_datacite_client() -> DataciteClient:

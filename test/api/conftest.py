@@ -5,6 +5,7 @@ from authlib.integrations.requests_client import OAuth2Session
 from starlette.testclient import TestClient
 
 import odp.api
+import odplib.const
 from odp.db.models import TagCardinality
 from odp.lib.hydra import HydraAdminAPI
 from test.api import CollectionAuth
@@ -25,7 +26,7 @@ def api():
         token = OAuth2Session(
             client_id='odp.test',
             client_secret='secret',
-            scope=' '.join(s.value for s in odp.ODPScope),
+            scope=' '.join(s.value for s in odplib.const.ODPScope),
         ).fetch_token(
             f'{hydra_public_url}/oauth2/token',
             grant_type='client_credentials',

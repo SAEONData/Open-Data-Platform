@@ -5,7 +5,7 @@ from random import randint
 import pytest
 from sqlalchemy import select
 
-from odp import ODPCollectionTag, ODPScope
+from odplib.const import ODPCollectionTag, ODPScope
 from odp.db import Session
 from odp.db.models import CollectionTag, PublishedDOI, Record, RecordAudit, RecordTag, RecordTagAudit, Scope, ScopeType
 from test.api import (CollectionAuth, all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,

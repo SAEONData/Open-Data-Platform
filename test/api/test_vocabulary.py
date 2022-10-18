@@ -3,7 +3,7 @@ from random import randint
 import pytest
 from sqlalchemy import select
 
-from odp import ODPScope
+from odplib.const import ODPScope
 from odp.db import Session
 from odp.db.models import SchemaType, Scope, ScopeType, Vocabulary, VocabularyTerm, VocabularyTermAudit
 from test.api import (all_scopes, all_scopes_excluding, assert_conflict, assert_empty_result, assert_forbidden, assert_new_timestamp,

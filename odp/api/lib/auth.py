@@ -9,13 +9,13 @@ from sqlalchemy import select
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp import ODPScope
 from odp.api.models import TagInstanceModelIn
-from odplib.config import config
 from odp.db import Session
 from odp.db.models import CollectionTag, RecordTag, Scope, ScopeType, Tag, TagType, Vocabulary
 from odp.lib.auth import get_client_permissions, get_user_permissions
 from odp.lib.hydra import HydraAdminAPI, OAuth2TokenIntrospection
+from odplib.config import config
+from odplib.const import ODPScope
 
 hydra_admin_api = HydraAdminAPI(config.HYDRA.ADMIN.URL)
 hydra_public_url = config.HYDRA.PUBLIC.URL

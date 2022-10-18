@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from odp import ODPScope
 from odp.api.lib.auth import Authorize, Authorized
 from odp.api.models import AccessTokenModel
 from odp.lib.auth import get_client_permissions, get_user_permissions
+from odplib.const import ODPScope
 
 router = APIRouter()
 

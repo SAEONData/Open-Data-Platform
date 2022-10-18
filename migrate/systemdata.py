@@ -27,7 +27,7 @@ sys.path.append(str(rootdir))
 dotenv_path = pathlib.Path.cwd() / '.env'
 load_dotenv(dotenv_path)
 
-from odp import ODPCatalog, ODPCollectionTag, ODPMetadataSchema, ODPRecordTag, ODPScope, ODPTagSchema, ODPVocabulary, ODPVocabularySchema
+from odplib.const import ODPCatalog, ODPCollectionTag, ODPMetadataSchema, ODPRecordTag, ODPScope, ODPTagSchema, ODPVocabulary, ODPVocabularySchema
 from odp.db import Base, Session, engine
 from odp.db.models import Catalog, Client, Role, Schema, SchemaType, Scope, ScopeType, Tag, User, UserRole, Vocabulary
 from odp.lib.hydra import GrantType, HydraAdminAPI, HydraScope, ResponseType

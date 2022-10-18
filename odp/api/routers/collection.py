@@ -7,7 +7,6 @@ from sqlalchemy import func, literal_column, null, select, union_all
 from sqlalchemy.orm import aliased
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp import DOI_PREFIX, ODPScope
 from odp.api.lib.auth import Authorize, Authorized, TagAuthorize, UntagAuthorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.lib.schema import get_tag_schema
@@ -16,6 +15,7 @@ from odp.api.models import (AuditModel, CollectionAuditModel, CollectionModel, C
                             TagInstanceModelIn)
 from odp.db import Session
 from odp.db.models import AuditCommand, Collection, CollectionAudit, CollectionTag, CollectionTagAudit, Record, Tag, TagCardinality, TagType, User
+from odplib.const import DOI_PREFIX, ODPScope
 
 router = APIRouter()
 

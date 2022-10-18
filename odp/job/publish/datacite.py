@@ -1,13 +1,13 @@
 from jschon import JSON, URI
 
-from odp import DOI_PREFIX, ODPMetadataSchema
 from odp.api.models import PublishedDataCiteRecordModel, PublishedRecordModel, RecordModel
-from odplib.config import config
 from odp.db import Session
 from odp.db.models import CatalogRecord, Schema, SchemaType
 from odp.job.publish import NotPublishedReason, PublishedReason, Publisher
 from odp.lib.datacite import DataciteClient, DataciteRecordIn
 from odp.lib.schema import schema_catalog
+from odplib.config import config
+from odplib.const import DOI_PREFIX, ODPMetadataSchema
 
 
 class DataCitePublisher(Publisher):

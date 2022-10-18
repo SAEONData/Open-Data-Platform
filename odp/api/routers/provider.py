@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
-from odp import ODPScope
 from odp.api.lib.auth import Authorize
 from odp.api.lib.paging import Page, Paginator
 from odp.api.models import ProviderModel, ProviderModelIn
 from odp.db import Session
 from odp.db.models import Provider
+from odplib.const import ODPScope
 
 router = APIRouter()
 

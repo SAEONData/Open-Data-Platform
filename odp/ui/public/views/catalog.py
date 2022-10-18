@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request
 
-from odp import ODPScope
 from odp.ui.public.forms import SearchForm
+from odplib.const import ODPScope
 from odplib.ui import api
 
 bp = Blueprint('catalog', __name__)

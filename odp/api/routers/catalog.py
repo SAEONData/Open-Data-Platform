@@ -7,7 +7,6 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy import and_, func, select, text
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
 
-from odp import ODPCatalog, ODPScope
 from odp.api.lib.auth import Authorize
 from odp.api.lib.catalog import get_catalog_ui_url
 from odp.api.lib.datacite import get_datacite_client
@@ -18,7 +17,7 @@ from odp.db import Session
 from odp.db.models import Catalog, CatalogRecord
 from odp.lib.datacite import DataciteClient
 from odp.lib.exceptions import DataciteError
-from odplib.const import DOI_REGEX
+from odplib.const import DOI_REGEX, ODPCatalog, ODPScope
 
 router = APIRouter()
 

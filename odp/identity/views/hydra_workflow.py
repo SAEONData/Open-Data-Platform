@@ -4,7 +4,7 @@ from urllib.parse import urlparse, parse_qs
 
 from flask import Blueprint, request, redirect, url_for
 
-from odp import ODPScope
+from odplib.const import ODPScope
 from odplib.config import config
 from odp.identity import hydra_admin
 from odp.identity.views import hydra_error_page, encode_token

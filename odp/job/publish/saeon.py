@@ -2,12 +2,12 @@ from datetime import datetime
 
 from jschon import JSON, URI
 
-from odp import ODPMetadataSchema
 from odp.api.models import PublishedMetadataModel, PublishedRecordModel, PublishedSAEONRecordModel, PublishedTagInstanceModel, RecordModel
 from odp.db import Session
 from odp.db.models import Schema, SchemaType
 from odp.job.publish import Publisher
 from odp.lib.schema import schema_catalog
+from odplib.const import ODPMetadataSchema
 
 
 class SAEONPublisher(Publisher):

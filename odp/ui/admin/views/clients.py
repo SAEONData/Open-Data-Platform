@@ -1,9 +1,9 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from wtforms.validators import input_required
 
-from odp import ODPScope
 from odp.ui.admin.forms import ClientForm
 from odp.ui.admin.views import utils
+from odplib.const import ODPScope
 from odplib.ui import api
 
 bp = Blueprint('clients', __name__)
