@@ -1,8 +1,8 @@
 from wtforms import BooleanField, RadioField, SelectField, StringField, TextAreaField, ValidationError
 from wtforms.validators import data_required, input_required, length, optional, regexp
 
-from odplib.formats import DOI_REGEX, SID_REGEX
 from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
+from odplib.const import DOI_REGEX, SID_REGEX
 from odplib.ui.forms import BaseForm, DateStringField, JSONTextField, MultiCheckboxField, StringListField, json_object
 
 

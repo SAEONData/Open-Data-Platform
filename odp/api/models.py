@@ -5,7 +5,7 @@ from pydantic import AnyHttpUrl, BaseModel, Field, root_validator, validator
 
 from odp.db.models import AuditCommand, TagCardinality
 from odp.lib.hydra import GrantType, ResponseType, TokenEndpointAuthMethod
-from odplib.formats import DOI_REGEX, ID_REGEX, SID_REGEX
+from odplib.const import DOI_REGEX, ID_REGEX, SID_REGEX
 
 
 class AccessTokenModel(BaseModel):

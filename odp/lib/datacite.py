@@ -4,7 +4,7 @@ import requests
 from pydantic import AnyHttpUrl, BaseModel, Field
 
 from odp.lib.exceptions import DataciteError
-from odplib.formats import DOI_REGEX
+from odplib.const import DOI_REGEX
 
 
 class DataciteRecordIn(BaseModel):
