@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-import odp
+import odplib
 from odp.api.routers import catalog, client, collection, provider, record, role, schema, scope, status, tag, token, user, vocabulary
 from odp.db import Session
 from odplib.config import config
@@ -9,7 +9,7 @@ from odplib.config import config
 app = FastAPI(
     title="ODP API",
     description="SAEON | Open Data Platform API",
-    version=odp.__version__,
+    version=odplib.__version__,
     root_path=config.ODP.API.PATH_PREFIX,
     docs_url='/interactive',
     redoc_url='/docs',
